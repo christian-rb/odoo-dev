@@ -743,6 +743,15 @@ class Environment(Mapping):
         """
         return record.id in self._protected.get(field, ())
 
+    def filter_protected(self, field, records):
+        """ Return the subset of `records` that is protected against
+            invalidation or recomputation for `field`.
+        """
+        protected_ids = self._protected.get(field)
+        if not protected_ids:
+            return records.browse()
+        return records.browse([id_ for id_ in records._ids if id_ in protected_ids])
+
     def protected(self, field):
         """ Return the recordset for which ``field`` should not be invalidated or recomputed. """
         return self[field.model_name].browse(self._protected.get(field, ()))

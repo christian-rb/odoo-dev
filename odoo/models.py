@@ -6107,6 +6107,9 @@ class BaseModel(metaclass=MetaModel):
             records.filtered("partner_id.is_company")
         """
         if isinstance(func, str):
+            if func == 'id':
+                # optimization, enables to quickly get real records
+                return self.browse([id_ for id_ in self._ids if id_])
             name = func
             func = lambda rec: any(rec.mapped(name))
         return self.browse([rec.id for rec in self if func(rec)])

@@ -1340,41 +1340,39 @@ class Field(MetaField('DummyField', (object,), {})):
 
     def __set__(self, records, value):
         """ set the value of field ``self`` on ``records`` """
-        protected_ids = []
-        new_ids = []
-        other_ids = []
-        for record_id in records._ids:
-            if record_id in records.env._protected.get(self, ()):
-                protected_ids.append(record_id)
-            elif not record_id:
-                new_ids.append(record_id)
-            else:
-                other_ids.append(record_id)
+        if not records:
+            return
 
-        if protected_ids:
-            # records being computed: no business logic, no recomputation
-            protected_records = records.browse(protected_ids)
+        # records being computed: no business logic, no recomputation
+        protected_records = records.env.filter_protected(self, records)
+        if protected_records:
             self.write(protected_records, value)
 
-        if new_ids:
-            # new records: no business logic
-            new_records = records.browse(new_ids)
-            with records.env.protecting(records.pool.field_computed.get(self, [self]), records):
-                if self.relational:
-                    new_records.modified([self.name], before=True)
-                self.write(new_records, value)
-                new_records.modified([self.name])
+            records = records - protected_records
+            if not records:
+                return
 
-            if self.inherited:
-                # special case: also assign parent records if they are new
-                parents = records[self.related.split('.')[0]]
-                parents.filtered(lambda r: not r.id)[self.name] = value
+        # real records assignment: full business logic
+        real_records = records.filtered('id')
+        if real_records:
+            write_value = self.convert_to_write(value, real_records)
+            real_records.write({self.name: write_value})
 
-        if other_ids:
-            # base case: full business logic
-            records = records.browse(other_ids)
-            write_value = self.convert_to_write(value, records)
-            records.write({self.name: write_value})
+            records = records - real_records
+            if not records:
+                return
+
+        # new records assignment: no business logic
+        with records.env.protecting(records.pool.field_computed.get(self) or [self], records):
+            if records.pool.is_modifying_relations(self):
+                records.modified([self.name], before=True)
+            self.write(records, value)
+            records.modified([self.name])
+
+        if self.inherited:
+            # special case: also assign parent records if they are new
+            parents = records[self.related.split('.')[0]]
+            (parents - parents.filtered('id'))[self.name] = value
 
     ############################################################################
     #
