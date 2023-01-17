@@ -1056,6 +1056,7 @@ var SnippetEditor = Widget.extend({
         $clone.remove();
 
         this.options.wysiwyg.odooEditor.observerActive('dragAndDropMoveSnippet');
+        const moves = [];
         if (this.dropped) {
             if (prev) {
                 this.$target.insertAfter(prev);
@@ -1066,22 +1067,24 @@ var SnippetEditor = Widget.extend({
             }
 
             for (var i in this.styles) {
-                this.styles[i].onMove();
+                moves.push(this.styles[i].onMove());
             }
-
-            this.$target.trigger('content_changed');
-            $from.trigger('content_changed');
         }
-
-        this.trigger_up('drag_and_drop_stop', {
-            $snippet: this.$target,
+        Promise.all(moves).then(() => {
+            if (this.dropped) {
+                this.$target.trigger('content_changed');
+                $from.trigger('content_changed');
+            }
+            this.trigger_up('drag_and_drop_stop', {
+                $snippet: this.$target,
+            });
+            this.draggableComponent.$scrollTarget.off('scroll.scrolling_element');
+            const samePositionAsStart = this._dropSiblings.prev === this.$target.prev()[0] && this._dropSiblings.next === this.$target.next()[0];
+            if (!samePositionAsStart) {
+                this.options.wysiwyg.odooEditor.historyStep();
+            }
+            delete this.$dropZones;
         });
-        this.draggableComponent.$scrollTarget.off('scroll.scrolling_element');
-        const samePositionAsStart = this._dropSiblings.prev === this.$target.prev()[0] && this._dropSiblings.next === this.$target.next()[0];
-        if (!samePositionAsStart) {
-            this.options.wysiwyg.odooEditor.historyStep();
-        }
-        delete this.$dropZones;
     },
     /**
      * @private

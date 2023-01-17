@@ -3101,8 +3101,11 @@ const SnippetOptionWidget = Widget.extend({
     onClone: function (options) {},
     /**
      * Called when the associated snippet is moved to another DOM location.
+     * If a Promise is returned, it is awaited upon before proceeding with the
+     * ongoing move.
      *
      * @abstract
+     * @returns {Promise|undefined}
      */
     onMove: function () {},
     /**
