@@ -1168,9 +1168,6 @@ class Field(MetaField('DummyField', (object,), {})):
         :param records:
         :param value: a value in any format
         """
-        # discard recomputation of self on records
-        records.env.remove_to_compute(self, records)
-
         # discard the records that are not modified
         cache = records.env.cache
         cache_value = self.convert_to_cache(value, records)
@@ -1363,6 +1360,16 @@ class Field(MetaField('DummyField', (object,), {})):
                 return
 
         # new records assignment: no business logic
+        if self.compute and self.store:
+            if len(records.pool.field_computed[self]) > 1 or self.type in ('one2many', 'many2many'):
+                # force the computation of fields that are computed with self,
+                # and x2many fields, too (see method BaseModel.write() for a
+                # complete explanation)
+                records._recompute_recordset([self.name])
+            else:
+                # discard recomputation of self on records
+                records.env.remove_to_compute(self, records)
+
         with records.env.protecting(records.pool.field_computed.get(self) or [self], records):
             if records.pool.is_modifying_relations(self):
                 records.modified([self.name], before=True)
@@ -2506,9 +2513,6 @@ class Binary(Field):
             super().write(records, value)
             return
 
-        # discard recomputation of self on records
-        records.env.remove_to_compute(self, records)
-
         # update the cache, and discard the records that are not modified
         cache = records.env.cache
         cache_value = self.convert_to_cache(value, records)
@@ -3169,9 +3173,6 @@ class Many2one(_Relational):
         return value.display_name
 
     def write(self, records, value):
-        # discard recomputation of self on records
-        records.env.remove_to_compute(self, records)
-
         # discard the records that are not modified
         cache = records.env.cache
         cache_value = self.convert_to_cache(value, records)
@@ -4358,8 +4359,6 @@ class _RelationalMulti(_Relational):
         self.write_batch(record_values, True)
 
     def write(self, records, value):
-        # discard recomputation of self on records
-        records.env.remove_to_compute(self, records)
         self.write_batch([(records, value)])
 
     def write_batch(self, records_commands_list, create=False):
