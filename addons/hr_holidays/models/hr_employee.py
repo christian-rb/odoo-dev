@@ -215,7 +215,6 @@ class HrEmployeeBase(models.AbstractModel):
                 approver_group = self.env.ref('hr_holidays.group_hr_holidays_responsible', raise_if_not_found=False)
                 if approver_group and not leave_manager.has_group('hr_holidays.group_hr_holidays_responsible'):
                     leave_manager.sudo().write({'groups_id': [(4, approver_group.id)]})
-
         res = super(HrEmployeeBase, self).write(values)
         # remove users from the Responsible group if they are no longer leave managers
         old_managers.sudo()._clean_leave_responsible_users()
@@ -284,12 +283,11 @@ class HrEmployee(models.Model):
     def _is_leave_user(self):
         return self == self.env.user.employee_id and self.user_has_groups('hr_holidays.group_hr_holidays_user')
 
-    def get_mandatory_days(self, start_date, end_date):
+    def get_mandatory_days(self, start_date, end_date, attendee=False):
         all_days = {}
+        self = self if attendee else (self or self.env.user.employee_id)
 
-        self = self or self.env.user.employee_id
-
-        mandatory_days = self._get_mandatory_days(start_date, end_date)
+        mandatory_days = self._get_mandatory_days(start_date, end_date, attendee)
         for mandatory_day in mandatory_days:
             num_days = (mandatory_day.end_date - mandatory_day.start_date).days
             for d in range(num_days + 1):
@@ -304,11 +302,10 @@ class HrEmployee(models.Model):
             'bankHolidays': self.get_public_holidays_data(date_start, date_end),
         }
 
-    @api.model
-    def get_public_holidays_data(self, date_start, date_end):
-        self = self._get_contextual_employee()
-        employee_tz = pytz.timezone(self._get_tz() if self else self.env.user.tz or 'utc')
-        public_holidays = self._get_public_holidays(date_start, date_end).sorted('date_from')
+    def get_public_holidays_data(self, date_start, date_end, restricted=False):
+        self = self or self._get_contextual_employee()
+        employee_tz = pytz.timezone(self._get_tz() if len(self) == 1 else self.env.user.tz or 'utc')
+        public_holidays = self._get_public_holidays(date_start, date_end, restricted).sorted('date_from')
         return list(map(lambda bh: {
             'id': -bh.id,
             'colorIndex': 0,
@@ -320,7 +317,7 @@ class HrEmployee(models.Model):
             'title': bh.name,
         }, public_holidays))
 
-    def _get_public_holidays(self, date_start, date_end):
+    def _get_public_holidays(self, date_start, date_end, restricted=False):
         domain = [
             ('resource_id', '=', False),
             ('company_id', 'in', self.env.companies.ids),
@@ -329,19 +326,19 @@ class HrEmployee(models.Model):
         ]
 
         # a user with hr_holidays permissions will be able to see all public holidays from his calendar
-        if not self._is_leave_user():
+        if restricted or not self._is_leave_user():
             domain += [
                 '|',
                 ('calendar_id', '=', False),
-                ('calendar_id', '=', self.resource_calendar_id.id),
+                ('calendar_id', 'in', self.resource_calendar_id.ids),
             ]
 
         return self.env['resource.calendar.leaves'].search(domain)
 
     @api.model
-    def get_mandatory_days_data(self, date_start, date_end):
-        self = self._get_contextual_employee()
-        mandatory_days = self._get_mandatory_days(date_start, date_end).sorted('start_date')
+    def get_mandatory_days_data(self, date_start, date_end, attendee=False):
+        self = self or self._get_contextual_employee()
+        mandatory_days = self._get_mandatory_days(date_start, date_end, attendee).sorted('start_date')
         return list(map(lambda sd: {
             'id': -sd.id,
             'colorIndex': sd.color,
@@ -353,7 +350,7 @@ class HrEmployee(models.Model):
             'title': sd.name,
         }, mandatory_days))
 
-    def _get_mandatory_days(self, start_date, end_date):
+    def _get_mandatory_days(self, start_date, end_date, restricted=False):
         domain = [
             ('start_date', '<=', end_date),
             ('end_date', '>=', start_date),
@@ -361,17 +358,17 @@ class HrEmployee(models.Model):
         ]
 
         # a user with hr_holidays permissions will be able to see all mandatory days from his calendar
-        if not self._is_leave_user():
+        if restricted or not self._is_leave_user():
             domain += [
                 '|',
                 ('resource_calendar_id', '=', False),
-                ('resource_calendar_id', '=', self.resource_calendar_id.id),
+                ('resource_calendar_id', 'in', self.resource_calendar_id.ids),
             ]
             if self.department_id:
                 domain += [
                     '|',
                     ('department_ids', '=', False),
-                    ('department_ids', 'parent_of', self.department_id.id),
+                    ('department_ids', 'parent_of', self.department_id.ids),
                 ]
             else:
                 domain += [('department_ids', '=', False)]

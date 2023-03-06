@@ -24,6 +24,27 @@ class ResPartner(models.Model):
     def _get_on_leave_ids(self):
         return self.env['res.users']._get_on_leave_ids(partner=True)
 
+    def _get_related_employees(self, partner_ids, everybody):
+        if everybody:
+            return self.env['hr.employee'].search([])
+        else:
+            return self.env['hr.employee'].search([
+                ('work_contact_id', 'in', partner_ids)
+            ])
+
+    @api.model
+    def get_mandatory_days_data(self, start_date, end_date, partner_ids, everybody=False):
+        employee_ids = self._get_related_employees(partner_ids, everybody)
+        return employee_ids.get_mandatory_days_data(start_date, end_date, True)
+    @api.model
+    def get_mandatory_days(self, start_date, end_date, partner_ids, everybody=False):
+        employee_ids = self._get_related_employees(partner_ids, everybody)
+        return employee_ids.get_mandatory_days(start_date, end_date, True)
+    @api.model
+    def get_public_holidays_data(self, start_date, end_date, partner_ids, everybody=False):
+        employee_ids = self._get_related_employees(partner_ids, everybody)
+        return employee_ids.get_public_holidays_data(start_date, end_date, True)
+
     def mail_partner_format(self, fields=None):
         """Override to add the current leave status."""
         partners_format = super().mail_partner_format(fields=fields)

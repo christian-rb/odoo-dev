@@ -338,6 +338,10 @@ export class CalendarCommonRenderer extends Component {
             scale,
         });
     }
+
+    getEventPrioritiesList() {
+        return {};
+    }
 }
 CalendarCommonRenderer.components = {
     Popover: CalendarCommonPopover,

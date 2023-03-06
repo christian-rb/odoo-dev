@@ -10,18 +10,26 @@ patch(AttendeeCalendarCommonRenderer.prototype, {
     get options(){
         return {
             ...super.options,
-            eventOrder: function(event1, event2){
-                if (event1.extendedProps.worklocation){
+            eventOrder: function (event1, event2) {
+                const prioritiesList = this.getEventPrioritiesList();
+                const weight1 = prioritiesList[event1.extendedProps.type] || 0;
+                const weight2 = prioritiesList[event2.extendedProps.type] || 0;
+                if (weight1 > weight2) {
                     return -1;
-                } else {
-                    if(event2.extendedProps.worklocation){
-                        return 1;
-                    } else {
-                        return event1.title.localeCompare(event2.title);
-                    }
                 }
+                if (weight1 < weight2) {
+                    return 1;
+                }
+                return event1.title.localeCompare(event2.title);
             },
         };
+    },
+
+    getEventPrioritiesList() {
+        const list = super.getEventPrioritiesList();
+        return Object.assign(list, {
+            workLocation: 100,
+        });
     },
     fcEventToRecord(event) {
         const res = super.fcEventToRecord(...arguments);
@@ -85,7 +93,7 @@ patch(AttendeeCalendarCommonRenderer.prototype, {
             allDay: record.isAllDay,
             icon: record.icon,
             colorIndex: record.colorIndex,
-            worklocation: true,
+            type: "workLocation",
             // to avoid to drag location event
             editable: false,
         };
@@ -114,7 +122,7 @@ patch(AttendeeCalendarCommonRenderer.prototype, {
     },
     onEventRender(info) {
         const { el, event } = info;
-        if (event.extendedProps.worklocation) {
+        if (event.extendedProps.type === "workLocation") {
             el.classList.add("o_homework_event");
             const multiCalendar = this.props.model.multiCalendar;
             let injectedContentStr = "";
@@ -150,14 +158,14 @@ patch(AttendeeCalendarCommonRenderer.prototype, {
         }
     },
     onDblClick(info) {
-        if (info.event.extendedProps.worklocation) {
+        if (info.event.extendedProps.type === "workLocation") {
             this.onClick(info);
         } else {
             super.onDblClick(...arguments);
         }
     },
     onClick(info){
-        if (info.event.extendedProps.worklocation){
+        if (info.event.extendedProps.type === "workLocation"){
             const elems = document.elementsFromPoint(info.jsEvent.x, info.jsEvent.y)
             const dayElement = elems.find((elem) => elem.classList.contains("fc-day","fc-widget-content"))
             const dayFromElement = dayElement.getAttribute("data-date")

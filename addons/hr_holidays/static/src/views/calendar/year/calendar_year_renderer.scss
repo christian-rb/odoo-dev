@@ -1,0 +1,31 @@
+.o_timeoff_calendar {
+    .o_calendar_widget {
+        .fc-dayGridYear-view {
+            .fc-week-number {
+                color: #adb5bd;
+                font-size: 0.85rem;
+                cursor: default;
+                vertical-align: middle;
+
+                line-height: unset;
+            }
+        }
+    }
+}
+
+.o_calendar_renderer .o_calendar_widget .fc-timeGridWeek-view .fc-event.o_specialday {
+    background-color: transparent;
+    border-color: transparent;
+    box-shadow: none;
+    .fc-bg {
+        background-color: transparent;
+        border-color: transparent;
+    }
+    .fc-content{
+        text-align: center;
+    }
+}
+
+.fc-bgevent.hr_public_holiday {
+    background: $gray-200;
+}
