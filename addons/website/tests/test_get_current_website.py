@@ -2,6 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import json
 
+from odoo import Command
 from odoo.tests import tagged
 from odoo.addons.base.tests.common import HttpCaseWithUserDemo
 
@@ -75,8 +76,10 @@ class TestGetCurrentWebsite(HttpCaseWithUserDemo):
     def test_02_signup_user_website_id(self):
         website = self.website
         website.specific_user_account = True
+        internal_group = self.env.ref('base.group_user')
+        portal_group = self.env.ref('base.group_portal')
 
-        user = self.env['res.users'].create({'website_id': website.id, 'login': 'sad@mail.com', 'name': 'Hope Fully'})
+        user = self.env['res.users'].create({'website_id': website.id, 'login': 'sad@mail.com', 'name': 'Hope Fully', "groups_id": [Command.link(portal_group.id), Command.unlink(internal_group.id)]})
         self.assertTrue(user.website_id == user.partner_id.website_id == website)
 
     def test_03_rpc_signin_user_website_id(self):
