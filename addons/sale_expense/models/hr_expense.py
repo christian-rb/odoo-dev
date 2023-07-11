@@ -16,7 +16,7 @@ class Expense(models.Model):
     @api.depends('product_id.expense_policy')
     def _compute_can_be_reinvoiced(self):
         for expense in self:
-            expense.can_be_reinvoiced = expense.product_id.expense_policy in ['sales_price', 'cost']
+            expense.can_be_reinvoiced = expense.product_id.expense_policy in {'sales_price', 'cost'}
 
     @api.depends('can_be_reinvoiced')
     def _compute_sale_order_id(self):
@@ -24,7 +24,7 @@ class Expense(models.Model):
             expense.sale_order_id = False
 
     def _compute_analytic_distribution(self):
-        super(Expense, self)._compute_analytic_distribution()
+        super()._compute_analytic_distribution()
         for expense in self.filtered('sale_order_id'):
             if expense.sale_order_id.sudo().analytic_account_id:
                 expense.analytic_distribution = {expense.sale_order_id.sudo().analytic_account_id.id: 100}  # `sudo` required for normal employee without sale access rights
@@ -36,7 +36,7 @@ class Expense(models.Model):
         self.env.add_to_compute(self._fields['analytic_distribution'], to_reset)
 
     def _get_split_values(self):
-        vals = super(Expense, self)._get_split_values()
+        vals = super()._get_split_values()
         for split_value in vals:
             split_value['sale_order_id'] = self.sale_order_id.id
         return vals

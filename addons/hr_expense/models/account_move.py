@@ -22,8 +22,8 @@ class AccountMove(models.Model):
             'res_id': self.expense_sheet_id.id
         }
 
-    # Expenses can be written on journal other than purchase, hence don't include them in the constraint check
     def _check_journal_move_type(self):
+        """ Expenses can be written on journal other than purchase, hence don't include them in the constraint check """
         return super(AccountMove, self.filtered(lambda x: not x.expense_sheet_id))._check_journal_move_type()
 
     def _creation_message(self):

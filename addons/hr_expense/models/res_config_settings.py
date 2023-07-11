@@ -1,4 +1,3 @@
-
 from odoo import api, fields, models
 
 
@@ -6,12 +5,15 @@ class ResConfigSettings(models.TransientModel):
     _inherit = 'res.config.settings'
 
     hr_expense_alias_prefix = fields.Char(
-        'Default Alias Name for Expenses',
+        string='Default Alias Name for Expenses',
         compute='_compute_hr_expense_alias_prefix',
         store=True,
-        readonly=False)
-    hr_expense_use_mailgateway = fields.Boolean(string='Let your employees record expenses by email',
-                                             config_parameter='hr_expense.use_mailgateway')
+        readonly=False,
+    )
+    hr_expense_use_mailgateway = fields.Boolean(
+        string='Let your employees record expenses by email',
+        config_parameter='hr_expense.use_mailgateway',
+    )
     module_hr_payroll_expense = fields.Boolean(string='Reimburse Expenses in Payslip')
     module_hr_expense_extract = fields.Boolean(string='Send bills to OCR to generate expenses')
     expense_product_id = fields.Many2one('product.product', related='company_id.expense_product_id', readonly=False, check_company=True)
@@ -27,9 +29,7 @@ class ResConfigSettings(models.TransientModel):
     def get_values(self):
         res = super(ResConfigSettings, self).get_values()
         expense_alias = self.env.ref('hr_expense.mail_alias_expense', raise_if_not_found=False)
-        res.update(
-            hr_expense_alias_prefix=expense_alias.alias_name if expense_alias else False,
-        )
+        res.update(hr_expense_alias_prefix=expense_alias.alias_name if expense_alias else False)
         return res
 
     def set_values(self):

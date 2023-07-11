@@ -1,5 +1,4 @@
-
-from odoo import models, fields, api, _
+from odoo import models, api
 
 
 class AccountPaymentRegister(models.TransientModel):
@@ -16,7 +15,7 @@ class AccountPaymentRegister(models.TransientModel):
         expense_sheet = line.move_id.expense_sheet_id.filtered(lambda sheet: sheet and sheet.payment_mode == 'own_account')
         if expense_sheet and not line.move_id.partner_bank_id:
             res['partner_bank_id'] = expense_sheet.employee_id.sudo().bank_account_id.id \
-                                     or line.partner_id.bank_ids  \
+                                     or line.partner_id.bank_ids \
                                      and line.partner_id.bank_ids.ids[0]
         return res
 

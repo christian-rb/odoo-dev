@@ -420,6 +420,7 @@ class TestExpenses(TestExpenseCommon):
                 'product_id': self.product_c.id,
                 'total_amount_currency': 1000.00,
                 'total_amount': 3000.00,
+                'is_custom_rate': True,
                 'date': self.frozen_today,
                 'company_id': self.company_data['company'].id,
                 'currency_id': foreign_currency_2.id,  # default rate is 1:1.52, overriden to 3
@@ -443,7 +444,7 @@ class TestExpenses(TestExpenseCommon):
 
         # Manually changing rate on the two first expenses after creation to check they recompute properly
         # Back-end override
-        expense_sheet_currency_mix_1.expense_line_ids[0].write({'total_amount': 1000.00})
+        expense_sheet_currency_mix_1.expense_line_ids[0].write({'total_amount': 1000.00, 'is_custom_rate': True})
 
         # Front-end override
         expense = expense_sheet_currency_mix_2.expense_line_ids[0]
@@ -451,12 +452,12 @@ class TestExpenses(TestExpenseCommon):
             expense_form.total_amount = 2000.00
 
         self.assertRecordValues(expenses_sheet_currencies_mix.expense_line_ids.sorted('id'), [
-            {'currency_rate': 1.00, 'total_amount_currency': 1000.00, 'total_amount': 1000.00},  # Rate should change
-            {'currency_rate': 2.00, 'total_amount_currency': 1000.00, 'total_amount': 2000.00},  # Rate should change
-            {'currency_rate': 1.52, 'total_amount_currency': 1000.00, 'total_amount': 1520.00},  # Rate should NOT change
-            {'currency_rate': 1.52, 'total_amount_currency': 1000.00, 'total_amount': 1520.00},  # Rate should NOT change
-            {'currency_rate': 0.50, 'total_amount_currency': 1000.00, 'total_amount':  500.00},  # Rate should NOT change
-            {'currency_rate': 3.00, 'total_amount_currency': 1000.00, 'total_amount': 3000.00},  # Rate should not revert to the default one (1.52)
+            {'is_custom_rate': True,  'currency_rate': 1.00, 'total_amount_currency': 1000.00, 'total_amount': 1000.00},  # Rate should change
+            {'is_custom_rate': True,  'currency_rate': 2.00, 'total_amount_currency': 1000.00, 'total_amount': 2000.00},  # Rate should change
+            {'is_custom_rate': False, 'currency_rate': 1.52, 'total_amount_currency': 1000.00, 'total_amount': 1520.00},  # Rate should NOT change
+            {'is_custom_rate': False, 'currency_rate': 1.52, 'total_amount_currency': 1000.00, 'total_amount': 1520.00},  # Rate should NOT change
+            {'is_custom_rate': False, 'currency_rate': 0.50, 'total_amount_currency': 1000.00, 'total_amount':  500.00},  # Rate should NOT change
+            {'is_custom_rate': True,  'currency_rate': 3.00, 'total_amount_currency': 1000.00, 'total_amount': 3000.00},  # Rate should not revert to the default one (1.52)
         ])
 
         # Sheet and move creation should not touch the rates anymore

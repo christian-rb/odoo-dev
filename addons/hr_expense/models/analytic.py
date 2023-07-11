@@ -6,7 +6,7 @@ from odoo.exceptions import UserError
 
 class AccountAnalyticApplicability(models.Model):
     _inherit = 'account.analytic.applicability'
-    _description = "Analytic Plan's Applicabilities"
+    _description = "Analytic Plan's Applicability"
 
     business_domain = fields.Selection(
         selection_add=[

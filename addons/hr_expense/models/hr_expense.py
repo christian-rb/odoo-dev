@@ -156,6 +156,8 @@ class HrExpense(models.Model):
         compute='_compute_is_multiple_currency',
     )
     currency_rate = fields.Float(compute='_compute_currency_rate', digits=(12, 6), readonly=True, tracking=True)
+    # is_custom_rate is used to allow the odoo default rate to be used under specific conditions
+    is_custom_rate = fields.Boolean(default=False)
     label_currency_rate = fields.Char(compute='_compute_currency_rate', readonly=True)
 
     # Account fields
@@ -226,32 +228,40 @@ class HrExpense(models.Model):
         for expense in self:
             expense.name = expense.name or expense.product_id.display_name
 
-    @api.depends('currency_id', 'total_amount_currency', 'date')
+    @api.onchange('product_id', 'date', 'total_amount_currency', 'is_multiple_currency')
+    def _onchange_is_custom_rate(self):
+        """
+            We want the default odoo rate when the following fields change:
+            - the currency
+            - the total amount in foreign currency (the company currency if not multiple currency)
+            - the date
+            - the product used
+        """
+        for expense in self:
+            if expense.total_amount_currency:
+                expense.price_unit = (expense.total_amount / expense.quantity) if expense.quantity != 0 else 0.
+            else:
+                expense.total_amount = 0
+            expense.is_custom_rate = False
+
+    @api.depends('total_amount', 'total_amount_currency', 'date')
     def _compute_currency_rate(self):
         """
-            We want the default odoo rate when the following change:
-            - the currency of the expense
-            - the total amount in foreign currency
-            - the date of the expense
-            this will cause the rate to be recomputed twice with possible changes but we don't have the required fields
-            to store the override state in stable
+            The rate is ultimately always the total_amount / total_amount_currency, but we want to force the odoo default rate by default
+            and when specific changes are made.
         """
         date_today = fields.Date.context_today(self)
         for expense in self:
             if expense.is_multiple_currency:
-                if (
-                        expense.currency_id != expense._origin.currency_id
-                        or expense.total_amount_currency != expense._origin.total_amount_currency
-                        or expense.date != expense._origin.date
-                ):
+                if expense.is_custom_rate:
+                    expense.currency_rate = expense.total_amount / expense.total_amount_currency if expense.total_amount_currency else 1.0
+                else:
                     expense.currency_rate = self.env['res.currency']._get_conversion_rate(
                         from_currency=expense.currency_id,
                         to_currency=expense.company_currency_id,
                         company=expense.company_id,
                         date=expense.date or date_today,
                     )
-                else:
-                    expense.currency_rate = expense.total_amount / expense.total_amount_currency if expense.total_amount_currency else 1.0
             else:  # Mono-currency case computation shortcut, no need for the label if there is no conversion
                 expense.currency_rate = 1.0
                 expense.label_currency_rate = False
@@ -303,12 +313,12 @@ class HrExpense(models.Model):
             taxes_totals = self.env['account.tax']._compute_taxes(base_lines)['totals'][expense.currency_id]
             expense.total_amount_currency = taxes_totals['amount_untaxed'] + taxes_totals['amount_tax']
 
-    @api.onchange('total_amount_currency')
     def _inverse_total_amount_currency(self):
         for expense in self:
             if not expense.is_editable:
                 raise UserError(_('You are not authorized to edit this expense.'))
             expense.price_unit = (expense.total_amount / expense.quantity) if expense.quantity != 0 else 0.
+            expense.is_custom_rate = False
 
     @api.depends(
         'date',
@@ -333,21 +343,16 @@ class HrExpense(models.Model):
             else:  # Mono-currency case computation shortcut
                 expense.total_amount = expense.total_amount_currency
 
-    def _inverse_total_amount(self):
+    @api.onchange('total_amount')
+    def _onchange_total_amount(self):
         """ Allows to set a custom rate on the expense, and avoid the override when it makes no sense """
         for expense in self:
-            if expense.is_multiple_currency:
-                base_lines = [expense._convert_to_tax_base_line_dict(
-                    price_unit=expense.total_amount,
-                    currency=expense.company_currency_id,
-                )]
-                taxes_totals = self.env['account.tax']._compute_taxes(base_lines)['totals'][expense.company_currency_id]
-                expense.tax_amount = taxes_totals['amount_tax']
-            else:
+            expense.is_custom_rate = True
+            if not expense.quantity or not expense.total_amount_currency:
+                expense.total_amount = 0
+                expense.total_amount_currency = 0
+            elif not expense.is_multiple_currency:  # Mono-currency case computation shortcut
                 expense.total_amount_currency = expense.total_amount
-                expense.tax_amount = expense.tax_amount_currency
-            expense.currency_rate = expense.total_amount / expense.total_amount_currency if expense.total_amount_currency else 1.0
-            expense.price_unit = expense.total_amount / expense.quantity if expense.quantity else expense.total_amount
 
     @api.depends('product_id', 'company_id')
     def _compute_tax_ids(self):
@@ -356,7 +361,7 @@ class HrExpense(models.Model):
             # taxes only from the same company
             expense.tax_ids = expense.product_id.supplier_taxes_id.filtered_domain(self.env['account.tax']._check_company_domain(expense.company_id))
 
-    @api.depends('total_amount_currency', 'tax_ids')
+    @api.depends('total_amount_currency')
     def _compute_tax_amount_currency(self):
         """
              Note: as total_amount_currency can be set directly by the user (for product without cost)
@@ -368,7 +373,7 @@ class HrExpense(models.Model):
             expense.tax_amount_currency = taxes_totals['amount_tax']
             expense.untaxed_amount_currency = taxes_totals['amount_untaxed']
 
-    @api.depends('total_amount', 'currency_rate', 'tax_ids', 'is_multiple_currency')
+    @api.depends('total_amount_currency', 'currency_rate', 'tax_ids', 'is_multiple_currency')
     def _compute_tax_amount(self):
         """
              Note: as total_amount can be set directly by the user when the currency_rate is overriden,
@@ -377,7 +382,7 @@ class HrExpense(models.Model):
         for expense in self:
             if expense.is_multiple_currency:
                 base_lines = [expense._convert_to_tax_base_line_dict(
-                    price_unit=expense.total_amount,
+                    price_unit=expense.total_amount_currency * expense.currency_rate,
                     currency=expense.company_currency_id,
                 )]
                 taxes_totals = self.env['account.tax']._compute_taxes(base_lines)['totals'][expense.company_currency_id]

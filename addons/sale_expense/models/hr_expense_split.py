@@ -7,7 +7,7 @@ class HrExpenseSplit(models.TransientModel):
     _inherit = "hr.expense.split"
 
     def default_get(self, fields):
-        result = super(HrExpenseSplit, self).default_get(fields)
+        result = super().default_get(fields)
         if 'expense_id' in result:
             expense = self.env['hr.expense'].browse(result['expense_id'])
             result['sale_order_id'] = expense.sale_order_id
@@ -25,7 +25,7 @@ class HrExpenseSplit(models.TransientModel):
     @api.depends('product_id')
     def _compute_can_be_reinvoiced(self):
         for split in self:
-            split.can_be_reinvoiced = split.product_id.expense_policy in ['sales_price', 'cost']
+            split.can_be_reinvoiced = split.product_id.expense_policy in {'sales_price', 'cost'}
 
     @api.depends('can_be_reinvoiced')
     def _compute_sale_order_id(self):
