@@ -2187,9 +2187,9 @@ const ListUserValueWidget = UserValueWidget.extend({
         const values = [...this.listTable.querySelectorAll('.o_we_list_record_name input')].map(el => {
             const id = this.isCustom ? el.value : el.name;
             return Object.assign({
-                id: /^-?[0-9]{1,15}$/.test(id) ? parseInt(id) : id,
-                name: el.value,
-                display_name: el.value,
+                id: /^-?[0-9]{1,15}$/.test(id) ? parseInt(id) : id.trim().replace(/\s+/g, " "),
+                name: el.value.trim().replace(/\s+/g, " "),
+                display_name: el.value.trim().replace(/\s+/g, " "),
             }, el.dataset);
         });
         if (this.hasDefault) {
