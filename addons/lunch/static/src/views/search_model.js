@@ -13,6 +13,7 @@ export class LunchSearchModel extends SearchModel {
         this.lunchState = useState({
             locationId: false,
             userId: false,
+            date: new Date(),
         });
 
         onWillStart(async () => {
@@ -46,6 +47,15 @@ export class LunchSearchModel extends SearchModel {
 
     updateLocationId(locationId) {
         this.lunchState.locationId = locationId;
+        this._notify();
+    }
+
+    updateDate(date) {
+        this.lunchState.date.setTime(date);
+        const domain_key = ['available_on_sun', 'available_on_mon', 'available_on_tue', 'available_on_wed',
+        'available_on_thu', 'available_on_fri', 'available_on_sat'][this.lunchState.date.getDay()]
+        this.clearQuery();
+        this.toggleSearchItem(Object.values(this.searchItems).find(o => o['name'] === domain_key).id);
         this._notify();
     }
 
