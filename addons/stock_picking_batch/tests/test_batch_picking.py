@@ -318,7 +318,6 @@ class TestBatchPicking(TransactionCase):
 
         self.assertEqual(self.picking_client_1.state, 'done', 'Picking 1 should be done')
         self.assertEqual(self.picking_client_1.move_ids.product_uom_qty, 5, 'initial demand should be 5 after picking split')
-        self.assertFalse(self.picking_client_2.batch_id)
 
     def test_put_in_pack(self):
         self.env['stock.quant']._update_available_quantity(self.productA, self.stock_location, 10.0)
@@ -676,6 +675,35 @@ class TestBatchPicking(TransactionCase):
         })
         receipt03.action_confirm()
         self.assertEqual(batch.picking_ids, backorder | receipt02 | receipt03)
+
+    def test_batch_pickings_with_no_quantity(self):
+        """ Test a simple batch picking with no quantity.
+        The test should should show the no quantity warning wizard allowing user to modify.
+        If processed then the picking with no quantity will be detached from the batch
+        """
+        self.env['stock.quant']._update_available_quantity(self.productA, self.stock_location, 10.0)
+        self.env['stock.quant']._update_available_quantity(self.productB, self.stock_location, 10.0)
+
+        # Confirm batch, pickings should not be automatically assigned.
+        # Confirm batch, pickings should not be automatically assigned.
+        self.batch.action_confirm()
+        self.assertEqual(self.picking_client_1.state, 'confirmed', 'Picking 1 should be confirmed')
+        self.assertEqual(self.picking_client_2.state, 'confirmed', 'Picking 2 should be confirmed')
+        # Ask to assign, so pickings should be assigned now.
+        self.batch.action_assign()
+        self.assertEqual(self.picking_client_1.state, 'assigned', 'Picking 1 should be ready')
+        self.assertEqual(self.picking_client_2.state, 'assigned', 'Picking 2 should be ready')
+
+        self.picking_client_1.move_ids.write({'quantity': 0})
+        # There should be a no quantity warning confirmation wizard
+        batch_warning_wizard_dict = self.batch.action_done()
+        self.assertTrue(batch_warning_wizard_dict)
+        self.assertEqual(batch_warning_wizard_dict.get('res_model'), 'stock.picking.batch.warning')
+        Form(self.env[batch_warning_wizard_dict['res_model']].with_context(batch_warning_wizard_dict['context'])).save().confirm_batch()
+
+        self.assertEqual(self.picking_client_2.state, 'done', 'Picking 2 should be done')
+        self.assertFalse(self.picking_client_1.batch_id)
+
 
 @tagged('-at_install', 'post_install')
 class TestBatchPicking02(TransactionCase):

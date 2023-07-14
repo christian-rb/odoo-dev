@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_form_picking_batch_warning" model="ir.ui.view">
+        <field name="name">view.form.picking.batch.warning</field>
+        <field name="model">stock.picking.batch.warning</field>
+        <field name="arch" type="xml">
+            <form string="Warning?">
+                <p>Some transfers of this batch have no <strong>quantity done</strong></p>
+                <p><strong>Exclude them from the batch?</strong></p>
+                <footer>
+                    <button name="confirm_batch" string="Confirm" type="object" class="btn-primary" data-hotkey="q"/>
+                    <button string="Discard" class="btn-secondary" special="cancel" data-hotkey="z" />
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>
