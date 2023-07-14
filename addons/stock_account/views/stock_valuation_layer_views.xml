@@ -58,8 +58,8 @@
                 <field name="company_id" groups="base.group_multi_company"/>
                 <field name="quantity" string="Moved Quantity" optional="show" sum="Total Moved Quantity"/>
                 <field name="remaining_qty" type="measure" optional="hide" sum="Total Remaining Quantity"/>
+                <field name="uom_id" groups="uom.group_uom" string="Unit" optional="hide"/>
                 <field name="unit_cost" optional="hide"/>
-                <field name="uom_id" groups="uom.group_uom" />
                 <field name="currency_id" column_invisible="True" />
                 <field name="value" sum="Total Value" optional="show"/>
                 <field name="description" optional="hide"/>
