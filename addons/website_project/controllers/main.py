@@ -1,7 +1,7 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo.addons.website.controllers import form
+from odoo.http import request
 
 from odoo import _
 from odoo.addons.base.models.ir_qweb_fields import nl2br_enclose
@@ -10,10 +10,6 @@ from odoo.tools import html2plaintext
 class WebsiteForm(form.WebsiteForm):
     def insert_record(self, request, model, values, custom, meta=None):
         if model.model == 'project.task':
-            visitor_sudo = request.env['website.visitor']._get_visitor_from_request()
-            visitor_partner = visitor_sudo.partner_id
-            if visitor_partner:
-                values['partner_id'] = visitor_partner.id
             # When a task is created from the web editor, if the key 'user_ids' is not present, the user_ids is filled with the odoo bot. We set it to False to ensure it is not.
             values.setdefault('user_ids', False)
 
@@ -36,3 +32,14 @@ class WebsiteForm(form.WebsiteForm):
                 message_type='comment',
             )
         return res
+
+    def extract_data(self, model, values):
+        data = super().extract_data(model, values)
+        if model.model == 'project.task' and values.get('email_from'):
+            partner = request.env['mail.thread'].sudo()._mail_find_partner_from_emails([values['email_from']])
+            partner_id = partner[0].id if partner else False
+            data['record']['partner_id'] = partner_id
+            data['record']['email_from'] = values['email_from']
+            if not partner_id:
+                data['record']['email_cc'] = values['email_from']
+        return data

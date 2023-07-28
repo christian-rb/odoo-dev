@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import re
@@ -204,6 +203,8 @@ class Task(models.Model):
     partner_id = fields.Many2one('res.partner',
         string='Customer', recursive=True, tracking=True, compute='_compute_partner_id', store=True, readonly=False,
         domain="['|', ('company_id', '=?', company_id), ('company_id', '=', False)]", )
+    # Need this field to check there is no email loops when Odoo reply automatically
+    email_from = fields.Char('Email From')
     email_cc = fields.Char(help='Email addresses that were in the CC of the incoming emails from this task and that are not currently linked to an existing customer.')
     company_id = fields.Many2one('res.company', string='Company', compute='_compute_company_id', store=True, readonly=False, recursive=True, copy=True, default=_default_company_id)
     color = fields.Integer(string='Color Index')
