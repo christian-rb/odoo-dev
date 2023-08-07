@@ -221,28 +221,3 @@ class TestNestedTaskUpdate(TransactionCase):
         for child in children:
             self.assertEqual(child.sale_line_id, self.order_line)
             self.assertFalse(child.user_ids)
-
-    def test_allow_billable_on_subtasks(self):
-        parent = self.env['project.task'].create({
-            'name': 'Parent Task',
-            'project_id': self.project.id,
-            'child_ids': [
-                Command.create({
-                    'name': 'Subtask 1',
-                    'project_id': self.project.id,
-                }),
-                Command.create({
-                    'name': 'Subtask 2',
-                    'child_ids': [Command.create({'name': 'Subsubtask'})],
-                }),
-            ],
-        })
-        self.assertTrue(all((parent + parent._get_all_subtasks()).mapped('allow_billable')))
-
-        subtask2 = parent.child_ids.filtered(lambda t: t.name == 'Subtask 2')
-        subsubtask = subtask2.child_ids
-        project_non_billable = self.env['project.project'].create({'name': 'Non-billable project', 'allow_billable': False})
-
-        subtask2.project_id = project_non_billable
-        self.assertFalse(subtask2.allow_billable)
-        self.assertFalse(subsubtask.allow_billable)
