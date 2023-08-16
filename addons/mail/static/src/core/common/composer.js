@@ -305,15 +305,17 @@ export class Composer extends Component {
         return Boolean(this.suggestion?.state.items);
     }
 
+    onSelectSuggestion(ev, option) {
+        this.suggestion.insert(option);
+        markEventHandled(ev, "composer.selectSuggestion");
+    }
+
     get navigableListProps() {
         const props = {
             anchorRef: this.ref.el,
             position: this.env.inChatter ? "bottom-fit" : "top-fit",
             placeholder: _t("Loading"),
-            onSelect: (ev, option) => {
-                this.suggestion.insert(option);
-                markEventHandled(ev, "composer.selectSuggestion");
-            },
+            onSelect: this.onSelectSuggestion.bind(this),
             options: [],
         };
         if (!this.hasSuggestions) {
@@ -595,6 +597,7 @@ export class Composer extends Component {
                 mentionedPartners: composer.mentionedPartners,
                 cannedResponseIds: composer.cannedResponses.map((c) => c.id),
                 parentId: this.props.messageToReplyTo?.message?.id,
+                subCommand: this.props.composer.subCommand,
             };
             await this._sendMessage(value, postData);
         });
@@ -621,6 +624,7 @@ export class Composer extends Component {
         }
         this.suggestion?.clearRawMentions();
         this.suggestion?.clearCannedReponses();
+        this.suggestion?.clearSubCommand();
         this.props.messageToReplyTo?.cancel();
     }
 

@@ -119,8 +119,12 @@ const threadPatch = {
     async mute({ minutes = false } = {}) {
         await rpc("/discuss/channel/mute", { channel_id: this.id, minutes });
     },
-    /** @param {string} body */
-    async post(body) {
+    /**
+     * @param {string} body
+     * @param {Object} [param0={}]
+     * @param {Object} [param0.subCommand]
+     * */
+    async post(body, { subCommand } = {}) {
         if (this.model === "discuss.channel" && body.startsWith("/")) {
             const [firstWord] = body.substring(1).split(/\s/);
             const command = commandRegistry.get(firstWord, false);
@@ -128,7 +132,17 @@ const threadPatch = {
                 command &&
                 (!command.channel_types || command.channel_types.includes(this.channel_type))
             ) {
-                await this.executeCommand(command, body);
+                const params = {};
+                if (
+                    subCommand &&
+                    command.subCommandFields &&
+                    body.indexOf(` ${subCommand.label}`) !== -1
+                ) {
+                    for (const field of command.subCommandFields) {
+                        params[field] = subCommand[field];
+                    }
+                }
+                await this.executeCommand(command, body, params);
                 return;
             }
         }

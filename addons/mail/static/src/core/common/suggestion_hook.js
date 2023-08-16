@@ -79,6 +79,10 @@ class UseSuggestion {
         });
         this.state.items = undefined;
     }
+    clearSubCommand() {
+        this.composer.subCommandParent = false;
+        this.composer.subCommand = undefined;
+    }
     detect() {
         const { start, end } = this.composer.selection;
         const text = this.composer.text;
@@ -123,7 +127,11 @@ class UseSuggestion {
                 continue;
             }
             const charBeforeCandidate = text[candidatePosition - 1];
-            if (charBeforeCandidate && !/\s/.test(charBeforeCandidate)) {
+            if (
+                charBeforeCandidate &&
+                !/\s/.test(charBeforeCandidate) &&
+                !this.composer.subCommandParent
+            ) {
                 continue;
             }
             Object.assign(this.search, {
@@ -163,6 +171,9 @@ class UseSuggestion {
         if (option.cannedResponse) {
             this.composer.cannedResponses.push(option.cannedResponse);
         }
+        if (option.isSubCommand) {
+            this.composer.subCommand = option;
+        }
         this.clearSearch();
         this.composer.text = before + option.label + " " + after;
         this.composer.selection.start = before.length + option.label.length + 1;
@@ -175,6 +186,7 @@ class UseSuggestion {
         }
         const { type, suggestions } = this.suggestionService.searchSuggestions(this.search, {
             thread: this.thread,
+            composer: this.composer,
             sort: true,
         });
         if (!suggestions.length) {

@@ -8,6 +8,7 @@ import {
     MockServer,
     defineParams,
 } from "@web/../tests/web_test_helpers";
+import { ChatbotScript } from "./mock_server/mock_models/chatbot_script";
 import { DiscussChannel } from "./mock_server/mock_models/discuss_channel";
 import { DiscussChannelMember } from "./mock_server/mock_models/discuss_channel_member";
 import { LivechatChannel } from "./mock_server/mock_models/im_livechat_channel";
@@ -24,6 +25,7 @@ export function defineLivechatModels() {
 }
 
 export const livechatModels = {
+    ChatbotScript,
     DiscussChannel,
     DiscussChannelMember,
     LivechatChannel,
