@@ -3,6 +3,13 @@
     background-color: $o-view-background-color;
 
     .o_configurator_screen {
+        $-theme_preview-height-lg: 64vh;
+        $-theme_preview-hover-ratio: 1.2;
+        $-theme_preview-hover-height: $-theme_preview-height-lg * $-theme_preview-hover-ratio;
+
+        $-theme_preview-svg-ratio: 2.6;
+        // Viewport - padding-x - all the gutter to get the width, multiplied by the svg ratio to get the height.
+        --theme_preview-svg-height: calc((100vw - 2 * #{map-get($spacers, 4)} - #{$grid-gutter-width} * 3) * 1/3 * #{$-theme_preview-svg-ratio});
 
         // ==== Animations
         @keyframes configuratorFadeIn{
@@ -11,11 +18,11 @@
         }
 
         @keyframes theme_screenshot_scroll {
-            to { transform: translate3d(0, -24%, 0)}
+            to { transform: translate3d(0, calc(((var(--theme_preview-svg-height)) - MIN(#{$-theme_preview-hover-height}, var(--theme_preview-svg-height))) * -1), 0)}
         }
 
-        @keyframes theme_screenshot_scroll_small {
-            to { transform: translate3d(0, -31.5%, 0)}
+        @keyframes theme_screenshot_scroll-vertical {
+            to { transform: translate3d(0, -74%, 0)}
         }
 
         // ==== General Components
@@ -310,7 +317,7 @@
             }
 
             .theme_preview_tip {
-                @include o-position-absolute(0, 0, auto, 0);
+                @include o-position-absolute(auto, 0, 0, 0);
             }
 
             .theme_preview, .theme_svg_container svg, .theme_preview_tip {
@@ -336,32 +343,33 @@
                 box-shadow: $box-shadow-sm;
 
                 @include media-breakpoint-up(lg) {
-                    padding-top: 200%;
-
-                    &:hover {
-                        transform: translate3d(0,-10px,0);
-                    }
-
-                    &.small {
-                        padding-top: 180%;
-                    }
+                    // Avoid the container size with hover ratio to be taller than the svg size
+                    padding-top: MIN(#{$-theme_preview-height-lg}, calc(var(--theme_preview-svg-height)/#{$-theme_preview-hover-ratio}));
                 }
 
                 &:hover {
                     border-color: map-get($theme-colors, primary)!important;
                     box-shadow: $box-shadow;
 
+                    @include media-breakpoint-up(lg) {
+                        padding-top: MIN(#{$-theme_preview-hover-height}, var(--theme_preview-svg-height));
+                        margin-top: -$-theme_preview-hover-height - $-theme_preview-height-lg;
+
+                        &:hover {
+                            transform: translate3d(0, calc(#{$-theme_preview-height-lg} * .1), 0);
+                        }
+                    }
+
                     .theme_preview_tip {
-                        transform: translate3d(0,-120%,0);
+                        transform: translate3d(0, 200%, 0);
                     }
 
                     .theme_svg_container svg {
-                        animation: theme_screenshot_scroll 4s cubic-bezier(0.455, 0.030, 0.515, 0.955) .1s infinite alternate;
-                    }
+                        animation: theme_screenshot_scroll 6s cubic-bezier(0.455, 0.030, 0.515, 0.955) .1s infinite alternate;
 
-                    &.small .theme_svg_container svg {
-                        animation-name: theme_screenshot_scroll_small;
-                        animation-duration: 5s;
+                        @include media-breakpoint-down(lg) {
+                            animation: theme_screenshot_scroll-vertical 8s cubic-bezier(0.455, 0.030, 0.515, 0.955) .1s infinite alternate;
+                        }
                     }
                 }
             }
