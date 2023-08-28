@@ -59,7 +59,7 @@
                             <page name="bank_account" string="Journal Entries">
                                 <group>
                                     <group string="Accounting Information">
-                                        <field name="default_account_type" invisible="1"/>
+                                        <field name="default_account_domain_ids" invisible="1"/>
                                         <label for="default_account_id" string="Bank Account"
                                                invisible="type != 'bank'" groups="account.group_account_readonly"/>
                                         <label for="default_account_id" string="Cash Account"

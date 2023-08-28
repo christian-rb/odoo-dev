@@ -88,12 +88,11 @@ class AccountJournal(models.Model):
     account_control_ids = fields.Many2many('account.account', 'journal_account_control_rel', 'journal_id', 'account_id', string='Allowed accounts',
         check_company=True,
         domain="[('deprecated', '=', False), ('account_type', '!=', 'off_balance')]")
-    default_account_type = fields.Char(string='Default Account Type', compute="_compute_default_account_type")
+    default_account_domain_ids = fields.Binary(string='Domain for Default Account', compute="_compute_default_account_domain_ids")
     default_account_id = fields.Many2one(
         comodel_name='account.account', check_company=True, copy=False, ondelete='restrict',
         string='Default Account',
-        domain="[('deprecated', '=', False),"
-               "'|', ('account_type', '=', default_account_type), ('account_type', 'not in', ('asset_receivable', 'liability_payable'))]")
+        domain="[('id', 'in', default_account_domain_ids)]")
     suspense_account_id = fields.Many2one(
         comodel_name='account.account', check_company=True, ondelete='restrict', readonly=False, store=True,
         compute='_compute_suspense_account_id',
@@ -295,19 +294,18 @@ class AccountJournal(models.Model):
         return {'manual'}
 
     @api.depends('type')
-    def _compute_default_account_type(self):
+    def _compute_default_account_domain_ids(self):
         default_account_id_types = {
-            'bank': 'asset_cash',
-            'cash': 'asset_cash',
-            'sale': 'income',
-            'purchase': 'expense'
+            'bank': ('asset_cash'),
+            'cash': ('asset_cash'),
+            'sale': ('income'),
+            'purchase': ('expense')
         }
-
         for journal in self:
             if journal.type in default_account_id_types:
-                journal.default_account_type = default_account_id_types[journal.type]
+                journal.default_account_domain_ids = self.env['account.account'].search([('deprecated', '=', False),  ('account_type', 'not in', ('asset_receivable', 'liability_payable', 'off_balance')), ('account_type', '=', default_account_id_types[journal.type])]).ids
             else:
-                journal.default_account_type = False
+                journal.default_account_domain_ids = self.env['account.account'].search([('deprecated', '=', False),  ('account_type', 'not in', ('asset_receivable', 'liability_payable', 'off_balance'))]).ids
 
     @api.depends('type', 'currency_id')
     def _compute_inbound_payment_method_line_ids(self):
