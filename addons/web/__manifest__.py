@@ -66,6 +66,8 @@ This module provides the core of the Odoo Web Client.
             'web/static/src/legacy/scss/modal.scss',
             'web/static/src/legacy/scss/name_and_signature.scss',
 
+            'web/static/src/libs/clipboard_polyfill.js',
+
             'web/static/src/legacy/js/promise_extension.js',
             'web/static/src/legacy/js/core/cookie_utils.js',
 
