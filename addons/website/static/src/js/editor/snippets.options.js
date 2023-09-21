@@ -19,7 +19,7 @@ import {
     convertHslToRgb,
  } from '@web/core/utils/colors';
 import { renderToElement, renderToFragment } from "@web/core/utils/render";
-
+import { browser } from "@web/core/browser/browser";
 import { markup } from "@odoo/owl";
 
 const InputUserValueWidget = options.userValueWidgetsRegistry['we-input'];
@@ -2725,17 +2725,16 @@ options.registry.HideFooter = VisibilityPageOptionUpdate.extend({
  */
 options.registry.anchor = options.Class.extend({
     isTopOption: true,
+    events: {
+        "click we-button": "onClickToClipboard",
+    },
 
     /**
      * @override
      */
     start() {
         // Generate anchor and copy it to clipboard on click, show the tooltip on success
-        const buttonEl = this.el.querySelector("we-button");
         this.isModal = this.$target[0].classList.contains("modal");
-        if (buttonEl && !this.isModal) {
-            this._buildClipboard(buttonEl);
-        }
 
         return this._super(...arguments);
     },
@@ -2747,39 +2746,26 @@ options.registry.anchor = options.Class.extend({
         this.$target.filter(':not(.carousel)').removeAttr('id');
     },
 
-    //--------------------------------------------------------------------------
-    // Public
-    //--------------------------------------------------------------------------
-
-    /**
-     * @override
-     */
-    notify(name, data) {
-        this._super(...arguments);
-        if (name === "modalAnchor") {
-            this._buildClipboard(data.buttonEl);
+    async onClickToClipboard(ev) {
+        if (!browser.navigator.clipboard) {
+            return browser.console.warn("This browser doesn't allow to copy to clipboard");
         }
+        if (this.isModal) {
+            return;
+        }
+        const anchorLink = this._getAnchorLink();
+        await browser.navigator.clipboard.writeText(anchorLink);
+        const message = markup(_t("Anchor copied to clipboard<br>Link: %s", anchorLink));
+        this.displayNotification({
+            type: "success",
+            message: message,
+            buttons: [{text: _t("Edit"), click: () => this._openAnchorDialog(ev.target), primary: true}],
+        });
     },
 
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
-
-    /**
-     * @private
-     * @param {Element} buttonEl
-     */
-    _buildClipboard(buttonEl) {
-        const clipboard = new ClipboardJS(buttonEl, {text: () => this._getAnchorLink()});
-        clipboard.on("success", () => {
-            const message = markup(_t("Anchor copied to clipboard<br>Link: %s", this._getAnchorLink()));
-            this.displayNotification({
-                type: "success",
-                message: message,
-                buttons: [{text: _t("Edit"), click: () => this._openAnchorDialog(buttonEl), primary: true}],
-            });
-        });
-    },
 
     /**
      * @private
