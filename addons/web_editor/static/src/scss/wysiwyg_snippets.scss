@@ -512,6 +512,10 @@
                 display: none; // remove ballon
             }
 
+            .fa {
+                font-size: $o-we-sidebar-font-size;
+            }
+
             .btn {
                 @extend %we-generic-button;
                 display: flex;
