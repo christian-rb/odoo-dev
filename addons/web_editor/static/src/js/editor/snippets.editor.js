@@ -1415,7 +1415,13 @@ var SnippetEditor = dragAndDropCommonMenuEditor.extend({
         this.$dropZones.droppable({
             over: function () {
                 if (self.dropped) {
+                    // Checking if the "out" event happened before this "over":
+                    // if `self.dropped` is "true", "out" didn't happen because
+                    // it sets it to "false". We are therefore in the case of an
+                    // "over" after an "over" and we need to escape the previous
+                    // dropzone first.
                     self.$target.detach();
+                    self._outPreviousDropzone(this);
                 }
 
                 // Prevent a column to be trapped in an upper grid dropzone at
@@ -1440,14 +1446,6 @@ var SnippetEditor = dragAndDropCommonMenuEditor.extend({
                 const $dropzone = $(this).first().after(self.$target);
                 $dropzone.addClass('invisible');
 
-                // Checking if the "out" event happened before this "over": if
-                // `self.dragState.currentDropzoneEl` exists, "out" didn't
-                // happen because it deletes it. We are therefore in the case
-                // of an "over" after an "over" and we need to escape the
-                // previous dropzone first.
-                if (self.dragState.currentDropzoneEl) {
-                    self._outPreviousDropzone($dropzone[0]);
-                }
                 self.dragState.currentDropzoneEl = $dropzone[0];
 
                 if ($dropzone[0].classList.contains('oe_grid_zone')) {
@@ -1468,12 +1466,9 @@ var SnippetEditor = dragAndDropCommonMenuEditor.extend({
                 if (sameDropzoneAsCurrent) {
                     self._outOfZone(dropzoneEl);
 
-                    var prev = self.$target.prev();
-                    if (this === prev[0]) {
-                        self.dropped = false;
-                        self.$target.detach();
-                        $(this).removeClass('invisible');
-                    }
+                    self.dropped = false;
+                    self.$target.detach();
+                    $(this).removeClass('invisible');
                 }
             },
         });
