@@ -2,6 +2,7 @@
 
 import { _t } from "@web/core/l10n/translation";
 import publicWidget from "@web/legacy/js/public/public_widget";
+import { browser } from "@web/core/browser/browser";
 
 var SelectBox = publicWidget.Widget.extend({
     events: {
@@ -124,8 +125,11 @@ var RecentLinkBox = publicWidget.Widget.extend({
     /**
      * @override
      */
-    start: function () {
-        new ClipboardJS(this.$('.btn_shorten_url_clipboard').get(0));
+    start: async function () {
+        if (!browser.navigator.clipboard) {
+            return browser.console.warn("This browser doesn't allow to copy to clipboard");
+        }
+        await browser.navigator.clipboard.writeText(this.$('.btn_shorten_url_clipboard').get(0).innerText);
         return this._super.apply(this, arguments);
     },
 
@@ -353,7 +357,7 @@ publicWidget.registry.websiteLinks = publicWidget.Widget.extend({
     /**
      * @override
      */
-    start: function () {
+    start: async function () {
         var defs = [this._super.apply(this, arguments)];
 
         // UTMS selects widgets
@@ -371,8 +375,10 @@ publicWidget.registry.websiteLinks = publicWidget.Widget.extend({
         defs.push(this.recentLinks.appendTo($('#o_website_links_recent_links')));
         this.recentLinks.getRecentLinks('newest');
 
-        // Clipboard Library
-        new ClipboardJS($('#btn_shorten_url').get(0));
+        if (!browser.navigator.clipboard) {
+            return browser.console.warn("This browser doesn't allow to copy to clipboard");
+        }
+        await browser.navigator.clipboard.writeText($('#btn_shorten_url').get(0).innerText);
 
         this.url_copy_animating = false;
 

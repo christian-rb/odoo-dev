@@ -2,6 +2,7 @@
 
 import { _t } from "@web/core/l10n/translation";
 import publicWidget from "@web/legacy/js/public/public_widget";
+import { browser } from "@web/core/browser/browser";
 const { DateTime } = luxon;
 
 var BarChart = publicWidget.Widget.extend({
@@ -134,7 +135,7 @@ publicWidget.registry.websiteLinksCharts = publicWidget.Widget.extend({
     /**
      * @override
      */
-    start: function () {
+    start: async function () {
         var self = this;
         this.charts = {};
 
@@ -150,7 +151,10 @@ publicWidget.registry.websiteLinksCharts = publicWidget.Widget.extend({
         defs.push(this._lastMonthClicksByCountry());
         defs.push(this._super.apply(this, arguments));
 
-        new ClipboardJS($('.copy-to-clipboard')[0]);
+        if (!browser.navigator.clipboard) {
+            return browser.console.warn("This browser doesn't allow to copy to clipboard");
+        }
+        await browser.navigator.clipboard.writeText($('.copy-to-clipboard')[0].innerText);
 
         this.animating_copy = false;
 
