@@ -20,6 +20,7 @@ import {
  } from '@web/core/utils/colors';
 import { renderToElement, renderToFragment } from "@web/core/utils/render";
 import { browser } from "@web/core/browser/browser";
+import { escape } from "@web/core/utils/strings";
 import { markup } from "@odoo/owl";
 
 const InputUserValueWidget = options.userValueWidgetsRegistry['we-input'];
@@ -2755,7 +2756,7 @@ options.registry.anchor = options.Class.extend({
         }
         const anchorLink = this._getAnchorLink();
         await browser.navigator.clipboard.writeText(anchorLink);
-        const message = markup(_t("Anchor copied to clipboard<br>Link: %s", anchorLink));
+        const message = markup(_t("Anchor copied to clipboard<br>Link: %s", escape(anchorLink)));
         this.displayNotification({
             type: "success",
             message: message,
