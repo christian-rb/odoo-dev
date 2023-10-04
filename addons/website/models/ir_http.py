@@ -266,10 +266,32 @@ class Http(models.AbstractModel):
     @classmethod
     def _serve_page(cls):
         req_page = request.httprequest.path
+        default_lang = cls._get_default_lang()
 
         def _search_page(comparator='='):
             page_domain = [('url', comparator, req_page)] + request.website.website_domain()
-            return request.env['website.page'].sudo().search(page_domain, order='website_id asc', limit=1)
+            search_page = request.env['website.page'].sudo().search(page_domain, order='website_id asc', limit=1)
+            if search_page:
+                return search_page
+            else:
+                # Search if the page domain can be found thanks to a translation
+                # of language installed on the website.
+                installed_languages = request.website.language_ids
+                for language in installed_languages:
+                    search_page = request.env['website.page'].sudo().with_context(lang=language[0].code).search(page_domain, order='website_id asc', limit=1)
+                    if search_page:
+                        if (request.env.lang != default_lang.code):
+                            # Redirect the browser to the found page and inject
+                            # the lang before the original path in the url as
+                            # the requested lang is not the default one.
+                            redirect = request.redirect_query(f'/{request.env.lang}{search_page.with_context(lang=request.env.lang).url}', request.httprequest.args)
+                            redirect.set_cookie('frontend_lang', request.env.lang)
+                            werkzeug.exceptions.abort(redirect)
+                        else:
+                            # Redirect the browser to the found page.
+                            redirect = redirect = request.redirect_query(search_page.with_context(lang=default_lang.code).url, request.httprequest.args)
+                            redirect.set_cookie('frontend_lang', default_lang.code)
+                            werkzeug.exceptions.abort(redirect)
 
         # specific page first
         page = _search_page()

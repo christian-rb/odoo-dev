@@ -7,7 +7,8 @@ from urllib.parse import urlparse
 
 from odoo.addons.http_routing.models.ir_http import url_lang
 from odoo.addons.website.tools import MockRequest
-from odoo.tests import HttpCase, tagged
+from odoo.tests import HttpCase, tagged, common
+from odoo.tools import config
 
 
 @tagged('-at_install', 'post_install')
@@ -155,3 +156,69 @@ class TestControllerRedirect(TestLangUrl):
         # website.page
         assertUrlRedirect('/fr/page_1/', '/fr/page_1', "Check for website.page with language in URL.")
         assertUrlRedirect('/fr/page_1/?a=b', '/fr/page_1?a=b', "Check for website.page with language in URL + URL params.")
+
+@tagged('-at_install', 'post_install')
+class TestTranslateUrl(TestLangUrl):
+    def test_translate_url(self):
+        base = "http://%s:%s" % (common.HOST, config['http_port'])
+        view_test_translate_url = self.env['ir.ui.view'].create({
+            'name': 'NewPage',
+            'type': 'qweb',
+            'arch': '<div>NewPage</div>',
+            'key': 'test.view_test_translate_url',
+        })
+        page = self.env['website.page'].create({
+            'view_id': view_test_translate_url.id,
+            'url': '/page-en',
+            'is_published': True,
+        })
+        page.with_context(lang='fr_FR').url = '/page-fr'
+        homepage_domain = [('url', '=', '/')] + self.website.website_domain()
+        homepage_specific = self.env['website.page'].search(homepage_domain, order='website_id asc', limit=1)
+        homepage_specific.with_context(lang='fr_FR').url = '/accueil'
+
+        # Trying to access the french url of a page (without the lang in the
+        # url) if the website language is in english should redirect to the
+        # english url of this page.
+        r = self.url_open('/page-fr')
+        self.assertEqual(r.history[0].status_code, 303)
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(r.url, base + '/page-en')
+
+        # Go to the homepage.
+        r = self.url_open('/')
+        # From the homepage, changing the language of the website should
+        # redirect to the french url of the specific homepage.
+        r = self.url_open('/fr')
+        self.assertEqual(r.history[0].status_code, 303)
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(r.url, base + '/fr/accueil')
+        r = self.url_open('/en_US')
+
+        # Trying to access the french url of a page (with the lang in the url)
+        # should change the website language to french and access the french url
+        # of the page.
+        r = self.url_open('/fr/page-fr')
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(r.url, base + '/fr/page-fr')
+
+        # Trying to access the english url of a page (without the lang in the
+        # url) if the website language is in french should redirect to the
+        # french url of this page.
+        r = self.url_open('/page-en')
+        self.assertEqual(r.history[0].status_code, 303)
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(r.url, base + '/fr/page-fr')
+
+        # It should be possible to translate the url of a page with a url that
+        # exists in another language.
+        self.start_tour('/contactus', 'translate_url', login='admin')
+        r = self.url_open('/fr/contactus')
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(r.url, base + '/fr/contactus')
+
+        # If a page url is the website homepage url, updating this url through
+        # the "translate" modal should also update the homepage url.
+        self.website.homepage_url = '/contactus'
+        self.start_tour('/contactus', 'update_homepage_url', login='admin')
+        self.assertEqual(self.website.homepage_url, '/contactus-en')
