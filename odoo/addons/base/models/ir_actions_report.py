@@ -52,6 +52,9 @@ except Exception:
 def _get_wkhtmltopdf_bin():
     return find_in_path('wkhtmltopdf')
 
+def _get_wkhtmltoimage_bin():
+    return find_in_path('wkhtmltoimage')
+
 def _split_table(tree, max_rows):
     """
     Walks through the etree and splits tables with more than max_rows rows into
@@ -409,6 +412,58 @@ class IrActionsReport(models.Model):
         })
 
         return bodies, res_ids, header, footer, specific_paperformat_args
+
+    @api.model
+    def _build_wkhtmltoimage_args(self, width, height, allow_js=False):
+        '''Build arguments understandable by wkhtmltoimage bin.'''
+        command_args = ['--disable-local-file-access']
+
+        # Passing the cookie to wkhtmltopdf in order to resolve internal links.
+        if request and request.db:
+            command_args.extend(['--cookie', 'session_id', request.session.sid])
+
+        # Less verbose error messages
+        command_args.extend(['--quiet'])
+        if not allow_js:
+            command_args.extend(['--disable-javascript'])
+
+        # Build paperformat args
+        command_args.extend(['--width', str(width)])
+        command_args.extend(['--height', str(height)])
+
+        return command_args
+
+    def _run_wkhtmltoimage(self, bodies, width, height):
+        command_args = self._build_wkhtmltoimage_args(width, height)
+        inputpath_arr = []
+        outputfd_arr = []
+        outputpath_arr = []
+        # this would be a great place for async :/
+        for i, body in enumerate(bodies):
+            infd, inputpath = tempfile.mkstemp(suffix='.html', prefix=f'report_image_html_input.tmp.{i}.')
+            with closing(os.fdopen(infd, 'wb')) as html_file:
+                html_file.write(body.encode())
+            inputpath_arr.append(inputpath)
+            outfd, outpath = tempfile.mkstemp(suffix='.png', prefix='report_image_output.tmp.')
+            outputfd_arr.append(outfd)
+            outputpath_arr.append(outpath)
+        output_image_arr = []
+        # start all processes THEN await
+        # TODO maybe put a limit on parallel processes...
+        process_arr = []
+        for input_path, output_path in zip(inputpath_arr, outputpath_arr):
+            wkhtmltoimage = [_get_wkhtmltoimage_bin()] + command_args + [input_path, output_path]
+            process_arr.append(subprocess.Popen(wkhtmltoimage, stdout=subprocess.PIPE, stderr=subprocess.PIPE))
+        # wait for processes in order they started (likely correlated to the order they finish)
+        for process, outfd in zip(process_arr, outputfd_arr):
+            out, err = process.communicate()
+            with closing(os.fdopen(outfd, 'rb')) as image_file:
+                output_image_arr.append(image_file.read())
+        # cleanup tmp files
+        for input_path, output_path in zip(inputpath_arr, outputpath_arr):
+            os.unlink(input_path)
+            os.unlink(output_path)
+        return output_image_arr
 
     @api.model
     def _run_wkhtmltopdf(

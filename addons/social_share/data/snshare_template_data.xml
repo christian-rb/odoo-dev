@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo><data noupdate="0">
+    <record id="snshare_template_1" model="snshare.template">
+        <field name="name">Base Template</field>
+        <field name="body" type="html">
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <style>
+            body {
+                @charset "UTF-8";
+                font-family: sans-serif, "Noto Color Emoji";
+                font-size: 2em;
+                background: #161315;
+                background-size: contain;
+                background-repeat: no-repeat;
+                background-position: center center;
+                color: white;
+                padding: 80px;
+                display: -webkit-box;
+                display: flex;
+                -webkit-box-orient: vertical;
+                flex-direction: column;
+                -webkit-box-pack: justify;
+                justify-content: space-around;
+                -webkit-box-align: center;
+                align-items: center;
+                text-align: center;
+            }
+            .center_column {
+                display: -webkit-box;
+                display: flex;
+                -webkit-box-orient: vertical;
+                flex-direction: column;
+                -webkit-box-align: center;
+                align-items: center;
+                -webkit-box-pack: justify;
+                justify-content: space-around;
+                line-height: 4rem;
+                height: 60%;
+                width: 100%;
+            }
+            .header, .subheader, .rounded_button h1 {
+                display: -webkit-box;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+            }
+            .header, .subheader, .rounded_button h1 {
+                margin: 0.1em;
+            }
+            .header {
+                -webkit-line-clamp: 2;
+                max-height: 8rem;
+            }
+            .subheader, .rounded_button h1{
+                -webkit-line-clamp: 1;
+                max-height: 4rem;
+            }
+            .rounded_button {
+                width: fit-content;
+                min-width: 50%;
+                max-width: 70%;
+                padding: 0.2rem 1rem;
+                border-radius: 100px;
+            }
+            .white {
+                background: white; color: black;
+            }
+            .footer {
+                height: 30%;
+                width: 100%;
+                display: -webkit-box;
+                display: flex;
+                -webkit-box-orient: horizontal;
+                flex-direction: row;
+                -webkit-box-align: center;
+                align-items: center;
+                -webkit-box-pack: justify;
+                justify-content: space-between;
+            }
+            .footer div {
+                height: 100%;
+            }
+            .profile_section {
+                font-size: 2.5rem;
+                display: -webkit-box;
+                display: flex;
+                -webkit-box-orient: horizontal;
+                flex-direction: row;
+                -webkit-box-align: center;
+                align-items: center;
+            }
+            .profile_section img {
+                object-fit: cover;
+                border-radius: 100px;
+            }
+            .profile_section .text_section {
+                display: -webkit-box;
+                display: flex;
+                -webkit-box-orient: vertical;
+                flex-direction: column;
+                -webkit-box-align: start;
+                align-items: flex-start;
+                align-content: flex-start;
+                -webkit-box-pack: center;
+                justify-content: center;
+            }
+            .profile_section .text_section span {
+                display: block;
+            }
+            .logo {
+                max-height: 80px;
+                width: auto;
+            }
+        </style>
+    </head>
+    <body t-attf-style="background-image: url('data:image/png;base64,{{background}}');">
+        <div class="center_column">
+            <div class="title">
+                <h1 class="header" t-out="header" t-att-style="'color: %s;' % header_color if header_color else ''"></h1>
+                <h2 class="subheader" t-out="subheader" t-att-style="'color: %s;' % subheader_color if subheader_color else ''"></h2>
+            </div>
+            <div class="white rounded_button" t-if="button">
+                <h1 t-out="button" t-att-style="'color: %s;' % button_color if button_color else ''">button text</h1>
+            </div>
+        </div>
+        <div class="footer">
+            <div class="profile_section">
+                <t t-if="image_1">
+                <img
+                    t-attf-src="data:image/png;base64,{{image_1}}"
+                    alt="Profile Picture"
+                    width="128px"
+                    height="128px"
+                />
+                <div class="text_section" t-if="section_1">
+                    <span t-out="section_1" t-att-style="'color: {%s};' % section_1_color if section_1_color else ''"/>
+                    <span t-out="subsection_1" t-att-style="'color: {%s};' % subsection_1_color if subsection_1_color else ''"/>
+                </div>
+                </t>
+            </div>
+            <img
+                t-attf-src="data:image/png;base64,{{image_2}}"
+                alt="Profile Picture"
+                height="auto"
+                class="logo"
+                t-if="image_2"
+            />
+        </div>
+    </body>
+</html>
+        </field>
+    </record>
+    <record id="snshare_template_2" model="snshare.template">
+        <field name="name">Base Template 2</field>
+        <field name="body" type="html">
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <style>
+            body {
+                @charset "UTF-8";
+                padding: 80px;
+                font-family: sans-serif, "Noto Color Emoji";
+                font-size: 2em;
+                background: #161315;
+                color: white;
+                display: -webkit-box;
+                display: flex;
+                -webkit-box-orient: vertical;
+                flex-direction: column;
+                -webkit-box-pack: justify;
+                justify-content: space-between;
+                -webkit-box-align: center;
+                align-items: center;
+            }
+            .title {
+                line-height: 4rem;
+            }
+            .header, .subheader, .rounded_button h1 {
+                display: -webkit-box;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+            }
+            .header, .subheader, .rounded_button h1 {
+                margin: 0.1em;
+            }
+            .header {
+                -webkit-line-clamp: 2;
+                max-height: 8.53rem;
+            }
+            .subheader, .rounded_button h1{
+                -webkit-line-clamp: 1;
+                max-height: 5.5rem;
+            }
+            .rounded_button {
+                text-align: center;
+                width: fit-content;
+                max-height: 6rem;
+                min-width: 50%;
+                max-width: 70%;
+                padding: 0.2rem 1rem;
+                border-radius: 100px;
+            }
+            .white {
+                background: white; color: black;
+            }
+            .footer {
+                height: 30%;
+                width: 100%;
+                display: -webkit-box;
+                display: flex;
+                -webkit-box-orient: horizontal;
+                flex-direction: row;
+                -webkit-box-align: center;
+                align-items: center;
+                -webkit-box-pack: justify;
+                justify-content: space-between;
+            }
+            .footer div {
+                height: 100%;
+            }
+            .profile_section {
+                font-size: 2.5rem;
+                display: -webkit-box;
+                display: flex;
+                -webkit-box-orient: horizontal;
+                flex-direction: row;
+                -webkit-box-align: center;
+                align-items: center;
+            }
+            .profile_section img {
+                object-fit: cover;
+                border-radius: 100px;
+            }
+            .profile_section .text_section {
+                display: -webkit-box;
+                display: flex;
+                -webkit-box-orient: vertical;
+                flex-direction: column;
+                -webkit-box-align: start;
+                align-items: flex-start;
+                align-content: flex-start;
+                -webkit-box-pack: center;
+                justify-content: center;
+            }
+            .profile_section .text_section span {
+                display: block;
+            }
+            .logo_line {
+                width: 100%;
+                display: -webkit-box;
+                display: flex;
+                -webkit-box-orient: horizontal;
+                flex-direction: row;
+                -webkit-box-align: center;
+                align-items: center;
+                align-content: center;
+                -webkit-box-pack: end;
+                justify-content: flex-end;
+            }
+            .logo {
+                margin: 0.1rem;
+                align-self: flex-end;
+                max-height: 80px;
+                width: auto;
+            }
+        </style>
+    </head>
+    <body t-attf-style="background-image: url('data:image/png;base64,{{background}}');">
+        <div class="logo_line">
+            <img
+                t-attf-src="data:image/png;base64,{{image_2}}"
+                alt="Profile Picture"
+                class="logo"
+                t-if="image_2"
+            />
+        </div>
+        <div class="title">
+            <h1 class="header" t-out="header" t-att-style="'color: %s;' % header_color if header_color else ''"></h1>
+            <h2 class="subheader" t-out="subheader" t-att-style="'color: %s;' % subheader_color if subheader_color else ''"></h2>
+        </div>
+        <div class="footer">
+            <div class="profile_section">
+                <t t-if="image_1">
+                <img
+                    t-attf-src="data:image/png;base64,{{image_1}}"
+                    alt="Profile Picture"
+                    width="128px"
+                    height="128px"
+                />
+                <div class="text_section" t-if="section_1">
+                    <span t-out="section_1" t-att-style="'color: {%s};' % section_1_color if section_1_color else ''"/>
+                    <span t-out="subsection_1" t-att-style="'color: {%s};' % subsection_1_color if subsection_1_color else ''"/>
+                </div>
+                </t>
+            </div>
+
+            <div class="white rounded_button" t-if="button">
+                <h1 t-out="button" t-att-style="'color: %s;' % button_color if button_color else ''">button text</h1>
+            </div>
+        </div>
+    </body>
+</html>
+        </field>
+    </record>
+
+    <record id="snshare_template_group_1" model="snshare.template.group">
+        <field name="name">Base Templates</field>
+        <field name="template_ids" eval="[Command.link(snshare_template_1), Command.link(snshare_template_2)]"/>
+    </record>
+</data></odoo>

@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<odoo><data>
+    <record model="ir.ui.view" id="view_share_template_form">
+        <field name="name">snshare.template.form</field>
+        <field name="model">snshare.template</field>
+        <field name="arch" type="xml">
+            <form string="Share Template">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="template_group_id"/>
+                            <field name="body"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+    <record model="ir.actions.act_window" id="action_snshare_template">
+        <field name="name">Share Template</field>
+        <field name="res_model">snshare.template</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+</data></odoo>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <menuitem name="Social Share"
+        id="snshare_menu_main"
+        web_icon="social_share,static/description/icon.png"
+        sequence="270"/>
+
+    <menuitem name="Campaigns"
+        id="snshare_message_menu"
+        parent="snshare_menu_main"
+        sequence="0"
+        action="action_snshare_campaign"
+        groups="social_share.group_snshare_user"
+    />
+
+    <menuitem name="Configuration"
+        id="snshare_configuration_menu"
+        parent="snshare_menu_main"
+        groups="social_share.group_snshare_manager,base.group_no_one"
+        sequence="10"
+    />
+
+    <menuitem name="Templates"
+        id="snshare_template_menu"
+        parent="snshare_configuration_menu"
+        groups="social_share.group_snshare_manager,base.group_no_one"
+        action="action_snshare_template"
+    />
+
+
+</odoo>
