@@ -131,7 +131,7 @@
                                                 <field name="rating_status" widget="radio" />
                                                 <div  attrs="{'required': [('rating_status','=','periodic')], 'invisible': [('rating_status','!=','periodic')]}">
                                                     <label for="rating_status_period"/>
-                                                    <field name="rating_status_period"/>
+                                                    <field class="mx-3 w-auto" name="rating_status_period"/>
                                                 </div>
                                                 <div class="content-group">
                                                     <div class="mt8">
