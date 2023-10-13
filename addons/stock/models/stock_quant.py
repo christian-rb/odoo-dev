@@ -391,14 +391,16 @@ class StockQuant(models.Model):
             'path': 'inventory',
             'context': ctx,
             'domain': [('location_id.usage', 'in', ['internal', 'transit'])],
-            'help': """
+            'help': _('''
                 <p class="o_view_nocontent_smiling_face">
-                    {}
-                </p><p>
-                    {} <span class="fa fa-long-arrow-right"/> {}</p>
-                """.format(_('Your stock is currently empty'),
-                           _('Press the CREATE button to define quantity for each product in your stock or import them from a spreadsheet throughout Favorites'),
-                           _('Import')),
+                    Your stock is currently empty
+                </p>
+                <p>
+                    Press the NEW button to define quantity for each product in your stock or import them from a spreadsheet through 
+                    <span class="fa fa-cog"/> <span class="fa fa-long-arrow-right"/> 
+                    Import Records
+                </p>
+            ''')
         }
         return action
 
@@ -1284,7 +1286,10 @@ class StockQuant(models.Model):
 
         form_view = self.env.ref('stock.view_stock_quant_form_editable').id
         if self.env.context.get('inventory_mode') and self.env.user.has_group('stock.group_stock_manager'):
-            action['view_id'] = self.env.ref('stock.view_stock_quant_tree_editable').id
+            if self.env.context.get('default_detailed_type', False):
+                action['view_id'] = self.env.ref('stock.view_stock_quant_tree_inventory_editable_update_qty').id
+            else:
+                action['view_id'] = self.env.ref('stock.view_stock_quant_tree_editable').id
         else:
             action['view_id'] = self.env.ref('stock.view_stock_quant_tree').id
         action.update({
