@@ -1,13 +1,4 @@
 .s_dynamic {
-  .carousel-control-prev, .carousel-control-next {
-    position: absolute;
-    width: 4rem;
-
-    > span.fa {
-      color: map-get($grays, '700');
-      background: radial-gradient($white 50%, transparent 50%);
-    }
-  }
   .dynamic_snippet_template .card-footer a, .dynamic_snippet_template .card-footer button, .o_dynamic_snippet_btn_wrapper {
     z-index: 2;
   }
@@ -21,6 +12,15 @@
   .s_dynamic_snippet_arrow_bottom {
     > .carousel-control-prev, .carousel-control-next {
       position: relative;
+    }
+  }
+
+  &.s_dynamic_snippet_carousel.s_blog_post_big_picture .s_blog_posts_post_cover {
+    @include media-breakpoint-up(sm) {
+      --aspect-ratio: 50%;
+    }
+    @include media-breakpoint-up(lg) {
+      --aspect-ratio: 100%;
     }
   }
 }
