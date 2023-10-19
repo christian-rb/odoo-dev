@@ -3375,11 +3375,17 @@ export class OdooEditor extends EventTarget {
                 this.historyRollback();
                 ev.preventDefault();
                 this._applyCommand('oDeleteForward');
-            } else if (ev.inputType === 'insertParagraph' || isChromeInsertParagraph) {
+            } else if (['insertParagraph', 'insertLineBreak'].includes(ev.inputType) || isChromeInsertParagraph) {
                 this._compositionStep();
                 this.historyRollback();
                 ev.preventDefault();
-                if (this._applyCommand('oEnter') === UNBREAKABLE_ROLLBACK_CODE) {
+                const anchorTD = closestElement(newSelection.anchorNode, '.o_selected_td');
+                const focusTD = closestElement(newSelection.focusNode, '.o_selected_td');
+                if (anchorTD && focusTD && closestElement(anchorTD, 'table') === closestElement(focusTD, 'table')) {
+                    this.deselectTable();
+                    setSelection(anchorTD.firstChild, 0, anchorTD.lastChild, nodeSize(anchorTD.lastChild));
+                }
+                if (ev.inputType === 'insertLineBreak' || this._applyCommand('oEnter') === UNBREAKABLE_ROLLBACK_CODE) {
                     this._applyCommand('oShiftEnter');
                 }
             } else if (['insertText', 'insertCompositionText'].includes(ev.inputType)) {
@@ -3746,9 +3752,6 @@ export class OdooEditor extends EventTarget {
             }
             ev.preventDefault();
             ev.stopPropagation();
-        } else if (ev.shiftKey && ev.key === "Enter") {
-            ev.preventDefault();
-            this._applyCommand('oShiftEnter');
         } else if (IS_KEYBOARD_EVENT_UNDO(ev)) {
             // Ctrl-Z
             ev.preventDefault();
