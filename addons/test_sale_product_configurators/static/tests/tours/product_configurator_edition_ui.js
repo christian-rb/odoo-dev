@@ -26,9 +26,9 @@ registry.category("web_tour.tours").add('sale_product_configurator_edition_tour'
 }, {
     trigger: 'ul.ui-autocomplete a:contains("Customizable Desk (TEST)")',
 }, {
-    trigger: 'tr:has(div[name="o_sale_product_configurator_name"]:contains("Customizable Desk")) label:contains("Aluminium")',
+    trigger: 'tr:has(div[name="o_product_configurator_name"]:contains("Customizable Desk")) label:contains("Aluminium")',
 }, {
-    trigger: 'tr:has(div[name="o_sale_product_configurator_name"]:contains("Customizable Desk (TEST) (Aluminium, White)"))',
+    trigger: 'tr:has(div[name="o_product_configurator_name"]:contains("Customizable Desk (TEST) (Aluminium, White)"))',
     isCheck: true,
 }, {
     trigger: 'button:contains(Confirm)',
@@ -41,20 +41,20 @@ registry.category("web_tour.tours").add('sale_product_configurator_edition_tour'
 }, {
     trigger: '.fa-pencil',
 }, {
-    trigger: 'table.o_sale_product_configurator_table tr:has(td>div[name="o_sale_product_configurator_name"] h5:contains("Customizable Desk")) td>div[name="ptal"]:has(div>label:contains("Legs")) label:has(span:contains("Aluminium")) ~ input:checked',
+    trigger: 'table.o_product_configurator_table tr:has(td>div[name="o_product_configurator_name"] h5:contains("Customizable Desk")) td>div[name="ptal"]:has(div>label:contains("Legs")) label:has(span:contains("Aluminium")) ~ input:checked',
     isCheck: true, // check updated legs
 }, {
-    trigger: 'table.o_sale_product_configurator_table tr:has(td>div[name="o_sale_product_configurator_name"] h5:contains("Customizable Desk")) td[name="price"] h5:contains("800.40")',
+    trigger: 'table.o_product_configurator_table tr:has(td>div[name="o_product_configurator_name"] h5:contains("Customizable Desk")) td[name="price"] h5:contains("800.40")',
     isCheck: true, // check updated price
 }, {
-    trigger: 'table.o_sale_product_configurator_table tr:has(td>div[name="o_sale_product_configurator_name"] h5:contains("Customizable Desk")) td>div[name="ptal"]:has(div>label:contains("Legs")) label:has(span:contains("Custom")) ~ input',
+    trigger: 'table.o_product_configurator_table tr:has(td>div[name="o_product_configurator_name"] h5:contains("Customizable Desk")) td>div[name="ptal"]:has(div>label:contains("Legs")) label:has(span:contains("Custom")) ~ input',
 }, {
-    trigger: 'table.o_sale_product_configurator_table tr:has(td>div[name="o_sale_product_configurator_name"] h5:contains("Customizable Desk")) td>div[name="ptal"]:has(div>label:contains("Legs")) input[type="text"]',
+    trigger: 'table.o_product_configurator_table tr:has(td>div[name="o_product_configurator_name"] h5:contains("Customizable Desk")) td>div[name="ptal"]:has(div>label:contains("Legs")) input[type="text"]',
     run: 'text nice custom value'
 }, {
-    trigger: 'tr:has(div[name="o_sale_product_configurator_name"]:contains("Customizable Desk")) label[style="background-color:#000000"] input',
+    trigger: 'tr:has(div[name="o_product_configurator_name"]:contains("Customizable Desk")) label[style="background-color:#000000"] input',
 }, {
-    trigger: 'div[name="o_sale_product_configurator_name"]:contains("Customizable Desk (TEST) (Custom, Black)")',
+    trigger: 'div[name="o_product_configurator_name"]:contains("Customizable Desk (TEST) (Custom, Black)")',
     isCheck: true, // used to sync with server
 }, {
     trigger: 'button:contains(Confirm)',
@@ -83,7 +83,7 @@ registry.category("web_tour.tours").add('sale_product_configurator_edition_tour'
 }, {
     trigger: '.fa-pencil',
 }, {
-    trigger: 'table.o_sale_product_configurator_table tr:has(td>div[name="o_sale_product_configurator_name"] h5:contains("Customizable Desk")) td>div[name="ptal"]:has(div>label:contains("Legs")) label:has(span:contains("Steel")) ~ input',
+    trigger: 'table.o_product_configurator_table tr:has(td>div[name="o_product_configurator_name"] h5:contains("Customizable Desk")) td>div[name="ptal"]:has(div>label:contains("Legs")) label:has(span:contains("Steel")) ~ input',
 },
     configuratorTourUtils.assertProductNameContains("Customizable Desk (TEST) (Steel, Black)"),
     configuratorTourUtils.increaseProductQuantity("Customizable Desk"),

@@ -26,7 +26,7 @@ registry.category("web_tour.tours").add('event_sale_with_product_configurator_to
 }, {
     trigger: 'ul.ui-autocomplete a:contains("Registration Event (TEST variants)")',
 }, {
-    trigger: 'tr:has(div[name="o_sale_product_configurator_name"]:contains("Memorabilia")) button:has(i.fa-plus)',
+    trigger: 'tr:has(div[name="o_product_configurator_name"]:contains("Memorabilia")) button:has(i.fa-plus)',
 }, {
     trigger: 'button:contains(Confirm)',
 }, {
@@ -55,9 +55,9 @@ registry.category("web_tour.tours").add('event_sale_with_product_configurator_to
 }, {
     trigger: 'ul.ui-autocomplete a:contains("Registration Event (TEST variants)")',
 }, {
-    trigger: 'tr:has(div[name="o_sale_product_configurator_name"]:contains("Registration Event (TEST variants)")) label:contains("Adult")',
+    trigger: 'tr:has(div[name="o_product_configurator_name"]:contains("Registration Event (TEST variants)")) label:contains("Adult")',
 }, {
-    trigger: 'tr:has(div[name="o_sale_product_configurator_name"]:contains("Registration Event (TEST variants)")) .o_sale_product_configurator_qty input',
+    trigger: 'tr:has(div[name="o_product_configurator_name"]:contains("Registration Event (TEST variants)")) .o_product_configurator_qty input',
     run: 'text 5',
 },
     configuratorTourUtils.assertPriceTotal("150.00"),
@@ -89,7 +89,7 @@ registry.category("web_tour.tours").add('event_sale_with_product_configurator_to
 }, {
     trigger: 'ul.ui-autocomplete a:contains("Registration Event (TEST variants)")',
 }, {
-    trigger: 'tr:has(div[name="o_sale_product_configurator_name"]:contains("Registration Event (TEST variants)")) label:contains("VIP")',
+    trigger: 'tr:has(div[name="o_product_configurator_name"]:contains("Registration Event (TEST variants)")) label:contains("VIP")',
 },
     configuratorTourUtils.assertPriceTotal(60.00),
 {

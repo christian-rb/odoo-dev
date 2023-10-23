@@ -53,7 +53,6 @@ class TestMrpCommon(common2.TestStockCommon):
     @classmethod
     def setUpClass(cls):
         super(TestMrpCommon, cls).setUpClass()
-
         (
             cls.product_4,
             cls.product_5,
@@ -91,7 +90,7 @@ class TestMrpCommon(common2.TestStockCommon):
             login='gary',
             email='g.g@example.com',
             notification_type='inbox',
-            groups='mrp.group_mrp_manager, stock.group_stock_user, mrp.group_mrp_byproducts, uom.group_uom',
+            groups='mrp.group_mrp_manager, stock.group_stock_user, mrp.group_mrp_byproducts, uom.group_uom, mrp.group_mrp_configurator',
         )
         # Both groups below are required to make fields `product_uom_id` and
         # `workorder_ids` to be visible in the view of `mrp.production`. The
