@@ -26,7 +26,7 @@ class MrpProduction(models.Model):
     _name = 'mrp.production'
     _description = 'Production Order'
     _date_name = 'date_start'
-    _inherit = ['mail.thread', 'mail.activity.mixin']
+    _inherit = ['mail.thread', 'mail.activity.mixin', 'product.description.mixin']
     _order = 'priority desc, date_start asc,id'
 
     @api.model
@@ -59,11 +59,9 @@ class MrpProduction(models.Model):
         help="Reference of the document that generated this production order request.")
 
     product_id = fields.Many2one(
-        'product.product', 'Product',
         domain="[('type', 'in', ['product', 'consu'])]",
         compute='_compute_product_id', store=True, copy=True, precompute=True,
         readonly=False, required=True, check_company=True)
-    product_variant_attributes = fields.Many2many('product.template.attribute.value', related='product_id.product_template_attribute_value_ids')
     workcenter_id = fields.Many2one('mrp.workcenter', store=False)  # Only used for search in view_mrp_production_filter
     product_tracking = fields.Selection(related='product_id.tracking')
     product_tmpl_id = fields.Many2one('product.template', 'Product Template', related='product_id.product_tmpl_id')
@@ -246,6 +244,12 @@ class MrpProduction(models.Model):
     show_produce = fields.Boolean(compute='_compute_show_produce', help='Technical field to check if produce button can be shown')
     show_produce_all = fields.Boolean(compute='_compute_show_produce', help='Technical field to check if produce all button can be shown')
     is_outdated_bom = fields.Boolean("Outdated BoM", help="The BoM has been updated since creation of the MO")
+    product_custom_attribute_value_ids = fields.One2many(
+        'product.attribute.custom.value', 'res_id',
+        string="Custom Values",
+        compute='_compute_custom_attribute_values',
+        store=True, readonly=False, precompute=True, copy=True,
+        domain=[('res_model', '=', 'mrp.production')])
 
     _sql_constraints = [
         ('name_uniq', 'unique(name, company_id)', 'Reference must be unique per Company!'),
