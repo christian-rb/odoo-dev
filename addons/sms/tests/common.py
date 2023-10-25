@@ -183,7 +183,8 @@ class SMSCase(MockSMS):
         self.assertEqual(self.env['mail.notification'].search(base_domain), self.env['mail.notification'])
         self.assertEqual(self._sms, [])
 
-    def assertSMSNotification(self, recipients_info, content, messages=None, check_sms=True, sent_unlink=False):
+    def assertSMSNotification(self, recipients_info, content, messages=None, check_sms=True, sent_unlink=False,
+                              mail_message_values=None, from_text=False):
         """ Check content of notifications.
 
           :param recipients_info: list[{
@@ -192,6 +193,16 @@ class SMSCase(MockSMS):
             'state': ready / sent / exception / canceled (sent by default),
             'failure_type': optional: sms_number_missing / sms_number_format / sms_credit / sms_server
             }, { ... }]
+          :param content: SMS content
+          :param mail_message_values: dictionary of expected mail message fields values
+          :param from_text: Set to true if sms was sent from a raw text input (composer).
+            If it was however sent from an HTML source content, leave False.
+            The differences are that
+            * an url added in raw text should be converted to a link in
+            the chatter and the link markup not be present at all in the sms,
+            * If an url is added in HTML content
+              * outside a link tag, it stays as is (not converted to a link (tracker), not clickable in the chatter).
+              * inside a link tag, we need to keep the link in the chatter, the sms, with the associated label
         """
         partners = self.env['res.partner'].concat(*list(p['partner'] for p in recipients_info if p.get('partner')))
         numbers = [p['number'] for p in recipients_info if p.get('number')]
@@ -218,7 +229,8 @@ class SMSCase(MockSMS):
 
             notif = notifications.filtered(lambda n: n.res_partner_id == partner and n.sms_number == number and n.notification_status == state)
             self.assertTrue(notif, 'SMS: not found notification for %s (number: %s, state: %s)' % (partner, number, state))
-
+            for field_name, expected_value in (mail_message_values or {}).items():
+                self.assertEqual(notif.mail_message_id[field_name], expected_value)
             if state not in ('sent', 'ready', 'canceled'):
                 self.assertEqual(notif.failure_type, recipient_info['failure_type'])
             if check_sms:
@@ -238,7 +250,11 @@ class SMSCase(MockSMS):
 
         if messages is not None:
             for message in messages:
-                self.assertEqual(content, tools.html2plaintext(message.body).rstrip('\n'))
+                if from_text:
+                    with patch("odoo.tools.mail.tags_to_remove", ["html", "body", "a"]):
+                        self.assertEqual(content, tools.html2plaintext(tools.html_sanitize(message.body).rstrip('\n')))
+                else:
+                    self.assertEqual(content, tools.html2plaintext(tools.html_sanitize(message.body).rstrip('\n')))
 
     def assertSMSLogged(self, records, body):
         for record in records:
