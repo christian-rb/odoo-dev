@@ -14,6 +14,7 @@ from . import test_account_account
 from . import test_account_tax
 from . import test_account_analytic
 from . import test_account_payment
+from . import test_account_reimbursement
 from . import test_account_bank_statement
 from . import test_account_move_partner_count
 from . import test_account_move_rounding
