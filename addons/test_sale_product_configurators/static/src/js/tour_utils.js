@@ -9,7 +9,7 @@ function addOptionalProduct(productName) {
 
 function increaseProductQuantity(productName) {
     return {
-        trigger: `table.o_sale_product_configurator_table tr:has(td>div[name="o_sale_product_configurator_name"] h5:contains("${productName}")) td.o_sale_product_configurator_qty div>button:has(i.fa-plus)`,
+        trigger: `table.o_product_configurator_table tr:has(td>div[name="o_product_configurator_name"] h5:contains("${productName}")) td.o_product_configurator_qty div>button:has(i.fa-plus)`,
         content: `Increase quantity of ${productName}`,
     };
 }
@@ -18,22 +18,22 @@ function selectAttribute(productName, attributeName, attributeValue, attributeTy
     switch (attributeType) {
         case 'color':
             return {
-                trigger: `table.o_sale_product_configurator_table tr:has(td>div[name="o_sale_product_configurator_name"] h5:contains("${productName}")) td>div[name="ptal"]:has(div>label:contains("${attributeName}")) label[title="${attributeValue}"]`,
+                trigger: `table.o_product_configurator_table tr:has(td>div[name="o_product_configurator_name"] h5:contains("${productName}")) td>div[name="ptal"]:has(div>label:contains("${attributeName}")) label[title="${attributeValue}"]`,
                 content: `Select ${attributeValue} for ${productName} ${attributeName}`,
             };
         case 'multi':
         case 'pills':
         case 'radio':
             return {
-                trigger: `table.o_sale_product_configurator_table tr:has(td>div[name="o_sale_product_configurator_name"] h5:contains("${productName}")) td>div[name="ptal"]:has(div>label:contains("${attributeName}")) span:contains("${attributeValue}")`,
+                trigger: `table.o_product_configurator_table tr:has(td>div[name="o_product_configurator_name"] h5:contains("${productName}")) td>div[name="ptal"]:has(div>label:contains("${attributeName}")) span:contains("${attributeValue}")`,
                 content: `Select ${attributeValue} for ${productName} ${attributeName}`,
             };
         case 'select':
             return {
-                trigger: `table.o_sale_product_configurator_table tr:has(td>div[name="o_sale_product_configurator_name"] h5:contains("${productName}")) td>div[name="ptal"]:has(div>label:contains("${attributeName}"))`,
+                trigger: `table.o_product_configurator_table tr:has(td>div[name="o_product_configurator_name"] h5:contains("${productName}")) td>div[name="ptal"]:has(div>label:contains("${attributeName}"))`,
                 content: `Select ${attributeValue} for ${productName} ${attributeName}`,
                 run: () => {
-                    let $selectElement = $(`table.o_sale_product_configurator_table tr:has(td>div[name="o_sale_product_configurator_name"] h5:contains("${productName}")) td>div[name="ptal"]:has(div>label:contains("${attributeName}")) select`)
+                    let $selectElement = $(`table.o_product_configurator_table tr:has(td>div[name="o_product_configurator_name"] h5:contains("${productName}")) td>div[name="ptal"]:has(div>label:contains("${attributeName}")) select`)
                     let inputValue = $selectElement.children(`option:contains(${attributeValue})`).val();
                     $selectElement.val(inputValue);
                     $selectElement[0].dispatchEvent(new Event("change"));
