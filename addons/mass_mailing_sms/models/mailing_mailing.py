@@ -3,6 +3,8 @@
 
 import logging
 
+from urllib.parse import urljoin
+
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 from odoo.osv import expression
@@ -323,6 +325,46 @@ class Mailing(models.Model):
             res[mailing.id] = body
         res.update(super(Mailing, self - sms_mailings).convert_links())
         return res
+
+    def get_replacements_placeholders(self):
+        """Get placeholders for replaced links in sms widget for accurate computation of sms counts.
+
+        Reminders and assumptions:
+          * Links wille be transformed to the format "[base_url]/r/[link_tracker_code]/s/[sms_id]".
+          * unsubscribe is formatted as: "\nSTOP SMS : [base_url]/sms/[mailing_id]/[trace_code]".
+
+        :return: Character counts used for links, formatted as `{link: str, unsubscribe: str}`.
+        """
+        if self:
+            self.ensure_one()
+
+        self.check_access_rights('write')
+
+        query = '''
+            SELECT COALESCE(max(id), 0) 
+              FROM sms_sms 
+         UNION ALL
+            SELECT code_length 
+              FROM ( SELECT COALESCE(LENGTH(code), 3) AS code_length
+                       FROM link_tracker_code 
+                   ORDER BY LENGTH(code) DESC LIMIT 1) ltc
+        '''
+        if not self.id:
+            query += 'UNION ALL SELECT COALESCE(max(id), 0) FROM mailing_mailing'
+
+        self.env.cr.execute(query)
+        results = self.env.cr.fetchall()
+        sms_id = results[0][0]
+        max_sms_id_length = max(len(str(sms_id)), 5)  # Assumes a mailing won't be more than 100k sms at once
+        code_length = results[1][0] + 1
+        mailing_id_placeholder = 'x' * len(str(self.id or results[2][0] + 1))
+
+        base_url = self.get_base_url()
+        opt_out_url = urljoin(base_url, f"sms/{mailing_id_placeholder}/{'x' * self.env['mailing.trace'].CODE_SIZE}")
+        return {
+            'link': urljoin(base_url, f"r/{'x' * code_length}/s/{'x' * max_sms_id_length}"),
+            'unsubscribe': f"\n{self.env['sms.composer']._get_unsubscribe_info(opt_out_url)}"
+        }
 
     # ------------------------------------------------------
     # A/B Test Override
