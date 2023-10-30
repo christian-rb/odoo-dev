@@ -11,6 +11,7 @@ from odoo.addons.sale_project.tests.test_project_profitability import TestProjec
 @tagged('-at_install', 'post_install')
 class TestProjectSaleExpenseProfitability(TestProjectProfitabilityCommon, TestProjectHrExpenseProfitabilityCommon, TestSaleCommon):
     def test_project_profitability(self):
+        self.maxDiff = None
         expense = self.env['hr.expense'].create({
             'name': 'expense',
             'product_id': self.company_data['product_order_sales_price'].id,

@@ -1335,9 +1335,9 @@ class HrExpenseSheet(models.Model):
 
     def _do_reverse_moves(self):
         draft_moves = self.account_move_id.filtered(lambda _move: _move.state == 'draft')
-        draft_moves.unlink()
         moves = self.account_move_id - draft_moves
         moves._reverse_moves(default_values_list=[{'invoice_date': fields.Date.context_today(move), 'ref': False} for move in moves], cancel=True)
+        draft_moves.unlink()
 
     def _prepare_payment_vals(self):
         self.ensure_one()
