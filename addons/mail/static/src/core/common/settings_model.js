@@ -27,6 +27,22 @@ export class Settings extends Record {
     push_to_talk_key;
     use_push_to_talk = false;
     voice_active_duration = 0;
+    supportedResolutions = [
+        { label: "360p", value: 360 },
+        { label: "480p", value: 480 },
+        { label: "720p", value: 720 },
+        { label: "1080p", value: 1080 },
+    ];
+    supportedFramerates = [
+        { label: "1 FPS", value: 1 },
+        { label: "15 FPS", value: 15 },
+        { label: "30 FPS", value: 30 },
+        { label: "60 FPS", value: 60 },
+    ];
+    cameraFramerate = 30;
+    cameraResolution = 720;
+    screenFramerate = 30;
+    screenResolution = 1080;
     useBlur = false;
     volumeSettingsTimeouts = new Map();
     /**
@@ -45,6 +61,28 @@ export class Settings extends Record {
             constraints.deviceId = this.audioInputDeviceId;
         }
         return constraints;
+    }
+
+    get cameraConstraints() {
+        return {
+            height: { ideal: this.cameraResolution, max: this.cameraResolution },
+            aspectRatio: 16 / 9,
+            frameRate: {
+                ideal: this.cameraFramerate,
+                max: this.cameraFramerate,
+            },
+        };
+    }
+
+    get screenConstraints() {
+        return {
+            height: { ideal: this.screenResolution, max: this.screenResolution },
+            aspectRatio: 16 / 9,
+            frameRate: {
+                ideal: this.screenFramerate,
+                max: this.screenFramerate,
+            },
+        };
     }
 
     getVolume(rtcSession) {
@@ -68,6 +106,39 @@ export class Settings extends Record {
         this.audioInputDeviceId = audioInputDeviceId;
         browser.localStorage.setItem("mail_user_setting_audio_input_device_id", audioInputDeviceId);
     }
+
+    /**
+     * @param {number} value
+     */
+    setCameraFramerate(value) {
+        this.cameraFramerate = value;
+        browser.localStorage.setItem("mail_user_setting_camera_framerate", value);
+    }
+
+    /**
+     * @param {number} value
+     */
+    setCameraResolution(value) {
+        this.cameraResolution = value;
+        browser.localStorage.setItem("mail_user_setting_camera_resolution", value);
+    }
+
+    /**
+     * @param {number} value
+     */
+    setScreenFramerate(value) {
+        this.screenFramerate = value;
+        browser.localStorage.setItem("mail_user_setting_screen_framerate", value);
+    }
+
+    /**
+     * @param {number} value
+     */
+    setScreenResolution(value) {
+        this.screenResolution = value;
+        browser.localStorage.setItem("mail_user_setting_screen_resolution", value);
+    }
+
     /**
      * @param {string} value
      */
@@ -191,6 +262,22 @@ export class Settings extends Record {
         this.audioInputDeviceId = browser.localStorage.getItem(
             "mail_user_setting_audio_input_device_id"
         );
+        const cameraFramerateString = browser.localStorage.getItem(
+            "mail_user_setting_camera_framerate"
+        );
+        this.cameraFramerate = Number(cameraFramerateString) || this.cameraFramerate;
+        const cameraResolutionString = browser.localStorage.getItem(
+            "mail_user_setting_camera_resolution"
+        );
+        this.cameraResolution = Number(cameraResolutionString) || this.cameraResolution;
+        const screenFramerateString = browser.localStorage.getItem(
+            "mail_user_setting_screen_framerate"
+        );
+        this.screenFramerate = Number(screenFramerateString) || this.screenFramerate;
+        const screenResolutionString = browser.localStorage.getItem(
+            "mail_user_setting_screen_resolution"
+        );
+        this.screenResolution = Number(screenResolutionString) || this.screenResolution;
     }
     /**
      * @private

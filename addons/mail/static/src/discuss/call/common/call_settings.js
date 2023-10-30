@@ -36,6 +36,15 @@ export class CallSettings extends Component {
         });
     }
 
+    get showHighQualityWarning() {
+        return Boolean(
+            this.store.settings.cameraResolution > 720 ||
+                this.store.settings.cameraFramerate > 30 ||
+                this.store.settings.screenResolution > 720 ||
+                this.store.settings.screenFramerate > 30
+        );
+    }
+
     get pushToTalkKeyText() {
         const { shiftKey, ctrlKey, altKey, key } = this.store.settings.pushToTalkKeyFormat();
         const f = (k, name) => (k ? name : "");
@@ -69,6 +78,22 @@ export class CallSettings extends Component {
 
     onChangeSelectAudioInput(ev) {
         this.store.settings.setAudioInputDevice(ev.target.value);
+    }
+
+    onClickCameraFramerate(value) {
+        this.store.settings.setCameraFramerate(Number(value));
+    }
+
+    onClickCameraResolution(value) {
+        this.store.settings.setCameraResolution(Number(value));
+    }
+
+    onClickScreenFramerate(value) {
+        this.store.settings.setScreenFramerate(Number(value));
+    }
+
+    onClickScreenResolution(value) {
+        this.store.settings.setScreenResolution(Number(value));
     }
 
     onChangePushToTalk() {
@@ -126,6 +151,6 @@ export class CallSettings extends Component {
     }
 
     get title() {
-        return _t("Voice Settings");
+        return _t("Call Settings");
     }
 }

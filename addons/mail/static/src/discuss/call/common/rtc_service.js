@@ -24,22 +24,6 @@ export const CONNECTION_TYPES = { P2P: "p2p", SERVER: "server" };
 const PEER_NOTIFICATION_WAIT_DELAY = 50;
 const RECOVERY_TIMEOUT = 15_000;
 const RECOVERY_DELAY = 3_000;
-const SCREEN_CONFIG = {
-    width: { max: 1920 },
-    height: { max: 1080 },
-    aspectRatio: 16 / 9,
-    frameRate: {
-        max: 24,
-    },
-};
-const CAMERA_CONFIG = {
-    width: { max: 1280 },
-    height: { max: 720 },
-    aspectRatio: 16 / 9,
-    frameRate: {
-        max: 30,
-    },
-};
 const INVALID_ICE_CONNECTION_STATES = new Set(["disconnected", "failed", "closed"]);
 const IS_CLIENT_RTC_COMPATIBLE = Boolean(window.RTCPeerConnection && window.MediaStream);
 const DEFAULT_ICE_SERVERS = [
@@ -163,6 +147,16 @@ export class Rtc {
             sourceScreenStream: null,
         });
         this.blurManager = undefined;
+        onChange(this.store.settings, ["cameraFramerate", "cameraResolution"], () => {
+            this.state.sourceCameraStream?.getTracks().forEach((track) => {
+                track.applyConstraints(this.store.settings.cameraConstraints);
+            });
+        });
+        onChange(this.store.settings, ["screenFramerate", "screenResolution"], () => {
+            this.state.sourceScreenStream?.getTracks().forEach((track) => {
+                track.applyConstraints(this.store.settings.screenConstraints);
+            });
+        });
         onChange(this.store.settings, "useBlur", () => {
             if (this.state.sendCamera) {
                 this.toggleVideo("camera", true);
@@ -1420,7 +1414,7 @@ export class Rtc {
                     sourceStream = this.state.sourceCameraStream;
                 } else {
                     sourceStream = await browser.navigator.mediaDevices.getUserMedia({
-                        video: CAMERA_CONFIG,
+                        video: this.store.settings.cameraConstraints,
                     });
                 }
             }
@@ -1429,7 +1423,7 @@ export class Rtc {
                     sourceStream = this.state.sourceScreenStream;
                 } else {
                     sourceStream = await browser.navigator.mediaDevices.getDisplayMedia({
-                        video: SCREEN_CONFIG,
+                        video: this.store.settings.screenConstraints,
                     });
                 }
                 this.soundEffectsService.play("screen-sharing");
