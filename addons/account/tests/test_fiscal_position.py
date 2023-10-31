@@ -133,9 +133,8 @@ class TestFiscalPosition(common.TransactionCase):
         george.property_account_position_id = self.be_nat
         assert_fp(george, self.be_nat, "Forced position has max precedence")
 
-
     def test_20_fp_one_tax_2m(self):
-
+        self.env.company.country_id = self.be
         self.src_tax = self.env['account.tax'].create({'name': "SRC", 'amount': 0.0})
         self.dst1_tax = self.env['account.tax'].create({'name': "DST1", 'amount': 0.0})
         self.dst2_tax = self.env['account.tax'].create({'name': "DST2", 'amount': 0.0})
