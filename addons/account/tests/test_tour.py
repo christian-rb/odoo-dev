@@ -40,7 +40,6 @@ class TestUi(odoo.tests.HttpCase):
         self.start_tour("/web", 'account_tour', login="admin")
 
     def test_01_account_tax_groups_tour(self):
-        product = self.env.ref('product.product_product_5')
         company_used = self.env.companies.sorted(lambda c: c.id)[0]
         new_tax = self.env['account.tax'].create({
             'name': '10% Tour Tax',
@@ -50,6 +49,16 @@ class TestUi(odoo.tests.HttpCase):
             'company_id': company_used.id,
             'country_id': company_used.account_fiscal_country_id.id
         })
-        product.supplier_taxes_id = new_tax
+        self.env['product.product'].create(
+            {
+                'name': 'This beautiful product',
+                'standard_price': 600.0,
+                'supplier_taxes_id': new_tax
+            }
+        )
+        self.env['res.partner'].create({
+            'name': 'My best customer',
+
+        })
 
         self.start_tour("/web", 'account_tax_group', login="admin")
