@@ -5,14 +5,16 @@ import base64
 import socket
 
 from itertools import product
+from freezegun import freeze_time
 from unittest.mock import patch
 from werkzeug.urls import url_parse, url_decode
 
 from odoo.addons.mail.models.mail_message import Message
 from odoo.addons.mail.tests.common import MailCommon
+from odoo.addons.test_mail.models.test_mail_corner_case_models import MailTestMultiCompanyWithActivity
 from odoo.addons.test_mail.tests.common import TestRecipients
 from odoo.exceptions import AccessError
-from odoo.tests import tagged, users, HttpCase
+from odoo.tests import tagged, users, HttpCase, JsonRpcException
 from odoo.tools import mute_logger
 
 
@@ -253,62 +255,156 @@ class TestMultiCompanySetup(TestMailMCCommon, HttpCase):
                 subtype_xmlid='mail.mt_comment',
             )
 
+    @freeze_time('2023-11-22 08:00:00')
     @users("admin")
     def test_systray_get_activities(self):
-        self.env["mail.activity"].search([]).unlink()
-        test_records = self.env["mail.test.multi.company.with.activity"].create(
+        original_filter_access_rules = MailTestMultiCompanyWithActivity._filter_access_rules
+
+        def _mock_filter_access_rules(*args, **kwargs):
+            """ To avoid creating a new test model not accessible by employee user, we modify the access rules. """
+            filtered_records = original_filter_access_rules(*args, **kwargs)
+            if filtered_records.env.uid == self.user_admin.id:
+                return filtered_records
+            return filtered_records.filtered(lambda r: not r.sudo().name.startswith('TestAdmin'))
+
+        user_admin = self.user_admin.with_user(self.user_admin)
+        user_employee = self.user_employee.with_user(self.user_employee)
+        company_1_all = user_admin.company_id
+        company_2_admin_only = self.company_2
+        test_records_all = self.env["mail.test.multi.company.with.activity"].create(
             [
-                {"name": "Test1", "company_id": self.user_admin.company_id.id},
-                {"name": "Test2", "company_id": self.company_2.id},
+                {"name": "Test1", "company_id": company_1_all.id},
+                {"name": "Test2", "company_id": company_2_admin_only.id},
+                {"name": "TestAdmin1", "company_id": company_1_all.id},
+                {"name": "TestAdmin2", "company_id": company_2_admin_only.id},
+                {"name": "TestAdmin3", "company_id": False},
             ]
         )
-        test_records[0].activity_schedule("test_mail.mail_act_test_todo", user_id=self.user_admin.id)
-        test_records[1].activity_schedule("test_mail.mail_act_test_todo", user_id=self.user_admin.id)
-        self.authenticate(self.user_admin.login, self.user_admin.login)
-        data = self.make_jsonrpc_request("/mail/data", {"systray_get_activities": True})
-        test_activity = next(
-            a for a in data["Store"]["activityGroups"]
-            if a['model'] == 'mail.test.multi.company.with.activity'
-        )
-        self.assertEqual(
-            test_activity,
-            {
-                "icon": "/base/static/description/icon.png",
-                "id": self.env["ir.model"]._get_id("mail.test.multi.company.with.activity"),
-                "model": "mail.test.multi.company.with.activity",
-                "name": "Test Multi Company Mail With Activity",
-                "overdue_count": 0,
-                "planned_count": 0,
-                "today_count": 2,
-                "total_count": 2,
-                "type": "activity",
-                "view_type": "list",
-            }
-        )
-        params = {
-            "systray_get_activities": True,
-            "context": {"allowed_company_ids": [self.company_2.id]},
-        }
-        data = self.make_jsonrpc_request("/mail/data", params)
-        test_activity = next(
-            a for a in data["Store"]["activityGroups"]
-            if a['model'] == 'mail.test.multi.company.with.activity'
-        )
-        self.assertEqual(
-            test_activity,
-            {
-                "icon": "/base/static/description/icon.png",
-                "id": self.env["ir.model"]._get_id("mail.test.multi.company.with.activity"),
-                "model": "mail.test.multi.company.with.activity",
-                "name": "Test Multi Company Mail With Activity",
-                "overdue_count": 0,
-                "planned_count": 0,
-                "today_count": 1,
-                "total_count": 1,
-                "type": "activity",
-                "view_type": "list",
-            }
-        )
+        # Schedule an employee and admin todo activity for each records
+        admin_acts_all = self.env['mail.activity'].concat(*(
+            record.activity_schedule("test_mail.mail_act_test_todo", user_id=user_admin.id)
+            for record in test_records_all
+        ))
+        admin_acts, admin_acts_on_admin_rec = admin_acts_all[:2], admin_acts_all[2:]
+        employee_acts_all = self.env['mail.activity'].concat(*(
+            record.activity_schedule("test_mail.mail_act_test_todo", user_id=user_employee.id)
+            for record in test_records_all
+        ))
+        employee_acts, employee_acts_on_admin_rec = employee_acts_all[:2], employee_acts_all[2:]
+
+        self.assertTrue((company_1_all | company_2_admin_only) <= user_admin.company_ids)
+        self.assertEqual(company_1_all, user_employee.company_ids)
+
+        # We test the outcome of systray_get_activities for different couple of user and allowed companies
+        for description, (user, allowed_company_ids), (expected_other_activities, expected_test_model_activities) in (
+                (
+                        "Admin see only activities of records of allowed companies (company_1).",
+                        (user_admin, company_1_all.ids),
+                        (False, admin_acts[0] + admin_acts_on_admin_rec[0] + admin_acts_on_admin_rec[2]),
+                ),
+                (
+                        "Admin see only activities of records of allowed companies (company_2).",
+                        (user_admin, company_2_admin_only.ids),
+                        (False, admin_acts[1] + admin_acts_on_admin_rec[1] + admin_acts_on_admin_rec[2]),
+                ),
+                (
+                        "Admin see only activities of records of allowed companies (company_1 and company_2).",
+                        (user_admin, (company_1_all | company_2_admin_only).ids),
+                        (False, admin_acts_all),
+                ),
+                (
+                        'Employee see all activities of records of allowed companies (company_1) he has access to, '
+                        'and under "Other activities", see all activities of allowed companies he has not access to'
+                        ' + activities related to record with company False or he has not access to.',
+                        (user_employee, company_1_all.ids),
+                        # Employee has no right on test_records_admin so related activities appears in "other"
+                        # He has no access to company_2 so activity of test_records[1] is also included
+                        (employee_acts[1] + employee_acts_on_admin_rec, employee_acts[0]),
+                ),
+        ):
+            with self.subTest(description=description):
+                self.authenticate(user.login, user.login)
+                with patch.object(MailTestMultiCompanyWithActivity, '_filter_access_rules', autospec=True,
+                                  side_effect=_mock_filter_access_rules):
+                    activity_groups = self.make_jsonrpc_request("/mail/data", {
+                        "systray_get_activities": True,
+                        "context": {"allowed_company_ids": allowed_company_ids}
+                    })["Store"]["activityGroups"]
+                actual_activity_groups_by_model = {ag["model"]: ag for ag in activity_groups if ag["model"]}
+                if expected_other_activities:
+                    other_activities_model_name = 'mail.activity'
+                    self.assertIn(other_activities_model_name, actual_activity_groups_by_model)
+                    actual_activity_group = actual_activity_groups_by_model[other_activities_model_name]
+                    self.assertDictEqual(
+                        {
+                            "type": "activity",
+                            "view_type": "list",
+                            "overdue_count": 0,
+                            "planned_count": 0,
+                            "today_count": len(expected_other_activities),
+                            "total_count": len(expected_other_activities),
+                            "id": self.env["ir.model"]._get_id(other_activities_model_name),
+                            "model": other_activities_model_name,
+                            "name": "Other activities",
+                            "icon": "/mail/static/description/icon.png",
+                            "activity_ids": set(expected_other_activities.ids),
+                        },
+                        {
+                            **actual_activity_group,
+                            # To compare regardless the order
+                            "activity_ids": set(actual_activity_group['activity_ids']),
+                        }
+                    )
+                test_model_name = 'mail.test.multi.company.with.activity'
+                self.assertIn(test_model_name, actual_activity_groups_by_model)
+                self.assertDictEqual(
+                    {
+                        "type": "activity",
+                        "view_type": "list",
+                        "overdue_count": 0,
+                        "planned_count": 0,
+                        "today_count": len(expected_test_model_activities),
+                        "total_count": len(expected_test_model_activities),
+                        "id": self.env["ir.model"]._get_id(test_model_name),
+                        "model": test_model_name,
+                        "name": "Test Multi Company Mail With Activity",
+                        "icon": "/base/static/description/icon.png",
+                    },
+                    actual_activity_groups_by_model[test_model_name])
+                allowed_user_company_records = _mock_filter_access_rules(
+                    (self.env[test_model_name]
+                    ).with_context(allowed_company_ids=allowed_company_ids).with_user(user).search([
+                        ('id', 'in', test_records_all.ids),
+                        ('activity_user_id', '=', user.id),
+                    ]),
+                    'read')
+                self.assertEqual(
+                    (self.env['mail.activity']
+                    ).with_user(user).with_context(allowed_company_ids=allowed_company_ids).search([
+                        ('res_model', '=', test_model_name),
+                        ('res_id', 'in', allowed_user_company_records.ids),
+                        ('user_id', '=', user.id),
+                    ]),
+                    expected_test_model_activities)
+                self.assertEqual(len(allowed_user_company_records), len(expected_test_model_activities),
+                                 'One scheduled activity per record per user')
+        # Employee cannot fetch activities of a company he doesn't belong to
+        self.authenticate(user_employee.login, user_employee.login)
+        with self.assertRaises(JsonRpcException, msg="odoo.exceptions.AccessError"), mute_logger("odoo.http"):
+            self.make_jsonrpc_request("/mail/data", {
+                "systray_get_activities": True,
+                "context": {"allowed_company_ids": company_2_admin_only.ids}})
+        # Activities related to not accessible records are in other activities regardless of the allowed companies
+        self.authenticate(user_admin.login, user_admin.login)
+        with patch.object(MailTestMultiCompanyWithActivity, 'check_access_rights', autospec=True,
+                          side_effect=lambda *args, **kwargs: False):
+            for company in (company_1_all, company_2_admin_only):
+                activity_groups = self.make_jsonrpc_request("/mail/data", {
+                    "systray_get_activities": True,
+                    "context": {"allowed_company_ids": company.ids}
+                })["Store"]["activityGroups"]
+                other_activity_group = next(ag for ag in activity_groups if ag['model'] == 'mail.activity')
+                self.assertEqual(other_activity_group["total_count"], 5)
 
 
 @tagged('-at_install', 'post_install', 'multi_company')

@@ -332,15 +332,24 @@ class Users(models.Model):
             activities_by_record_by_model_name[activity.res_model][record] += activity
         activities_by_model_name = defaultdict(lambda: self.env["mail.activity"])
         for model_name, activities_by_record in activities_by_record_by_model_name.items():
-            if self.env[model_name].check_access_rights('read', raise_exception=False):
-                res_ids = [r.id for r in activities_by_record]
-                allowed_records = self.env[model_name].browse(res_ids)._filter_access_rules('read')
+            res_ids = [r.id for r in activities_by_record]
+            Model = self.env[model_name].with_context(**self.env.context)
+            has_model_access_right = self.env[model_name].check_access_rights('read', raise_exception=False)
+            if has_model_access_right:
+                allowed_records = Model.browse(res_ids)._filter_access_rules('read')
             else:
                 allowed_records = self.env[model_name]
+            unallowed_records = Model.browse(res_ids) - allowed_records
+            user_company_ids = self.env.user.company_ids.ids
+            # We remove from not allowed records, records that the user has access to through others of his companies
+            if (has_model_access_right and unallowed_records and
+                    set(user_company_ids) != set(self.env.context.get('allowed_company_ids'))):
+                unallowed_records -= unallowed_records.with_context(
+                    allowed_company_ids=user_company_ids)._filter_access_rules('read')
             for record, activities in activities_by_record.items():
-                if record not in allowed_records:
+                if record in unallowed_records:
                     activities_by_model_name['mail.activity'] += activities
-                else:
+                elif record in allowed_records:
                     activities_by_model_name[model_name] += activities
         model_ids = [self.env["ir.model"]._get_id(name) for name in activities_by_model_name]
         user_activities = {}
