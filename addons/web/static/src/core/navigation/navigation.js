@@ -116,11 +116,7 @@ class Navigator {
 
         this.hotkeyRemoves = [];
         this.hotkeyService = hotkeyService;
-
-        this.allowedInEditableHotkeys = ["arrowup", "arrowdown", "enter", "tab", "shift+tab"];
-        if (this.options.hotkeys.space) {
-            this.allowedInEditableHotkeys.push("space");
-        }
+        this.bypassEditableProtection = ["arrowup", "arrowdown", "enter", "tab", "shift+tab"];
     }
 
     enable() {
@@ -139,7 +135,7 @@ class Navigator {
                     () => callback(this.currentActiveIndex, this.items),
                     {
                         allowRepeat: true,
-                        bypassEditableProtection: this.allowedInEditableHotkeys.includes(hotkey),
+                        bypassEditableProtection: this.bypassEditableProtection.includes(hotkey),
                     }
                 )
             );
@@ -149,6 +145,7 @@ class Navigator {
         this.targetObserver.observe(this.containerRef.el, {
             childList: true,
             subtree: true,
+            attributes: true,
         });
 
         this.initialFocusElement = document.activeElement;
@@ -191,6 +188,7 @@ class Navigator {
         if (!this.containerRef.el) {
             return;
         }
+        const oldItems = [...this.items];
         this.clearItems();
 
         const elements = [...this.containerRef.el.querySelectorAll(this.options.itemsSelector)];
@@ -202,6 +200,10 @@ class Navigator {
                 setActiveItem: (index, el) => this.setActiveItem(index, el),
             });
         });
+
+        if (oldItems.length != this.items.length && this.currentActiveIndex >= this.items.length) {
+            this.items.at(-1)?.focus();
+        }
     }
 
     setActiveItem(index, item) {
