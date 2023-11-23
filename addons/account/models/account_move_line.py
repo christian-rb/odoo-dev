@@ -415,6 +415,7 @@ class AccountMoveLine(models.Model):
              "associated partner",
     )
     is_refund = fields.Boolean(compute='_compute_is_refund')
+    is_downpayment = fields.Boolean()
 
     _sql_constraints = [
         (
@@ -1180,6 +1181,9 @@ class AccountMoveLine(models.Model):
             'target': 'new',
             'type': 'ir.actions.act_window',
         }
+
+    def _get_order_lines(self):
+        return self.env['account.order.line.mixin']
 
     # -------------------------------------------------------------------------
     # INVERSE METHODS

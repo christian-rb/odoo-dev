@@ -922,7 +922,7 @@ class TestSalePrices(SaleCommon):
         # Same with an included-in-price tax
         order = order.copy()
         line = order.order_line
-        line.tax_id = [Command.create({
+        line.tax_ids = [Command.create({
             'name': 'Super Tax',
             'amount_type': 'percent',
             'amount': 15.0,
@@ -972,7 +972,7 @@ class TestSalePrices(SaleCommon):
         # Same with an included-in-price tax
         order = order.copy()
         line = order.order_line
-        line.tax_id = [Command.create({
+        line.tax_ids = [Command.create({
             'name': 'Super Tax',
             'amount_type': 'percent',
             'amount': 10.0,

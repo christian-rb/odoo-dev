@@ -17,7 +17,7 @@ from odoo.exceptions import UserError, ValidationError
 
 class PurchaseOrder(models.Model):
     _name = "purchase.order"
-    _inherit = ['portal.mixin', 'product.catalog.mixin', 'mail.thread', 'mail.activity.mixin']
+    _inherit = ['portal.mixin', 'product.catalog.mixin', 'mail.thread', 'mail.activity.mixin', 'account.order.mixin']
     _description = "Purchase Order"
     _rec_names_search = ['name', 'partner_ref']
     _order = 'priority desc, id desc'
@@ -55,7 +55,7 @@ class PurchaseOrder(models.Model):
                 continue
 
             if any(
-                not float_is_zero(line.qty_to_invoice, precision_digits=precision)
+                not float_is_zero(line.qty_to_invoice, precision_digits=precision) and not line.is_downpayment
                 for line in order.order_line.filtered(lambda l: not l.display_type)
             ):
                 order.invoice_status = 'to invoice'
@@ -64,7 +64,7 @@ class PurchaseOrder(models.Model):
                     float_is_zero(line.qty_to_invoice, precision_digits=precision)
                     for line in order.order_line.filtered(lambda l: not l.display_type)
                 )
-                and order.invoice_ids
+                and order.order_line.invoice_lines.filtered(lambda aml: not aml.is_downpayment)
             ):
                 order.invoice_status = 'invoiced'
             else:
@@ -110,7 +110,7 @@ class PurchaseOrder(models.Model):
 
     invoice_count = fields.Integer(compute="_compute_invoice", string='Bill Count', copy=False, default=0, store=True)
     invoice_ids = fields.Many2many('account.move', compute="_compute_invoice", string='Bills', copy=False, store=True)
-    invoice_status = fields.Selection([
+    invoice_status = fields.Selection(selection_add=[
         ('no', 'Nothing to Bill'),
         ('to invoice', 'Waiting Bills'),
         ('invoiced', 'Fully Billed'),
@@ -125,7 +125,7 @@ class PurchaseOrder(models.Model):
     amount_tax = fields.Monetary(string='Taxes', store=True, readonly=True, compute='_amount_all')
     amount_total = fields.Monetary(string='Total', store=True, readonly=True, compute='_amount_all')
 
-    fiscal_position_id = fields.Many2one('account.fiscal.position', string='Fiscal Position', domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
+    fiscal_position_id = fields.Many2one(domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
     tax_country_id = fields.Many2one(
         comodel_name='res.country',
         compute='_compute_tax_country_id',
@@ -151,6 +151,9 @@ class PurchaseOrder(models.Model):
 
     receipt_reminder_email = fields.Boolean('Receipt Reminder Email', compute='_compute_receipt_reminder_email')
     reminder_date_before_receipt = fields.Integer('Days Before Receipt', compute='_compute_receipt_reminder_email')
+
+    amount_to_invoice = fields.Monetary("Amount to be billed")
+    amount_invoiced = fields.Monetary("Amount already billed")
 
     @api.constrains('company_id', 'order_line')
     def _check_order_line_company_id(self):
@@ -558,39 +561,12 @@ class PurchaseOrder(models.Model):
                 # supplier info should be added regardless of the user access rights
                 line.product_id.product_tmpl_id.sudo().write(vals)
 
-    def action_create_invoice(self):
+    def action_create_invoice(self, return_invoices=False):
         """Create the invoice associated to the PO.
         """
-        precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
 
         # 1) Prepare invoice vals and clean-up the section lines
-        invoice_vals_list = []
-        sequence = 10
-        for order in self:
-            if order.invoice_status != 'to invoice':
-                continue
-
-            order = order.with_company(order.company_id)
-            pending_section = None
-            # Invoice values.
-            invoice_vals = order._prepare_invoice()
-            # Invoice line values (keep only necessary sections).
-            for line in order.order_line:
-                if line.display_type == 'line_section':
-                    pending_section = line
-                    continue
-                if not float_is_zero(line.qty_to_invoice, precision_digits=precision):
-                    if pending_section:
-                        line_vals = pending_section._prepare_account_move_line()
-                        line_vals.update({'sequence': sequence})
-                        invoice_vals['invoice_line_ids'].append((0, 0, line_vals))
-                        sequence += 1
-                        pending_section = None
-                    line_vals = line._prepare_account_move_line()
-                    line_vals.update({'sequence': sequence})
-                    invoice_vals['invoice_line_ids'].append((0, 0, line_vals))
-                    sequence += 1
-            invoice_vals_list.append(invoice_vals)
+        invoice_vals_list = self._generate_invoice_values()
 
         if not invoice_vals_list:
             raise UserError(_('There is no invoiceable line. If a product has a control policy based on received quantity, please make sure that a quantity has been received.'))
@@ -629,6 +605,8 @@ class PurchaseOrder(models.Model):
         # is actually negative or not
         moves.filtered(lambda m: m.currency_id.round(m.amount_total) < 0).action_switch_move_type()
 
+        if return_invoices:
+            return moves
         return self.action_view_invoice(moves)
 
     def _prepare_invoice(self):
@@ -640,20 +618,16 @@ class PurchaseOrder(models.Model):
         partner_invoice = self.env['res.partner'].browse(self.partner_id.address_get(['invoice'])['invoice'])
         partner_bank_id = self.partner_id.commercial_partner_id.bank_ids.filtered_domain(['|', ('company_id', '=', False), ('company_id', '=', self.company_id.id)])[:1]
 
-        invoice_vals = {
+        invoice_vals = super()._prepare_invoice()
+        invoice_vals.update({
             'ref': self.partner_ref or '',
             'move_type': move_type,
             'narration': self.notes,
-            'currency_id': self.currency_id.id,
             'partner_id': partner_invoice.id,
             'fiscal_position_id': (self.fiscal_position_id or self.fiscal_position_id._get_fiscal_position(partner_invoice)).id,
             'payment_reference': self.partner_ref or '',
             'partner_bank_id': partner_bank_id.id,
-            'invoice_origin': self.name,
-            'invoice_payment_term_id': self.payment_term_id.id,
-            'invoice_line_ids': [],
-            'company_id': self.company_id.id,
-        }
+        })
         return invoice_vals
 
     def action_view_invoice(self, invoices=False):
@@ -1079,3 +1053,29 @@ class PurchaseOrder(models.Model):
         """
         self.ensure_one()
         return self.state == 'cancel'
+
+    def action_create_bill(self):
+        if self.env.user.has_group('purchase.group_down_payment'):
+            return {
+                'name': _('Create bills'),
+                'type': 'ir.actions.act_window',
+                'view_mode': 'form',
+                'res_model': 'purchase.advance.payment.wizard',
+                'target': 'new',
+            }
+        return self.action_create_invoice()
+
+    def _filter_subrecords(self):
+        return lambda x: self == x.purchase_order_id
+
+    def _create_new_order_line(self, values):
+        return self.env['purchase.order.line'].create(values)
+
+    def _is_locked(self):
+        return self.state == 'done'
+
+    def _create_invoices(self, grouped=False, final=False, date=None):
+        return self.action_create_invoice(True)
+
+    def _sign(self):
+        return 1

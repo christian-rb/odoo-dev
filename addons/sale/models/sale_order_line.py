@@ -6,16 +6,16 @@ from datetime import timedelta
 
 from markupsafe import Markup
 
-from odoo import _, _lt, api, fields, models
+from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 from odoo.fields import Command
 from odoo.osv import expression
-from odoo.tools import float_compare, float_is_zero, format_date, groupby
+from odoo.tools import float_compare, float_is_zero, groupby
 
 
 class SaleOrderLine(models.Model):
     _name = 'sale.order.line'
-    _inherit = 'analytic.mixin'
+    _inherit = ['analytic.mixin', 'account.order.line.mixin']
     _description = "Sales Order Line"
     _rec_names_search = ['name', 'order_id.name']
     _order = 'order_id, sequence, id'
@@ -283,6 +283,17 @@ class SaleOrderLine(models.Model):
                 name = f'{name} {additional_name}'
             so_line.display_name = name
 
+    def _additional_name_per_id(self):
+        return {
+            so_line.id: so_line._get_partner_display()
+            for so_line in self
+        }
+
+    def _get_partner_display(self):
+        self.ensure_one()
+        commercial_partner = self.order_partner_id.commercial_partner_id
+        return f'({commercial_partner.ref or commercial_partner.name})'
+
     @api.depends('product_id')
     def _compute_product_template_id(self):
         for line in self:
@@ -323,23 +334,6 @@ class SaleOrderLine(models.Model):
             for ptav in line.product_no_variant_attribute_value_ids:
                 if ptav._origin not in valid_values:
                     line.product_no_variant_attribute_value_ids -= ptav
-
-    @api.depends('product_id')
-    def _compute_name(self):
-        for line in self:
-            if not line.product_id and not line.is_downpayment:
-                continue
-
-            lang = line.order_id._get_lang()
-            if lang != self.env.lang:
-                line = line.with_context(lang=lang)
-
-            if line.product_id:
-                line.name = line._get_sale_order_line_multiline_description_sale()
-                continue
-
-            if line.is_downpayment:
-                line.name = line._get_downpayment_description()
 
     def _get_sale_order_line_multiline_description_sale(self):
         """ Compute a default multiline description for this sales order line.
@@ -389,31 +383,6 @@ class SaleOrderLine(models.Model):
         for patv in sorted_custom_ptav:
             pacv = self.product_custom_attribute_value_ids.filtered(lambda pcav: pcav.custom_product_template_attribute_value_id == patv)
             name += "\n" + pacv.display_name
-
-        return name
-
-    def _get_downpayment_description(self):
-        self.ensure_one()
-        if self.display_type:
-            return _("Down Payments")
-
-        dp_state = self._get_downpayment_state()
-        name = _lt("Down Payment")
-        if dp_state == 'draft':
-            name = _(
-                "Down Payment: %(date)s (Draft)",
-                date=format_date(self.env, self.create_date.date()),
-            )
-        elif dp_state == 'cancel':
-            name = _("Down Payment (Cancelled)")
-        else:
-            invoice = self._get_invoice_lines().move_id
-            if len(invoice) == 1 and invoice.payment_reference and invoice.invoice_date:
-                name = _(
-                    "Down Payment (ref: %(reference)s on %(date)s)",
-                    reference=invoice.payment_reference,
-                    date=format_date(self.env, invoice.invoice_date),
-                )
 
         return name
 
@@ -731,20 +700,6 @@ class SaleOrderLine(models.Model):
         for so_line in lines_by_analytic:
             so_line.qty_delivered = mapping.get(so_line.id or so_line._origin.id, 0.0)
 
-    def _get_downpayment_state(self):
-        self.ensure_one()
-
-        if self.display_type:
-            return ''
-
-        invoice_lines = self._get_invoice_lines()
-        if all(line.parent_state == 'draft' for line in invoice_lines):
-            return 'draft'
-        if all(line.parent_state == 'cancel' for line in invoice_lines):
-            return 'cancel'
-
-        return ''
-
     def _get_delivered_quantity_by_analytic(self, additional_domain):
         """ Compute and write the delivered quantity of current SO lines, based on their related
             analytic lines.
@@ -796,15 +751,6 @@ class SaleOrderLine(models.Model):
                     elif invoice_line.move_id.move_type == 'out_refund':
                         qty_invoiced -= invoice_line.product_uom_id._compute_quantity(invoice_line.quantity, line.product_uom)
             line.qty_invoiced = qty_invoiced
-
-    def _get_invoice_lines(self):
-        self.ensure_one()
-        if self._context.get('accrual_entry_date'):
-            return self.invoice_lines.filtered(
-                lambda l: l.move_id.invoice_date and l.move_id.invoice_date <= self._context['accrual_entry_date']
-            )
-        else:
-            return self.invoice_lines
 
     # no trigger product_id.invoice_policy to avoid retroactively changing SO
     @api.depends('qty_invoiced', 'qty_delivered', 'product_uom_qty', 'state')
@@ -1003,7 +949,7 @@ class SaleOrderLine(models.Model):
                 vals['product_uom_qty'] = 0.0
 
         lines = super().create(vals_list)
-        if self.env.context.get('sale_no_log_for_new_lines'):
+        if self.env.context.get('no_log_for_new_lines'):
             return lines
 
         for line in lines:
@@ -1124,6 +1070,20 @@ class SaleOrderLine(models.Model):
     def compute_uom_qty(self, new_qty, stock_move, rounding=True):
         return self.product_uom._compute_quantity(new_qty, stock_move.product_uom, rounding)
 
+    def _compute_name(self):
+        super()._compute_name()
+        for line in self:
+            if not line.product_id:
+                continue
+
+            lang = line.order_id._get_lang()
+            if lang != self.env.lang:
+                line = line.with_context(lang=lang)
+
+            line.name = line._get_sale_order_line_multiline_description_sale()
+
+    # INVOICING #
+
     def _get_invoice_line_sequence(self, new=0, old=0):
         """
         Method intended to be overridden in third-party module if we want to prevent the resequencing
@@ -1142,20 +1102,14 @@ class SaleOrderLine(models.Model):
         :param optional_values: any parameter that should be added to the returned invoice line
         :rtype: dict
         """
-        self.ensure_one()
-        res = {
-            'display_type': self.display_type or 'product',
+        res = super()._prepare_invoice_line()
+        res.update({
             'sequence': self.sequence,
             'name': self.name,
-            'product_id': self.product_id.id,
-            'product_uom_id': self.product_uom.id,
-            'quantity': self.qty_to_invoice,
-            'discount': self.discount,
             'price_unit': self.price_unit,
             'tax_ids': [Command.set(self.tax_id.ids)],
             'sale_line_ids': [Command.link(self.id)],
-            'is_downpayment': self.is_downpayment,
-        }
+        })
         self._set_analytic_distribution(res, **optional_values)
         if optional_values:
             res.update(optional_values)
@@ -1174,33 +1128,21 @@ class SaleOrderLine(models.Model):
             else:
                 inv_line_vals['analytic_distribution'] = {analytic_account_id: 100}
 
-    def _prepare_procurement_values(self, group_id=False):
-        """ Prepare specific key for moves or other components that will be created from a stock rule
-        coming from a sale order line. This method could be override in order to add other custom key that could
-        be used in move/po creation.
-        """
-        return {}
-
     def _validate_analytic_distribution(self):
-        for line in self.filtered(lambda l: not l.display_type and l.state in ['draft', 'sent']):
-            line._validate_distribution(**{
-                'product': line.product_id.id,
-                'business_domain': 'sale_order',
-                'company_id': line.company_id.id,
-            })
+        for line in self.filtered(
+            lambda sol: not sol.display_type and sol.state in ['draft', 'sent']
+        ):
+            line._validate_distribution(
+                product=line.product_id.id,
+                business_domain='sale_order',
+                company_id=line.company_id.id,
+            )
 
-    #=== CORE METHODS OVERRIDES ===#
+    def has_valued_move_ids(self):
+        return self.move_ids
 
-    def _get_partner_display(self):
-        self.ensure_one()
-        commercial_partner = self.order_partner_id.commercial_partner_id
-        return f'({commercial_partner.ref or commercial_partner.name})'
-
-    def _additional_name_per_id(self):
-        return {
-            so_line.id: so_line._get_partner_display()
-            for so_line in self
-        }
+    def _has_valid_qty_to_invoice(self, final=False):
+        return self.qty_to_invoice > 0 or (self.qty_to_invoice < 0 and final)
 
     #=== HOOKS ===#
 
@@ -1277,6 +1219,13 @@ class SaleOrderLine(models.Model):
                 # price will be computed in batch with pricelist utils so not given here
             }
 
+    def _prepare_procurement_values(self, group_id=False):
+        """ Prepare specific key for moves or other components that will be created from a stock rule
+        coming from a sale order line. This method could be override in order to add other custom key that could
+        be used in move/po creation.
+        """
+        return {}
+
     #=== TOOLING ===#
 
     def _convert_to_sol_currency(self, amount, currency):
@@ -1301,6 +1250,3 @@ class SaleOrderLine(models.Model):
                 round=False,
             )
         return amount
-
-    def has_valued_move_ids(self):
-        return self.move_ids
