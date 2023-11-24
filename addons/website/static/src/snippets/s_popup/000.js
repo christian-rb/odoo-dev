@@ -2,9 +2,13 @@
 
 import publicWidget from "@web/legacy/js/public/public_widget";
 import { cookie } from "@web/core/browser/cookie";
+import { _t } from "@web/core/l10n/translation";
+import { renderToElement } from "@web/core/utils/render";
 import {throttleForAnimation} from "@web/core/utils/timing";
-import { utils as uiUtils, SIZES } from "@web/core/ui/ui_service";
+import { isVisible } from "@web/core/utils/ui";
+import { utils as uiUtils, MEDIAS_BREAKPOINTS, SIZES } from "@web/core/ui/ui_service";
 import {setUtmsHtmlDataset} from '@website/js/content/inject_dom';
+import { ObservingCookieWidgetMixin } from "@website/snippets/observing_cookie_mixin";
 
 // TODO In master, export this class too or merge it with PopupWidget
 const SharedPopupWidget = publicWidget.Widget.extend({
@@ -68,7 +72,7 @@ const SharedPopupWidget = publicWidget.Widget.extend({
 
 publicWidget.registry.SharedPopup = SharedPopupWidget;
 
-const PopupWidget = publicWidget.Widget.extend({
+const PopupWidget = publicWidget.Widget.extend(ObservingCookieWidgetMixin, {
     selector: '.s_popup',
     events: {
         'click .js_close_popup': '_onCloseClick',
@@ -238,8 +242,8 @@ const PopupWidget = publicWidget.Widget.extend({
      */
     _onShowModal() {
         this.el.querySelectorAll('.media_iframe_video').forEach(media => {
-            const iframe = media.querySelector('iframe');
-            iframe.src = media.dataset.oeExpression || media.dataset.src; // TODO still oeExpression to remove someday
+            // TODO still oeExpression to remove someday
+            this._manageIframeSrc(media, media.dataset.oeExpression || media.dataset.src);
         });
     },
     /**
@@ -362,6 +366,7 @@ publicWidget.registry.cookies_bar = PopupWidget.extend({
     selector: '#website_cookies_bar',
     events: Object.assign({}, PopupWidget.prototype.events, {
         'click #cookies-consent-essential, #cookies-consent-all': '_onAcceptClick',
+        "show_cookies_bar": "_onShowCookiesBar",
     }),
 
     //--------------------------------------------------------------------------
@@ -374,6 +379,9 @@ publicWidget.registry.cookies_bar = PopupWidget.extend({
      */
     _onAcceptClick(ev) {
         this.cookieValue = `{"required": true, "optional": ${ev.target.id === 'cookies-consent-all'}}`;
+        if (ev.target.id === "cookies-consent-all") {
+            document.dispatchEvent(new Event("optionalCookiesAccepted"));
+        }
         this._onHideModal();
     },
     /**
@@ -394,7 +402,98 @@ publicWidget.registry.cookies_bar = PopupWidget.extend({
             }
         }
         setUtmsHtmlDataset();
-    }
+    },
+    /**
+     * Reopens the cookies bar if it was closed.
+     *
+     * @private
+     */
+    _onShowCookiesBar() {
+        const modalEl = this.el.querySelector(".modal");
+        const currCookie = cookie.get(this.el.id);
+
+        if (currCookie && JSON.parse(currCookie).optional || !this._popupAlreadyShown) {
+            return;
+        }
+        $(modalEl).modal("show");
+
+        // The cookies bar remains hidden, most probably because of the browser
+        // or an extension: notify the user because "nothing happens when I
+        // click" is never good.
+        if (!isVisible(modalEl)) {
+            window.alert(_t("Our cookies bar was blocked by your browser or an extension."));
+            return;
+        }
+        modalEl.focus();
+    },
+});
+
+publicWidget.registry.cookies_approval = publicWidget.Widget.extend({
+    selector: "[data-need-cookies-approval]",
+    events: {
+        "add_cookies_warning": "_onAddCookiesWarning",
+    },
+
+    /**
+     * @override
+     */
+    willStart() {
+        const thirdPartyEl = this.el.tagName === "IFRAME"
+            ? this.el
+            : this.el.querySelector("iframe");
+        if (thirdPartyEl) {
+            const existingOptionalCookiesWarningEl = thirdPartyEl.nextElementSibling
+                ?.classList.contains("o_no_optional_cookie");
+            if (!existingOptionalCookiesWarningEl) {
+                this._addOptionalCookiesWarning(thirdPartyEl);
+            }
+        }
+        return this._super(...arguments);
+    },
+    /**
+     * Adds a warning in place of the iframe. On click, shows the cookies bar if
+     * it was hidden.
+     *
+     * @private
+     */
+    _addOptionalCookiesWarning(iframeEl) {
+        const options = {
+            extraStyle: iframeEl.parentElement.classList.contains("media_iframe_video")
+                ? `aspect-ratio: 16/9; max-width: ${MEDIAS_BREAKPOINTS[SIZES.SM].maxWidth}px;`
+                : "",
+            extraClasses: getComputedStyle(iframeEl.parentElement).position === "absolute"
+                ? "" : "my-3",
+        };
+        const optionalCookiesWarningEl = renderToElement("website.cookiesWarning", options);
+        iframeEl.insertAdjacentElement("afterend", optionalCookiesWarningEl);
+        iframeEl.classList.add("d-none");
+        optionalCookiesWarningEl.addEventListener("click", () => {
+            $(document.getElementById("website_cookies_bar")).trigger("show_cookies_bar");
+        });
+
+        document.addEventListener("optionalCookiesAccepted", () => {
+            iframeEl.src = iframeEl.dataset.nocookieSrc;
+            iframeEl.classList.remove("d-none");
+            delete iframeEl.dataset.nocookieSrc;
+            delete iframeEl.dataset.needCookiesApproval;
+            delete iframeEl.closest(":not(iframe)[data-need-cookies-approval]")
+                ?.dataset.needCookiesApproval;
+            optionalCookiesWarningEl.remove();
+        }, { once: true });
+    },
+
+    //--------------------------------------------------------------------------
+    // Handlers
+    //--------------------------------------------------------------------------
+
+    /**
+     * @private
+     */
+    _onAddCookiesWarning(ev) {
+        if (!ev.target.nextElementSibling?.classList.contains("o_no_optional_cookie")) {
+            this._addOptionalCookiesWarning(ev.target);
+        }
+    },
 });
 
 export default PopupWidget;

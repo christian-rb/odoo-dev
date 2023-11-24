@@ -75,6 +75,18 @@ class Website(models.Model):
     auto_redirect_lang = fields.Boolean('Autoredirect Language', default=True, help="Should users be redirected to their browser's language")
     cookies_bar = fields.Boolean('Cookies Bar', help="Display a customizable cookies bar on your website.")
     configurator_done = fields.Boolean(help='True if configurator has been completed or ignored')
+    block_third_party_domains = fields.Boolean(
+        'Block 3rd-party domains',
+        help="Block 3rd-party domains that may track users (YouTube, Google Maps, etc.).",
+        default=True)
+    blocked_third_party_domains = fields.Text(
+        'User list of blocked 3rd-party domains',
+        groups='website.group_website_designer',
+        translate=False, default="")
+    default_blocked_third_party_domains = fields.Char(
+        'Default list of blocked 3rd-party domains',
+        compute='_compute_default_blocked_third_party_domains'
+    )
 
     def _default_social_facebook(self):
         return self.env.ref('base.main_company').social_facebook
@@ -182,6 +194,23 @@ class Website(models.Model):
 
             top_menus = menus.filtered(lambda m: not m.parent_id)
             website.menu_id = top_menus and top_menus[0].id or False
+
+    def _compute_default_blocked_third_party_domains(self):
+        for website in self:
+            website.default_blocked_third_party_domains = '\n'.join([  # noqa: FLY002
+                "youtu.be", "youtube.com", "youtube-nocookie.com",
+                "instagram.com", "instagr.am", "ig.me",
+                "vimeo.com",  # "player.vimeo.com", "vimeo.com",
+                "dailymotion.com", "dai.ly",
+                "youku.com",  # "player.youku.com", "youku.com",
+                "tudou.com",
+                # Checking 2nd-level domains for Google (too many subdomains &
+                # TLDs, it would be impossible to check them all).
+                "google", "googletagmanager", "google-analytics",  # "google.com", "google.be", "maps.google.com", "googletagmanager.com"...
+                "facebook.com", "facebook.net", "fb.com", "fb.me", "fb.watch",
+                "tiktok.com",
+                "x.com", "twitter.com", "t.co",
+            ])
 
     # self.env.uid for ir.rule groups on menu
     @tools.ormcache('self.env.uid', 'self.id', cache='templates')

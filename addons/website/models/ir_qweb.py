@@ -4,6 +4,7 @@ import re
 import logging
 
 from collections import OrderedDict
+from urllib3.util import parse_url
 
 from odoo import models
 from odoo.http import request
@@ -34,7 +35,7 @@ class IrQWeb(models.AbstractModel):
     # assume cache will be invalidated by third party on write to ir.ui.view
     def _get_template_cache_keys(self):
         """ Return the list of context keys to use for caching ``_compile``. """
-        return super()._get_template_cache_keys() + ['website_id']
+        return super()._get_template_cache_keys() + ['website_id', 'cookies_allowed']
 
     def _prepare_frontend_environment(self, values):
         """ Update the values and context with website specific value
@@ -89,6 +90,9 @@ class IrQWeb(models.AbstractModel):
                 # will add the branding on fields (into values)
                 irQweb = irQweb.with_context(inherit_branding_auto=True)
 
+        is_allowed_optional_cookies = request.env['ir.http']._is_allowed_cookie('optional')
+        irQweb = irQweb.with_context(cookies_allowed=is_allowed_optional_cookies)
+
         return irQweb
 
     def _post_processing_att(self, tagName, atts):
@@ -109,6 +113,54 @@ class IrQWeb(models.AbstractModel):
 
         if not website:
             return atts
+
+        if (
+            website.cookies_bar
+            and website.block_third_party_domains
+            and not self.env.context.get('cookies_allowed')
+        ):
+            # If the cookie banner is activated, 3rd-party embedded iframes and
+            # scripts should be controlled. As such:
+            # - 'domains' is a watchlist on the iframe/script's src itself,
+            # - 'custom_domains' is a watchlist set by the user on the iframe /
+            # script's src,
+            # - 'classes' is a watchlist on container elements in which iframes
+            # are/could be built on the fly client-side for some reason.
+            cookiesWatchList = {
+                'domains': website.default_blocked_third_party_domains.split('\n'),
+                'custom_domains': website.sudo().blocked_third_party_domains.split("\n"),
+                'classes': {
+                    's_map',
+                    's_instagram_page',
+                    'o_facebook_page',
+                    'o_background_video',
+                    'media_iframe_video',
+                },
+            }
+            remove_src = False
+            if tagName in ('iframe', 'script'):
+                srcHost = parse_url((atts.get('src') or '').lower()).host
+                if srcHost:
+                    all_domains = (
+                        [re.escape(domain) for domain in cookiesWatchList['domains']]
+                        + [re.escape(domain) for domain in cookiesWatchList['custom_domains']]
+                    )
+                    # Match domains with or without subdomain, or just second-
+                    # level domains.
+                    domain_regex = re.compile(r'^(.*\.)?({})(\..*)?$'.format('|'.join(all_domains)))
+                    remove_src = bool(domain_regex.search(srcHost))
+            if (
+                cookiesWatchList['classes'].intersection((atts.get('class') or '').split(' '))
+                or remove_src
+            ):
+                atts['data-need-cookies-approval'] = 'true'
+                # Case class in watchlist: we stop here. The element could
+                # contain an iframe created on the fly client-side. It is marked
+                # now so that the iframe can be marked later when created.
+                # Case iframe/script's src in watchlist: we adapt the src.
+                if 'src' in atts:
+                    atts['data-nocookie-src'] = atts['src']
+                    atts['src'] = 'about:blank'
 
         name = self.URL_ATTRS.get(tagName)
         if request:
