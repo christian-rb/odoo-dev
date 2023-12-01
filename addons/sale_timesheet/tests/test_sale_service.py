@@ -365,13 +365,9 @@ class TestSaleService(TestCommonSaleTimesheet):
             - Confirm sale_order
 
             Expected result:
-            - 2 tasks created on the project_id configured on the SO
+            - 2 tasks created on the project_id configured on the SOL
             - 1 project created with the correct template for the 'project_only' product
         """
-
-        self.sale_order.write({'project_id': self.project_global.id})
-        self.sale_order._onchange_project_id()
-        self.assertEqual(self.sale_order.analytic_account_id, self.analytic_account_sale, "Changing the project on the SO should set the analytic account accordingly.")
 
         so_line1 = self.env['sale.order.line'].create({
             'product_id': self.product_order_timesheet3.id,
@@ -400,9 +396,9 @@ class TestSaleService(TestCommonSaleTimesheet):
         })
 
         self.assertTrue(so_line1.task_id, "so_line1 should create a task as its product's service_tracking is set as 'task_in_project'")
-        self.assertEqual(so_line1.task_id.project_id, self.project_global, "The project on so_line1's task should be project_global as configured on its parent sale_order")
+        self.assertEqual(so_line1.task_id.project_id, so_line1.project_id, "The project on so_line1's task should be so_line's project as configured on its parent sale_order")
         self.assertTrue(so_line2.task_id, "so_line2 should create a task as its product's service_tracking is set as 'task_in_project'")
-        self.assertEqual(so_line2.task_id.project_id, self.project_global, "The project on so_line2's task should be project_global as configured on its parent sale_order")
+        self.assertEqual(so_line2.task_id.project_id, so_line2.project_id, "The project on so_line2's task should be so_line's project as configured on its parent sale_order")
         self.assertFalse(so_line3.task_id.name, "so_line3 should not create a task as its product's service_tracking is set as 'project_only'")
         self.assertNotEqual(so_line3.project_id, self.project_template, "so_line3 should create a new project and not directly use the configured template")
         self.assertIn(self.project_template.name, so_line3.project_id.name, "The created project for so_line3 should use the configured template")

@@ -221,7 +221,6 @@ class TestSaleProject(TestSaleProjectCommon):
             'partner_id': self.partner.id,
             'partner_invoice_id': self.partner.id,
             'partner_shipping_id': self.partner.id,
-            'project_id': self.project_global.id,
         })
         sale_order_line = self.env['sale.order.line'].create({
             'name': self.product_order_service2.name,
@@ -235,7 +234,6 @@ class TestSaleProject(TestSaleProjectCommon):
         #use of sudo() since the env.user does not have the access right to edit projects.
         self.project_global.sudo().sale_line_id = sale_order_line
         sale_order.with_context({'disable_cancel_warning': True}).action_cancel()
-        self.assertFalse(self.project_global.sale_line_id, "The project should not be linked to the SOL anymore")
 
     def test_links_with_sale_order_line(self):
         """

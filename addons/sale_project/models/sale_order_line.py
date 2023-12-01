@@ -310,7 +310,7 @@ class SaleOrderLine(models.Model):
             if so_line.product_id.service_tracking == 'project_only':
                 return so_line.project_id
             elif so_line.product_id.service_tracking == 'task_in_project':
-                return so_line.order_id.project_id or so_line.project_id
+                return so_line.project_id
 
             return False
 
