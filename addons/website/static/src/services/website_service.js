@@ -119,7 +119,7 @@ export const websiteService = {
                 if (!isWebsitePage) {
                     currentMetadata = {};
                 } else {
-                    const { mainObject, seoObject, isPublished, canOptimizeSeo, canPublish, editableInBackend, translatable, viewXmlid } = dataset;
+                    const { mainObject, seoObject, isPublished, canOptimizeSeo, canPublish, editableInBackend, translatable, viewXmlid, defaultLang } = dataset;
                     // We ignore multiple menus with the same `content_menu_id`
                     // in the DOM, since it's possible to have different
                     // templates for the same content menu (E.g. used for a
@@ -152,6 +152,7 @@ export const websiteService = {
                         editable: !!document.getElementById('wrapwrap'),
                         viewXmlid: viewXmlid,
                         lang: document.documentElement.getAttribute('lang').replace('-', '_'),
+                        defaultLang: defaultLang,
                         direction: document.documentElement.querySelector('#wrapwrap.o_rtl') ? 'rtl' : 'ltr',
                     };
                 }
@@ -226,7 +227,7 @@ export const websiteService = {
                 ]);
             },
             async fetchWebsites() {
-                websites = [...(await orm.searchRead('website', [], ['domain', 'id', 'name']))];
+                websites = [...(await orm.searchRead('website', [], ['domain', 'id', 'name', 'default_lang_id']))];
             },
             async loadWysiwyg() {
                 await loadBundle('website.backend_assets_all_wysiwyg');

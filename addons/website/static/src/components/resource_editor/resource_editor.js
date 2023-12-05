@@ -375,7 +375,15 @@ export class ResourceEditor extends Component {
      */
     async saveXML(resource) {
         const { id, arch } = resource;
-        const context = { ...this.context, lang: false };
+        if (!this.website.currentWebsite.metadata.defaultLang) {
+            // TODO: Remove in master.
+            // Default language code was not available in template.
+            const defaultLanguageId = this.website.currentWebsite.default_lang_id[0];
+            this.website.currentWebsite.metadata.defaultLang = (
+                await this.orm.read("res.lang", [defaultLanguageId], ["code"])
+            )[0]["code"];
+        }
+        const context = { ...this.context, lang: this.website.currentWebsite.metadata.defaultLang };
         await this.orm.write("ir.ui.view", [id], { arch }, { context });
         delete resource.dirty;
     }
