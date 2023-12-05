@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="web.CustomFavoriteDialog" >
+        <Dialog title="props.title" size="'md'">
+            <t t-set-slot="default">
+                <input type="text"
+                    class="o_input mb-1"
+                    t-ref="description"
+                    t-model.trim="state.description"
+                    t-on-keydown="onInputKeydown"
+                    />
+                <CheckBox value="state.isDefault" onChange.bind="onDefaultCheckboxChange">
+                    <span data-tooltip="Use this filter by default when opening the view">Default filter</span>
+                </CheckBox>
+                <t t-if="props.showSharedCheckBox">
+                    <CheckBox value="state.isShared" onChange.bind="onShareCheckboxChange">
+                        <span data-tooltip="Make this filter available to other users">Shared</span>
+                    </CheckBox>
+                </t>
+            </t>
+            <t t-set-slot="footer">
+                <button class="o_save_favorite btn btn-primary" t-on-click="saveFavorite">
+                    Save
+                </button>
+            </t>
+        </Dialog>
+    </t>
+
+</templates>

@@ -15,6 +15,7 @@ import { CheckboxItem } from "@web/core/dropdown/checkbox_item";
 import { FACET_ICONS, GROUPABLE_TYPES } from "@web/search/utils/misc";
 import { useGetDefaultLeafDomain } from "@web/core/domain_selector/utils";
 import { _t } from "@web/core/l10n/translation";
+import { CustomFavoriteDialog } from "../custom_favorite_dialog/custom_favorite_dialog";
 
 const favoriteMenuRegistry = registry.category("favoriteMenu");
 
@@ -167,13 +168,20 @@ export class SearchBarMenu extends Component {
     }
 
     // Favorite Panel
-    /**
-     * @returns {Array}
-     */
-    get favoriteItems() {
-        const favorites = this.env.searchModel.getSearchItems(
-            (searchItem) => searchItem.type === "favorite"
+
+    get favorites() {
+        return this.env.searchModel.getSearchItems(
+            (searchItem) => searchItem.type === "favorite" && searchItem.userId !== false
         );
+    }
+
+    get sharedFavorites() {
+        return this.env.searchModel.getSearchItems(
+            (searchItem) => searchItem.type === "favorite" && searchItem.userId === false
+        );
+    }
+
+    get otherItems() {
         const registryMenus = [];
         for (const item of favoriteMenuRegistry.getAll()) {
             if ("isDisplayed" in item ? item.isDisplayed(this.env) : true) {
@@ -184,21 +192,14 @@ export class SearchBarMenu extends Component {
                 });
             }
         }
-        return [...favorites, ...registryMenus];
+        return registryMenus;
     }
 
-    /**
-     * @param {number} itemId
-     */
     onFavoriteSelected(itemId) {
         this.env.searchModel.toggleSearchItem(itemId);
     }
 
-    /**
-     * @param {number} itemId
-     */
-    openConfirmationDialog(itemId) {
-        const { userId } = this.favoriteItems.find((item) => item.id === itemId);
+    openConfirmationDialog(itemId, userId) {
         const dialogProps = {
             title: _t("Warning"),
             body: userId
@@ -209,5 +210,31 @@ export class SearchBarMenu extends Component {
             cancel: () => {},
         };
         this.dialogService.add(ConfirmationDialog, dialogProps);
+    }
+
+    copyFavoriteForUser(itemId, description) {
+        this.openCustomFavoriteDialog({
+            itemId,
+            description: _t("%s (%s)", description, "copy"),
+            showSharedCheckBox: false,
+        });
+    }
+
+    onSaveCurrentSearchClick() {
+        this.openCustomFavoriteDialog();
+    }
+
+    openCustomFavoriteDialog({ itemId, description, showSharedCheckBox } = {}) {
+        const favoriteDescriptions = this.env.searchModel
+            .getSearchItems((item) => item.type === "favorite")
+            .map((f) => f.description);
+        this.dialogService.add(CustomFavoriteDialog, {
+            title: itemId ? _t("Add to my filters") : _t("Save current search"),
+            description: description || this.env.config.getDisplayName(),
+            showSharedCheckBox,
+            favoriteDescriptions,
+            onConfirm: (preFavorite) =>
+                this.env.searchModel.createNewFavorite({ ...preFavorite, copyOf: itemId }),
+        });
     }
 }

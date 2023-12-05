@@ -1988,46 +1988,67 @@ export class SearchModel extends EventBus {
      * @returns {{ preFavorite: Object, irFilter: Object }}
      */
     _getIrFilterDescription(params = {}) {
-        const { description, isDefault, isShared } = params;
-        const fns = this.env.__getContext__.callbacks;
-        const localContext = Object.assign({}, ...fns.map((fn) => fn()));
-        const gs = this.env.__getOrderBy__.callbacks;
-        let localOrderBy;
-        if (gs.length) {
-            localOrderBy = gs.flatMap((g) => g());
-        }
-        const context = makeContext([this._getContext(), localContext]);
-        const userContext = this.userService.context;
-        for (const key in context) {
-            if (key in userContext || /^search(panel)?_default_/.test(key)) {
-                // clean search defaults and user context keys
-                delete context[key];
+        const { description, isDefault, isShared, copyOf } = params;
+        let preFavorite;
+        let comparison;
+        if (copyOf) {
+            const searchItem = this.searchItems[copyOf];
+            const { domain, context, groupBys, orderBy } = searchItem;
+            comparison = searchItem.comparison;
+            const userId = isShared ? false : this.userService.userId;
+            preFavorite = {
+                description,
+                isDefault: false,
+                domain,
+                context,
+                groupBys,
+                orderBy,
+                userId,
+            };
+        } else {
+            const fns = this.env.__getContext__.callbacks;
+            const localContext = Object.assign({}, ...fns.map((fn) => fn()));
+            const gs = this.env.__getOrderBy__.callbacks;
+            let localOrderBy;
+            if (gs.length) {
+                localOrderBy = gs.flatMap((g) => g());
             }
-        }
-        const domain = this._getDomain({ raw: true, withGlobal: false }).toString();
-        const groupBys = this._getGroupBy();
-        const comparison = this.getFullComparison();
-        const orderBy = localOrderBy || this._getOrderBy();
-        const userId = isShared ? false : this.userService.userId;
+            const context = makeContext([this._getContext(), localContext]);
+            const userContext = this.userService.context;
+            for (const key in context) {
+                if (key in userContext || /^search(panel)?_default_/.test(key)) {
+                    // clean search defaults and user context keys
+                    delete context[key];
+                }
+            }
+            const domain = this._getDomain({ raw: true, withGlobal: false }).toString();
+            const groupBys = this._getGroupBy();
+            comparison = this.getFullComparison();
+            const orderBy = localOrderBy || this._getOrderBy();
+            const userId = isShared ? false : this.userService.userId;
 
-        const preFavorite = {
-            description,
-            isDefault,
-            domain,
-            context,
-            groupBys,
-            orderBy,
-            userId,
-        };
+            preFavorite = {
+                description,
+                isDefault,
+                domain,
+                context,
+                groupBys,
+                orderBy,
+                userId,
+            };
+        }
+
         const irFilter = {
             name: description,
             action_id: this.env.config.actionId,
             model_id: this.resModel,
-            domain,
+            domain: preFavorite.domain,
             is_default: isDefault,
-            sort: JSON.stringify(orderBy.map((o) => `${o.name}${o.asc === false ? " desc" : ""}`)),
-            user_id: userId,
-            context: { group_by: groupBys, ...context },
+            sort: JSON.stringify(
+                preFavorite.orderBy.map((o) => `${o.name}${o.asc === false ? " desc" : ""}`)
+            ),
+            user_id: preFavorite.userId,
+            context: { group_by: preFavorite.groupBys, ...preFavorite.context },
         };
 
         if (comparison) {
