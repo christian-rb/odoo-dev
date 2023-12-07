@@ -13,6 +13,7 @@ export class CustomFavoriteDialog extends Component {
     static props = {
         title: String,
         onConfirm: Function,
+        close: Function,
         description: { type: String, optional: true },
         showSharedCheckBox: { type: Boolean, optional: true },
         favoriteDescriptions: { type: Array, element: String, optional: true },
