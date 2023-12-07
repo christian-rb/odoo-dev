@@ -360,11 +360,15 @@ function registerWebsitePreviewTour(name, options, steps) {
 }
 
 function registerThemeHomepageTour(name, steps) {
+    let saveAs = name;
+    if (name !== "homepage") {
+        saveAs = "homepage_design_themes";
+    }
     return registerWebsitePreviewTour(name, {
         url: '/',
         edition: true,
         sequence: 1010,
-        saveAs: "homepage",
+        saveAs,
     }, prepend_trigger(
         steps.concat(clickOnSave()),
         ".o_website_preview[data-view-xmlid='website.homepage'] "
