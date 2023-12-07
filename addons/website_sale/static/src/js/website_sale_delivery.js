@@ -10,12 +10,12 @@ import { Component } from "@odoo/owl";
 publicWidget.registry.websiteSaleDelivery = publicWidget.Widget.extend({
     selector: '.oe_website_sale',
     events: {
-        'change select[name="shipping_id"]': '_onSetAddress',
+        'change select[name="shipping_id"]': '_onSetAddress', // TODO dead code ?
         'click .o_delivery_carrier_select': '_onCarrierClick',
-        "click .o_address_select": "_onClickLocation",
+        "click .o_address_select": "_onClickLocation", // sendcloud & fedex
         "click .o_remove_order_location": "_onClickRemoveLocation",
         "click .o_show_pickup_locations": "_onClickShowLocations",
-        "click .o_payment_option_card": "_onClickPaymentMethod"
+        "click .o_payment_option_card": "_onClickPaymentMethod", // TODO dead code ?
     },
 
     /**
@@ -42,7 +42,7 @@ publicWidget.registry.websiteSaleDelivery = publicWidget.Widget.extend({
             await this._getCarrierRateShipment(carrierInput);
         });
         if (this._super && typeof(this._super.apply)==="function") {
-          return this._super.apply(this, arguments);
+            return this._super.apply(this, arguments);
         }
     },
 
@@ -179,13 +179,13 @@ publicWidget.registry.websiteSaleDelivery = publicWidget.Widget.extend({
         var $carrierBadge = $('#delivery_carrier input[name="delivery_type"][value=' + result.carrier_id + '] ~ .o_wsale_delivery_badge_price');
 
         if (result.status === true) {
-             // if free delivery (`free_over` field), show 'Free', not '$0'
-             if (result.is_free_delivery) {
-                 $carrierBadge.text(_t('Free'));
-             } else {
-                 $carrierBadge.html(result.new_amount_delivery);
-             }
-             $carrierBadge.removeClass('o_wsale_delivery_carrier_error');
+            // if free delivery (`free_over` field), show 'Free', not '$0'
+            if (result.is_free_delivery) {
+                $carrierBadge.text(_t('Free'));
+            } else {
+                $carrierBadge.html(result.new_amount_delivery);
+            }
+            $carrierBadge.removeClass('o_wsale_delivery_carrier_error');
         } else {
             $carrierBadge.addClass('o_wsale_delivery_carrier_error');
             $carrierBadge.text(result.error_message);
@@ -221,9 +221,11 @@ publicWidget.registry.websiteSaleDelivery = publicWidget.Widget.extend({
 
     _checkCarrier: async function (ev, carrier_id) {
         ev.stopPropagation();
-        await this.keepLast.add(rpc('/shop/update_carrier', {
-            carrier_id: carrier_id,
-        }))
+        await this.keepLast.add(
+            rpc('/shop/update_carrier', {
+                carrier_id: carrier_id,
+            })
+        )
         var closestDocElement = ev.currentTarget.closest('.o_delivery_carrier_select');
         var radio = closestDocElement.querySelector('input[type="radio"]');
         radio.checked = true;

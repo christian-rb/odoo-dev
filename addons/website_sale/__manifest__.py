@@ -44,7 +44,6 @@
         'views/product_product_add.xml',
         'views/website_views.xml',
         'views/website_pages_views.xml',
-        'views/website_sale_delivery_templates.xml',
         'views/website_sale_menus.xml',
         'views/variant_templates.xml',
     ],
