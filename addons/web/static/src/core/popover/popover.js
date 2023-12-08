@@ -39,6 +39,7 @@ const POPOVERS = new WeakMap();
 export function getPopoverForTarget(target) {
     return POPOVERS.get(target);
 }
+import { browser } from "@web/core/browser/browser";
 
 export class Popover extends Component {
     static template = "web.Popover";
@@ -52,6 +53,7 @@ export class Popover extends Component {
         fixedPosition: false,
         position: "bottom",
         setActiveElement: false,
+        closeOnHoverAway: () => true,
     };
     static props = {
         // Main props
@@ -97,6 +99,7 @@ export class Popover extends Component {
         closeOnClickAway: { optional: true, type: Function },
         closeOnEscape: { optional: true, type: Boolean },
         setActiveElement: { optional: true, type: Boolean },
+        closeOnHoverAway: { optional: true, type: Boolean },
 
         // Technical props
         ref: { optional: true, type: Function },
@@ -104,6 +107,7 @@ export class Popover extends Component {
     };
 
     static animationTime = 200;
+    static closePopoverTimeout = 100;
     setup() {
         if (this.props.setActiveElement) {
             useActiveElement("ref");
@@ -148,6 +152,10 @@ export class Popover extends Component {
             if (this.props.closeOnEscape) {
                 useHotkey("escape", () => this.props.close());
             }
+            if (this.props.closeOnHoverAway) {
+                this.closePopoverTimeout = false;
+                useExternalListener(window, "mouseover", this.onHoverAway, { capture: true });
+            }
             const targetObserver = new MutationObserver(this.onTargetMutate.bind(this));
             targetObserver.observe(this.props.target.parentElement, { childList: true });
             onWillDestroy(() => targetObserver.disconnect());
@@ -177,6 +185,17 @@ export class Popover extends Component {
     onClickAway(target) {
         if (this.props.closeOnClickAway(target) && !this.isInside(target)) {
             this.props.close();
+        }
+    }
+
+    onHoverAway(ev) {
+        const target = ev.composedPath()[0];
+        if (!this.props.target.contains(target) && !this.popoverRef.el.contains(target)) {
+            this.constructor.closePopoverTimeout = browser.setTimeout(() => {
+                this.props.close();
+            }, 200);
+        } else {
+            browser.clearTimeout(this.constructor.closePopoverTimeout);
         }
     }
 

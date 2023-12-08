@@ -1,0 +1,10 @@
+.o-mail-MessageReactionList {
+    max-width: 250px;
+
+    &:hover {
+        .btn-link {
+            text-decoration: underline !important;
+        }
+    }
+
+}

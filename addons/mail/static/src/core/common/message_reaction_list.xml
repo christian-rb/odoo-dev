@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+<t t-name="mail.MessageReaction.List">
+    <div class="o-mail-MessageReactionList p-2 cursor-pointer" t-on-click="() => this.manageReactionMenu(this.props.reaction)">
+        <span class="o-mail-MessageReaction-Summary">
+            <t t-out="getReactionSummary()" />
+        </span>
+    </div>
+</t>
+</templates>

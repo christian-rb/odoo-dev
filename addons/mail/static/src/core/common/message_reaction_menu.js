@@ -14,7 +14,7 @@ import { Dialog } from "@web/core/dialog/dialog";
 import { useService } from "@web/core/utils/hooks";
 
 export class MessageReactionMenu extends Component {
-    static props = ["close", "message"];
+    static props = ["close", "message", "currentReaction?"];
     static components = { Dialog };
     static template = "mail.MessageReactionMenu";
 
@@ -24,7 +24,7 @@ export class MessageReactionMenu extends Component {
         this.store = useState(useService("mail.store"));
         this.ui = useState(useService("ui"));
         this.state = useState({
-            reaction: this.props.message.reactions[0],
+            reaction: this.props.currentReaction,
         });
         useExternalListener(document, "keydown", this.onKeydown);
         onExternalClick("root", () => this.props.close());

@@ -514,9 +514,16 @@ export class Message extends Component {
         });
     }
 
-    openReactionMenu() {
+    openReactionMenu(reaction) {
         const message = toRaw(this.props.message);
-        this.dialog.add(MessageReactionMenu, { message }, { context: this });
+        this.dialog.add(
+            MessageReactionMenu,
+            {
+                message,
+                currentReaction: reaction,
+            },
+            { context: this }
+        );
     }
 
     async onClickToggleTranslation() {

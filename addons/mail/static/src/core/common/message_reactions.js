@@ -1,59 +1,25 @@
-import { Component, useState } from "@odoo/owl";
+import { MessageReactionList } from "@mail/core/common/message_reaction_list";
+import { usePopover } from "@web/core/popover/popover_hook";
 
-import { _t } from "@web/core/l10n/translation";
+import { Component, useState } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 
 export class MessageReactions extends Component {
     static props = ["message", "openReactionMenu"];
     static template = "mail.MessageReactions";
+    static components = { MessageReactionList };
 
     setup() {
         super.setup();
         this.store = useState(useService("mail.store"));
         this.ui = useService("ui");
-    }
-
-    /** @param {import("models").MessageReactions} reaction */
-    getReactionSummary(reaction) {
-        const [firstUserName, secondUserName, thirdUserName] = reaction.personas.map(
-            ({ name, displayName }) => name || displayName
-        );
-        switch (reaction.count) {
-            case 1:
-                return _t("%s has reacted with %s", firstUserName, reaction.content);
-            case 2:
-                return _t(
-                    "%s and %s have reacted with %s",
-                    firstUserName,
-                    secondUserName,
-                    reaction.content
-                );
-            case 3:
-                return _t(
-                    "%s, %s, %s have reacted with %s",
-                    firstUserName,
-                    secondUserName,
-                    thirdUserName,
-                    reaction.content
-                );
-            case 4:
-                return _t(
-                    "%s, %s, %s and 1 other person have reacted with %s",
-                    firstUserName,
-                    secondUserName,
-                    thirdUserName,
-                    reaction.content
-                );
-            default:
-                return _t(
-                    "%s, %s, %s and %s other persons have reacted with %s",
-                    firstUserName,
-                    secondUserName,
-                    thirdUserName,
-                    reaction.personas.length - 3,
-                    reaction.content
-                );
-        }
+        this.reactionOpened = false;
+        this.reactionPopover = usePopover(MessageReactionList, {
+            closeOnHoverAway: true,
+            popoverClass: "o-mail-MessageReactionList-Popover",
+            position: "bottom-start",
+        });
+        this.lastedOpenedId = 0;
     }
 
     hasSelfReacted(reaction) {
@@ -72,6 +38,21 @@ export class MessageReactions extends Component {
         if (this.ui.isSmall) {
             ev.preventDefault();
             this.props.openReactionMenu();
+        }
+    }
+    openReactions(params) {
+        const target = params.ev.currentTarget;
+        const reaction = params.reaction;
+        if (
+            !this.reactionPopover.isOpen ||
+            (this.lastedOpenedId && reaction.messageId !== this.lastedOpenedId)
+        ) {
+            this.reactionPopover.open(target, {
+                id: reaction.message.id,
+                reaction: params.reaction,
+                openReactionMenu: this.props.openReactionMenu,
+            });
+            this.lastedOpenedId = reaction.messageId;
         }
     }
 }

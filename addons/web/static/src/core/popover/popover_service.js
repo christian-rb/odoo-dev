@@ -7,6 +7,7 @@ import { registry } from "@web/core/registry";
  *   animation?: Boolean;
  *   arrow?: Boolean;
  *   closeOnClickAway?: boolean | (target: HTMLElement) => boolean;
+ *   closeOnHoverAway?: boolean;
  *   closeOnEscape?: boolean;
  *   env?: object;
  *   fixedPosition?: boolean;
@@ -36,12 +37,15 @@ export const popoverService = {
                 typeof options.closeOnClickAway === "function"
                     ? options.closeOnClickAway
                     : () => options.closeOnClickAway ?? true;
+            const closeOnHoverAway = options.closeOnHoverAway || false;
+            clearTimeout(Popover.closePopoverTimeout);
             const remove = overlay.add(
                 Popover,
                 {
                     target,
                     close: () => remove(),
                     closeOnClickAway,
+                    closeOnHoverAway,
                     closeOnEscape: options.closeOnEscape,
                     component,
                     componentProps: markRaw(props),
