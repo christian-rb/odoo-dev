@@ -339,7 +339,7 @@
                     <record id="tax_report_de_tax_tag_17" model="account.report.line">
                         <field name="name">Declaration of the advance payment of turnover tax</field>
                         <field name="code">I_ANMELDUNG_DER_UMSATZSTEUERVORAUSZAHLUNG_ZEILE_17_STEUER</field>
-                        <field name="aggregation_formula">LIEFERUNGEN_UND_SONSTIGE_LEISTUNGEN_ZEILE_18_STEUER.balance + LEISTUNGSEMPFANGER_ALS_STEUERSCHULDNER_ZEILE_46.balance + ABZIEHBARE_VORSTEUERBETRAGE_ZEILE_55.balance + ANDERE_STEUERBETRAGE_ZEILE_64.balance + DE_39.balance + DE_83.balance</field>
+                        <field name="aggregation_formula">LIEFERUNGEN_UND_SONSTIGE_LEISTUNGEN_ZEILE_18_STEUER.balance + LEISTUNGSEMPFANGER_ALS_STEUERSCHULDNER_ZEILE_46.balance - ABZIEHBARE_VORSTEUERBETRAGE_ZEILE_55.balance + ANDERE_STEUERBETRAGE_ZEILE_64.balance + DE_39.balance + DE_83.balance</field>
                         <field name="children_ids">
                             <record id="tax_report_de_tax_tag_18" model="account.report.line">
                                 <field name="name">Goods and services</field>
