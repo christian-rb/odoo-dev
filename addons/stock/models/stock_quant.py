@@ -276,6 +276,10 @@ class StockQuant(models.Model):
                     quant = quant[0].sudo()
                 else:
                     quant = self.sudo().create(vals)
+                    if 'quants_cache' in self.env.context:
+                        self.env.context['quants_cache'][
+                            quant.product_id.id, quant.location_id.id, quant.lot_id.id, quant.package_id.id, quant.owner_id.id
+                        ] |= quant
                 if auto_apply:
                     quant.write({'inventory_quantity_auto_apply': inventory_quantity})
                 else:
@@ -286,6 +290,10 @@ class StockQuant(models.Model):
                 quants |= quant
             else:
                 quant = super().create(vals)
+                if 'quants_cache' in self.env.context:
+                    self.env.context['quants_cache'][
+                        quant.product_id.id, quant.location_id.id, quant.lot_id.id, quant.package_id.id, quant.owner_id.id
+                    ] |= quant
                 quants |= quant
                 if self._is_inventory_mode():
                     quant._check_company()
@@ -739,42 +747,70 @@ class StockQuant(models.Model):
         return generate_domain(best_leaf)
 
     @api.model
-    def _get_removal_strategy_domain_order(self, domain, removal_strategy, qty):
-        if removal_strategy == 'fifo':
-            return domain, 'in_date ASC, id'
+    def _get_removal_strategy_order(self, removal_strategy):
+        if removal_strategy in ['fifo', 'least_packages']:
+            return 'in_date ASC, id'
         elif removal_strategy == 'lifo':
-            return domain, 'in_date DESC, id DESC'
+            return 'in_date DESC, id DESC'
         elif removal_strategy == 'closest':
-            return domain, False
-        elif removal_strategy == 'least_packages':
-            if qty > 0:
-                return self._run_least_packages_removal_strategy_astar(domain, qty), 'in_date ASC, id'
-            return domain, 'in_date ASC, id'
+            return False
         raise UserError(_('Removal strategy %s not implemented.', removal_strategy))
 
-    def _gather(self, product_id, location_id, lot_id=None, package_id=None, owner_id=None, strict=False, qty=0):
-        """ if records in self, the records are filtered based on the wanted characteristics passed to this function
-            if not, a search is done with all the characteristics passed.
-        """
+    def _gather(self, product_id, location_id, lot_id=None, package_id=None, owner_id=None, strict=False, quantity=0):
         removal_strategy = self._get_removal_strategy(product_id, location_id)
-        domain = [('product_id', '=', product_id.id)]
-        if not strict:
+        quants_cache = self.env.context.get('quants_cache')
+        if quants_cache is not None and strict and removal_strategy != 'least_packages':
+            res = self.env['stock.quant']
             if lot_id:
-                domain = expression.AND([['|', ('lot_id', '=', lot_id.id), ('lot_id', '=', False)], domain])
-            if package_id:
-                domain = expression.AND([[('package_id', '=', package_id.id)], domain])
-            if owner_id:
-                domain = expression.AND([[('owner_id', '=', owner_id.id)], domain])
-            domain = expression.AND([[('location_id', 'child_of', location_id.id)], domain])
+                res |= quants_cache[
+                    product_id.id, location_id.id, lot_id.id,
+                    package_id and package_id.id or False,
+                    owner_id and owner_id.id or False]
+            res |= quants_cache[
+                product_id.id, location_id.id, False,
+                package_id and package_id.id or False,
+                owner_id and owner_id.id or False]
         else:
-            domain = expression.AND([['|', ('lot_id', '=', lot_id.id), ('lot_id', '=', False)] if lot_id else [('lot_id', '=', False)], domain])
-            domain = expression.AND([[('package_id', '=', package_id and package_id.id or False)], domain])
-            domain = expression.AND([[('owner_id', '=', owner_id and owner_id.id or False)], domain])
-            domain = expression.AND([[('location_id', '=', location_id.id)], domain])
-        if self.env.context.get('with_expiration'):
-            domain = expression.AND([['|', ('expiration_date', '>=', self.env.context['with_expiration']), ('expiration_date', '=', False)], domain])
-        domain, order = self._get_removal_strategy_domain_order(domain, removal_strategy, qty)
-        return self.search(domain, order=order).sorted(lambda q: not q.lot_id)
+            domain = [('product_id', '=', product_id.id)]
+            if not strict:
+                if lot_id:
+                    domain = expression.AND([['|', ('lot_id', '=', lot_id.id), ('lot_id', '=', False)], domain])
+                if package_id:
+                    domain = expression.AND([[('package_id', '=', package_id.id)], domain])
+                if owner_id:
+                    domain = expression.AND([[('owner_id', '=', owner_id.id)], domain])
+                domain = expression.AND([[('location_id', 'child_of', location_id.id)], domain])
+            else:
+                domain = expression.AND([['|', ('lot_id', '=', lot_id.id), ('lot_id', '=', False)] if lot_id else [('lot_id', '=', False)], domain])
+                domain = expression.AND([[('package_id', '=', package_id and package_id.id or False)], domain])
+                domain = expression.AND([[('owner_id', '=', owner_id and owner_id.id or False)], domain])
+                domain = expression.AND([[('location_id', '=', location_id.id)], domain])
+            removal_strategy_order = self._get_removal_strategy_order(removal_strategy)
+            if removal_strategy == 'least_packages' and float_compare(quantity, 0, precision_rounding=product_id.uom_id.rounding) > 0:
+                domain = self._run_least_packages_removal_strategy_astar(domain, quantity)
+            res = self.search(domain, order=removal_strategy_order)
+        if res and removal_strategy == 'closest':
+            res = res.sorted(lambda q: (q.location_id.complete_name, -q.id))
+        return res.sorted(lambda q: not q.lot_id)
+
+    def _get_quants_by_products_locations(self, product_ids, location_ids, extra_domain=False):
+        res = defaultdict(lambda: self.env['stock.quant'])
+        if product_ids and location_ids:
+            domain = [
+                ('product_id', 'in', product_ids.ids),
+                ('location_id', 'child_of', location_ids.ids)
+            ]
+            if extra_domain:
+                domain = expression.AND([domain, extra_domain])
+            needed_quants = self.env['stock.quant']._read_group(
+                domain,
+                ['product_id', 'location_id', 'lot_id', 'package_id', 'owner_id'],
+                ['id:array_agg'],
+            )
+            for group in needed_quants:
+                group, ids = group[:-1], group[-1]
+                res[(f.id for f in list(group))] = self.env['stock.quant'].browse(ids)
+        return res
 
     @api.model
     def _get_available_quantity(self, product_id, location_id, lot_id=None, package_id=None, owner_id=None, strict=False, allow_negative=False):
@@ -792,6 +828,9 @@ class StockQuant(models.Model):
         quants we'll reserve, and the characteristics are meaningless in this context.
         In the last ones, `strict` should be set to `True`, as we work on a specific set of
         characteristics.
+        The quantity parameter has a use when the removal strategy is least_package. Since we have to
+        pick a limited number of packages, we need to know the needed quantity. Otherwise leastpackage
+        is considered with a fifo strategy.
 
         :return: available quantity as a float
         """
@@ -830,7 +869,7 @@ class StockQuant(models.Model):
         """
         self = self.sudo()
         rounding = product_id.uom_id.rounding
-        quants = self or self._gather(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=strict, qty=quantity)
+        quants = self or self._gather(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=strict, quantity=quantity)
         reserved_quants = []
 
         if float_compare(quantity, 0, precision_rounding=rounding) > 0:
