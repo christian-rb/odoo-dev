@@ -137,7 +137,7 @@ export class CalendarCommonRenderer extends Component {
             title: record.title,
             start: record.start.toISO(),
             end:
-                ["week", "month"].includes(this.props.model.scale) && record.isAllDay
+                ["week", "month", "day"].includes(this.props.model.scale) && record.isAllDay
                     ? record.end.plus({ days: 1 }).toISO()
                     : record.end.toISO(),
             allDay: record.isAllDay,
@@ -157,7 +157,7 @@ export class CalendarCommonRenderer extends Component {
         this.popover.open(
             target,
             this.getPopoverProps(record),
-            `o_cw_popover o_calendar_color_${typeof(color) === "number" ? color : 0}`
+            `o_cw_popover o_calendar_color_${typeof color === "number" ? color : 0}`
         );
     }
     updateSize() {
