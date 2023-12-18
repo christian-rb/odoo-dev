@@ -2,10 +2,9 @@
 from unittest.mock import patch
 
 from odoo import Command
-from odoo.addons.account.models.chart_template import AccountChartTemplate
-from odoo.addons.account.tests.common import instantiate_accountman
 from odoo.tests import tagged
-from odoo.tests.common import TransactionCase
+from odoo.addons.account.models.chart_template import AccountChartTemplate
+from odoo.addons.base.tests.common import BaseCommon
 
 
 def _get_chart_template_mapping(self, get_all=False):
@@ -137,7 +136,7 @@ def _tax_vals(name, amount, external_id_prefix):
 
 @tagged('post_install', '-at_install')
 @patch.object(AccountChartTemplate, '_get_chart_template_mapping', _get_chart_template_mapping)
-class TestMultiVAT(TransactionCase):
+class TestMultiVAT(BaseCommon):
 
     @classmethod
     @patch.object(AccountChartTemplate, '_get_chart_template_mapping', _get_chart_template_mapping)
@@ -147,14 +146,13 @@ class TestMultiVAT(TransactionCase):
             We need to add xml_ids to the templates because they are loaded from their xml_ids
         """
         super().setUpClass()
-        instantiate_accountman(cls)
 
         cls.company_1 = cls.env['res.company'].create({
             'name': 'TestCompany1',
             'country_id': cls.env.ref('base.be').id,
         })
 
-        cls.user.write({
+        cls.env.user.write({
             'company_ids': [Command.set(cls.company_1.ids)],
             'company_id': cls.company_1.id,
         })

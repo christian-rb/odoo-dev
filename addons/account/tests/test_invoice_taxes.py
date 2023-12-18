@@ -9,10 +9,9 @@ from odoo.tests import tagged, Form
 class TestInvoiceTaxes(AccountTestInvoicingCommon):
 
     @classmethod
-    def setUpClass(cls, chart_template_ref=None):
-        super().setUpClass(chart_template_ref=chart_template_ref)
-
-        cls.company_data['company'].country_id = cls.env.ref('base.us')
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.currency_data = cls.setup_other_currency('EUR')
 
         cls.percent_tax_1 = cls.env['account.tax'].create({
             'name': '21%',

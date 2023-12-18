@@ -10,8 +10,9 @@ from unittest.mock import patch
 class TestAccountIncomingSupplierInvoice(AccountTestInvoicingCommon):
 
     @classmethod
-    def setUpClass(cls, chart_template_ref=None):
-        super().setUpClass(chart_template_ref=chart_template_ref)
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.env = cls.env(context=cls.default_context())
 
         cls.internal_user = cls.env['res.users'].create({
             'name': 'Internal User',

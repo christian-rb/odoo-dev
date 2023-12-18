@@ -12,8 +12,11 @@ from odoo.tests import tagged
 class TestUBLBE(TestUBLCommon, TestAccountMoveSendCommon):
 
     @classmethod
-    def setUpClass(cls, chart_template_ref="be_comp"):
-        super().setUpClass(chart_template_ref=chart_template_ref)
+    @TestUBLCommon.setup_country("be")
+    def setUpClass(cls):
+        super().setUpClass()
+
+        cls.company.vat = "BE0246697724"
 
         # seller
         cls.partner_1 = cls.env['res.partner'].create({
@@ -99,17 +102,6 @@ class TestUBLBE(TestUBLCommon, TestAccountMoveSendCommon):
             'line_ids': [
                 Command.create({'value': 'percent', 'value_amount': 100.0, 'nb_days': 30})],
         })
-
-    @classmethod
-    def setup_company_data(cls, company_name, chart_template):
-        # OVERRIDE
-        # to force the company to be belgian
-        res = super().setup_company_data(
-            company_name,
-            chart_template=chart_template,
-            country_id=cls.env.ref("base.be").id,
-            vat="BE0246697724")
-        return res
 
     ####################################################
     # Test export - import
@@ -744,7 +736,7 @@ class TestUBLBE(TestUBLCommon, TestAccountMoveSendCommon):
             subfolder='tests/test_files/from_odoo', filename='bis3_pay_term.xml', amount_total=3105.68,
             amount_tax=505.68, list_line_subtotals=[-4, -48, 52, 200, 2400],
             currency_id=self.currency_data['currency'].id, list_line_price_unit=[-4, -48, 52, 200, 2400],
-            list_line_discount=[0, 0, 0, 0, 0], list_line_taxes=[self.tax_6, tax_21, self.tax_0, self.tax_6, tax_21],
+            list_line_discount=[0, 0, 0, 0, 0], list_line_taxes=[self.tax_6, tax_21, tax_0, self.tax_6, tax_21],
             move_type='out_invoice',
         )
 

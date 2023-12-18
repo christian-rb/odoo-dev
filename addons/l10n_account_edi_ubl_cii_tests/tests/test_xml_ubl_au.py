@@ -7,8 +7,9 @@ from odoo.tests import tagged
 class TestUBLAU(TestUBLCommon):
 
     @classmethod
-    def setUpClass(cls, chart_template_ref="au"):
-        super().setUpClass(chart_template_ref=chart_template_ref)
+    @TestUBLCommon.setup_country('au')
+    def setUpClass(cls):
+        super().setUpClass()
 
         cls.partner_1 = cls.env['res.partner'].create({
             'name': "partner_1",
@@ -41,16 +42,6 @@ class TestUBLAU(TestUBLCommon):
             'type_tax_use': 'sale',
             'country_id': cls.env.ref('base.au').id,
         })
-
-    @classmethod
-    def setup_company_data(cls, company_name, chart_template):
-        # OVERRIDE
-        res = super().setup_company_data(
-            company_name,
-            chart_template=chart_template,
-            country_id=cls.env.ref("base.au").id,
-        )
-        return res
 
     ####################################################
     # Test export - import

@@ -2,6 +2,8 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import logging
 
+from odoo import Command
+
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 from odoo.exceptions import UserError
 from odoo.tests import tagged
@@ -12,8 +14,9 @@ _logger = logging.getLogger(__name__)
 class QRPrintTest(AccountTestInvoicingCommon):
 
     @classmethod
-    def setUpClass(cls, chart_template_ref='ch'):
-        super().setUpClass(chart_template_ref=chart_template_ref)
+    @AccountTestInvoicingCommon.setup_country('ch')
+    def setUpClass(cls):
+        super().setUpClass()
         # the partner must be located in Switzerland.
         cls.partner = cls.env['res.partner'].create({
             'name': 'Bobby',
@@ -30,7 +33,7 @@ class QRPrintTest(AccountTestInvoicingCommon):
             'partner_bank_id': cls.qr_bank_account.id,
             'currency_id': cls.env.ref('base.CHF').id,
             'invoice_date': '2019-01-01',
-            'invoice_line_ids': [(0, 0, {'product_id': cls.product_a.id})],
+            'invoice_line_ids': [Command.create({'product_id': cls.product_a.id})],
         })
 
         cls.correct_invoice_eur = cls.env['account.move'].create({
@@ -39,7 +42,7 @@ class QRPrintTest(AccountTestInvoicingCommon):
             'partner_bank_id': cls.qr_bank_account.id,
             'currency_id': cls.env.ref('base.EUR').id,
             'invoice_date': '2019-01-01',
-            'invoice_line_ids': [(0, 0, {'product_id': cls.product_a.id})],
+            'invoice_line_ids': [Command.create({'product_id': cls.product_a.id})],
         })
 
         cls.wrong_partner_invoice = cls.env['account.move'].create({
@@ -48,7 +51,7 @@ class QRPrintTest(AccountTestInvoicingCommon):
             'partner_bank_id': cls.qr_bank_account.id,
             'currency_id': cls.env.ref('base.EUR').id,
             'invoice_date': '2019-01-01',
-            'invoice_line_ids': [(0, 0, {'product_id': cls.product_a.id})],
+            'invoice_line_ids': [Command.create({'product_id': cls.product_a.id})],
         })
 
     def print_qr_bill(self, invoice):

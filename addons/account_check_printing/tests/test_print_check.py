@@ -12,8 +12,9 @@ import math
 class TestPrintCheck(AccountTestInvoicingCommon):
 
     @classmethod
-    def setUpClass(cls, chart_template_ref=None):
-        super().setUpClass(chart_template_ref=chart_template_ref)
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.currency_data = cls.setup_other_currency('EUR')
 
         bank_journal = cls.company_data['default_journal_bank']
 
@@ -140,7 +141,7 @@ class TestPrintCheck(AccountTestInvoicingCommon):
             'number': invoice.name,
             'amount_total': f'${NON_BREAKING_SPACE}150.00',
             'amount_residual': f'${NON_BREAKING_SPACE}75.00',
-            'amount_paid': f'150.000{NON_BREAKING_SPACE}☺',
+            'amount_paid': f'150.00{NON_BREAKING_SPACE}€',
             'currency': invoice.currency_id,
         }]])
 

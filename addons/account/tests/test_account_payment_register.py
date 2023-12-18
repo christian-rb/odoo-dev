@@ -9,15 +9,11 @@ from odoo import Command
 class TestAccountPaymentRegister(AccountTestInvoicingCommon):
 
     @classmethod
-    def setUpClass(cls, chart_template_ref=None):
-        super().setUpClass(chart_template_ref=chart_template_ref)
+    def setUpClass(cls):
+        super().setUpClass()
 
-        cls.currency_data_3 = cls.setup_multi_currency_data({
-            'name': "Umbrella",
-            'symbol': '☂',
-            'currency_unit_label': "Umbrella",
-            'currency_subunit_label': "Broken Umbrella",
-        }, rate2017=0.01)
+        cls.currency_data = cls.setup_other_currency('EUR')
+        cls.currency_data_3 = cls.setup_other_currency('CAD', rates=[('2016-01-01', 3.0), ('2017-01-01', 0.01)])
 
         cls.payment_debit_account_id = cls.company_data['default_journal_bank'].company_id.account_journal_payment_debit_account_id.copy()
         cls.payment_credit_account_id = cls.company_data['default_journal_bank'].company_id.account_journal_payment_credit_account_id.copy()

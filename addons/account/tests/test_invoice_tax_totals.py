@@ -9,8 +9,9 @@ from odoo.tests import tagged
 class TestTaxTotals(AccountTestInvoicingCommon):
 
     @classmethod
-    def setUpClass(cls, chart_template_ref=None):
-        super().setUpClass(chart_template_ref=chart_template_ref)
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.currency_data = cls.setup_other_currency('EUR')
         cls.maxDiff = None
 
         cls.tax_group1 = cls.env['account.tax.group'].create({

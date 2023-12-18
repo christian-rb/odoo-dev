@@ -9,8 +9,8 @@ from odoo.tools import format_date
 @tagged('post_install', '-at_install')
 class TestAccountMoveInalterableHash(AccountTestInvoicingCommon):
     @classmethod
-    def setUpClass(cls, chart_template_ref=None):
-        super().setUpClass(chart_template_ref=chart_template_ref)
+    def setUpClass(cls):
+        super().setUpClass()
 
     def _init_and_send(self, vals, hash_version=False):
         moves = self.env['account.move']

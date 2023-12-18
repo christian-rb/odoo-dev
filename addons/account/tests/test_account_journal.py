@@ -13,6 +13,12 @@ from odoo.exceptions import UserError, ValidationError
 @tagged('post_install', '-at_install')
 class TestAccountJournal(AccountTestInvoicingCommon):
 
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.currency_data = cls.setup_other_currency('EUR')
+        cls.company_data_2 = cls.setup_other_company()
+
     def test_constraint_currency_consistency_with_accounts(self):
         ''' The accounts linked to a bank/cash journal must share the same foreign currency
         if specified.
@@ -151,6 +157,11 @@ class TestAccountJournal(AccountTestInvoicingCommon):
 
 @tagged('post_install', '-at_install', 'mail_alias')
 class TestAccountJournalAlias(AccountTestInvoicingCommon, MailCommon):
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.company_data_2 = cls.setup_other_company()
 
     def test_alias_name_creation(self):
         """ Test alias creation, notably avoid raising constraints due to ascii

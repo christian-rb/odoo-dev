@@ -12,6 +12,7 @@ class TestPurchaseToInvoiceCommon(AccountTestInvoicingCommon):
     @classmethod
     def setUpClass(cls):
         super(TestPurchaseToInvoiceCommon, cls).setUpClass()
+        cls.currency_data = cls.setup_other_currency('EUR')
         uom_unit = cls.env.ref('uom.product_uom_unit')
         uom_hour = cls.env.ref('uom.product_uom_hour')
         cls.product_order = cls.env['product.product'].create({

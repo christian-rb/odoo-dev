@@ -14,8 +14,8 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
     '''
 
     @classmethod
-    def setUpClass(cls, chart_template_ref=None):
-        super().setUpClass(chart_template_ref=chart_template_ref)
+    def setUpClass(cls):
+        super().setUpClass()
 
         cls.receivable_account = cls.company_data['default_account_receivable']
         cls.payable_account = cls.company_data['default_account_payable']
@@ -32,19 +32,9 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
 
 
         # ==== Multi-currency setup ====
-
-        cls.currency_data_2 = cls.setup_multi_currency_data(default_values={
-            'name': 'Diamond',
-            'symbol': '💎',
-            'currency_unit_label': 'Diamond',
-            'currency_subunit_label': 'Carbon',
-        }, rate2016=6.0, rate2017=4.0)
-        cls.currency_data_3 = cls.setup_multi_currency_data(default_values={
-            'name': 'Sand',
-            'symbol': 'S',
-            'currency_unit_label': 'Sand',
-            'currency_subunit_label': 'Sand',
-        }, rate2016=0.0001, rate2017=0.00001)
+        cls.currency_data = cls.setup_other_currency('EUR', rounding=0.001)
+        cls.currency_data_2 = cls.setup_other_currency('CAD', rates=[('2016-01-01', 6.0), ('2017-01-01', 4.0)])
+        cls.currency_data_3 = cls.setup_other_currency('XAF', rates=[('2016-01-01', 0.0001), ('2017-01-01', 0.00001)])
 
         # ==== Cash Basis Taxes setup ====
 
@@ -364,12 +354,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
         In that case, we don't reconcile anything.
         """
         currency_1 = self.currency_data['currency']
-        currency_2 = self.setup_multi_currency_data({
-            'name': 'Bretonnian Ecu',
-            'symbol': '👑',
-            'currency_unit_label': 'Ecu',
-            'currency_subunit_label': 'Bretonnian Denier',
-        })['currency']
+        currency_2 = self.setup_other_currency('CHF')['currency']
 
         line_1 = self.create_line_for_reconciliation(0.0, -0.01, currency_1, '2017-01-01')
         line_2 = self.create_line_for_reconciliation(0.0, 0.02, currency_2, '2016-01-01')
@@ -2573,14 +2558,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
         ])
 
     def test_reconcile_rounding_issue(self):
-        rate = 1/1.5289
-        currency = self.setup_multi_currency_data(default_values={
-            'name': 'XXX',
-            'symbol': 'XXX',
-            'currency_unit_label': 'XX',
-            'currency_subunit_label': 'X',
-            'rounding': 0.01,
-        }, rate2016=rate, rate2017=rate)['currency']
+        currency = self.setup_other_currency('CHF', rates=[('2016-01-01', 1/1.5289), ('2017-01-01', 1/1.5289)])['currency']
 
         # Create an invoice 26.45 XXX = 40.43 USD
         invoice = self.env['account.move'].create({
@@ -3283,12 +3261,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
         account is not a reconcile one.
         '''
         self.env.company.tax_exigibility = True
-        currency_id = self.setup_multi_currency_data(default_values={
-            'name': 'bitcoin',
-            'symbol': 'bc',
-            'currency_unit_label': 'Bitcoin',
-            'currency_subunit_label': 'Tiny bitcoin',
-        }, rate2016=0.5, rate2017=0.66666666666666)['currency'].id
+        currency_id = self.setup_other_currency('CHF', rates=[('2016-01-01', 0.5), ('2017-01-01', 0.66666666666666)])['currency'].id
 
         # Rate 2/1 in 2016.
         caba_inv = self.env['account.move'].with_context(skip_invoice_sync=True).create({
@@ -3366,13 +3339,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
         account is not a reconcile one.
         '''
         self.env.company.tax_exigibility = True
-        currency_id = self.setup_multi_currency_data(default_values={
-            'name': 'bitcoin',
-            'symbol': 'bc',
-            'currency_unit_label': 'Bitcoin',
-            'currency_subunit_label': 'Tiny bitcoin',
-            'rounding': 0.01,
-        }, rate2016=0.5, rate2017=0.66666666666666)['currency'].id
+        currency_id = self.setup_other_currency('CHF', rates=[('2016-01-01', 0.5), ('2017-01-01', 0.66666666666666)])['currency'].id
 
         # Rate 2/1 in 2016.
         caba_inv = self.env['account.move'].with_context(skip_invoice_sync=True).create({
@@ -3560,13 +3527,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
 
     def test_reconcile_cash_basis_refund_multicurrency(self):
         self.env.company.tax_exigibility = True
-        rates_data = self.setup_multi_currency_data(default_values={
-            'name': 'Playmock',
-            'symbol': '🦌',
-            'rounding': 0.01,
-            'currency_unit_label': 'Playmock',
-            'currency_subunit_label': 'Cent',
-        }, rate2016=0.5, rate2017=0.33333333333333333)
+        rates_data = self.setup_other_currency('CHF', rates=[('2016-01-01', 0.5), ('2017-01-01', 0.33333333333333333)])
 
         invoice = self.env['account.move'].create({
             'move_type': 'out_invoice',
@@ -4578,7 +4539,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
         self.env.company.tax_exigibility = True
 
         # Rates are 1/3 for 2016, 1/2 for 2017 and 5/1 in 2018
-        currency_id = self.setup_multi_currency_data({'name': 'Minovsky Dollar', 'rounding': 0.01})['currency'].id
+        currency_id = self.setup_other_currency('CHF')['currency'].id
 
         self.env['res.currency.rate'].create({
             'name': '2018-01-01',

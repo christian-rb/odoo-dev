@@ -1057,10 +1057,168 @@ class TestExpenses(TestExpenseCommon):
         {
             'name': 'Company expense 2',
             'payment_mode': 'company_account',
-            'currency_id': self.currency_data['currency'].id,
+            'currency_id': self.other_currency.id,
             'total_amount_currency': 1000.00,
             'total_amount': 2000.00,
             'employee_id': self.expense_employee.id,
         }])
         expense_state = Expense.get_expense_dashboard()
         self.assertEqual(expense_state['to_submit']['amount'], 3000.00)
+
+    def test_expense_standard_price_update_warning(self):
+        self.expense_cat_A = self.env['product.product'].create({
+            'name': 'Category A',
+            'default_code': 'CA',
+            'standard_price': 0.0,
+        })
+        self.expense_cat_B = self.env['product.product'].create({
+            'name': 'Category B',
+            'default_code': 'CB',
+            'standard_price': 0.0,
+        })
+        self.expense_cat_C = self.env['product.product'].create({
+            'name': 'Category C',
+            'default_code': 'CC',
+            'standard_price': 0.0,
+        })
+        self.expense_1 = self.env['hr.expense'].create({
+            'employee_id': self.expense_employee.id,
+            'name': 'Expense 1',
+            'product_id': self.expense_cat_A.id,
+            'total_amount': 1,
+        })
+        self.expense_2 = self.env['hr.expense'].create({
+            'employee_id': self.expense_employee.id,
+            'name': 'Expense 2',
+            'product_id': self.expense_cat_B.id,
+            'total_amount': 5,
+        })
+
+        # At first, there is no warning message on the categories because their prices are 0
+        self.assertFalse(self.expense_cat_A.standard_price_update_warning)
+        self.assertFalse(self.expense_cat_B.standard_price_update_warning)
+        self.assertFalse(self.expense_cat_C.standard_price_update_warning)
+
+        # When modifying the price of the first category, a message should appear as a an expense will be modified.
+        with Form(self.expense_cat_A, view="hr_expense.product_product_expense_form_view") as form:
+            form.standard_price = 5
+            self.assertTrue(form.standard_price_update_warning)
+
+        # When modifying the price of the second category, no message should appear as the price of the linked
+        # expense is the price of the category that is going to be saved.
+        with Form(self.expense_cat_B, view="hr_expense.product_product_expense_form_view") as form:
+            form.standard_price = 5
+            self.assertFalse(form.standard_price_update_warning)
+
+        # When modifying the price of the thirs category, no message should appear as no expense is linked to it.
+        with Form(self.expense_cat_C, view="hr_expense.product_product_expense_form_view") as form:
+            form.standard_price = 5
+            self.assertFalse(form.standard_price_update_warning)
+
+    def test_expense_sheet_multi_company(self):
+        self.expense_employee.company_id = self.company_data_2['company']
+
+        # The expense employee is able to a create an expense sheet for company_2.
+        # product_a needs a standard_price in company_2
+        self.product_a.with_context(allowed_company_ids=self.company_data_2['company'].ids).standard_price = 100
+
+        expense_sheet_approve = self.env['hr.expense.sheet'] \
+            .with_user(self.expense_user_employee) \
+            .with_context(allowed_company_ids=self.company_data_2['company'].ids) \
+            .create({
+            'name': 'First Expense for employee',
+            'employee_id': self.expense_employee.id,
+            'journal_id': self.company_data_2['default_journal_purchase'].id,
+            'accounting_date': '2017-01-01',
+            'expense_line_ids': [Command.create({
+                # Expense without foreign currency but analytic account.
+                'name': 'expense_1',
+                'date': '2016-01-01',
+                'product_id': self.product_a.id,
+                'price_unit': 1000.0,
+                'employee_id': self.expense_employee.id,
+            })],
+        })
+        expense_sheet_refuse = self.env['hr.expense.sheet'] \
+            .with_user(self.expense_user_employee) \
+            .with_context(allowed_company_ids=self.company_data_2['company'].ids) \
+            .create({
+            'name': 'First Expense for employee',
+            'employee_id': self.expense_employee.id,
+            'journal_id': self.company_data_2['default_journal_purchase'].id,
+            'accounting_date': '2017-01-01',
+            'expense_line_ids': [Command.create({
+                # Expense without foreign currency but analytic account.
+                'name': 'expense_1',
+                'date': '2016-01-01',
+                'product_id': self.product_a.id,
+                'price_unit': 1000.0,
+                'employee_id': self.expense_employee.id,
+            })],
+        })
+        expenses = expense_sheet_approve | expense_sheet_refuse
+        self.assertRecordValues(expenses, [
+            {'company_id': self.company_data_2['company'].id},
+            {'company_id': self.company_data_2['company'].id},
+        ])
+
+        # The expense employee is able to submit the expense sheet.
+        expenses.with_user(self.expense_user_employee).action_submit_sheet()
+
+        # An expense manager is not able to approve nor refuse without access to company_2.
+        with self.assertRaises(UserError):
+            expense_sheet_approve \
+                .with_user(self.expense_user_manager) \
+                .with_context(allowed_company_ids=self.company_data['company'].ids) \
+                .action_approve_expense_sheets()
+
+        with self.assertRaises(UserError):
+            expense_sheet_refuse \
+                .with_user(self.expense_user_manager) \
+                .with_context(allowed_company_ids=self.company_data['company'].ids) \
+                ._do_refuse('failed')
+
+        # An expense manager is able to approve/refuse with access to company_2.
+        expense_sheet_approve \
+            .with_user(self.expense_user_manager) \
+            .with_context(allowed_company_ids=self.company_data_2['company'].ids) \
+            .action_approve_expense_sheets()
+        expense_sheet_refuse \
+            .with_user(self.expense_user_manager) \
+            .with_context(allowed_company_ids=self.company_data_2['company'].ids) \
+            ._do_refuse('failed')
+
+        # An expense manager having accounting access rights is not able to create the journal entry without access
+        # to company_2.
+        with self.assertRaises(UserError):
+            expense_sheet_approve \
+                .with_user(self.env.user) \
+                .with_context(allowed_company_ids=self.company_data['company'].ids) \
+                .action_sheet_move_create()
+
+        # An expense manager having accounting access rights is able to create the journal entry with access to
+        # company_2.
+        expense_sheet_approve \
+            .with_user(self.env.user) \
+            .with_context(allowed_company_ids=self.company_data_2['company'].ids) \
+            .action_sheet_move_create()
+
+    def test_tax_is_used_when_in_transactions(self):
+        ''' Ensures that a tax is set to used when it is part of some transactions '''
+
+        # Account.move is one type of transaction
+        tax_expense = self.env['account.tax'].create({
+            'name': 'test_is_used_expenses',
+            'amount': '100',
+            'include_base_amount': True,
+        })
+
+        self.env['hr.expense'].create({
+            'name': 'Test Tax Used',
+            'employee_id': self.expense_employee.id,
+            'product_id': self.product_c.id,
+            'total_amount_currency': 350.00,
+            'tax_ids': [Command.set(tax_expense.ids)]
+        })
+        tax_expense.invalidate_model(fnames=['is_used'])
+        self.assertTrue(tax_expense.is_used)

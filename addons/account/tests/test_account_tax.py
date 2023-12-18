@@ -9,6 +9,21 @@ from odoo.exceptions import UserError
 @tagged('post_install', '-at_install')
 class TestAccountTax(AccountTestInvoicingCommon):
 
+    @classmethod
+    def default_context(cls):
+        """ Adding logs for the tax created """
+        context = super().default_context()
+        return {
+            **context,
+            'tracking_disable': False,
+            'mail_notrack': False,
+        }
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.company_data_2 = cls.setup_other_company()
+
     def set_up_and_use_tax(self):
 
         self.env['account.move'].create({

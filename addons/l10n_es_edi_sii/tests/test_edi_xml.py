@@ -19,6 +19,8 @@ class TestEdiXmls(TestEsEdiCommon):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        cls.currency_data = cls.setup_other_currency('USD')
+
         cls.certificate.write({
             'date_start': '2019-01-01 01:00:00',
             'date_end': '2021-01-01 01:00:00',

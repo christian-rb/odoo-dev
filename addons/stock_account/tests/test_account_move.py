@@ -8,8 +8,10 @@ from odoo import fields
 
 class TestAccountMoveStockCommon(AccountTestInvoicingCommon):
     @classmethod
-    def setUpClass(cls, chart_template_ref=None):
-        super().setUpClass(chart_template_ref=chart_template_ref)
+    def setUpClass(cls):
+        super().setUpClass()
+
+        cls.currency_data = cls.setup_other_currency('EUR')
 
         (
             cls.stock_input_account,

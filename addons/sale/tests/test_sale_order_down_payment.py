@@ -9,10 +9,12 @@ from .common import TestSaleCommon
 class TestSaleOrderDownPayment(TestSaleCommon):
 
     @classmethod
-    def setUpClass(cls, chart_template_ref=None):
-        super().setUpClass(chart_template_ref=chart_template_ref)
+    def setUpClass(cls):
+        super().setUpClass()
 
-        SaleOrder = cls.env['sale.order'].with_context(tracking_disable=True)
+        cls.currency_data = cls.setup_other_currency('EUR')
+
+        SaleOrder = cls.env['sale.order']
 
         cls.tax_account = cls.env['account.account'].search([('account_type', '=', 'liability_current')], limit=1)
         cls.tax_10 = cls.create_tax(10)

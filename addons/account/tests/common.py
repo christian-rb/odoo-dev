@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 from odoo import fields, Command
+from odoo.addons.product.tests.common import ProductCommon
 from odoo.tests import Form, TransactionCase, HttpCase
 from odoo.tools.float_utils import float_round
 
@@ -10,96 +11,73 @@ from lxml import etree
 from unittest import SkipTest
 
 
-def instantiate_accountman(cls):
-    cls.user = cls.env['res.users'].create({
-        'name': 'Because I am accountman!',
-        'login': 'accountman',
-        'password': 'accountman',
-        'groups_id': [
-            Command.set(cls.env.user.groups_id.ids),
-            Command.link(cls.env.ref('account.group_account_manager').id),
-            Command.link(cls.env.ref('account.group_account_user').id),
-        ],
-    })
-    cls.user.partner_id.email = 'accountman@test.com'
-
-    # Shadow the current environment/cursor with one having the report user.
-    # This is mandatory to test access rights.
-    cls.env = cls.env(user=cls.user)
-    cls.cr = cls.env.cr
-
-class AccountTestInvoicingCommon(TransactionCase):
+class AccountTestInvoicingCommon(ProductCommon):
 
     @classmethod
     def safe_copy(cls, record):
         return record and record.copy()
 
-    @classmethod
-    def copy_account(cls, account, default=None):
-        suffix_nb = 1
-        while True:
-            new_code = '%s.%s' % (account.code, suffix_nb)
-            if account.search_count([('company_id', '=', account.company_id.id), ('code', '=', new_code)]):
-                suffix_nb += 1
-            else:
-                return account.copy(default={**(default or {}), 'code': new_code, 'name': account.name})
+    @staticmethod
+    def setup_country(country_code):
+        def _decorator(function):
+            def wrapper(self):
+                self.country_code = country_code.upper()
+                function(self)
+            return wrapper
+
+        return _decorator
+
+    @staticmethod
+    def setup_chart_template(chart_template):
+        def _decorator(function):
+            def wrapper(self):
+                self.chart_template = chart_template
+                function(self)
+            return wrapper
+
+        return _decorator
 
     @classmethod
-    def setUpClass(cls, chart_template_ref=None):
+    def default_context(cls):
+        return {
+            'disable_abnormal_invoice_detection': True,
+        }
+
+    @classmethod
+    def setUpClass(cls):
         super().setUpClass()
         cls.env = cls.env(context={
             **cls.env.context,
-            'disable_abnormal_invoice_detection': True,
+            **cls.default_context(),
         })
-        cls.env.ref('base.main_company').currency_id = cls.env.ref('base.USD')
-        instantiate_accountman(cls)
+        # TODO LAS: check if necessary
+        cls.cr = cls.env.cr  # NOTE: LAS confusing and unnecessary variable, should not be in the BaseCommon
 
-        assert 'post_install' in cls.test_tags, 'This test requires a CoA to be installed, it should be tagged "post_install"'
-
-        if chart_template_ref:
-            template_vals = cls.env['account.chart.template']._get_chart_template_mapping()[chart_template_ref]
-            template_module = cls.env.ref(f"base.module_{template_vals['module']}")
-            if template_module.state != 'installed':
-                raise SkipTest(f"Module required for the test is not installed ({template_module.name})")
-
-        cls.company_data_2 = cls.setup_company_data('company_2_data', chart_template=chart_template_ref)
-        cls.company_data = cls.setup_company_data('company_1_data', chart_template=chart_template_ref)
-
-        cls.user.write({
-            'company_ids': [Command.set((cls.company_data['company'] + cls.company_data_2['company']).ids)],
-            'company_id': cls.company_data['company'].id,
-        })
-
-        cls.currency_data = cls.setup_multi_currency_data()
+        cls.company_data = cls.collect_company_accounting_data(cls.env.company)
 
         # ==== Taxes ====
         cls.tax_sale_a = cls.company_data['default_tax_sale']
-        cls.tax_sale_b = cls.safe_copy(cls.company_data['default_tax_sale'])
+        cls.tax_sale_b = cls.company_data['default_tax_sale'] and cls.company_data['default_tax_sale'].copy()
         cls.tax_purchase_a = cls.company_data['default_tax_purchase']
-        cls.tax_purchase_b = cls.safe_copy(cls.company_data['default_tax_purchase'])
+        cls.tax_purchase_b = cls.company_data['default_tax_purchase'] and cls.company_data['default_tax_purchase'].copy()
         cls.tax_armageddon = cls.setup_armageddon_tax('complex_tax', cls.company_data)
 
         # ==== Products ====
-        cls.product_a = cls.env['product.product'].create({
-            'name': 'product_a',
-            'uom_id': cls.env.ref('uom.product_uom_unit').id,
-            'lst_price': 1000.0,
-            'standard_price': 800.0,
-            'property_account_income_id': cls.company_data['default_account_revenue'].id,
-            'property_account_expense_id': cls.company_data['default_account_expense'].id,
-            'taxes_id': [Command.set(cls.tax_sale_a.ids)],
-            'supplier_taxes_id': [Command.set(cls.tax_purchase_a.ids)],
-        })
-        cls.product_b = cls.env['product.product'].create({
-            'name': 'product_b',
-            'uom_id': cls.env.ref('uom.product_uom_dozen').id,
-            'lst_price': 200.0,
-            'standard_price': 160.0,
-            'property_account_income_id': cls.copy_account(cls.company_data['default_account_revenue']).id,
-            'property_account_expense_id': cls.copy_account(cls.company_data['default_account_expense']).id,
-            'taxes_id': [Command.set((cls.tax_sale_a + cls.tax_sale_b).ids)],
-            'supplier_taxes_id': [Command.set((cls.tax_purchase_a + cls.tax_purchase_b).ids)],
-        })
+        cls.product_a = cls._create_product(
+            name='product_a',
+            lst_price=1000.0,
+            standard_price=800.0
+        )
+        cls.product_b = cls._create_product(
+            name='product_b',
+            uom_id=cls.uom_dozen.id,
+            lst_price=200.0,
+            standard_price=160.0,
+            property_account_income_id=cls.copy_account(cls.company_data['default_account_revenue']).id,
+            property_account_expense_id=cls.copy_account(cls.company_data['default_account_expense']).id,
+            taxes_id=[Command.set((cls.tax_sale_a + cls.tax_sale_b).ids)],
+            supplier_taxes_id=[Command.set((cls.tax_purchase_a + cls.tax_purchase_b).ids)],
+        )
 
         # ==== Fiscal positions ====
         cls.fiscal_pos_a = cls.env['account.fiscal.position'].create({
@@ -194,32 +172,77 @@ class AccountTestInvoicingCommon(TransactionCase):
             )
 
     @classmethod
-    def setup_company_data(cls, company_name, chart_template=None, **kwargs):
-        ''' Create a new company having the name passed as parameter.
-        A chart of accounts will be installed to this company: the same as the current company one.
-        The current user will get access to this company.
+    def setup_other_company(cls, **kwargs):
+        # OVERRIDE
+        company = cls._create_company(**{'name': 'company_2'} | kwargs)
+        return cls.collect_company_accounting_data(company)
 
-        :param chart_template: The chart template to be used on this new company.
-        :param company_name: The name of the company.
-        :return: A dictionary will be returned containing all relevant accounting data for testing.
-        '''
+    @classmethod
+    def setup_independent_company(cls, **kwargs):
+        # OVERRIDE
+        company = super().setup_independent_company(**kwargs)
+        if not company:
+            company = cls._create_company(name='company_1_data', **kwargs)
+        return company
 
-        company = cls.env['res.company'].create({
-            'name': company_name,
-            **kwargs,
-        })
-        cls.env.user.company_ids |= company
+    @classmethod
+    def _create_company(cls, **create_values):
+        country_code = getattr(cls, 'country_code', None)
+        if country_code:
+            country = cls.env['res.country'].search([('code', '=', country_code.upper())])
+            if not country:
+                raise ValueError('Invalid country code')
+            create_values.update({
+                'country_id': create_values.get('country_id', country.id),
+                'currency_id': create_values.get('currency_id', country.currency_id.id),
+            })
+        chart_template_ref = getattr(cls, 'chart_template', None)
+        company = super()._create_company(**create_values)
+        cls._use_chart_template(company, chart_template_ref)
+        if create_values.get('currency_id'):
+            company.currency_id = create_values.get('currency_id')
+        return company
+
+    @classmethod
+    def _create_product(cls, **create_values):
+        # OVERRIDE
+        create_values.setdefault('property_account_income_id', cls.company_data['default_account_revenue'].id)
+        create_values.setdefault('property_account_expense_id', cls.company_data['default_account_expense'].id)
+        create_values.setdefault('taxes_id', [Command.set(cls.tax_sale_a.ids)])
+        return super()._create_product(**create_values)
+
+    @classmethod
+    def _create_user(cls, groups, **create_values):
+        return super()._create_user(
+            groups + cls.env.ref('account.group_account_manager') + cls.env.ref('account.group_account_user'),
+            name='Because I am accountman!',
+            login='accountman',
+            password='accountman',
+            email='accountman@test.com',
+            **create_values,
+        )
+
+    @classmethod
+    def setup_other_currency(cls, code, **kwargs):
+        if 'rates' not in kwargs:
+            return super().setup_other_currency(code, rates=[('2016-01-01', 3.0), ('2017-01-01', 2.0)], **kwargs)
+        return super().setup_other_currency(code, **kwargs)
+
+    @classmethod
+    def _use_chart_template(cls, company, chart_template_ref=None):
+        chart_template_ref = chart_template_ref or cls.env['account.chart.template']._guess_chart_template(company.country_id)
+        template_vals = cls.env['account.chart.template']._get_chart_template_mapping()[chart_template_ref]
+        template_module = cls.env['ir.module.module']._get(template_vals['module'])
+        if template_module.state != 'installed':
+            raise SkipTest(f"Module required for the test is not installed ({template_module.name})")
 
         # Install the chart template
-        chart_template = chart_template or cls.env['account.chart.template']._guess_chart_template(company.country_id)
-        cls.env['account.chart.template'].try_loading(chart_template, company=company, install_demo=False)
+        cls.env['account.chart.template'].try_loading(chart_template_ref, company=company, install_demo=False)
         if not company.account_fiscal_country_id:
             company.account_fiscal_country_id = cls.env.ref('base.us')
 
-        # The currency could be different after the installation of the chart template.
-        if kwargs.get('currency_id'):
-            company.write({'currency_id': kwargs['currency_id']})
-
+    @classmethod
+    def collect_company_accounting_data(cls, company):
         return {
             'company': company,
             'currency': company.currency_id,
@@ -279,49 +302,18 @@ class AccountTestInvoicingCommon(TransactionCase):
         }
 
     @classmethod
-    def setup_multi_currency_data(cls, default_values=None, rate2016=3.0, rate2017=2.0):
-        default_values = default_values or {}
-        foreign_currency = cls.env['res.currency'].create({
-            'name': 'Gold Coin',
-            'symbol': '☺',
-            'rounding': 0.001,
-            'position': 'after',
-            'currency_unit_label': 'Gold',
-            'currency_subunit_label': 'Silver',
-            **default_values,
-        })
-        rate1 = cls.env['res.currency.rate'].create({
-            'name': '2016-01-01',
-            'rate': rate2016,
-            'currency_id': foreign_currency.id,
-            'company_id': cls.env.company.id,
-        })
-        rate2 = cls.env['res.currency.rate'].create({
-            'name': '2017-01-01',
-            'rate': rate2017,
-            'currency_id': foreign_currency.id,
-            'company_id': cls.env.company.id,
-        })
-        return {
-            'currency': foreign_currency,
-            'rates': rate1 + rate2,
-        }
-
-    @classmethod
-    def _instantiate_basic_test_tax_group(cls, company=None, country=None):
-        company = company or cls.env.company
-        vals = {
-            'name': 'Test tax group',
-            'company_id': company.id,
-            'tax_receivable_account_id': cls.company_data['default_account_receivable'].sudo().copy({'company_id': company.id}).id,
-            'tax_payable_account_id': cls.company_data['default_account_payable'].sudo().copy({'company_id': company.id}).id,
-        }
-        if country:
-            vals['country_id'] = country.id
-        return cls.env['account.tax.group'].sudo().create(vals)
+    def copy_account(cls, account, default=None):
+        suffix_nb = 1
+        while True:
+            new_code = '%s.%s' % (account.code, suffix_nb)
+            if account.search_count([('company_id', '=', account.company_id.id), ('code', '=', new_code)]):
+                suffix_nb += 1
+            else:
+                return account.copy(default={'code': new_code, 'name': account.name, **(default or {})})
 
     @classmethod
     def setup_armageddon_tax(cls, tax_name, company_data):
+        cash_basis_transition_account = company_data['default_account_tax_sale'] and company_data['default_account_tax_sale'].copy()
         return cls.env['account.tax'].create({
             'name': '%s (group)' % tax_name,
             'amount_type': 'group',
@@ -373,7 +365,7 @@ class AccountTestInvoicingCommon(TransactionCase):
                     'amount': 10.0,
                     'country_id': company_data['company'].account_fiscal_country_id.id,
                     'tax_exigibility': 'on_payment',
-                    'cash_basis_transition_account_id': cls.safe_copy(company_data['default_account_tax_sale']).id,
+                    'cash_basis_transition_account_id': cash_basis_transition_account.id,
                     'invoice_repartition_line_ids': [
                         (0, 0, {
                             'repartition_type': 'base',
@@ -671,8 +663,8 @@ class AccountTestInvoicingHttpCommon(AccountTestInvoicingCommon, HttpCase):
 class TestTaxCommon(AccountTestInvoicingHttpCommon):
 
     @classmethod
-    def setUpClass(cls, chart_template_ref=None):
-        super().setUpClass(chart_template_ref=chart_template_ref)
+    def setUpClass(cls):
+        super().setUpClass()
         cls.number = 0
         cls.maxDiff = None
 

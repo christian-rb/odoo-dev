@@ -11,9 +11,15 @@ from odoo import Command, fields
 
 @tagged('post_install', '-at_install')
 class TestValuationReconciliation(ValuationReconciliationTestCommon):
+
     @classmethod
-    def setup_company_data(cls, company_name, chart_template=None, **kwargs):
-        company_data = super().setup_company_data(company_name, chart_template=chart_template, **kwargs)
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.currency_data = cls.setup_other_currency('EUR', rounding=0.001)
+
+    @classmethod
+    def collect_company_accounting_data(cls, company):
+        company_data = super().collect_company_accounting_data(company)
 
         # Create stock config.
         company_data.update({

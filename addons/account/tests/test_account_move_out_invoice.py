@@ -16,8 +16,11 @@ from freezegun import freeze_time
 class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
 
     @classmethod
-    def setUpClass(cls, chart_template_ref=None):
-        super().setUpClass(chart_template_ref=chart_template_ref)
+    def setUpClass(cls):
+        super().setUpClass()
+
+        cls.currency_data = cls.setup_other_currency('EUR', rounding=0.001)
+        cls.company_data_2 = cls.setup_other_company()
 
         cls.invoice = cls.init_invoice('out_invoice', products=cls.product_a+cls.product_b)
 

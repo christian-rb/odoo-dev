@@ -9,6 +9,11 @@ from datetime import datetime, timedelta
 @tagged('post_install', '-at_install')
 class TestPurchaseOrderReport(AccountTestInvoicingCommon):
 
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.currency_data = cls.setup_other_currency('EUR')
+
     def test_00_purchase_order_report(self):
         uom_dozen = self.env.ref('uom.product_uom_dozen')
 

@@ -33,10 +33,11 @@ def _mocked_cancel_success(edi_format, invoices):
 class AccountEdiTestCommon(AccountTestInvoicingCommon):
 
     @classmethod
-    def setUpClass(cls, chart_template_ref=None, edi_format_ref=None):
-        super().setUpClass(chart_template_ref=chart_template_ref)
+    def setUpClass(cls):
+        super().setUpClass()
 
         # ==== EDI ====
+        edi_format_ref = getattr(cls, 'edi_format_ref', None)
         if edi_format_ref:
             cls.edi_format = cls.env.ref(edi_format_ref)
         else:
@@ -47,6 +48,16 @@ class AccountEdiTestCommon(AccountTestInvoicingCommon):
                 })
         cls.journal = cls.company_data['default_journal_sale']
         cls.journal.edi_format_ids = [(6, 0, cls.edi_format.ids)]
+
+    @staticmethod
+    def setup_edi_format(edi_format_ref):
+        def _decorator(function):
+            def wrapper(self):
+                self.edi_format_ref = edi_format_ref
+                function(self)
+            return wrapper
+
+        return _decorator
 
     ####################################################
     # EDI helpers

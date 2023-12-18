@@ -8,18 +8,14 @@ from odoo import Command
 class TestAccountMovePaymentsWidget(AccountTestInvoicingCommon):
 
     @classmethod
-    def setUpClass(cls, chart_template_ref=None):
-        super().setUpClass(chart_template_ref=chart_template_ref)
+    def setUpClass(cls):
+        super().setUpClass()
 
         cls.receivable_account = cls.company_data['default_account_receivable']
         cls.payable_account = cls.company_data['default_account_payable']
 
-        cls.currency_data_2 = cls.setup_multi_currency_data(default_values={
-            'name': 'Stars',
-            'symbol': '☆',
-            'currency_unit_label': 'Stars',
-            'currency_subunit_label': 'Little Stars',
-        }, rate2016=6.0, rate2017=4.0)
+        cls.currency_data = cls.setup_other_currency('EUR')
+        cls.currency_data_2 = cls.setup_other_currency('CAD', rates=[('2016-01-01', 6.0), ('2017-01-01', 4.0)])
 
         cls.curr_1 = cls.company_data['currency']
         cls.curr_2 = cls.currency_data['currency']

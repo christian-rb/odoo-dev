@@ -14,6 +14,7 @@ class TestTracking(AccountTestInvoicingCommon, MailCommon):
 
     def test_aml_change_tracking(self):
         """ tests that the field_groups is correctly set """
+        self.env = self.env(context=self.default_context())
         account_move = self.env['account.move'].create({
             'move_type': 'out_invoice',
             'partner_id': self.partner_a.id,

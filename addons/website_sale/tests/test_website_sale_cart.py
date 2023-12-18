@@ -6,7 +6,6 @@ from odoo.exceptions import UserError
 from odoo.fields import Command
 from odoo.tests import tagged
 
-from odoo.addons.base.tests.common import BaseUsersCommon
 from odoo.addons.website.tools import MockRequest
 from odoo.addons.website_sale.controllers.main import WebsiteSale
 from odoo.addons.website_sale.controllers.payment import PaymentPortal
@@ -15,7 +14,7 @@ from odoo.addons.website_sale.tests.common import WebsiteSaleCommon
 
 
 @tagged('post_install', '-at_install')
-class TestWebsiteSaleCart(BaseUsersCommon, WebsiteSaleCommon):
+class TestWebsiteSaleCart(WebsiteSaleCommon):
 
     @classmethod
     def setUpClass(cls):
@@ -129,7 +128,7 @@ class TestWebsiteSaleCart(BaseUsersCommon, WebsiteSaleCommon):
             'lst_price': 1000.0,
             'standard_price': 800.0,
         })
-        portal_user = self.user_portal
+        portal_user = self._create_portal_user()
         website = self.website.with_user(portal_user)
 
         SaleOrderLine = self.env['sale.order.line']

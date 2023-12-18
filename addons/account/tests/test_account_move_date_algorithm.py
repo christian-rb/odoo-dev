@@ -9,6 +9,11 @@ import freezegun
 @tagged('post_install', '-at_install')
 class TestAccountMoveDateAlgorithm(AccountTestInvoicingCommon):
 
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.currency_data = cls.setup_other_currency('EUR')
+
     # -------------------------------------------------------------------------
     # HELPERS
     # -------------------------------------------------------------------------

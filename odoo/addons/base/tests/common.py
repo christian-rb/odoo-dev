@@ -29,10 +29,69 @@ class BaseCommon(TransactionCase):
         # Hack to use with_context and avoid manual context dict modification
         cls.env = cls.env['base'].with_context(**DISABLED_MAIL_CONTEXT).env
 
+        independent_company = cls.setup_independent_company()
+        if independent_company:
+            # avoid using the context to assign companies
+            cls.env.user.company_id = independent_company
+            cls.env.user.company_ids = [Command.set(independent_company.ids)]
+            independent_user = cls.setup_independent_user()
+            if independent_user:
+                cls.env = cls.env(user=independent_user)
+        else:
+            cls.setup_main_company()
+
+        # Make sure all class variables have the same env.
+        # Do not specify any class variables before the env changes.
+        cls.company = cls.env.company
+        cls.currency = cls.env.company.currency_id
+
         cls.partner = cls.env['res.partner'].create({
             'name': 'Test Partner',
         })
-        cls.currency = cls.env.company.currency_id
+
+        cls.group_portal = cls.env.ref('base.group_portal')
+        cls.group_user = cls.env.ref('base.group_user')
+        cls.group_system = cls.env.ref('base.group_system')
+
+    @classmethod
+    def setup_other_currency(cls, code, **kwargs):
+        rates = kwargs.pop('rates', [])
+        currency = cls.env['res.currency'].with_context(active_test=False).search([('name', '=', code)], limit=1)
+        currency.active = True
+        currency.rate_ids.unlink()
+        currency.write({
+            'active': True,
+            'rate_ids': [Command.create(
+                {
+                    'name': rate_date,
+                    'rate': rate,
+                    'company_id': cls.env.company.id,
+                }
+            ) for rate_date, rate in rates],
+            **kwargs,
+        })
+        return {
+            'currency': currency,
+            'rates': currency.rate_ids,
+        }
+
+    @classmethod
+    def setup_independent_company(cls, **kwargs):
+        return None
+
+    @classmethod
+    def setup_independent_user(cls):
+        groups = cls.get_default_groups()
+        return cls._create_user(groups)
+
+    @classmethod
+    def get_default_groups(cls):
+        # cls.env['ir.config_parameter'].sudo().set_param("base_setup.default_user_rights", True)
+        return cls.env['res.users']._default_groups()
+
+    @classmethod
+    def setup_main_company(cls, currency_code='USD'):
+        cls._use_currency(cls.env.company, currency_code)
 
     @classmethod
     def _enable_currency(cls, currency_code):
@@ -43,40 +102,66 @@ class BaseCommon(TransactionCase):
         return currency
 
     @classmethod
-    def _use_currency(cls, currency_code):
+    def _use_currency(cls, company, currency_code):
         # Enforce constant currency
         currency = cls._enable_currency(currency_code)
-        if not cls.env.company.currency_id == currency:
-            cls.env.transaction.cache.set(cls.env.company, type(cls.env.company).currency_id, currency.id, dirty=True)
+        if not company.currency_id == currency:
+            cls.env.transaction.cache.set(company, type(company).currency_id, currency.id, dirty=True)
             # this is equivalent to cls.env.company.currency_id = currency but without triggering buisness code checks.
             # The value is added in cache, and the cache value is set as dirty so that that
             # the value will be written to the database on next flush.
             # this was needed because some journal entries may exist when running tests, especially l10n demo data.
 
-class BaseUsersCommon(BaseCommon):
+    @classmethod
+    def _create_partner(cls, **create_values):
+        return cls.env['res.partner'].create({
+            'name': "Test Partner",
+            'company_id': False,
+            **create_values,
+        })
 
     @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-
-        cls.group_portal = cls.env.ref('base.group_portal')
-        cls.group_user = cls.env.ref('base.group_user')
-
-        cls.user_portal = cls.env['res.users'].create({
-            'name': 'Test Portal User',
-            'login': 'portal_user',
-            'password': 'portal_user',
-            'email': 'portal_user@gladys.portal',
-            'groups_id': [Command.set([cls.group_portal.id])],
+    def _create_user(cls, groups, **create_values):
+        return cls.env['res.users'].create({
+            'name': "Test User",
+            'login': 'test_user',
+            'password': 'test_user',
+            'email': 'test_user@test.com',
+            'groups_id': [Command.set(groups.ids)],
+            'company_id': cls.env.company.id,
+            'company_ids': [Command.set(cls.env.company.ids)],
+            **create_values,
         })
 
-        cls.user_internal = cls.env['res.users'].create({
-            'name': 'Test Internal User',
-            'login': 'internal_user',
-            'password': 'internal_user',
-            'email': 'mark.brown23@example.com',
-            'groups_id': [Command.set([cls.group_user.id])],
+    @classmethod
+    def _create_company(cls, **create_values):
+        company = cls.env['res.company'].create({
+            'name': "Test Company",
+            **create_values,
         })
+        cls.env.user.company_ids = [Command.link(company.id)]
+        # cls.env.context['allowed_company_ids'].append(company.id)
+        return company
+
+    @classmethod
+    def _create_internal_user(cls, **kwargs):
+        return cls._create_user(
+            groups=cls.group_user,
+            login='internal_user',
+            password='internal_user',
+            email='internal_user@test.com',
+            **kwargs
+        )
+
+    @classmethod
+    def _create_portal_user(cls, **kwargs):
+        return cls._create_user(
+            groups=cls.group_portal,
+            login='portal_user',
+            password='portal_user',
+            email='portal_user@test.com',
+            **kwargs
+        )
 
 
 class TransactionCaseWithUserDemo(TransactionCase):

@@ -2,8 +2,9 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import time
 
+from odoo import Command
+
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
-from odoo.exceptions import UserError
 from odoo.tests import tagged
 from odoo.tools.misc import mod10r
 
@@ -15,8 +16,9 @@ QR_IBAN = 'CH21 3080 8001 2345 6782 7'
 class TestSwissQR(AccountTestInvoicingCommon):
 
     @classmethod
-    def setUpClass(cls, chart_template_ref='ch'):
-        super().setUpClass(chart_template_ref=chart_template_ref)
+    @AccountTestInvoicingCommon.setup_country('ch')
+    def setUpClass(cls):
+        super().setUpClass()
 
     def setUp(self):
         super(TestSwissQR, self).setUp()
@@ -205,7 +207,7 @@ class TestSwissQR(AccountTestInvoicingCommon):
             'name': "S00001",
             'partner_id': self.env['res.partner'].search([("name", '=', 'Partner')])[0].id,
             'order_line': [
-                (0, 0, {'product_id': self.product_a.id, 'price_unit': 100}),
+                Command.create({'product_id': self.product_a.id, 'price_unit': 100}),
             ],
         })
         payment_transaction = self.env['payment.transaction'].create({

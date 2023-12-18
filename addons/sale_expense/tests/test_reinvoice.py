@@ -10,8 +10,8 @@ from odoo.tests import tagged
 class TestReInvoice(TestExpenseCommon, TestSaleCommon):
 
     @classmethod
-    def setUpClass(cls, chart_template_ref=None):
-        super().setUpClass(chart_template_ref=chart_template_ref)
+    def setUpClass(cls):
+        super().setUpClass()
         cls.company_data.update({
             'service_order_sales_price': cls.env['product.product'].with_company(cls.company_data['company']).create({
                 'name': 'service_order_sales_price',

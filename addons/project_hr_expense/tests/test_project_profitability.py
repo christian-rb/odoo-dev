@@ -38,6 +38,8 @@ class TestProjectHrExpenseProfitability(TestProjectProfitabilityCommon, TestProj
     def test_project_profitability(self):
         self.project.company_id = False
         # Create a new company with the foreign currency.
+
+        self.company_data_2 = self.setup_other_company()
         foreign_company = self.company_data_2['company']
         foreign_company.currency_id = self.foreign_currency
         foreign_employee = self.env['hr.employee'].create({

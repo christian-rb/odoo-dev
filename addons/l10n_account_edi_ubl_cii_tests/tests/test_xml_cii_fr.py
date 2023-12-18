@@ -7,8 +7,9 @@ from odoo.tests import tagged
 class TestCIIFR(TestUBLCommon):
 
     @classmethod
-    def setUpClass(cls, chart_template_ref="fr"):
-        super().setUpClass(chart_template_ref=chart_template_ref)
+    @TestUBLCommon.setup_country('fr')
+    def setUpClass(cls):
+        super().setUpClass()
 
         cls.partner_1 = cls.env['res.partner'].create({
             'name': "partner_1",
@@ -97,19 +98,14 @@ class TestCIIFR(TestUBLCommon):
         })
 
     @classmethod
-    def setup_company_data(cls, company_name, chart_template):
-        # OVERRIDE
-        # to force the company to be french
-        res = super().setup_company_data(
-            company_name,
-            chart_template=chart_template,
-            country_id=cls.env.ref("base.fr").id,
+    def setup_independent_company(cls, **kwargs):
+        return super().setup_independent_company(
             phone='+1 (650) 555-0111',  # [BR-DE-6] "Seller contact telephone number" (BT-42) is required
             email="info@yourcompany.com",  # [BR-DE-7] The element "Seller contact email address" (BT-43) is required
             vat='FR23334175221', # [BR-CO-26]-In order for the buyer to automatically ...
             zip='123', # [BR-DE-4] The element "Seller post code" (BT-38) must be transmitted.
+            **kwargs,
         )
-        return res
 
     ####################################################
     # Test export - import

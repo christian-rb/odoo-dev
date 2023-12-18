@@ -9,6 +9,11 @@ from odoo.tools.misc import format_amount
 @tagged('post_install', '-at_install')
 class TestAccountJournalDashboard(AccountTestInvoicingCommon):
 
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.currency_data = cls.setup_other_currency('EUR')
+
     @freeze_time("2019-01-22")
     def test_customer_invoice_dashboard(self):
         journal = self.company_data['default_journal_sale']

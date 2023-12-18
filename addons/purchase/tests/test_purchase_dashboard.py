@@ -11,8 +11,9 @@ from odoo import fields
 class TestPurchaseDashboard(AccountTestInvoicingCommon, MailCase):
 
     @classmethod
-    def setUpClass(cls, chart_template_ref=None):
-        super().setUpClass(chart_template_ref=chart_template_ref)
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.env = cls.env(context=cls.default_context())  # To not deactivate mail logic
 
         # Create two new users
         cls.user_a = new_test_user(cls.env, login='purchaseusera', groups='purchase.group_purchase_user')

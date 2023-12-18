@@ -8,8 +8,9 @@ import base64
 class TestUBLDE(TestUBLCommon):
 
     @classmethod
-    def setUpClass(cls, chart_template_ref="de_skr03"):
-        super().setUpClass(chart_template_ref=chart_template_ref)
+    @TestUBLCommon.setup_country("de")
+    def setUpClass(cls):
+        super().setUpClass()
 
         cls.partner_1 = cls.env['res.partner'].create({
             'name': "partner_1",
@@ -52,17 +53,12 @@ class TestUBLDE(TestUBLCommon):
         })
 
     @classmethod
-    def setup_company_data(cls, company_name, chart_template):
-        # OVERRIDE
-        # to force the company to be german + add phone and email
-        res = super().setup_company_data(
-            company_name,
-            chart_template=chart_template,
-            country_id=cls.env.ref("base.de").id,
+    def setup_independent_company(cls, **kwargs):
+        return super().setup_independent_company(
             phone="+49(0) 30 227-0",
             email="test@xrechnung@com",
+            **kwargs,
         )
-        return res
 
     ####################################################
     # Test export - import

@@ -11,8 +11,10 @@ from odoo.exceptions import UserError
 class TestAccruedSaleOrders(AccountTestInvoicingCommon):
 
     @classmethod
-    def setUpClass(cls, chart_template_ref=None):
-        super().setUpClass(chart_template_ref=chart_template_ref)
+    def setUpClass(cls):
+        super().setUpClass()
+
+        cls.currency_data = cls.setup_other_currency('EUR')
         cls.alt_inc_account = cls.company_data['default_account_revenue'].copy()
         # set 'invoice_policy' to 'delivery' to take 'qty_delivered' into account when computing 'untaxed_amount_to_invoice'
         # set 'type' to 'service' to allow manualy set 'qty_delivered' even with sale_stock installed

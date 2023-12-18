@@ -10,6 +10,13 @@ from freezegun import freeze_time
 @tagged('post_install', '-at_install')
 class TestAccountAccount(AccountTestInvoicingCommon):
 
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+
+        cls.company_data_2 = cls.setup_other_company()
+        cls.currency_data = cls.setup_other_currency('EUR')
+
     def test_changing_account_company(self):
         ''' Ensure you can't change the company of an account.account if there are some journal entries '''
 

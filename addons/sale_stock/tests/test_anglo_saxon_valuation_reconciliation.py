@@ -7,8 +7,9 @@ from odoo.tests import Form, tagged
 class TestValuationReconciliationCommon(ValuationReconciliationTestCommon):
 
     @classmethod
-    def setUpClass(cls, chart_template_ref=None):
-        super().setUpClass(chart_template_ref=chart_template_ref)
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.currency_data = cls.setup_other_currency('EUR')
 
         # Set the invoice_policy to delivery to have an accurate COGS entry.
         cls.test_product_delivery.invoice_policy = 'delivery'

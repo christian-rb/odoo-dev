@@ -9,8 +9,9 @@ from odoo.exceptions import UserError
 class TestAccruedPurchaseOrders(AccountTestInvoicingCommon):
 
     @classmethod
-    def setUpClass(cls, chart_template_ref=None):
-        super().setUpClass(chart_template_ref=chart_template_ref)
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.currency_data = cls.setup_other_currency('XAF')
         cls.alt_exp_account = cls.company_data['default_account_expense'].copy()
         # set 'type' to 'service' to allow manualy set 'qty_delivered' even with purchase_stock installed
         cls.product_a.update({'type': 'service', 'purchase_method': 'receive'})

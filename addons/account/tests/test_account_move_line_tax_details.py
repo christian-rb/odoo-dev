@@ -8,6 +8,12 @@ from odoo import Command
 @tagged('post_install', '-at_install')
 class TestAccountTaxDetailsReport(AccountTestInvoicingCommon):
 
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+
+        cls.currency_data = cls.setup_other_currency('EUR', rounding=0.001)
+
     def _dispatch_move_lines(self, moves):
         base_lines = moves.line_ids\
             .filtered(lambda x: x.tax_ids and not x.tax_line_id)\
