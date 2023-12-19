@@ -1,8 +1,5 @@
-# -*- coding: utf-8 -*-
 
-import threading
-from odoo import fields, models, api, _
-from odoo.exceptions import ValidationError
+from odoo import fields, models, api
 
 
 class ResConfigSettings(models.TransientModel):
@@ -11,23 +8,18 @@ class ResConfigSettings(models.TransientModel):
     resource_calendar_id = fields.Many2one(
         'resource.calendar', 'Company Working Hours',
         related='company_id.resource_calendar_id', readonly=False)
-    module_hr_presence = fields.Boolean(string="Advanced Presence Control")
     module_hr_skills = fields.Boolean(string="Skills Management")
     module_hr_homeworking = fields.Boolean(string="Remote Work")
-    hr_presence_control_login = fields.Boolean(string="Based on user status in system", config_parameter='hr.hr_presence_control_login')
-    hr_presence_control_email = fields.Boolean(string="Based on number of emails sent", config_parameter='hr_presence.hr_presence_control_email')
-    hr_presence_control_ip = fields.Boolean(string="Based on IP Address", config_parameter='hr_presence.hr_presence_control_ip')
-    module_hr_attendance = fields.Boolean(string="Based on attendances")
+    hr_presence_control = fields.Selection(related="company_id.hr_presence_control", readonly=False)
     hr_presence_control_email_amount = fields.Integer(related="company_id.hr_presence_control_email_amount", readonly=False)
     hr_presence_control_ip_list = fields.Char(related="company_id.hr_presence_control_ip_list", readonly=False)
     hr_employee_self_edit = fields.Boolean(string="Employee Editing", config_parameter='hr.hr_employee_self_edit')
 
-    @api.constrains('module_hr_presence', 'hr_presence_control_email', 'hr_presence_control_ip')
-    def _check_advanced_presence(self):
-        test_mode = self.env.registry.in_test_mode() or getattr(threading.current_thread(), 'testing', False)
-        if self.env.context.get('install_mode', False) or test_mode:
-            return
 
-        for settings in self:
-            if settings.module_hr_presence and not (settings.hr_presence_control_email or settings.hr_presence_control_ip):
-                raise ValidationError(_('You should select at least one Advanced Presence Control option.'))
+    @api.model_create_multi
+    def create(self, vals_list):
+        configs = super().create(vals_list)
+        hr_presence_module = self.env['ir.module.module'].sudo().search([('name', '=', 'hr_presence'), ('state', '=', 'uninstalled')])
+        if hr_presence_module and any(config.hr_presence_control in ['user_ip', 'user_email'] for config in configs):
+            hr_presence_module.button_immediate_install()
+        return configs

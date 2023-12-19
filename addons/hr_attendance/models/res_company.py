@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import fields, models, api
@@ -29,6 +28,8 @@ class ResCompany(models.Model):
         ('back', 'Back Camera'),
     ], string='Barcode Source', default='front')
     attendance_kiosk_delay = fields.Integer(default=10)
+    hr_presence_control = fields.Selection(selection_add=[
+        ('user_attendence', "Attendence's check in")])
     attendance_kiosk_key = fields.Char(default=lambda s: uuid.uuid4().hex, copy=False, groups='hr_attendance.group_hr_attendance_manager')
     attendance_kiosk_url = fields.Char(compute="_compute_attendance_kiosk_url")
     attendance_kiosk_use_pin = fields.Boolean(string='Employee PIN Identification')
@@ -125,3 +126,11 @@ class ResCompany(models.Model):
             'target': 'self',
             'url': f'/hr_attendance/kiosk_mode_menu/{self.env.company.id}',
         }
+
+    def _check_hr_presence_control(self, at_install):
+        companies = self.env.companies
+        for company in companies:
+            if at_install and company.hr_presence_control == 'user_status':
+                company.hr_presence_control = 'user_attendence'
+            if not at_install and company.hr_presence_control == 'user_attendence':
+                company.hr_presence_control = 'user_status'

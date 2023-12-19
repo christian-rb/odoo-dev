@@ -1,7 +1,4 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-
-from ast import literal_eval
 
 from pytz import timezone, UTC, utc
 from datetime import timedelta, datetime
@@ -145,12 +142,11 @@ class HrEmployeeBase(models.AbstractModel):
         presence criterions. e.g. hr_attendance, hr_holidays
         """
         # Check on login
-        check_login = literal_eval(self.env['ir.config_parameter'].sudo().get_param('hr.hr_presence_control_login', 'False'))
         employee_to_check_working = self.filtered(lambda e: 'offline' in str(e.user_id.im_status))
         working_now_list = employee_to_check_working._get_employee_working_now()
         for employee in self:
             state = 'to_define'
-            if check_login:
+            if employee.company_id.hr_presence_control == 'user_status':
                 if 'online' in str(employee.user_id.im_status):
                     state = 'present'
                 elif 'offline' in str(employee.user_id.im_status) and employee.id not in working_now_list:

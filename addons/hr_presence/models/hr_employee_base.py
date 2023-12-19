@@ -1,11 +1,11 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-from odoo import fields, models
+from odoo import api, fields, models
 
 
 class HrEmployeeBase(models.AbstractModel):
     _inherit = "hr.employee.base"
 
+    @api.depends("user_id.im_status", "hr_presence_state_display")
     def _compute_presence_state(self):
         super()._compute_presence_state()
         employees = self.filtered(lambda e: e.hr_presence_state != 'present' and not e.is_absent)
@@ -19,3 +19,5 @@ class HrEmployeeBase(models.AbstractModel):
                     company.hr_presence_last_compute_date.day == fields.Datetime.now().day and \
                     (employee.email_sent or employee.ip_connected or employee.manually_set_present):
                 employee.hr_presence_state = 'present'
+            else:
+                employee.hr_presence_state = employee.hr_presence_state_display
