@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<templates xml:space="preserve">
+    <t t-name="sale.SaleActionHelper">
+        <div class="o_view_nocontent flex-wrap pt-5">
+            <div class="container">
+                <div class="o_nocontent_help">
+                    <div>
+                        <a
+                            class="o_sale_action_preview position-relative d-block mx-auto mw-md-75 mw-lg-100 ratio ratio-16x9 overflow-hidden"
+                            role="button"
+                            t-on-click="this.openVideoPreview"
+                        >
+                            <i class="position-absolute top-50 start-50 translate-middle w-auto h-auto z-index-1 fa fa-4x fa-play-circle"/>
+                                <div class="position-absolute"/>
+                        </a>
+                        <t t-out="props.noContentHelp"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

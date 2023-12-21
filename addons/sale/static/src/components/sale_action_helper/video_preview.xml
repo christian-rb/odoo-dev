@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<templates xml:space="preserve">
+    <t t-name="sale.VideoPreview">
+        <div
+            class="modal fade"
+            id="s_panel_video_modal"
+            contenteditable="false"
+            backdrop="false"
+            tabindex="1"
+            role="dialog"
+            aria-hidden="true"
+        >
+            <div class="modal-dialog modal-xl modal-dialog-centered pe-auto">
+                <div class="modal-content border-0 bg-transparent shadow-none">
+                    <div class="modal-header border-0 pe-0">
+                        <button
+                            type="button"
+                            class="btn btn-light btn-close rounded-pill p-3 opacity-100 me-0"
+                            data-bs-dismiss="modal"
+                        >
+                            <span class="visually-hidden">Close</span>
+                        </button>
+                    </div>
+                    <div class="modal-body p-0 shadow">
+                        <div class="ratio ratio-16x9">
+                            <iframe
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                width="1140"
+                                height="641"
+                                t-att-src="url"
+                                title="Sale"
+                                frameborder="0"
+                                allowfullscreen="1"
+                            >
+                                Your browser does not support iframe.
+                            </iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

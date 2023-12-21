@@ -31,7 +31,6 @@ This module contains all the common features of Sales Management and eCommerce.
         'data/mail_message_subtype_data.xml',
         'data/mail_template_data.xml',
         'data/ir_config_parameter.xml', # Needs mail_template_data
-        'data/onboarding_data.xml',
 
         'wizard/account_accrued_orders_wizard_views.xml',
         'wizard/mass_cancel_orders_views.xml',
@@ -78,6 +77,8 @@ This module contains all the common features of Sales Management and eCommerce.
             'sale/static/src/js/tours/sale.js',
             'sale/static/src/js/sale_product_field.js',
             'sale/static/src/xml/**/*',
+            'sale/static/src/components/**/*',
+            'sale/static/src/views/**/*',
         ],
         'web.assets_frontend': [
             'sale/static/src/scss/sale_portal.scss',

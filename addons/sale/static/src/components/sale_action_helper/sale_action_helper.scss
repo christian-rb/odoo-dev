@@ -1,0 +1,19 @@
+.o_sale_action_preview {
+    background-image: url(../../img/sales_quotation_thumbnail.jpg);
+    background-size: cover;
+    border-radius: $spacer;
+
+    i {
+        color: white;
+    }
+
+    > div {
+        background-color: rgba(black, .15);
+        transition: .5s;
+    }
+
+    &:hover > div {
+        background-color: rgba(black, .3);
+        transition: .5s;
+    }
+}
