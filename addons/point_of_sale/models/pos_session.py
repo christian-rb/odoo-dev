@@ -1,17 +1,24 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-import secrets
 from collections import defaultdict
 from datetime import timedelta
 from itertools import groupby
 from markupsafe import Markup, escape
+from traceback import format_exception
+from typing import Optional
+
+import json
+import logging
+import secrets
 
 from odoo import api, fields, models, _, Command
 from odoo.exceptions import AccessError, UserError, ValidationError
-from odoo.tools import float_is_zero, float_compare, convert
-from odoo.service.common import exp_version
 from odoo.osv.expression import AND
+from odoo.service.common import exp_version
+from odoo.tools import float_is_zero, float_compare, convert
+from odoo.tools.misc import str2bool
 
+_logger = logging.getLogger(__name__)
 
 class PosSession(models.Model):
     _name = 'pos.session'
@@ -2289,6 +2296,103 @@ class PosSession(models.Model):
             ('product_id', 'in', product_ids)]
         return self.env['product.pricelist.item'].search_read(pricelist_item_domain, self._product_pricelist_item_fields())
 
+    def _is_capture_system_activated(self):
+        # Enabled by default, but can be disabled manually if needed (error, crashs, storage issue due to number of attachments)
+        return str2bool(self.env['ir.config_parameter'].sudo().get_param('point_of_sale.capture_unprocessed_order', True))
+
+    def _handle_order_process_fail(self, order: dict, exception: Exception, draft: bool):
+        if not self._is_capture_system_activated():
+            return
+
+        if draft:
+            # draft will be set when we receive a restaurant order that was not validated yet
+            # if we capture it, it will create tons of (a priori) irrelevant attachments
+            # So we capture only restaurant order that are validated
+            _logger.info("order '%s' was not captured as it is draft", order['data']['name'])
+            return
+
+        self.env.cr.rollback()  # It would have rollback anyway as it was raising an exception
+        self.sudo()._process_order_process_fail(order, exception, self.env.user.id)
+        self.env.cr.commit()  # Make sure that our created records are stored
+
+    def _process_order_process_fail(self, order: dict, exception: Exception, uid: int = False):
+        self._get_unprocessed_pos_order_scheduled_activity(
+            order['data']['name'],
+            uid or self.env.user.id,
+            create=True,
+        )
+        self._capture_order_data(order, exception)
+
+    def _get_unprocessed_pos_order_scheduled_activity(self, order_ref: str, assigned_user_id: Optional[int] = None, create: bool = True):
+        if create:
+            assert assigned_user_id, "if in creation mode, assigned_user_id value is needed"
+        xml_id_module = '__support__'  # purposefully not using point.of.sale as otherwise the activity is removed on PoS app update
+        order_ref = order_ref.replace(' ', '_')
+        activity_xid_name = f"activity_pos_unprocessed_{order_ref}"
+        scheduled_activity = self.env.ref(f"{xml_id_module}.{activity_xid_name}", raise_if_not_found=False)
+        if create and not scheduled_activity:
+            scheduled_activity = self.activity_schedule(
+                act_type_xmlid='mail.mail_activity_data_warning',
+                summary=_("PoS order %s can not be processed", order_ref),
+                note=_("The Point of Sale order with the following reference %s was received by the Odoo server, "
+                       "but the order processing phase failed.\n"
+                       "The datas received from the point of sale has been saved in the attachments.\n"
+                       "Please contact your support service to assist you on restoring it",
+                       Markup("<code>%s</code>") % order_ref).replace('\n', Markup('<br/>')),
+                user_id=assigned_user_id,
+            )
+            # and set it an XID
+            self.env['ir.model.data'].create({
+                'name': activity_xid_name,
+                'module': xml_id_module,
+                'model': scheduled_activity._name,
+                'res_id': scheduled_activity.id,
+            })
+        return scheduled_activity
+
+    def _capture_order_data_attachment_name(self, order_ref: str):
+        return f"pos_order_save_{order_ref}.json"
+
+    def _get_captured_order_attachment(self, pos_order_ref: str):
+        return self.env['ir.attachment'].search([
+            ['res_model', '=', self._name],
+            ['name', '=', self._capture_order_data_attachment_name(pos_order_ref)],
+        ])
+
+    def _capture_order_data(self, order: dict, exception: Exception):
+        order_name = order['data']['name']
+
+        if exception:
+            # Store the traceback on the attachment in order to more easily investigate the cause of the issue
+            order["traceback"] = format_exception(exception)
+
+        # Create an attachment with the order data content it it does not already exists
+        # otherwise, update the existing one
+        existing_captured_attachment = self._get_captured_order_attachment(order_name)
+        raw_order_content = json.dumps(order, indent=2)
+        if existing_captured_attachment:
+            existing_captured_attachment.write({"raw": raw_order_content})
+            attachment = existing_captured_attachment
+        else:
+            attachment = self.env['ir.attachment'].create({
+                "name": self._capture_order_data_attachment_name(order_name),
+                "raw": raw_order_content,
+                "res_model": self._name,
+                "res_id": self.id,
+                "type": 'binary',
+            })
+        _logger.info("order '%s' was captured in attachment %s #%d (updated: %s)", order_name, attachment.name, attachment.id, bool(existing_captured_attachment))
+        return attachment
+
+    def _remove_capture_content(self, order_data):
+        pos_reference = order_data['name']
+        # Remove the scheduled activity if there is any
+        unprocessed_pos_order_scheduled_activity = self.sudo()._get_unprocessed_pos_order_scheduled_activity(pos_reference, create=False)
+        if unprocessed_pos_order_scheduled_activity:
+            unprocessed_pos_order_scheduled_activity.unlink()
+
+        # Remove the attachments that have different datas
+        self.sudo()._get_captured_order_attachment(pos_reference).unlink()
 
 class ProcurementGroup(models.Model):
     _inherit = 'procurement.group'
