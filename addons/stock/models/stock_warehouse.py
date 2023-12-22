@@ -601,7 +601,7 @@ class Warehouse(models.Model):
                 'rules_values': {
                     'active': True,
                     'propagate_cancel': True,
-                    'procure_method': 'make_to_order',
+                    'procure_method': 'mts_else_mto',
                 }
             }
         }
@@ -820,7 +820,7 @@ class Warehouse(models.Model):
                 'action': routing.action,
                 'auto': 'manual',
                 'picking_type_id': routing.picking_type.id,
-                'procure_method': first_rule and 'make_to_stock' or 'make_to_order',
+                'procure_method': first_rule and 'make_to_stock' or 'mts_else_mto',  # TODO : CHECK ME
                 'warehouse_id': self.id,
                 'company_id': self.company_id.id,
             }
@@ -846,7 +846,7 @@ class Warehouse(models.Model):
         pull_values['active'] = True
         rules_list = self._get_rule_values(route_values, values=pull_values)
         for pull_rules in rules_list:
-            pull_rules['procure_method'] = self.lot_stock_id.id != pull_rules['location_src_id'] and 'make_to_order' or 'make_to_stock'  # first part of the resuply route is MTS
+            pull_rules['procure_method'] = self.lot_stock_id.id != pull_rules['location_src_id'] and 'mts_else_mto' or 'make_to_stock'  # first part of the resuply route is MTS #TODO : mto is replace by MTSO
         return rules_list
 
     def _update_reception_delivery_resupply(self, reception_new, delivery_new):
@@ -865,7 +865,7 @@ class Warehouse(models.Model):
         rules = Rule.search(['&', '&', ('route_id', 'in', routes.ids), ('action', '!=', 'push'), ('location_dest_id.usage', '=', 'transit')])
         rules.write({
             'location_src_id': new_location.id,
-            'procure_method': change_to_multiple and "make_to_order" or "make_to_stock"})
+            'procure_method': change_to_multiple and "mts_else_mto" or "make_to_stock"})
         if not change_to_multiple:
             # If single delivery we should create the necessary MTO rules for the resupply
             routings = [self.Routing(self.lot_stock_id, location, self.out_type_id, 'pull') for location in rules.location_dest_id]
@@ -950,7 +950,7 @@ class Warehouse(models.Model):
     def _get_picking_type_create_values(self, max_sequence):
         """ When a warehouse is created this method return the values needed in
         order to create the new picking types for this warehouse. Every picking
-        type are created at the same time than the warehouse howver they are
+        type are created at the same time than the warehouse however they are
         activated or archived depending the delivery_steps or reception_steps.
         """
         input_loc, output_loc = self._get_input_output_locations(self.reception_steps, self.delivery_steps)
