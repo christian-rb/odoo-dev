@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from collections import defaultdict
 from markupsafe import Markup
+from datetime import datetime
 
 from odoo import api, models, fields, _, SUPERUSER_ID
 from odoo.exceptions import AccessError
-from odoo.tools.misc import clean_context
+from odoo.tools.misc import clean_context, format_datetime
 
 
 HR_READABLE_FIELDS = [
@@ -223,9 +225,54 @@ class User(models.Model):
         """
         return ['name', 'email', 'image_1920', 'tz']
 
-    def _get_personal_info_partner_ids_to_notify(self, employee):
-        # To override in appropriate module
-        return ('', [])
+    def _get_tracked_values(self, tracked_fields, initial_values):
+        self.ensure_one()
+        updated = []
+        tracking_values = []
+
+        fields_track_info = self._mail_track_order_fields(tracked_fields)
+        for col_name, _sequence in fields_track_info:
+            if col_name not in initial_values:
+                continue
+            initial_value, new_value = initial_values[col_name], self[col_name]
+            if new_value == initial_value or (not new_value and not initial_value):
+                continue
+
+            if tracked_fields[col_name]['type'] == 'one2many' and not (new_value - initial_value):
+                # it the record is deleted then we should avoid tracking value of those fields
+                continue
+
+            updated.append(col_name)
+            tracking_values.append(
+                self.env['mail.tracking.value']._create_tracking_values(
+                    initial_value, new_value,
+                    col_name, tracked_fields[col_name],
+                    self
+                ))
+
+        return updated, tracking_values
+
+    def _send_user_notification(self, fields_definition, user_initial_values, hr_fields, user_ids):
+        IrQweb = self.env['ir.qweb']
+        today = datetime.now()
+        for user, initial_values in user_initial_values.items():
+            col_name, tracking_values = self._get_tracked_values(fields_definition, initial_values)
+            if not (col_name and tracking_values):
+                continue
+            for column_name, tracking_value in zip(col_name, tracking_values):
+                tracking_value['field_name'] = hr_fields.get(column_name).string
+
+            for user_id in user_ids:
+                body = IrQweb._render(
+                    'hr.employee_edit_notify', {
+                        'user_name': user.name,
+                        'current_date': format_datetime(\
+                            user.env, today, tz=user_id.tz, dt_format='medium', lang_code=user_id.lang
+                        ),
+                        'tracking_values': tracking_values,
+                    }
+                )
+                self.employee_id.message_notify(body=body, partner_ids=user_id.partner_id.ids)
 
     def write(self, vals):
         """
@@ -238,34 +285,26 @@ class User(models.Model):
             for field_name, field in self._fields.items()
             if field.related_field and field.related_field.model_name == 'hr.employee' and field_name in vals
         }
+        user_initial_values = defaultdict(dict)
         can_edit_self = self.env['ir.config_parameter'].sudo().get_param('hr.hr_employee_self_edit') or self.env.user.has_group('hr.group_hr_user')
         if hr_fields and not can_edit_self:
             # Raise meaningful error message
             raise AccessError(_("You are only allowed to update your preferences. Please contact a HR officer to update other information."))
+        elif hr_fields and can_edit_self:
+            for user in self:
+                for key in hr_fields:
+                    user_initial_values[user][key] = user.sudo()[key]
 
         employee_domain = [
             *self.env['hr.employee']._check_company_domain(self.env.company),
             ('user_id', 'in', self.ids),
         ]
-        if hr_fields:
-            employees = self.env['hr.employee'].sudo().search(employee_domain)
-            get_field = self.env['ir.model.fields']._get
-            field_names = Markup().join([
-                 Markup("<li>%s</li>") % get_field("res.users", fname).field_description for fname in hr_fields
-            ])
-            for employee in employees:
-                reason_message, partner_ids = self._get_personal_info_partner_ids_to_notify(employee)
-                if partner_ids:
-                    employee.message_notify(
-                        body=Markup("<p>%s</p><p>%s</p><ul>%s</ul><p><em>%s</em></p>") % (
-                            _('Personal information update.'),
-                            _("The following fields were modified by %s", employee.name),
-                            field_names,
-                            reason_message,
-                        ),
-                        partner_ids=partner_ids,
-                    )
         result = super(User, self).write(vals)
+        if bool(user_initial_values):
+            user_ids = self._get_users_to_notify()
+            if user_ids:
+                fields_definition = self.env['res.users'].fields_get(hr_fields.keys())
+                self._send_user_notification(fields_definition, user_initial_values, hr_fields, user_ids)
 
         employee_values = {}
         for fname in [f for f in self._get_employee_fields_to_sync() if f in vals]:
@@ -286,6 +325,10 @@ class User(models.Model):
                 if employees:
                     employees.write(employee_values)
         return result
+
+    def _get_users_to_notify(self):
+        self.ensure_one()
+        return self.env.companies.hr_notify_user_ids if self.env['ir.config_parameter'].sudo().get_param('hr.hr_employee_self_edit') else False
 
     @api.model
     def action_get(self):

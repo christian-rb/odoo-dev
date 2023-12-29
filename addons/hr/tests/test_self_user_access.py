@@ -6,6 +6,7 @@ from itertools import chain
 from lxml import etree
 
 from odoo.addons.hr.tests.common import TestHrCommon
+from odoo.addons.mail.tests.common import MailCommon
 from odoo.tests import new_test_user, tagged, Form
 from odoo.exceptions import AccessError
 
@@ -103,7 +104,7 @@ class TestSelfAccessProfile(TestHrCommon):
         self.assertTrue(any(x['id'] == change_password_action.id for x in available_actions))
 
 
-class TestSelfAccessRights(TestHrCommon):
+class TestSelfAccessRights(TestHrCommon, MailCommon):
 
     @classmethod
     def setUpClass(cls):
@@ -230,3 +231,20 @@ class TestSelfAccessRights(TestHrCommon):
             # triggering an onchange should not trigger some access error
             form.lang = "fr_FR"
             form.tz = "Europe/Brussels"
+
+    def testSentNotifyWriteSelfUserEmployee(self):
+        """
+            In this test case, we ensured that the responsible person is notified whenever the
+            employee modifies his data.
+            Flow:
+              - Actived an Employee Editing
+              - Set Edition Notification(Simple employee-hubert)
+              - Update Richard's private phone number
+              - Check the email
+        """
+        with self.mock_mail_gateway():
+            self.env['ir.config_parameter'].set_param('hr.hr_employee_self_edit', True)
+            self.env.company.hr_notify_user_ids = self.hubert.ids
+            self.richard.with_user(self.richard).write({'private_phone': "21455"})
+        sent_mail = self._new_mails.filtered(lambda e: e.recipient_ids.id == self.hubert.partner_id.id and e.author_id == self.richard.partner_id)
+        self.assertEqual(len(sent_mail), 1, "An email sent to the 'Hubert'")

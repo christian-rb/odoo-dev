@@ -39,6 +39,7 @@
         'views/res_users.xml',
         'views/hr_templates.xml',
         'data/hr_data.xml',
+        'data/mail_template_data.xml',
     ],
     'demo': [
         'data/hr_demo.xml'
