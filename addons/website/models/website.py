@@ -222,6 +222,18 @@ class Website(models.Model):
                 company = self.env['res.company'].browse(values['company_id'])
                 super(Website, public_user_to_change_websites).write(dict(values, user_id=company and company._get_public_user().id))
 
+        if 'default_lang_id' in values and self.homepage_url:
+            # If the website has a homepage url and the website default language
+            # is changing, update this homepage url with its corresponding
+            # translation.
+            page_domain = [('url', '=', self.homepage_url)] + self.website_domain()
+            homepage = self.env['website.page'].sudo().with_context(
+                lang=self.default_lang_id.code).search(page_domain, order='website_id asc', limit=1)
+            if homepage:
+                # If a page has been found, the homepage url should be updated.
+                new_default_lang_code = self.env['res.lang'].browse(values['default_lang_id']).code
+                self.homepage_url = homepage.with_context(lang=new_default_lang_code).url
+
         result = super(Website, self - public_user_to_change_websites).write(values)
 
         if 'cdn_activated' in values or 'cdn_url' in values or 'cdn_filters' in values:
