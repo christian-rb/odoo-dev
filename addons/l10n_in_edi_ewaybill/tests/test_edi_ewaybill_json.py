@@ -1,5 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 from odoo.addons.l10n_in_edi.tests.test_edi_json import TestEdiJson
+from odoo.exceptions import RedirectWarning
 from odoo.tests import tagged
 
 
@@ -7,7 +8,8 @@ from odoo.tests import tagged
 class TestEdiEwaybillJson(TestEdiJson):
 
     def test_edi_json(self):
-        (self.invoice + self.invoice_full_discount + self.invoice_zero_qty).write({
+        self.invoice_empty_product_hsn = self.init_invoice("out_invoice", post=False, products=self.product_a)
+        (self.invoice + self.invoice_full_discount + self.invoice_zero_qty + self.invoice_empty_product_hsn).write({
             "l10n_in_type_id": self.env.ref("l10n_in_edi_ewaybill.type_tax_invoice_sub_type_supply"),
             "l10n_in_distance": 20,
             "l10n_in_mode": "1",
@@ -113,3 +115,10 @@ class TestEdiEwaybillJson(TestEdiJson):
             "totInvValue": 0.0
         })
         self.assertDictEqual(json_value, expected, "Indian EDI with 0(zero) quantity sent json value is not matched")
+
+        # =================================== Empty HSN test =============================================
+
+        self.invoice_empty_product_hsn.invoice_line_ids.l10n_in_hsn_code = False
+        self.invoice_empty_product_hsn.action_post()
+        with self.assertRaises(RedirectWarning):
+            self.invoice_empty_product_hsn.l10n_in_edi_ewaybill_send()
