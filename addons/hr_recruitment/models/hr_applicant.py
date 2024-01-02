@@ -404,7 +404,7 @@ class Applicant(models.Model):
             deadline = fields.Datetime.to_datetime(self.env.context.get('default_activity_date_deadline'))
             for applicant in applicants:
                 partners = applicant.partner_id | applicant.user_id.partner_id | applicant.department_id.manager_id.user_id.partner_id
-                self.env['calendar.event'].sudo().with_context(default_applicant_id=applicant.id).create({
+                self.env['calendar.event'].sudo().with_context(default_applicant_id=applicant.id, just_created=True).create({
                     'applicant_id': applicant.id,
                     'partner_ids': [(6, 0, partners.ids)],
                     'user_id': self.env.uid,
@@ -460,10 +460,14 @@ class Applicant(models.Model):
 
         nocontent_body = Markup("""
 <p class="o_view_nocontent_smiling_face">%(help_title)s</p>
-<p>%(para_1)s<br/>%(para_2)s</p>""") % {
+<p>%(para_1)s<br/>%(para_2)s<br/>%(para_3)s<a href="%(link)s">%(para_4)s</a>%(para_5)s</p>""") % {
             'help_title': _("No application found. Let's create one !"),
             'para_1': _('People can also apply by email to save time.'),
             'para_2': _("You can search into attachment's content, like resumes, with the searchbar."),
+            'para_3': _("Have you tried to "),
+            'para_4': _('add skills to your job position '),
+            'para_5': _('and search into the Reserve ?'),
+            'link': f'/odoo/recruitement/{hr_job.id}',
         }
 
         if hr_job.alias_email:
@@ -568,7 +572,7 @@ class Applicant(models.Model):
         applicant = self[0]
         # When applcant is unarchived, they are put back to the default stage automatically. In this case,
         # don't post automated message related to the stage change.
-        if 'stage_id' in changes and applicant.exists() and applicant.stage_id.template_id and not applicant._context.get('just_unarchived'):
+        if 'stage_id' in changes and applicant.exists() and applicant.stage_id.template_id and applicant._context.get('just_created'):
             res['stage_id'] = (applicant.stage_id.template_id, {
                 'auto_delete_keep_log': False,
                 'subtype_id': self.env['ir.model.data']._xmlid_to_res_id('mail.mt_note'),
@@ -745,7 +749,6 @@ class Applicant(models.Model):
                  'refuse_reason_id': False})
 
     def toggle_active(self):
-        self = self.with_context(just_unarchived=True)
         res = super(Applicant, self).toggle_active()
         active_applicants = self.filtered(lambda applicant: applicant.active)
         if active_applicants:

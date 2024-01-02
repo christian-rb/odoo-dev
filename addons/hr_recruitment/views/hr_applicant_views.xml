@@ -13,8 +13,8 @@
                 <field name="create_date" readonly="1" optional="show"/>
                 <field name="type_id" column_invisible="True"/>
                 <field name="job_id" optional="show"/>
-                <field name="name" readonly="1" optional="show"/>
                 <field name="stage_id" optional="show"/>
+                <field name="name" readonly="1" optional="show"/>
                 <field name="application_status" optional="show" invisible="application_status == 'ongoing'"/>
                 <field name="refuse_reason_id" optional='hide'/>
                 <field name="priority" widget="priority" optional="show"/>
@@ -313,7 +313,7 @@
         <field name="name">Hr Applicants kanban</field>
         <field name="model">hr.applicant</field>
         <field name="arch" type="xml">
-            <kanban default_group_by="stage_id" class="o_kanban_applicant" quick_create_view="hr_recruitment.quick_create_applicant_form" sample="1">
+            <kanban default_group_by="stage_id" class="o_kanban_applicant o_search_matching_applicant" quick_create_view="hr_recruitment.quick_create_applicant_form" sample="1">
                 <field name="stage_id" options='{"group_by_tooltip": {"requirements": "Requirements"}}'/>
                 <field name="date_closed"/>
                 <field name="color"/>
