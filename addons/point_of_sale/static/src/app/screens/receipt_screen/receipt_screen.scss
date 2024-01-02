@@ -6,6 +6,16 @@
     flex-basis: 400px;
 }
 
+.receipt-screen {
+    .send-form .input-value {
+        .send {
+            &:not(.highlight) {
+                pointer-events: none;
+            }
+        }
+    }
+}
+
 @page {
     margin: 0;
 }

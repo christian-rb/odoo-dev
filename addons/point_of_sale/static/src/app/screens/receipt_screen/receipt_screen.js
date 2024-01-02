@@ -25,7 +25,8 @@ export class ReceiptScreen extends Component {
         this.currentOrder = this.pos.get_order();
         const partner = this.currentOrder.get_partner();
         this.state = useState({
-            inputEmail: (partner && partner.email) || "",
+            inputValue: partner?.email || "",
+            messageMode: "",
         });
 
         this.doSendEmail = useTrackedAsync(() => this._sendReceiptToCustomer());
@@ -40,27 +41,36 @@ export class ReceiptScreen extends Component {
     _addNewOrder() {
         this.pos.add_new_order();
     }
-    get emailNotice() {
-        switch (this.doSendEmail.status) {
-            case "loading":
-                return { class: "text-info", message: _t("Sending in progress.") };
-            case "success": {
-                return { class: "successful text-success", message: _t("Email sent.") };
-            }
-            case "error": {
-                return {
-                    class: "failed text-danger",
-                    message: _t("Sending email failed. Please try again."),
-                };
-            }
-            default: {
-                throw new Error("Shouldn't be reached.");
+    get MessageStatus() {
+        if (this.state.messageMode === "email") {
+            switch (this.doSendEmail.status) {
+                case "loading":
+                    return {
+                        class: "text-info",
+                        message: _t("Sending in progress."),
+                        status: this.doSendEmail.status,
+                    };
+                case "success":
+                    return {
+                        class: "successful text-success",
+                        message: _t("Email sent."),
+                        status: this.doSendEmail.status,
+                    };
+                case "error":
+                    return {
+                        class: "failed text-danger",
+                        message: _t("Sending email failed. Please try again."),
+                        status: this.doSendEmail.status,
+                    };
+                default:
+                    throw new Error("Shouldn't be reached.");
             }
         }
+        return { status: "idle" };
     }
     isValidEmail() {
-        // A basic check of whether the `inputEmail` is an email or not.
-        return /^.+@.+$/.test(this.state.inputEmail);
+        // A basic check of whether the `inputValue` is an email or not.
+        return /^.+@.+$/.test(this.state.inputValue);
     }
     get orderAmountPlusTip() {
         const order = this.currentOrder;
@@ -103,9 +113,10 @@ export class ReceiptScreen extends Component {
     async _sendReceiptToCustomer() {
         const partner = this.currentOrder.get_partner();
         const orderPartner = {
-            email: this.state.inputEmail,
-            name: partner ? partner.name : this.state.inputEmail,
+            email: this.state.inputValue,
+            name: partner ? partner.name : this.state.inputValue,
         };
+        this.state.messageMode = "email";
         await this.sendToCustomer(orderPartner, "action_receipt_to_customer");
     }
     async sendToCustomer(orderPartner, methodName) {

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="pos_sms.ReceiptScreen" t-inherit="point_of_sale.ReceiptScreen" t-inherit-mode="extension">
+        <xpath expr="//button[hasclass('send')]" position="after">
+            <button t-if="this.pos.config.module_pos_sms" class="send btn px-5 me-1 border border-dark mt-1 mt-md-0" type="button" t-att-class="is_valid_mobile ? 'highlight btn btn-primary' : 'btn-secondary disabled'" t-on-click="() => doSendSms.call()">
+                <i t-attf-class="fa {{doSendSms.status !== 'loading' ? 'fa-lg fa-mobile' : 'fa-spin fa-circle-o-notch'}}" aria-hidden="true" />
+            </button>
+        </xpath>
+    </t>
+</templates>

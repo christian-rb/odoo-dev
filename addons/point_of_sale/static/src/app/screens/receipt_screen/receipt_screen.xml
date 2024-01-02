@@ -20,17 +20,22 @@
                                     <i t-attf-class="fa {{doPrint.status === 'loading' ? 'fa-fw fa-spin fa-circle-o-notch' : 'fa-print'}} me-1" />Print Receipt
                                 </button>
                             </div>
-                            <form t-on-submit.prevent="() => doSendEmail.call()" class="send-email d-flex">
-                                <div class="input-email input-group">
-                                    <input type="email" class="form-control py-3 bg-view" t-attf-placeholder="Email: {{currentOrder.getEmailItems().join(', ')}}" t-model="state.inputEmail" />
-                                    <button class="send btn px-5" t-att-class="isValidEmail() ? 'highlight btn btn-primary' : 'btn-secondary disabled'" type="submit">
+                            <form class="send-form d-flex">
+                                <div class="input-value input-group d-flex">
+                                    <input
+                                        type="text"
+                                        class="form-control py-3 w-100 w-md-auto bg-view"
+                                        t-attf-placeholder="Write an email or phone number.."
+                                        t-model="state.inputValue"
+                                    />
+                                    <button class="send btn px-5 me-1 border border-dark mt-1 mt-md-0" t-att-class="isValidEmail() ? 'highlight btn btn-primary' : 'btn-secondary disabled'" t-on-click="() => doSendEmail.call()" type="button">
                                         <i t-attf-class="fa {{doSendEmail.status !== 'loading' ? 'fa-paper-plane' : 'fa-fw fa-spin fa-circle-o-notch'}}" aria-hidden="true" />
                                     </button>
                                 </div>
                             </form>
                             <div class="notice mt-2">
-                                <div t-if="doSendEmail.status !== 'idle'" t-attf-class="{{ emailNotice.class }}">
-                                    <t t-esc="emailNotice.message"></t>
+                                <div t-if="MessageStatus.status !== 'idle'" t-attf-class="{{ MessageStatus.class }}">
+                                    <t t-esc="MessageStatus.message"></t>
                                 </div>
                             </div>
                         </div>
