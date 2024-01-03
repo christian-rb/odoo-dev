@@ -713,11 +713,11 @@ export class Orderline extends PosModel {
     }
     /**
      * Return the full product name with variant details.
-     * 
+     *
      * e.g. Desk Organiser product with variant:
      * - Size: S
      * - Fabric: Plastic
-     * 
+     *
      * -> "Desk Organiser (S, Plastic)"
      * @returns {string}
      */
@@ -752,9 +752,17 @@ export class Orderline extends PosModel {
             orderline.compute_fixed_price(order_line_price),
             this.pos.currency.decimal_places
         );
-        let hasSameAttributes = Object.keys(Object(orderline.attribute_value_ids)).length === Object.keys(Object(this.attribute_value_ids)).length;
-        if(hasSameAttributes && Object(orderline.attribute_value_ids)?.length && Object(this.attribute_value_ids)?.length) {
-            hasSameAttributes = orderline.attribute_value_ids.every((value, index) => value === this.attribute_value_ids[index]);
+        let hasSameAttributes =
+            Object.keys(Object(orderline.attribute_value_ids)).length ===
+            Object.keys(Object(this.attribute_value_ids)).length;
+        if (
+            hasSameAttributes &&
+            Object(orderline.attribute_value_ids)?.length &&
+            Object(this.attribute_value_ids)?.length
+        ) {
+            hasSameAttributes = orderline.attribute_value_ids.every(
+                (value, index) => value === this.attribute_value_ids[index]
+            );
         }
         return (
             !this.skipChange &&
@@ -1097,19 +1105,24 @@ export class Orderline extends PosModel {
     findAttribute(values, customAttributes) {
         const listOfAttributes = [];
         const addedPtal_id = [];
-        for (const value of values){
-            for (const ptal_id of this.pos.ptal_ids_by_ptav_id[value]){
-                if (addedPtal_id.includes(ptal_id)){
+        for (const value of values) {
+            for (const ptal_id of this.pos.ptal_ids_by_ptav_id[value]) {
+                if (addedPtal_id.includes(ptal_id)) {
                     continue;
                 }
-                const attribute = this.pos.attributes_by_ptal_id[ptal_id]
-                const attFound = attribute.values.filter((target) => {
-                    return Object.values(values).includes(target.id);
-                }).map(att => ({...att})); // make a copy
+                const attribute = this.pos.attributes_by_ptal_id[ptal_id];
+                const attFound = attribute.values
+                    .filter((target) => {
+                        return Object.values(values).includes(target.id);
+                    })
+                    .map((att) => ({ ...att })); // make a copy
                 attFound.forEach((att) => {
                     if (att.is_custom) {
                         customAttributes.forEach((customAttribute) => {
-                            if (att.id === customAttribute.custom_product_template_attribute_value_id) {
+                            if (
+                                att.id ===
+                                customAttribute.custom_product_template_attribute_value_id
+                            ) {
                                 att.name = customAttribute.value;
                             }
                         });
@@ -1595,7 +1608,8 @@ export class Order extends PosModel {
                 qrCodeSrc(
                     `${this.pos.base_url}/pos/ticket/validate?access_token=${this.access_token}`
                 ),
-            ticket_code: this.pos.company.point_of_sale_ticket_unique_code &&
+            ticket_code:
+                this.pos.company.point_of_sale_ticket_unique_code &&
                 this.finalized &&
                 this.ticketCode,
             base_url: this.pos.base_url,
@@ -1689,6 +1703,7 @@ export class Order extends PosModel {
                     };
                 }
                 line.setHasChange(false);
+                line.saved_quantity = line.get_quantity();
             }
         });
 
@@ -1844,7 +1859,7 @@ export class Order extends PosModel {
         return this.orderlines.length === 0;
     }
     get isBooked() {
-        return this.booked || !this.is_empty() || this.server_id;
+        return Boolean(this.booked || !this.is_empty() || this.server_id);
     }
     generate_unique_id() {
         // Generates a public identification number for the order.
@@ -2103,7 +2118,7 @@ export class Order extends PosModel {
         if (this._printed) {
             // when adding product with a barcode while being in receipt screen
             this.pos.removeOrder(this);
-            return this.pos.add_new_order().add_product(product, options);
+            return await this.pos.add_new_order().add_product(product, options);
         }
         this.assert_editable();
         options = options || {};

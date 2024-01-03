@@ -264,6 +264,7 @@ class ReportSaleDetails(models.AbstractModel):
         discount_number = 0
         discount_amount = 0
         invoiceList = []
+        totalPaymentsAmount = 0
         invoiceTotal = 0
         for session in sessions:
             discount_number += len(session.order_ids.filtered(lambda o: o.lines.filtered(lambda l: l.discount > 0)))
@@ -273,6 +274,7 @@ class ReportSaleDetails(models.AbstractModel):
                 'invoices': session._get_invoice_total_list(),
             })
             invoiceTotal += session._get_total_invoice()
+            totalPaymentsAmount += session.total_payments_amount
 
         for payment in payments:
             if payment.get('id'):
@@ -302,6 +304,7 @@ class ReportSaleDetails(models.AbstractModel):
             'discount_amount': discount_amount,
             'invoiceList': invoiceList,
             'invoiceTotal': invoiceTotal,
+            'total_paid': totalPaymentsAmount
         }
 
     def _get_products_and_taxes_dict(self, line, products, taxes, currency):
