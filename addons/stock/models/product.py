@@ -204,7 +204,6 @@ class Product(models.Model):
             res[product_id]['virtual_available'] = float_round(
                 qty_available + res[product_id]['incoming_qty'] - res[product_id]['outgoing_qty'],
                 precision_rounding=rounding)
-
         return res
 
     def _compute_nbr_moves(self):

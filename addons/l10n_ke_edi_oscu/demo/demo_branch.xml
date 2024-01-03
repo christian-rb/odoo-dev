@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- TODO: REMOVE THIS DATA (it is specific to our test OSCU) -->
+    <record id="demo_out_invoice_sequence" model="ir.sequence">
+        <field name="name">eTIMS Customer Invoice Number</field>
+        <field name="code">l10n.ke.oscu.sale.sequence</field>
+        <field name="implementation">no_gap</field>
+        <field name="company_id" ref="l10n_ke.demo_company_ke"/>
+    </record>
+    <record id="demo_in_invoice_sequence" model="ir.sequence">
+        <field name="name">eTIMS Vendor Bill Number</field>
+        <field name="code">l10n.ke.oscu.purchase.sequence</field>
+        <field name="implementation">no_gap</field>
+        <field name="company_id" ref="l10n_ke.demo_company_ke"/>
+    </record>
+    <record id="l10n_ke.partner_demo_company_ke" model="res.partner">
+        <field name="vat">P052112956W</field>
+    </record>
+    <record id="l10n_ke.demo_company_ke" model="res.company">
+        <field name="l10n_ke_oscu_branch_code">00</field>
+        <field name="l10n_ke_server_mode">test</field>
+        <field name="l10n_ke_oscu_cmc_key">71D825151F9B4F9DBA9D7390B211A329438BC9DD7ECB4F5A8BAD</field>
+        <field name="l10n_ke_oscu_serial_number">KRACU0300000164</field>
+        <field name="l10n_ke_control_unit">KRACU0300000164</field>
+    </record>
+</odoo>

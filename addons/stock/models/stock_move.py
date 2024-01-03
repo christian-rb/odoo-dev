@@ -1820,6 +1820,7 @@ Please change the quantity done or the rounding precision of your unit of measur
         moves = (self | moves).exists().filtered(lambda x: x.state not in ('done', 'cancel'))
         moves_ids_todo = OrderedSet()
 
+
         # Cancel moves where necessary ; we should do it before creating the extra moves because
         # this operation could trigger a merge of moves.
         ml_ids_to_unlink = OrderedSet()
