@@ -873,6 +873,24 @@ class SaleOrder(models.Model):
             'context': ctx,
         }
 
+    def action_configure_layout_quotation_send(self):
+        """ Open a window to compose an email, with the sale order template.
+
+        :return: The layout action if layout is not set.
+        :rtype: dict
+        """
+        self.ensure_one()
+        action = self.action_quotation_send()
+        if self.env.is_admin() and not self.env.company.external_report_layout_id and not self.env.context.get('discard_logo_check'):
+            layout_action = self.env['ir.actions.report']._action_configure_external_report_layout(
+                action,
+            )
+            # Need to remove this context for windows action
+            action.pop('close_on_report_download', None)
+            layout_action['context']['dialog_size'] = 'extra-large'
+            return layout_action
+        return action
+
     def _find_mail_template(self):
         """ Get the appropriate mail template for the current sales order based on its state.
 
