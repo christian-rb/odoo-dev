@@ -45,6 +45,7 @@ odoo.define('point_of_sale.Chrome', function(require) {
             useListener('show-notification', this._onShowNotification);
             useListener('close-notification', this._onCloseNotification);
             useListener('connect-to-proxy', this.connect_to_proxy);
+            console.log(">>>>>>> useBus(this.env.posbus, 'start-cash-control'")
             useBus(this.env.posbus, 'start-cash-control', this.openCashControl);
             NumberBuffer.activate();
 
