@@ -58,7 +58,7 @@ odoo.define('point_of_sale.tour.utils', function (require) {
         steps = [
             {
                 content: 'wait for loading to finish',
-                trigger: 'body:not(:has(.loader))',
+                trigger: '.pos :not(.loader) ~ .pos-content',
                 run: function () {},
             },
         ];
