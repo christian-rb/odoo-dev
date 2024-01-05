@@ -300,6 +300,8 @@ class configmanager(object):
         group.add_option('--shell-interface', dest='shell_interface', type="string",
                          help="Specify a preferred REPL to use in shell mode. Supported REPLs are: "
                               "[ipython|ptpython|bpython|python]")
+        group.add_option('--shell-file', dest='shell_file')
+        group.add_option("--no-shell", dest="shell_interactive", action="store_false", my_default=True)
         group.add_option("--stop-after-init", action="store_true", dest="stop_after_init", my_default=False,
                           help="stop the server after its initialization")
         group.add_option("--osv-memory-count-limit", dest="osv_memory_count_limit", my_default=0,
@@ -455,7 +457,7 @@ class configmanager(object):
                 'syslog', 'without_demo', 'screencasts', 'screenshots',
                 'dbfilter', 'log_level', 'log_db',
                 'log_db_level', 'geoip_city_db', 'geoip_country_db', 'dev_mode',
-                'shell_interface',
+                'shell_interface', 'shell_file', 'shell_interactive',
         ]
 
         for arg in keys:

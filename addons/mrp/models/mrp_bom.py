@@ -132,7 +132,7 @@ class MrpBom(models.Model):
                 if component not in subcomponents_dict:
                     products_to_find |= component
 
-            bom_find_result = self._bom_find(products_to_find)
+            bom_find_result = self._bom_find(products_to_find)  # no change
             for component in components:
                 if component not in subcomponents_dict:
                     bom = bom_find_result[component]
@@ -354,6 +354,26 @@ class MrpBom(models.Model):
 
         return bom_by_product
 
+    @api.model
+    def _boms_find(self, records, picking_type=None, bom_type=False):
+        boms_by_product = defaultdict(lambda: self.env['mrp.bom'])
+        products = records.product_id
+        products_ids = set(products.ids)
+        companies = [*records.company_id.ids, self.env.context.get('company_id'), False]  # need self.env.context.get('company_id') ?
+        domain = ['&', '|', ('product_id', 'in', products_ids), '&', ('product_id', '=', False), ('product_tmpl_id', 'in', products.product_tmpl_id.ids), ('active', '=', True)]
+        domain = AND([domain, [('company_id', 'in', companies)]])
+        if picking_type:
+            domain = AND([domain, ['|', ('picking_type_id', '=', picking_type.id), ('picking_type_id', '=', False)]])
+        if bom_type:
+            domain = AND([domain, [('type', '=', bom_type)]])
+        boms = self.search(domain, order='sequence, product_id, id')
+        for bom in boms:
+            implied_products = bom.product_id or bom.product_tmpl_id.product_variant_ids
+            for product in implied_products:
+                if product.id in products_ids:
+                    boms_by_product[product] |= bom
+        return boms_by_product
+
     def explode(self, product, quantity, picking_type=False):
         """
             Explodes the BoM and creates two lists with all the information you need: bom_done and line_done
@@ -507,7 +527,7 @@ class MrpBomLine(models.Model):
     @api.depends('product_id', 'bom_id')
     def _compute_child_bom_id(self):
         products = self.product_id
-        bom_by_product = self.env['mrp.bom']._bom_find(products)
+        bom_by_product = self.env['mrp.bom']._bom_find(products)  # no change
         for line in self:
             if not line.product_id:
                 line.child_bom_id = False

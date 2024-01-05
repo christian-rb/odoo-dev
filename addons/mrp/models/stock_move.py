@@ -7,6 +7,7 @@ from odoo import api, Command, fields, models
 from odoo.osv import expression
 from odoo.tools import float_compare, float_round, float_is_zero, OrderedSet
 
+import time
 
 class StockMoveLine(models.Model):
     _inherit = 'stock.move.line'
@@ -355,6 +356,9 @@ class StockMove(models.Model):
         # in order to explode a move, we must have a picking_type_id on that move because otherwise the move
         # won't be assigned to a picking and it would be weird to explode a move into several if they aren't
         # all grouped in the same picking.
+        print("*** action_explode on", len(self.ids))
+        start_time = time.perf_counter()
+        kit_boms = self.env['mrp.bom'].sudo()._boms_find(self, bom_type='phantom')
         moves_ids_to_return = OrderedSet()
         moves_ids_to_unlink = OrderedSet()
         phantom_moves_vals_list = []
@@ -362,7 +366,8 @@ class StockMove(models.Model):
             if (not move.picking_type_id and not self.env.context.get('is_scrap')) or (move.production_id and move.production_id.product_id == move.product_id):
                 moves_ids_to_return.add(move.id)
                 continue
-            bom = self.env['mrp.bom'].sudo()._bom_find(move.product_id, company_id=move.company_id.id, bom_type='phantom')[move.product_id]
+            # bom = self.env['mrp.bom'].sudo()._bom_find(move.product_id, company_id=move.company_id.id, bom_type='phantom')[move.product_id]
+            bom = kit_boms[move.product_id].filtered(lambda b: not b.company or b.company == move.company_id)[:1]
             if not bom:
                 moves_ids_to_return.add(move.id)
                 continue
@@ -387,6 +392,9 @@ class StockMove(models.Model):
         move_to_unlink.quantity = 0
         move_to_unlink._action_cancel()
         move_to_unlink.unlink()
+        end_time = time.perf_counter()
+        execution_time = end_time - start_time
+        print(f"The execution time is: {execution_time}")
         return self.env['stock.move'].browse(moves_ids_to_return)
 
     def action_show_details(self):

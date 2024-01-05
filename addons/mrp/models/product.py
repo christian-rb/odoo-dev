@@ -152,7 +152,7 @@ class ProductProduct(models.Model):
         """ Return the components list ids in case of kit product.
         Return the product itself otherwise"""
         self.ensure_one()
-        bom_kit = self.env['mrp.bom']._bom_find(self, bom_type='phantom')[self]
+        bom_kit = self.env['mrp.bom']._bom_find(self, bom_type='phantom')[self]  # no change
         if bom_kit:
             boms, bom_sub_lines = bom_kit.explode(self, 1)
             return [bom_line.product_id.id for bom_line, data in bom_sub_lines if bom_line.product_id.type == 'product']
@@ -188,7 +188,7 @@ class ProductProduct(models.Model):
         This override is used to get the correct quantities of products
         with 'phantom' as BoM type.
         """
-        bom_kits = self.env['mrp.bom']._bom_find(self, bom_type='phantom')
+        bom_kits = self.env['mrp.bom']._bom_find(self, bom_type='phantom')  # no change
         kits = self.filtered(lambda p: bom_kits.get(p))
         regular_products = self - kits
         res = (
@@ -286,7 +286,7 @@ class ProductProduct(models.Model):
         return action
 
     def action_open_quants(self):
-        bom_kits = self.env['mrp.bom']._bom_find(self, bom_type='phantom')
+        bom_kits = self.env['mrp.bom']._bom_find(self, bom_type='phantom')  # no change
         components = self - self.env['product.product'].concat(*list(bom_kits.keys()))
         for product in bom_kits:
             boms, bom_sub_lines = bom_kits[product].explode(product, 1)

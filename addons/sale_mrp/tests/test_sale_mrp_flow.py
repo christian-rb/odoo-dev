@@ -730,7 +730,7 @@ class TestSaleMrpFlow(ValuationReconciliationTestCommon):
         self.assertEqual(len(move_ids), 3)
 
         # Check if BoM is created and is for a 'Kit'
-        bom_from_k1 = self.env['mrp.bom']._bom_find(self.kit_1)[self.kit_1]
+        bom_from_k1 = self.env['mrp.bom']._bom_find(self.kit_1)[self.kit_1]  # no change
         self.assertEqual(self.bom_kit_1.id, bom_from_k1.id)
         self.assertEqual(bom_from_k1.type, 'phantom')
 

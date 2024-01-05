@@ -103,13 +103,22 @@ class MrpUnbuild(models.Model):
 
     @api.depends('mo_id', 'product_id', 'company_id')
     def _compute_bom_id(self):
+        # for order in self:
+        #     if order.mo_id:
+        #         order.bom_id = order.mo_id.bom_id
+        #     else:
+        #         order.bom_id = self.env['mrp.bom']._bom_find(
+        #             order.product_id, company_id=order.company_id.id
+        #         )[order.product_id]
+        orders = self.env['mrp.unbuild']
         for order in self:
             if order.mo_id:
                 order.bom_id = order.mo_id.bom_id
             else:
-                order.bom_id = self.env['mrp.bom']._bom_find(
-                    order.product_id, company_id=order.company_id.id
-                )[order.product_id]
+                orders |= order
+        all_boms = self.env['mrp.bom']._boms_find(orders)
+        for order in orders:
+            order.bom_id = all_boms[order.product_id].filtered(lambda b: not b.company or b.company == order.company_id)[:1]
 
     @api.depends('mo_id')
     def _compute_lot_id(self):

@@ -70,9 +70,10 @@ class StockWarehouseOrderpoint(models.Model):
         return res
 
     def _quantity_in_progress(self):
-        bom_kits = self.env['mrp.bom']._bom_find(self.product_id, bom_type='phantom')
+        # bom_kits = self.env['mrp.bom']._bom_find(self.product_id, bom_type='phantom')
+        bom_kits = self.env['mrp.bom']._boms_find(self, bom_type='phantom')
         bom_kit_orderpoints = {
-            orderpoint: bom_kits[orderpoint.product_id]
+            orderpoint: bom_kits[orderpoint.product_id].filtered(lambda b: not b.company or b.company == orderpoint.company_id)[:1]
             for orderpoint in self
             if orderpoint.product_id in bom_kits
         }
@@ -101,7 +102,7 @@ class StockWarehouseOrderpoint(models.Model):
             product_qty = min(ratios_total or [0]) - min(ratios_qty_available or [0])
             res[orderpoint.id] = orderpoint.product_id.uom_id._compute_quantity(product_qty, orderpoint.product_uom, round=False)
 
-        bom_manufacture = self.env['mrp.bom']._bom_find(orderpoints_without_kit.product_id, bom_type='normal')
+        bom_manufacture = self.env['mrp.bom']._bom_find(orderpoints_without_kit.product_id, bom_type='normal')  # no change
         bom_manufacture = self.env['mrp.bom'].concat(*bom_manufacture.values())
         productions_group = self.env['mrp.production']._read_group(
             [('bom_id', 'in', bom_manufacture.ids), ('state', '=', 'draft'), ('orderpoint_id', 'in', orderpoints_without_kit.ids)],
@@ -118,7 +119,7 @@ class StockWarehouseOrderpoint(models.Model):
         self.ensure_one()
         qty_multiple_to_order = super()._get_qty_multiple_to_order()
         if 'manufacture' in self.rule_ids.mapped('action'):
-            bom = self.env['mrp.bom']._bom_find(self.product_id, bom_type='normal')[self.product_id]
+            bom = self.env['mrp.bom']._bom_find(self.product_id, bom_type='normal')[self.product_id]  # no change
             return bom.product_uom_id._compute_quantity(bom.product_qty, self.product_uom)
         return qty_multiple_to_order
 

@@ -50,15 +50,17 @@ class PurchaseOrderLine(models.Model):
     def _compute_qty_received(self):
         kit_lines = self.env['purchase.order.line']
         lines_stock = self.filtered(lambda l: l.qty_received_method == 'stock_moves' and l.move_ids and l.state != 'cancel')
-        product_by_company = defaultdict(OrderedSet)
+        # product_by_company = defaultdict(OrderedSet)
+        # for line in lines_stock:
+        #     product_by_company[line.company_id].add(line.product_id.id)
+        # kits_by_company = {
+        #     company: self.env['mrp.bom']._bom_find(self.env['product.product'].browse(product_ids), company_id=company.id, bom_type='phantom')
+        #     for company, product_ids in product_by_company.items()
+        # }
+        kit_boms = self.env['mrp.bom']._boms_find(lines_stock, bom_type='phantom')
         for line in lines_stock:
-            product_by_company[line.company_id].add(line.product_id.id)
-        kits_by_company = {
-            company: self.env['mrp.bom']._bom_find(self.env['product.product'].browse(product_ids), company_id=company.id, bom_type='phantom')
-            for company, product_ids in product_by_company.items()
-        }
-        for line in lines_stock:
-            kit_bom = kits_by_company[line.company_id].get(line.product_id)
+            # kit_bom = kits_by_company[line.company_id].get(line.product_id)
+            kit_bom = kit_boms[line.product_id].filtered(lambda b: not b.company or b.company == line.company_id)[:1]
             if kit_bom:
                 moves = line.move_ids.filtered(lambda m: m.state == 'done' and not m.scrapped)
                 order_qty = line.product_uom._compute_quantity(line.product_uom_qty, kit_bom.product_uom_id)
@@ -79,7 +81,7 @@ class PurchaseOrderLine(models.Model):
         # We don't try to be too smart and keep a simple approach: we compare the quantity before
         # and after update, and return the difference. We don't take into account what was already
         # sent, or any other exceptional case.
-        bom = self.env['mrp.bom'].sudo()._bom_find(self.product_id, bom_type='phantom')[self.product_id]
+        bom = self.env['mrp.bom'].sudo()._bom_find(self.product_id, bom_type='phantom')[self.product_id]  # no change
         if bom and 'previous_product_qty' in self.env.context:
             return self.env.context['previous_product_qty'].get(self.id, 0.0)
         return super()._get_qty_procurement()

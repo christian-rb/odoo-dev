@@ -98,7 +98,23 @@ class Shell(Command):
         embed(local_vars)
 
     def python(self, local_vars):
-        Console(locals=local_vars).interact()
+        c = Console(locals=local_vars)
+        f = config.options.get('shell_file')
+        if f:
+            if not os.path.isfile(f):
+                _logger.warning("%s cannot be found", f)
+            elif not f.endswith('py'):
+                _logger.warning("%s is not a python file", f)
+            else:
+                _logger.info("loading %s", f)
+                source = f"""with open('{os.path.expanduser(f)}', 'rb') as code:
+                     code = compile(code.read(), '{f}', 'exec')
+                     exec(globals().pop('code'))
+                """.rstrip()
+                c.runsource(source, f, 'exec')
+                if not config.options.get("shell_interactive"):
+                    return
+        c.interact()
 
     def shell(self, dbname):
         local_vars = {

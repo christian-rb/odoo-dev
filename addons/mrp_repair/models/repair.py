@@ -20,8 +20,10 @@ class Repair(models.Model):
     def action_explode(self):
         lines_to_unlink_ids = set()
         line_vals_list = []
+        kit_boms = self.env['mrp.bom'].sudo()._boms_find(self.move_ids, bom_type='phantom')
         for op in self.move_ids:
-            bom = self.env['mrp.bom'].sudo()._bom_find(op.product_id, company_id=op.company_id.id, bom_type='phantom')[op.product_id]
+            # bom = self.env['mrp.bom'].sudo()._bom_find(op.product_id, company_id=op.company_id.id, bom_type='phantom')[op.product_id]
+            bom = kit_boms[op.product_id].filtered(lambda b: not b.company or b.company == op.company_id)[:1]
             if not bom:
                 continue
             factor = op.product_uom._compute_quantity(op.product_uom_qty, bom.product_uom_id) / bom.product_qty

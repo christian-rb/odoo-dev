@@ -11,7 +11,7 @@ class AccountMoveLine(models.Model):
 
         so_line = self.sale_line_ids and self.sale_line_ids[-1] or False
         if so_line:
-            bom = self.env['mrp.bom']._bom_find(products=so_line.product_id, company_id=so_line.company_id.id, bom_type='phantom')[so_line.product_id]
+            bom = self.env['mrp.bom']._bom_find(products=so_line.product_id, company_id=so_line.company_id.id, bom_type='phantom')[so_line.product_id]  # no change
             if bom:
                 is_line_reversing = self.move_id.move_type == 'out_refund'
                 qty_to_invoice = self.product_uom_id._compute_quantity(self.quantity, self.product_id.uom_id)
