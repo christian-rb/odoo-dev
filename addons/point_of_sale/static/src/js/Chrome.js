@@ -256,12 +256,14 @@ odoo.define('point_of_sale.Chrome', function(require) {
         }
 
         openCashControl() {
+            console.log("openCashControl >>>>>>>>>>>")
             if (this.shouldShowCashControl()) {
                 this.showPopup('CashOpeningPopup');
             }
         }
 
         shouldShowCashControl() {
+            console.log("shouldShowCashControl >>>>>>>>>>>>", this.env.pos.config.cash_control, this.env.pos.pos_session.state)
             return this.env.pos.config.cash_control && this.env.pos.pos_session.state == 'opening_control';
         }
 
