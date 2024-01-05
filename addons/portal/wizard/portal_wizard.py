@@ -232,10 +232,24 @@ class PortalWizardUser(models.TransientModel):
         if not email:
             raise UserError(_('The contact "%s" does not have a valid email.', self.partner_id.name))
 
-        user = self.env['res.users'].sudo().with_context(active_test=False).search([
-            ('id', '!=', self.user_id.id),
-            ('login', '=ilike', email),
-        ])
+        similar_user_domain = self._get_similar_user_domain(email)
+        user = self.env['res.users'].sudo().with_context(active_test=False).search(similar_user_domain)
 
         if user:
-            raise UserError(_('The contact "%s" has the same email has an existing user (%s).', self.partner_id.name, user.name))
+            raise UserError(self._get_same_email_error_message(user[0].name))
+
+    def _get_similar_user_domain(self, email):
+        """ Return the domain needed to find the users that have the same email
+        than the current partner.
+        :param string email: the email of the current partner
+        """
+        return [('id', '!=', self.user_id.id),
+                ('login', '=ilike', email)]
+
+    def _get_same_email_error_message(self, user_name):
+        """ Returns the error message in case the current partner has the same
+        email than an existing user.
+        :param string user_name: The name of the user that has the same email
+        than the current partner
+        """
+        return _('The contact "%s" has the same email has an existing user (%s).', self.partner_id.name, user_name)
