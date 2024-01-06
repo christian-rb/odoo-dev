@@ -285,7 +285,8 @@ odoo.define('point_of_sale.Chrome', function(require) {
         // EVENT HANDLERS //
 
         _showStartScreen() {
-            this.__showScreen({ detail: this.startScreen });
+            const { name, props } = this.startScreen;
+            this.showScreen(name, props);
         }
         _getSavedScreen(order) {
             return order.get_screen_data();
