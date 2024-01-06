@@ -50,7 +50,7 @@ odoo.define('point_of_sale.ProductScreen', function(require) {
         }
         onMounted() {
             console.log("trigger('start-cash-control')")
-            setTimeout(() => this.env.posbus.trigger('start-cash-control'));
+            this.env.posbus.trigger('start-cash-control');
         }
         /**
          * To be overridden by modules that checks availability of
