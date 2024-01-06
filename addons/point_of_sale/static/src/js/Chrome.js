@@ -313,7 +313,8 @@ export class Chrome extends PosComponent {
     // EVENT HANDLERS //
 
     _showStartScreen() {
-        this.__showScreen({ detail: this.startScreen });
+        const { name, props } = this.startScreen;
+        this.showScreen(name, props);
     }
     _getSavedScreen(order) {
         return order.get_screen_data();
