@@ -18,6 +18,7 @@ odoo.define('point_of_sale.Chrome', function(require) {
     const {
         onError,
         onMounted,
+        onWillUnmount,
         onWillDestroy,
         useExternalListener,
         useRef,
@@ -83,6 +84,18 @@ odoo.define('point_of_sale.Chrome', function(require) {
                 $('html').off();
                 $('body').off();
             });
+
+            onMounted(() => {
+                console.log(">>>>>>> Chrome mounted")
+            })
+
+            onWillUnmount(() => {
+                console.log(">>>>>>> Chrome willUnmount")
+            })
+
+            onWillDestroy(() => {
+                console.log(">>>>>>> Chrome willDestroy")
+            })
 
             onWillDestroy(() => {
                 this.env.pos.destroy();
