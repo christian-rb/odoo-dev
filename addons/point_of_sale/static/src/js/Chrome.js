@@ -146,6 +146,7 @@ odoo.define('point_of_sale.Chrome', function(require) {
          * This will load pos and assign it to the environment.
          */
         async start() {
+            console.log(">>>>>> Chrome.start")
             try {
                 await this.env.pos.load_server_data();
                 await this.setupBarcodeParser();
