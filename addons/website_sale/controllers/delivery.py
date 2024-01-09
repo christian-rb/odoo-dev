@@ -63,16 +63,18 @@ class WebsiteSaleDelivery(WebsiteSale):
         :return dict: all available carriers for `shipping_address` sorted by lowest price.
         """
         order_sudo = request.website.sale_get_order()
-        public_partner = request.website.partner_id
 
         self._include_country_and_state_in_address(partial_shipping_address)
-        if order_sudo.partner_id == public_partner:
+        if order_sudo._is_public_order():
             # The partner_shipping_id and partner_invoice_id will be automatically computed when
             # changing the partner_id of the SO. This allow website_sale to avoid create duplicates.
+            partial_shipping_address['name'] = _(
+                'Anonymous express checkout partner for order %s',
+                order_sudo.name,
+            )
             order_sudo.partner_id = self._create_or_edit_partner(
                 partial_shipping_address,
                 type='delivery',
-                name=_('Anonymous express checkout partner for order %s', order_sudo.name),
             )
             # Pricelist are recomputed every time the partner is changed. We don't want to recompute
             # the price with another pricelist at this state since the customer has already accepted
@@ -85,9 +87,9 @@ class WebsiteSaleDelivery(WebsiteSale):
                 type='delivery',
                 partner_id=order_sudo.partner_shipping_id.id,
             )
-        elif any(
-            partial_shipping_address[k] != order_sudo.partner_shipping_id[k]
-            for k in partial_shipping_address
+        elif not self._are_address_identical(
+            partial_shipping_address,
+            order_sudo.partner_shipping_id,
         ):
             # Check if a child partner doesn't already exist with the same informations. The
             # phone isn't always checked because it isn't sent in shipping information with
@@ -95,11 +97,14 @@ class WebsiteSaleDelivery(WebsiteSale):
             child_partner_id = self._find_child_partner(
                 order_sudo.partner_id.commercial_partner_id.id, partial_shipping_address
             )
+            partial_shipping_address['name'] = _(
+                'Anonymous express checkout partner for order %s',
+                order_sudo.name,
+            )
             order_sudo.partner_shipping_id = child_partner_id or self._create_or_edit_partner(
-                    partial_shipping_address,
-                    type='delivery',
-                    parent_id=order_sudo.partner_id.id,
-                    name=_('Anonymous express checkout partner for order %s', order_sudo.name),
+                partial_shipping_address,
+                type='delivery',
+                parent_id=order_sudo.partner_id.id,
             )
 
         # Returns the list of develivery carrier available for the sale order.

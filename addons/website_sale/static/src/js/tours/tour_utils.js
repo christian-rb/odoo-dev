@@ -84,7 +84,7 @@ function fillAdressForm(adressParams = {
     let steps = [];
     steps.push({
         content: "Address filling",
-        trigger: 'select[name="country_id"]',
+        trigger: 'form.checkout_autoformat',
         run: () => {
             document.querySelector('input[name="name"]').value = adressParams.name;
             document.querySelector('input[name="phone"]').value = adressParams.phone;
@@ -97,7 +97,7 @@ function fillAdressForm(adressParams = {
     });
     steps.push({
         content: "Continue checkout",
-        trigger: '.oe_cart .btn:contains("Continue checkout")',
+        trigger: '#save_address',
     });
     return steps;
 }
