@@ -303,7 +303,7 @@ class SaleOrder(models.Model):
             # we need to recompute the prices to match the new pricelist if it changed
             self._recompute_prices()
 
-            request.session['website_sale_current_pl'] = self.pricelist_id
+            request.session['website_sale_current_pl'] = self.pricelist_id.id
             self.website_id.invalidate_recordset(['pricelist_id'])
 
         if self.carrier_id and 'partner_shipping_id' in fnames:
@@ -312,18 +312,11 @@ class SaleOrder(models.Model):
 
         self._message_subscribe([partner_id])
 
-    def _cart_update_pricelist(self, pricelist_id=None, update_pricelist=False):
+    def _cart_update_pricelist(self, pricelist_id=None):
         self.ensure_one()
 
-        previous_pricelist_id = self.pricelist_id.id
-
-        if pricelist_id:
+        if self.pricelist_id.id != pricelist_id:
             self.pricelist_id = pricelist_id
-
-        if update_pricelist:
-            self._compute_pricelist_id()
-
-        if update_pricelist or previous_pricelist_id != self.pricelist_id.id:
             self._recompute_prices()
 
     def _cart_update(self, product_id, line_id=None, add_qty=0, set_qty=0, **kwargs):
