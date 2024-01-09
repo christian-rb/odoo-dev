@@ -280,6 +280,10 @@ def validate_xml_from_attachment(env, xml_content, xsd_name, reload_files_functi
         _logger.info("XSD validation successful!")
     except FileNotFoundError:
         _logger.info("XSD file not found, skipping validation")
+    except etree.XMLSchemaParseError as e:
+        _logger.error("XSD file not valid: ")
+        for arg in e.args:
+            _logger.error(arg)
 
 
 def find_xml_value(xpath, xml_element, namespaces=None):
