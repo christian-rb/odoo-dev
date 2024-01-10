@@ -4,7 +4,6 @@ import { usePos } from "@point_of_sale/app/store/pos_hook";
 import { useService } from "@web/core/utils/hooks";
 
 import { CashierName } from "@point_of_sale/app/navbar/cashier_name/cashier_name";
-import { CustomerFacingDisplayButton } from "@point_of_sale/app/navbar/customer_facing_display_button/customer_facing_display_button";
 import { ProxyStatus } from "@point_of_sale/app/navbar/proxy_status/proxy_status";
 import { SaleDetailsButton } from "@point_of_sale/app/navbar/sale_details_button/sale_details_button";
 import { SyncNotification } from "@point_of_sale/app/navbar/sync_notification/sync_notification";
@@ -25,7 +24,6 @@ export class Navbar extends Component {
     static components = {
         // FIXME POSREF remove some of these components
         CashierName,
-        CustomerFacingDisplayButton,
         ProxyStatus,
         SaleDetailsButton,
         SyncNotification,
@@ -43,9 +41,6 @@ export class Navbar extends Component {
         this.notification = useService("notification");
         this.hardwareProxy = useService("hardware_proxy");
         this.isBarcodeScannerSupported = isBarcodeScannerSupported;
-    }
-    get customerFacingDisplayButtonIsShown() {
-        return this.pos.config.iface_customer_facing_display;
     }
     onClickScan() {
         if (!this.pos.scanning) {
