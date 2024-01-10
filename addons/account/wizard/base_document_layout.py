@@ -1,5 +1,4 @@
 from odoo import api, Command, fields, models
-from odoo.tools import is_html_empty
 
 
 class BaseDocumentLayout(models.TransientModel):
@@ -25,28 +24,26 @@ class BaseDocumentLayout(models.TransientModel):
     @api.depends('qr_code')
     def _compute_preview(self):
         """ This override is needed to add the depends on the qr code and the move """
-        super()._compute_preview()
         if self.env.context.get('active_model') != 'account.move':
-            return
+            return super()._compute_preview()
         move = self.env['account.move'].browse(self.env.context.get('active_id'))
         # If there is a move in the context then, the value put in the preview come from the move
         if not move.exists():
-            return
+            return super()._compute_preview()
 
         styles = self._get_asset_style()
         for wizard in self:
             if wizard.report_layout_id:
-                preview_css, wizard_with_logo = wizard._get_render_information(styles)
-
                 # We don't want to display the qr_code twice since we decided to put a fake one.
                 move.display_qr_code = False
-                wizard.preview = wizard_with_logo.env['ir.ui.view']._render_template('account.report_invoice_wizard_iframe', {
-                    'company': wizard_with_logo,
-                    'preview_css': preview_css,
-                    'is_html_empty': is_html_empty,
-                    'o': move,
-                    'qr_code': wizard.qr_code,
-                })
+                wizard.preview = wizard.env['ir.ui.view']._render_template(
+                    'account.report_invoice_wizard_iframe',
+                    {
+                        **wizard._get_render_information(styles),
+                        'o': move,
+                        'qr_code': wizard.qr_code,
+                    },
+                )
 
     @api.depends('partner_id', 'account_number')
     def _compute_account_number(self):
