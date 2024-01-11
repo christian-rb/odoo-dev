@@ -3532,10 +3532,6 @@ class SnippetsMenu extends Component {
                         delete $target[0].dataset.name;
                     }
 
-                    this.options.wysiwyg.odooEditor.observerUnactive('dragAndDropCreateSnippet');
-                    await this._scrollToSnippet($target, this.$scrollable);
-                    this.options.wysiwyg.odooEditor.observerActive('dragAndDropCreateSnippet');
-
                     browser.setTimeout(async () => {
                         // Free the mutex now to allow following operations
                         // (mutexed as well).
@@ -3549,6 +3545,7 @@ class SnippetsMenu extends Component {
                         this.options.wysiwyg.odooEditor.unbreakableStepUnactive();
                         this.options.wysiwyg.odooEditor.historyStep();
                         this.$el.find('.oe_snippet_thumbnail').removeClass('o_we_already_dragging');
+                        this._scrollToSnippet($target, this.$scrollable);
                     });
                 } else {
                     $toInsert.remove();
@@ -3640,7 +3637,12 @@ class SnippetsMenu extends Component {
         if (modalEl && !$(modalEl).hasScrollableContent()) {
             return;
         }
-        return dom.scrollTo($el[0], {extraOffset: 50, $scrollable: $scrollable});
+        return dom.scrollTo($el[0], {
+            extraOffset: 50,
+            $scrollable: $scrollable,
+            step: () => this.options.wysiwyg.odooEditor.observerUnactive('_scrollToSnippet'),
+            progress: () => this.options.wysiwyg.odooEditor.observerActive('_scrollToSnippet'),
+        });
     }
     /**
      * @private
