@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import { user } from "@web/core/user";
 import { _t } from "@web/core/l10n/translation";
 import { useService, useOwnedDialogs } from "@web/core/utils/hooks";
 import { FormViewDialog } from "@web/views/view_dialogs/form_view_dialog";
@@ -70,4 +71,9 @@ export function useNewAllocationRequest() {
             },
         });
     };
+}
+
+export async function useResponsibleForApproval(record) {
+    const isOfficer = await user.hasGroup("hr_holidays.group_hr_holidays_user")
+    return isOfficer || record.leave_manager_id?.[0] == user.userId
 }

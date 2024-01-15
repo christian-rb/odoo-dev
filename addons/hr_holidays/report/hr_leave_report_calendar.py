@@ -34,6 +34,7 @@ class LeaveReportCalendar(models.Model):
     is_striked = fields.Boolean('Striked', readonly=True)
 
     is_absent = fields.Boolean(related='employee_id.is_absent')
+    leave_manager_id = fields.Many2one(related='employee_id.leave_manager_id')
 
     def init(self):
         tools.drop_view_if_exists(self._cr, 'hr_leave_report_calendar')
