@@ -26,7 +26,9 @@
                         <ram:Name t-out="line.product_id.name or line.name"/>
                         <ram:Description t-out="line.name" t-if="line.name != line.product_id.name"/>
                         -->
-                        <ram:Name t-out="line.name"/>
+                        <ram:Name t-if="line.product_id and line.product_id.name and line.name" t-out="line.product_id.name + line.name"/>
+                        <ram:Name t-if="line.product_id and line.product_id.name and not line.name" t-out="line.product_id.name"/>
+                        <ram:Name t-else="" t-out="line.product_id.name"/>
                     </ram:SpecifiedTradeProduct>
 
                     <!-- Amounts. -->

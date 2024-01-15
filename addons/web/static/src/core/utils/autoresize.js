@@ -11,12 +11,12 @@ import { browser } from "../browser/browser";
  *
  * @param {Ref} ref
  */
-export function useAutoresize(ref, options = {}) {
+export function useAutoresize(ref, options = {}, resizeTextAreaMethod = resizeTextArea) {
     let resize = null;
     useEffect(
         (el) => {
             if (el) {
-                resize = (el instanceof HTMLInputElement ? resizeInput : resizeTextArea).bind(
+                resize = (el instanceof HTMLInputElement ? resizeInput : resizeTextAreaMethod).bind(
                     null,
                     el,
                     options

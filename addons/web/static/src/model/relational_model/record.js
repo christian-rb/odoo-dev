@@ -489,7 +489,7 @@ export class Record extends DataPoint {
         for (const fieldName in data) {
             const value = data[fieldName];
             const field = this.fields[fieldName];
-            if (field.relatedPropertyField) {
+            if (!field || field.relatedPropertyField) {
                 continue;
             }
             if (["char", "text", "html"].includes(field.type)) {

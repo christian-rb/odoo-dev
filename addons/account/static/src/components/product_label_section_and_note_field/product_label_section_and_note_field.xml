@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+
+    <t t-name="account.ProductLabelSectionAndNoteField">
+        <div class="o_field_product_label_section_and_note_cell">
+            <t t-if="props.readonly">
+                <t t-if="!isSectionOrNote">
+                    <t t-if="!isProductClickable">
+                        <t t-if="columnIsProductAndLabel.value">
+                            <span t-if="productName" t-ref="productAutoresizeRef" class="d-flex align-items-center justify-content-between w-100">
+                                <span t-esc="productName" class="text-truncate"></span>
+                            </span>
+                            <span t-if="!productName and !label" t-ref="productAutoresizeRef" class="d-flex align-items-center justify-content-between text-muted">
+                                <span class="text-truncate">Search a product</span>
+                            </span>
+                            <textarea t-if="label"
+                                class="o_input text-wrap border-0 fst-italic"
+                                rows="1"
+                                type="text"
+                                t-att-class="sectionAndNoteClasses"
+                                t-att-value="label"
+                                t-on-change="(ev) => this.updateLabel(ev.target.value)"
+                                t-ref="labelAutoresizeRef"
+                            />
+                        </t>
+                        <t t-else="">
+                            <span t-if="productName" t-ref="productAutoresizeRef" class="d-flex align-items-center justify-content-between w-100">
+                                <span t-esc="productName" class="text-truncate"></span>
+                            </span>
+                            <span t-else="" t-ref="productAutoresizeRef" class="d-flex align-items-center justify-content-between text-muted">
+                                <span class="text-truncate">Search a product</span>
+                            </span>
+                        </t>
+                    </t>
+                    <t t-else="">
+                        <t t-if="columnIsProductAndLabel.value">
+                            <a t-if="value"
+                                class="d-flex align-items-center justify-content-between"
+                                t-attf-class="o_form_uri #{classFromDecoration}"
+                                t-att-href="value ? `#id=${value[0]}&amp;model=${relation}` : '#'"
+                                t-on-click.prevent="onClick"
+                            >
+                                <span t-ref="productAutoresizeRef" class="w-100">
+                                    <span t-esc="productName" class="text-truncate"/>
+                                </span>
+                            </a>
+                            <textarea t-if="label"
+                                class="o_input text-wrap border-0 fst-italic"
+                                placeholder="Enter a description"
+                                readonly="1"
+                                rows="1"
+                                type="text"
+                                t-att-class="sectionAndNoteClasses"
+                                t-att-value="label"
+                                t-on-change="(ev) => this.updateLabel(ev.target.value)"
+                                t-ref="labelAutoresizeRef"
+                            />
+                        </t>
+                        <t t-else="">
+                            <a t-if="(productName or (!productName and !label)) and value"
+                                t-attf-class="o_form_uri #{classFromDecoration}"
+                                t-att-href="value ? `#id=${value[0]}&amp;model=${relation}` : '#'"
+                                t-on-click.prevent="onClick"
+                            >
+                                <span t-ref="productAutoresizeRef" class="w-100">
+                                    <span t-esc="productName" class="text-truncate"/>
+                                </span>
+                            </a>
+                            <t t-else="">
+                                <textarea
+                                    class="o_input text-wrap border-0 fst-italic"
+                                    placeholder="Enter a description"
+                                    readonly="true"
+                                    rows="1"
+                                    type="text"
+                                    t-att-class="sectionAndNoteClasses"
+                                    t-att-value="label"
+                                    t-on-change="(ev) => this.updateLabel(ev.target.value)"
+                                    t-ref="labelAutoresizeRef"
+                                />
+                            </t>
+                        </t>
+                    </t>
+                </t>
+                <t t-else="">
+                    <input t-if="isSection"
+                        class="o_input text-wrap border-0 fst-italic"
+                        placeholder="Enter a description"
+                        type="text"
+                        t-att-class="sectionAndNoteClasses"
+                        t-att-value="label"
+                        t-on-change="(ev) => this.updateLabel(ev.target.value)"
+                        t-ref="labelAutoresizeRef"
+                    />
+                    <t t-else="">
+                        <textarea
+                            class="o_input text-wrap border-0 fst-italic"
+                            placeholder="Enter a description"
+                            rows="1"
+                            type="text"
+                            t-att-class="sectionAndNoteClasses"
+                            t-att-value="label"
+                            t-on-change="(ev) => this.updateLabel(ev.target.value)"
+                            t-ref="labelAutoresizeRef"
+                        />
+                    </t>
+                </t>
+            </t>
+            <t t-else="">
+                <t t-if="!isSectionOrNote">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <Many2XAutocomplete t-props="Many2XAutocompleteProps"/>
+                        <button t-if="hasExternalButton"
+                            aria-label="Internal link"
+                            class="btn btn-link text-action oi"
+                            data-tooltip="Internal link"
+                            draggable="false"
+                            tabindex="-1"
+                            type="button"
+                            t-att-class="env.inDialog ? 'oi-launch' : 'oi-arrow-right'"
+                            t-on-click="onExternalBtnClick"
+                        />
+                        <button t-if="hasBarcodeButton"
+                            aria-label="Scan barcode"
+                            class="btn ms-3 o_barcode"
+                            data-tooltip="Scan barcode"
+                            draggable="false"
+                            tabindex="-1"
+                            title="Scan barcode"
+                            type="button"
+                            t-on-click="onBarcodeBtnClick"
+                        />
+                        <button t-if="columnIsProductAndLabel.value and !label"
+                            class="btn fa fa-bars text-start"
+                            data-tooltip="Click or press enter to add a description"
+                            id="labelVisibilityButton"
+                            type="button"
+                            t-on-click="switchLabelVisibility"
+                        />
+                    </div>
+                    <textarea t-if="columnIsProductAndLabel.value and (label or labelVisibility.value)"
+                        class="o_input text-wrap border-0 fst-italic"
+                        id="labelTextarea"
+                        placeholder="Enter a description"
+                        rows="1"
+                        type="text"
+                        t-att-class="sectionAndNoteClasses"
+                        t-att-value="label"
+                        t-on-change="(ev) => this.updateLabel(ev.target.value)"
+                        t-ref="labelAutoresizeRef"
+                    />
+                </t>
+                <t t-else="">
+                    <input t-if="isSection"
+                        class="o_input text-wrap border-0 fst-italic"
+                        type="text"
+                        t-att-class="sectionAndNoteClasses"
+                        t-att-value="label"
+                        t-on-change="(ev) => this.updateLabel(ev.target.value)"
+                        t-ref="labelAutoresizeRef"
+                    />
+                    <t t-else="">
+                        <textarea
+                            class="o_input text-wrap border-0 fst-italic"
+                            rows="1"
+                            type="text"
+                            t-att-class="sectionAndNoteClasses"
+                            t-att-value="label"
+                            t-on-change="(ev) => this.updateLabel(ev.target.value)"
+                            t-ref="labelAutoresizeRef"
+                        />
+                    </t>
+                </t>
+            </t>
+        </div>
+    </t>
+
+    <t t-name="account.ProductLabelSectionAndNoteFieldAutocomplete" t-inherit="web.Many2XAutocomplete">
+        <xpath expr="//AutoComplete[@t-else='']" position="replace">
+            <t t-else="">
+                <AutoComplete t-if="!isSectionOrNote"
+                    autofocus="props.autofocus"
+                    autoSelect="props.autoSelect"
+                    dropdown="props.dropdown"
+                    id="props.id"
+                    onChange.bind="onChange"
+                    onInput.bind="onInput"
+                    onSelect.bind="onSelect"
+                    placeholder="props.placeholder"
+                    resetOnSelect="props.value === ''"
+                    sources="sources"
+                    value="props.value"
+                />
+                <t t-else="">
+                    <input
+                        class="o_input"
+                        type="text"
+                        t-att-id="props.id"
+                        t-att-value="props.value"
+                        t-on-keydown="onKeyDown"
+                        t-ref="section_and_note_input"
+                    />
+                </t>
+            </t>
+        </xpath>
+        <xpath expr="//span[@class='o_dropdown_button']" position="replace">
+            <span class="o_dropdown_button" t-if="!isSectionOrNote"/>
+        </xpath>
+    </t>
+
+</templates>

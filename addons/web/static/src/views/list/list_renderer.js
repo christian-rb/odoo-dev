@@ -603,20 +603,23 @@ export class ListRenderer extends Component {
         const optionalColumns = this.allColumns.filter(
             (col) => col.optional && !this.evalColumnInvisible(col.column_invisible)
         );
+        const ignoredColumns = this.getIgnoredColumns();
         for (const col of optionalColumns) {
-            const optionalField = {
-                label: col.label,
-                name: col.name,
-                value: this.optionalActiveFields[col.name],
-            };
-            if (!col.relatedPropertyField) {
-                optionalFields.push(optionalField);
-            } else {
-                const { displayName, id } = col.relatedPropertyField;
-                if (propertyGroups[id]) {
-                    propertyGroups[id].optionalFields.push(optionalField);
+            if (!ignoredColumns.includes(col.name)) {
+                const optionalField = {
+                    label: col.label,
+                    name: col.name,
+                    value: this.optionalActiveFields[col.name],
+                };
+                if (!col.relatedPropertyField) {
+                    optionalFields.push(optionalField);
                 } else {
-                    propertyGroups[id] = { id, displayName, optionalFields: [optionalField] };
+                    const { displayName, id } = col.relatedPropertyField;
+                    if (propertyGroups[id]) {
+                        propertyGroups[id].optionalFields.push(optionalField);
+                    } else {
+                        propertyGroups[id] = { id, displayName, optionalFields: [optionalField] };
+                    }
                 }
             }
         }
@@ -624,6 +627,14 @@ export class ListRenderer extends Component {
             return [{ optionalFields }, ...Object.values(propertyGroups)];
         }
         return Object.values(propertyGroups);
+    }
+
+    /**
+     * This method is added so that overrides of ListRenderer are able to not display
+     * some columns in the field visibility drop-down menu.
+     */
+    getIgnoredColumns() {
+        return [];
     }
 
     get hasOptionalFields() {
