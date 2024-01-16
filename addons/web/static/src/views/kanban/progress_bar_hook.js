@@ -341,8 +341,8 @@ export function useProgressBar(progressAttributes, model, aggregateFields, activ
     onWillStart(() => {
         return progressBarState.loadProgressBar(component.props);
     });
-    onWillUpdateProps((nextProps) => {
-        progressBarState.loadProgressBar(nextProps);
+    onWillUpdateProps(async (nextProps) => {
+        await progressBarState.loadProgressBar(nextProps);
     });
 
     return reactive(progressBarState);
