@@ -173,6 +173,17 @@ class StockPickingType(models.Model):
             if pos_config:
                 raise ValidationError(_("You cannot archive '%s' as it is used by a POS configuration '%s'.", picking_type.name, pos_config.name))
 
+    def _compute_description(self):
+        for picking_type in self:
+            if picking_type.description:
+                return
+            # PoS Orders needs a different description than a normal Delivery
+            elif picking_type.code == 'outgoing' and picking_type.sequence_code == 'POS':
+                picking_type.description = _(
+                    'Send products to your customers.'
+                )
+        super()._compute_description()
+
 class ProcurementGroup(models.Model):
     _inherit = 'procurement.group'
 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, fields, models
+from odoo import _, api, fields, models
 
 
 class StockPickingType(models.Model):
@@ -63,6 +63,16 @@ class StockPickingType(models.Model):
         for picking_type in self:
             if picking_type.code == 'mrp_operation':
                 picking_type.use_existing_lots = True
+
+    def _compute_description(self):
+        super()._compute_description()
+        for picking_type in self:
+            if picking_type.description:
+                return
+            elif picking_type.code == 'mrp_operation':
+                picking_type.description = _(
+                    'Transform components into finished products. Use the shop floor app for advanced workflows.'
+                )
 
     def _get_mo_count(self):
         mrp_picking_types = self.filtered(lambda picking: picking.code == 'mrp_operation')

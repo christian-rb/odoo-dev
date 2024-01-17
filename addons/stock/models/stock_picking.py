@@ -125,6 +125,7 @@ class PickingType(models.Model):
     count_picking_waiting = fields.Integer(compute='_compute_picking_count')
     count_picking_late = fields.Integer(compute='_compute_picking_count')
     count_picking_backorders = fields.Integer(compute='_compute_picking_count')
+    count_move_ready = fields.Integer(compute='_compute_move_count')
     hide_reservation_method = fields.Boolean(compute='_compute_hide_reservation_method')
     barcode = fields.Char('Barcode', copy=False)
     company_id = fields.Many2one(
@@ -140,6 +141,20 @@ class PickingType(models.Model):
     show_picking_type = fields.Boolean(compute='_compute_show_picking_type')
 
     picking_properties_definition = fields.PropertiesDefinition("Picking Properties")
+    description = fields.Char(
+        'Overview Description', copy=True,
+        compute='_compute_description', store=True, precompute=True, readonly=False,
+    )
+    # By default, each picking type is in favorites for every user.
+    # It means that the relation has to store users who decided to remove a
+    # picking type from their favorites.
+    not_favorite_user_ids = fields.Many2many(
+        'res.users', 'picking_type_not_favorite_user_rel', 'picking_type_id', 'user_id',
+    )
+    is_favorite = fields.Boolean(
+        compute='_compute_is_favorite', inverse='_inverse_is_favorite', search='_search_is_favorite',
+        compute_sudo=True, string='Show Operation in Overview'
+    )
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -191,6 +206,25 @@ class PickingType(models.Model):
                     })
         return super(PickingType, self).write(vals)
 
+    @api.model
+    def _search_is_favorite(self, operator, value):
+        if operator not in ['=', '!='] or not isinstance(value, bool):
+            raise NotImplementedError(_('Operation not supported'))
+        return [('not_favorite_user_ids', 'not in' if (operator == '=') == value else 'in', self.env.uid)]
+
+    def _compute_is_favorite(self):
+        for picking_type in self:
+            picking_type.is_favorite = self.env.user not in picking_type.not_favorite_user_ids
+
+    def _inverse_is_favorite(self):
+        sudoed_self = self.sudo()
+        to_fav = sudoed_self.filtered(
+            lambda picking_type: self.env.user in picking_type.not_favorite_user_ids
+        )
+        # The condition is reversed: users to_fav should be removed from the relation.
+        to_fav.write({'not_favorite_user_ids': [(3, self.env.uid)]})
+        (sudoed_self - to_fav).write({'not_favorite_user_ids': [(4, self.env.uid)]})
+
     @api.depends('code')
     def _compute_hide_reservation_method(self):
         for rec in self:
@@ -212,6 +246,15 @@ class PickingType(models.Model):
             count = {picking_type.id: count for picking_type, count in data}
             for record in self:
                 record[field_name] = count.get(record.id, 0)
+
+    def _compute_move_count(self):
+        data = self.env['stock.move']._read_group(
+            [('state', '=', 'assigned'), ('picking_type_id', 'in', self.ids)],
+            ['picking_type_id'], ['__count']
+        )
+        count = {picking_type.id: count for picking_type, count in data}
+        for record in self:
+            record['count_move_ready'] = count.get(record.id, 0)
 
     @api.depends('warehouse_id')
     def _compute_display_name(self):
@@ -343,13 +386,40 @@ class PickingType(models.Model):
     def get_action_picking_type_operations(self):
         return self._get_action('stock.action_get_picking_type_operations')
 
+    def get_action_picking_type_moves_analysis(self):
+        action = self.env["ir.actions.actions"]._for_xml_id('stock.stock_move_action')
+        action['domain'] = (action['domain'] or []) + [('picking_type_id', '=', self.id)]
+        return action
+
     def get_stock_picking_action_picking_type(self):
         return self._get_action('stock.stock_picking_action_picking_type')
+
+    def get_action_picking_type_ready_moves(self):
+        return self._get_action('stock.action_get_picking_type_ready_moves')
 
     @api.depends('code')
     def _compute_show_picking_type(self):
         for record in self:
             record.show_picking_type = record.code in ['incoming', 'outgoing', 'internal']
+
+    def _compute_description(self):
+        for picking_type in self:
+            if picking_type.description:
+                return
+            picking_type.description = ''
+            match picking_type.code:
+                case 'incoming':
+                    picking_type.description = _(
+                        'Receive products from suppliers. Use replenishment rules to avoid stockouts.'
+                    )
+                case 'outgoing':
+                    picking_type.description = _(
+                        'Send products to your customers and ship them with an integrated carrier.'
+                    )
+                case 'internal':
+                    picking_type.description = _(
+                        'Move products within a warehouse. Use the barcode app for more convenience.'
+                    )
 
 
 class Picking(models.Model):

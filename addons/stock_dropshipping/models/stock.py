@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, models, fields
+from odoo import _, api, models, fields
 from odoo.osv import expression
 
 
@@ -59,6 +59,16 @@ class StockPickingType(models.Model):
         for record in self:
             if record.code == "dropship":
                 record.show_picking_type = True
+
+    def _compute_description(self):
+        super()._compute_description()
+        for picking_type in self:
+            if picking_type.description:
+                return
+            elif picking_type.code == 'dropship':
+                picking_type.description = _(
+                    'Deliver directly from suppliers to customers.'
+                )
 
 
 class StockLot(models.Model):

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import models
+from odoo import _, models
 from odoo.tools import float_compare
 
 
@@ -67,3 +67,18 @@ class StockPicking(models.Model):
             default_warehouse = self.env['stock.warehouse'].search([('company_id', '=', subcontract_move.company_id.id)], limit=1)
             res['picking_type_id'] = default_warehouse.subcontracting_type_id.id,
         return res
+
+
+class StockPickingType(models.Model):
+    _inherit = 'stock.picking.type'
+
+    def _compute_description(self):
+        for picking_type in self:
+            if picking_type.description:
+                return
+            # Dropship Subcontractor needs a different description than a normal Receipt
+            elif picking_type.code == 'incoming' and picking_type.sequence_code == 'DSC':
+                picking_type.description = _(
+                    'Make your supplier deliver components directly to your subcontractor.'
+                )
+        super()._compute_description()

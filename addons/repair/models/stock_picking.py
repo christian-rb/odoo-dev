@@ -123,6 +123,16 @@ class PickingType(models.Model):
                 stock_location = picking_type.warehouse_id.lot_stock_id
                 picking_type.default_recycle_location_dest_id = stock_location.id
 
+    def _compute_description(self):
+        super()._compute_description()
+        for picking_type in self:
+            if picking_type.description:
+                return
+            elif picking_type.code == 'repair_operation':
+                picking_type.description = _(
+                    'Replace or consume components in a manufactured product.'
+                )
+
     def get_repair_stock_picking_action_picking_type(self):
         action = self.env["ir.actions.actions"]._for_xml_id('repair.action_picking_repair')
         if self:
