@@ -721,6 +721,8 @@ class ProductTemplate(models.Model):
         string="Category Routes", related='categ_id.total_route_ids', related_sudo=False)
     show_on_hand_qty_status_button = fields.Boolean(compute='_compute_show_qty_status_button')
     show_forecasted_qty_status_button = fields.Boolean(compute='_compute_show_qty_status_button')
+    available_quantity = fields.Float('Available Quantity', digits='Quantity', store=True)
+    lot_id = fields.Text('Lot id/SN', store=True)
 
     @api.depends('type')
     def _compute_show_qty_status_button(self):

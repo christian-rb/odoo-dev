@@ -21,3 +21,4 @@ from . import product
 from . import stock_package_level
 from . import stock_package_type
 from . import stock_storage_category
+from . import productTemplate_import_csv
