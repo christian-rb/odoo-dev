@@ -31,6 +31,7 @@ from odoo.modules.module import get_module_resource
 from odoo.osv import expression
 from odoo.service.db import check_super
 from odoo.tools import partition, collections, frozendict, lazy_property, image_process
+from odoo.loglevels import LogType
 
 _logger = logging.getLogger(__name__)
 
@@ -714,6 +715,9 @@ class Users(models.Model):
         if not password:
             raise AccessDenied()
         ip = request.httprequest.environ['REMOTE_ADDR'] if request else 'n/a'
+        user_agent, user_agent_string = request.httprequest.user_agent if request else None, "n/a"
+        if user_agent and user_agent.platform:
+            user_agent_string = f"{user_agent.platform} {user_agent.browser} {sha256(user_agent.string.encode()).hexdigest()[:8]}"
         try:
             with cls.pool.cursor() as cr:
                 self = api.Environment(cr, SUPERUSER_ID, {})[cls._name]
@@ -729,10 +733,12 @@ class Users(models.Model):
                         user.tz = tz
                     user._update_last_login()
         except AccessDenied:
-            _logger.info("Login failed for db:%s login:%s from %s", db, login, ip)
+            _logger.info("%r Login failed for db:%s login:%s from %s UserAgent:%r", LogType.LOGIN_FAILED,
+                         db, login, ip, user_agent_string)
             raise
 
-        _logger.info("Login successful for db:%s login:%s from %s", db, login, ip)
+        _logger.info("%r Login successful for db:%s login:%s from %s UserAgent:%r", LogType.LOGIN_SUCCESSFUL,
+                     db, login, ip, user_agent_string)
 
         return user.id
 
@@ -821,7 +827,8 @@ class Users(models.Model):
         self._check_credentials(old_passwd, {'interactive': True})
 
         ip = request.httprequest.environ['REMOTE_ADDR'] if request else 'n/a'
-        _logger.info("Password change for '%s' (#%s) from %s", self.env.user.login, self.env.uid, ip)
+        _logger.info("%r Password change for '%s' (#%d) from %s", LogType.PASSWORD_CHANGED, self.env.user.login,
+                    self.env.uid, ip)
 
         # use self.env.user here, because it has uid=SUPERUSER_ID
         return self.env.user.write({'password': new_passwd})
@@ -999,21 +1006,21 @@ class Users(models.Model):
         (failures, previous) = failures_map[source]
         if self._on_login_cooldown(failures, previous):
             _logger.warning(
-                "Login attempt ignored for %s on %s: "
+                "%r Login attempt ignored for %s on %s: "
                 "%d failures since last success, last failure at %s. "
                 "You can configure the number of login failures before a "
                 "user is put on cooldown as well as the duration in the "
                 "System Parameters. Disable this feature by setting "
-                "\"base.login_cooldown_after\" to 0.",
+                "\"base.login_cooldown_after\" to 0.", LogType.LOGIN_COOLDOWN,
                 source, self.env.cr.dbname, failures, previous)
             if ipaddress.ip_address(source).is_private:
                 _logger.warning(
-                    "The rate-limited IP address %s is classified as private "
+                    "%r The rate-limited IP address %s is classified as private "
                     "and *might* be a proxy. If your Odoo is behind a proxy, "
                     "it may be mis-configured. Check that you are running "
                     "Odoo in Proxy Mode and that the proxy is properly configured, see "
                     "https://www.odoo.com/documentation/15.0/administration/install/deploy.html#https for details.",
-                    source
+                    LogType.LOGIN_RATE_LIMITED, source
                 )
             raise AccessDenied(_("Too many login failures, please wait a bit before trying again."))
 
@@ -1639,6 +1646,8 @@ class ChangePasswordUser(models.TransientModel):
             if not line.new_passwd:
                 raise UserError(_("Before clicking on 'Change Password', you have to write a new password."))
             line.user_id.write({'password': line.new_passwd})
+        _logger.info("%r The users %s (#%s) has a new password set by user %r (#%d)", LogType.PASSWORD_RESET,
+                    ", ".join(self.mapped('login')), self.ids, self.env.user.login, self.env.user.id)
         # don't keep temporary passwords in the database longer than necessary
         self.write({'new_passwd': False})
 
@@ -1750,7 +1759,7 @@ class APIKeys(models.Model):
             return {'type': 'ir.actions.act_window_close'}
         if self.env.is_system() or self.mapped('user_id') == self.env.user:
             ip = request.httprequest.environ['REMOTE_ADDR'] if request else 'n/a'
-            _logger.info("API key(s) removed: scope: <%s> for '%s' (#%s) from %s",
+            _logger.info("%r API key(s) removed: scope: <%s> for '%s' (#%d) from %s", LogType.TOTP_DEVICE_REMOVED,
                self.mapped('scope'), self.env.user.login, self.env.uid, ip)
             self.sudo().unlink()
             return {'type': 'ir.actions.act_window_close'}
@@ -1786,7 +1795,7 @@ class APIKeys(models.Model):
         [name, self.env.user.id, scope, hash_api_key(k), k[:INDEX_SIZE]])
 
         ip = request.httprequest.environ['REMOTE_ADDR'] if request else 'n/a'
-        _logger.info("%s generated: scope: <%s> for '%s' (#%s) from %s",
+        _logger.info("%r %s generated: scope: <%s> for '%s' (#%d) from %s", LogType.TOTP_DEVICE_ADD,
             self._description, scope, self.env.user.login, self.env.uid, ip)
 
         return k

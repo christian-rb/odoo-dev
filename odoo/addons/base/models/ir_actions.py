@@ -8,6 +8,7 @@ from odoo.osv import expression
 from odoo.tools.safe_eval import safe_eval, test_python_expr
 from odoo.tools.float_utils import float_compare
 from odoo.http import request
+from odoo.loglevels import LogType
 
 import base64
 from collections import defaultdict
@@ -625,8 +626,9 @@ class IrActionsServer(models.Model):
                 try:
                     self.env[action.model_name].check_access_rights("write")
                 except AccessError:
-                    _logger.warning("Forbidden server action %r executed while the user %s does not have access to %s.",
-                        action.name, self.env.user.login, action.model_name,
+                    _logger.warning("%r Forbidden server action %r executed while the user %s (#%d) does not"
+                                    " have access to %s.", LogType.SERVER_ACTION_FORBIDDEN, action.name,
+                                    self.env.user.login, self.env.user.id, action.model_name,
                     )
                     raise
 
@@ -637,12 +639,16 @@ class IrActionsServer(models.Model):
                 try:
                     records.check_access_rule('write')
                 except AccessError:
-                    _logger.warning("Forbidden server action %r executed while the user %s does not have access to %s.",
-                        action.name, self.env.user.login, records,
+                    _logger.warning("%r Forbidden server action %r executed while the user %s (#%d) does not"
+                                    " have access to %s.", LogType.SERVER_ACTION_FORBIDDEN, action.name,
+                                    self.env.user.login, self.env.user.id, records,
                     )
                     raise
 
             runner, multi = action._get_runner()
+            if runner and action.usage != "ir_cron":
+                _logger.info("%r %r (#%d) has been run by user %r (#%d).", LogType.SERVER_ACTION_RUN,
+                                self.display_name, self.id, self.env.user.login, self.env.user.id)
             if runner and multi:
                 # call the multi method
                 run_self = action.with_context(eval_context['env'].context)

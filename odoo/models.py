@@ -64,6 +64,7 @@ from .tools import date_utils
 from .tools import populate
 from .tools import unique
 from .tools.lru import LRU
+from .loglevels import LogType
 
 _logger = logging.getLogger(__name__)
 _schema = logging.getLogger(__name__ + '.schema')
@@ -1056,6 +1057,11 @@ class BaseModel(metaclass=MetaModel):
         if not (self.env.is_admin() or self.env.user.has_group('base.group_allow_export')):
             raise UserError(_("You don't have the rights to export data. Please contact an Administrator."))
         fields_to_export = [fix_import_export_id_paths(f) for f in fields_to_export]
+        _logger.info("%r Export made on model %s for %s records on %s fields by user %s (#%d). "
+                     "Domain : %s, Fields : %s, Ids (10 max) : %s",
+                     LogType.EXPORT, repr(self._name), len(self.ids), len(fields_to_export),
+                     self.env.user.login, self.env.user.id, self._context.get('export_domain'), fields_to_export,
+                     self.ids[:10])
         return {'datas': self._export_rows(fields_to_export)}
 
     @api.model
@@ -3725,7 +3731,8 @@ Fields:
             self.flush()
 
         # auditing: deletions are infrequent and leave no trace in the database
-        _unlink.info('User #%s deleted %s records with IDs: %r', self._uid, self._name, self.ids)
+        _unlink.info('%r User %d deleted %s records with IDs: %r', LogType.RECORD_DELETION, self._uid, self._name,
+                    self.ids)
 
         return True
 

@@ -8,6 +8,7 @@ from odoo.exceptions import AccessError, ValidationError
 from odoo.osv import expression
 from odoo.tools import config
 from odoo.tools.safe_eval import safe_eval, time
+from odoo.loglevels import LogType
 
 _logger = logging.getLogger(__name__)
 class IrRule(models.Model):
@@ -227,7 +228,8 @@ class IrRule(models.Model):
         return res
 
     def _make_access_error(self, operation, records):
-        _logger.info('Access Denied by record rules for operation: %s on record ids: %r, uid: %s, model: %s', operation, records.ids[:6], self._uid, records._name)
+        _logger.info('%r Access Denied by record rules for operation: %s on record ids: %r, uid: %s, '
+                     'model: %s', LogType.IRRULE_ACCESS_DENIED, operation, records.ids[:6], self._uid, records._name)
         self = self.with_context(self.env.user.context_get())
 
         model = records._name
