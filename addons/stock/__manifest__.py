@@ -87,6 +87,7 @@
         'views/stock_package_level_views.xml',
         'views/stock_package_type_view.xml',
         'views/stock_forecasted.xml',
+        'views/help_message_template.xml',
     ],
     'installable': True,
     'application': True,

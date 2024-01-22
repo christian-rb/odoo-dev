@@ -21,6 +21,7 @@
         'views/stock_lot_views.xml',
         'views/stock_orderpoint_views.xml',
         'views/product_views.xml',
+        'views/help_message_template.xml',
         'report/purchase_report_views.xml',
         'report/purchase_report_templates.xml',
         'report/report_stock_rule.xml',
