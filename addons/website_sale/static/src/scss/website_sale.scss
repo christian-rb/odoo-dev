@@ -50,8 +50,8 @@ $input-border-color: $gray-400;
         --o-wsale-card-border-radius: #{$card-border-radius};
         --o-wsale-card-info-padding: #{map-get($spacers, 2)};
         --o-wsale-card-bg: #{$card-bg};
-        --o-wsale-card-color: #{adjust-color-to-background($body-color, $card-bg)};
-        --o-wsale-card-text-muted: #{adjust-color-to-background($text-muted, $card-bg, mute-color($color-contrast-light), mute-color($color-contrast-dark))};
+        // --o-wsale-card-color: #{adjust-color-to-background($body-color, $card-bg)};
+        // --o-wsale-card-text-muted: #{adjust-color-to-background($text-muted, $card-bg, mute-color($color-contrast-light), mute-color($color-contrast-dark))};
 
         $-br-top: calc(#{$card-border-radius} - 1px);
         --o-wsale-card-thumb-border-radius: #{$-br-top} #{$-br-top} 0 0;
@@ -713,7 +713,7 @@ a.no-decoration {
         border-radius: $card-border-radius;
 
         .accordion-item {
-            @include o-bg-color(rgba($card-bg, $o-card-body-bg-opacity));
+            // @include o-bg-color(rgba($card-bg, $o-card-body-bg-opacity));
         }
 
         // TODO VCR This value should adapt to the offsetHeight

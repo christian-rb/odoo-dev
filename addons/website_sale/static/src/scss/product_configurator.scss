@@ -93,7 +93,7 @@ select.form-select.css_attribute_select {
 @if ($modal-content-color == null) and ($form-select-bg == $body-bg) {
     .modal-content {
         select.form-select.css_attribute_select {
-            background-image: str-replace($-arrow-url, "#000", str-replace(#{color-contrast($modal-content-bg)}, "#", "%23"));
+            // background-image: str-replace($-arrow-url, "#000", str-replace(#{color-contrast($modal-content-bg)}, "#", "%23"));
         }
     }
 }

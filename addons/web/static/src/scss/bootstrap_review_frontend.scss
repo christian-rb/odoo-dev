@@ -68,12 +68,12 @@ $o-btn-outline-border-width-defaults: () !default;
         padding-right: 0;
     }
 }
-@if alpha($navbar-light-toggler-border-color) < 0.001 {
-    .navbar-light .navbar-toggler {
-        padding-left: 0;
-        padding-right: 0;
-    }
-}
+// @if alpha($navbar-light-toggler-border-color) < 0.001 {
+//     .navbar-light .navbar-toggler {
+//         padding-left: 0;
+//         padding-right: 0;
+//     }
+// }
 
 // Review bootstrap navbar to work with different nav styles
 $o-navbar-nav-pills-link-padding-x: $nav-link-padding-x !default;
@@ -108,7 +108,7 @@ $o-navbar-nav-pills-link-border-radius: $nav-pills-border-radius !default;
     // background.
 
     @if $modal-content-color == null {
-        color: adjust-color-to-background($body-color, $modal-content-bg);
+        // color: adjust-color-to-background($body-color, $modal-content-bg);
 
         // This prevents these elements from taking their colors from the body
         // inside a modal.
@@ -125,13 +125,13 @@ $o-navbar-nav-pills-link-border-radius: $nav-pills-border-radius !default;
             @if ($input-bg == $body-bg) {
                 .form-control {
                     background-color: $modal-content-bg;
-                    color: color-contrast($modal-content-bg);
+                    // color: color-contrast($modal-content-bg);
                 }
             }
             @if ($form-select-bg == $body-bg) {
                 .form-select {
                     background-color: $modal-content-bg;
-                    color: color-contrast($modal-content-bg);;
+                    // color: color-contrast($modal-content-bg);;
                 }
             }
             @if $form-check-input-bg == $body-bg {
@@ -142,7 +142,7 @@ $o-navbar-nav-pills-link-border-radius: $nav-pills-border-radius !default;
         }
     }
     .text-muted {
-        color: adjust-color-to-background($text-muted, $modal-content-bg, mute-color($color-contrast-light), mute-color($color-contrast-dark)) !important;
+        // color: adjust-color-to-background($text-muted, $modal-content-bg, mute-color($color-contrast-light), mute-color($color-contrast-dark)) !important;
     }
 }
 
@@ -173,7 +173,7 @@ $o-navbar-nav-pills-link-border-radius: $nav-pills-border-radius !default;
     color: inherit;
 }
 .form-control.bg-light {
-    color: adjust-color-to-background($input-color, $light);
+    // color: adjust-color-to-background($input-color, $light);
 }
 
 $-color-for-gray-200-bg: adjust-color-to-background($body-color, $gray-200);
@@ -228,6 +228,6 @@ $-color-for-gray-200-bg: adjust-color-to-background($body-color, $gray-200);
 // Dropdown
 .dropdown .dropdown-menu {
     .text-muted {
-        color: adjust-color-to-background($text-muted, $dropdown-bg, mute-color($color-contrast-light), mute-color($color-contrast-dark)) !important;
+        // color: adjust-color-to-background($text-muted, $dropdown-bg, mute-color($color-contrast-light), mute-color($color-contrast-dark)) !important;
     }
 }
