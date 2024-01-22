@@ -962,3 +962,13 @@ section, .oe_img_bg, [data-oe-shape-data] {
         margin-bottom: 1rem;
     }
 }
+
+.o_we_magic_button_container {
+    z-index: 1;
+    opacity: 0.25;
+
+    .magic_button:hover {
+        background-color: var(--o-cc2-btn-secondary);
+        border-radius: 5px;
+    }
+}

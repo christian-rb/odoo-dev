@@ -491,6 +491,59 @@ export class OdooEditor extends EventTarget {
             this.editable.before(this._tableUiContainer);
         }
 
+        // Create the magic Buttons UI
+        this.magicButtonUiContainer = this.document.createElement('div');
+        this.magicButtonUiContainer.classList.add(
+            'o_we_magic_button_container',
+            'd-flex',
+            'align-items-center',
+            'position-absolute',
+            'd-none',
+        );
+
+        const magicButtonsContainer = this.document.createElement('div');
+        magicButtonsContainer.classList.add('o_we_magic_buttons', 'd-flex', 'justify-content-center');
+
+        const optionsData = [
+            { icon: 'fa-list-ol', dataCall: 'toggleList', dataArg1: 'OL' },
+            { icon: 'fa-list-ul', dataCall: 'toggleList', dataArg1: 'UL' },
+            { icon: 'fa-check-square', dataCall: 'toggleList', dataArg1: 'CL' },
+            { icon: 'fa-table', dataCall: 'insertTable' },
+            { icon: 'fa-file-image-o', id: 'insert-image' },
+            { icon: 'fa-link', id: 'create-magic-link' },
+            { icon: 'fa-hashtag', id: 'open-dynamic-placeholder' },
+        ];
+
+        const createOptions = (optionData) => {
+            const option = this.document.createElement('div');
+            option.classList.add('magic_button', 'px-3', 'py-2', 'fa', optionData.icon);
+            if (optionData.dataCall) option.setAttribute('data-call', optionData.dataCall);
+            if (optionData.dataArg1) option.setAttribute('data-arg1', optionData.dataArg1);
+            if (optionData.id) option.setAttribute('id', optionData.id);
+            return option;
+        };
+
+        for (const optionData of optionsData) {
+            if (optionData.id === 'open-dynamic-placeholder' && !this.options.dynamicPlaceholderProps?.show ) {
+                continue;
+            }
+            const option = createOptions(optionData);
+            option.addEventListener('mousedown', (ev) => {
+                ev.stopPropagation();
+                const arg1 = option.dataset.arg1;
+                const args = arg1 ? arg1.split(",") : [];
+                const methodToExecute = option.dataset.call;
+                if (args.length || methodToExecute === 'insertTable') {
+                    this.execCommand(methodToExecute, ...args);
+                }
+                ev.preventDefault();
+            });
+            magicButtonsContainer.appendChild(option);
+        }
+
+        this.magicButtonUiContainer.appendChild(magicButtonsContainer);
+        this.editable.before(this.magicButtonUiContainer);
+
         // --------
         // Powerbox
         // --------
@@ -700,6 +753,7 @@ export class OdooEditor extends EventTarget {
         this._resizeObserver.observe(this.document.body);
         this._resizeObserver.observe(this.editable);
         this.addDomListener(this.editable, 'scroll', this.multiselectionRefresh);
+        window.onresize = () => this._positionMagicButtons();
 
         if (this._collabClientId) {
             this._snapshotInterval = setInterval(() => {
@@ -889,6 +943,7 @@ export class OdooEditor extends EventTarget {
             this._makeHint(this.editable.firstChild, this.options.placeholder, true);
         }
         this.multiselectionRefresh();
+        this._positionMagicButtons();
     }
 
     sanitize(target) {
@@ -1843,6 +1898,7 @@ export class OdooEditor extends EventTarget {
             this._drawClientSelection(selection);
             this._drawClientAvatar(selection);
         }
+        this._handleCommandHint;
         this._updateAvatarCounters();
     }
 
@@ -3439,6 +3495,42 @@ export class OdooEditor extends EventTarget {
         this.toolbar.classList.toggle('d-none', distToScrollContainer < OFFSET / 2);
     }
 
+    _positionMagicButtons() {
+        const magicButtonsContainer = this.magicButtonUiContainer;
+        const anchorNode = this.document.getSelection().anchorNode;
+        const block = closestBlock(anchorNode);
+        let direction = block?.getAttribute('dir');
+        if (block?.tagName === "LI") {
+            direction = block.parentElement.getAttribute('dir');
+        }
+        magicButtonsContainer.setAttribute('dir', direction);
+
+        if (
+            block && block.classList.contains('oe-hint') &&
+            !block.closest('TD, .o_editor_banner, div.o_text_columns') &&
+            !block.style.textAlign &&
+            !this.isMobile &&
+            this.powerboxTablePicker.visible()
+        ) {
+            magicButtonsContainer.classList.remove('d-none');
+            const buttonStyles = magicButtonsContainer.style;
+            // Resetting the position of the magic buttons.
+            buttonStyles.top =  '0px';
+            buttonStyles.left = '0px';
+            const blockRect = block.getBoundingClientRect();
+            const buttonsRect = magicButtonsContainer.getBoundingClientRect();
+            if (direction === 'rtl') {
+                buttonStyles.left = (blockRect.right - buttonsRect.width - buttonsRect.x) - (buttonsRect.width * 0.60) + 'px';
+            } else {
+                buttonStyles.left = (blockRect.left - buttonsRect.x) + (buttonsRect.width * 0.60) + 'px';
+            }
+            buttonStyles.top = (blockRect.top - buttonsRect.top) + 'px';
+            buttonStyles.height = blockRect.height + 'px';
+        } else {
+            magicButtonsContainer.classList.add('d-none');
+        }
+    }
+
     // PASTING / DROPPING
 
     /**
@@ -4553,6 +4645,7 @@ export class OdooEditor extends EventTarget {
                         hint.classList.add("oe-hint");
                     }
                 } else {
+                    this.magicButtonUiContainer.classList.add('d-none');
                     hint.removeAttribute("placeholder");
                 }
                 if (hint.classList.length === 0) {
@@ -4585,20 +4678,21 @@ export class OdooEditor extends EventTarget {
     }
     _makeHint(block, text, temporary = false) {
         const content = block && block.innerHTML.trim();
+        this.observerUnactive();
         if (
             block &&
             (content === '' || content === '<br>') &&
             !block.querySelector('T[t-out],[t-field]') &&
             ancestors(block, this.editable).includes(this.editable)
         ) {
-            this.observerUnactive();
             block.setAttribute('placeholder', text);
             block.classList.add('oe-hint');
             if (temporary) {
                 block.classList.add('oe-command-temporary-hint');
             }
-            this.observerActive();
         }
+        this._positionMagicButtons();
+        this.observerActive();
     }
 
     /**
@@ -4797,6 +4891,7 @@ export class OdooEditor extends EventTarget {
         if (this._columnUiTarget && !this._columnUi.classList.contains('o_open')) {
             this._positionTableUi(this._columnUiTarget);
         }
+        this._positionMagicButtons();
     }
 
     _onDocumentKeydown(ev) {
