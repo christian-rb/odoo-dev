@@ -164,6 +164,7 @@ QUnit.module("spreadsheet_account > Accounting", { beforeEach }, () => {
                     codes: ["100"],
                     companyId: null,
                     includeUnposted: false,
+                    partnerIds: [],
                 })
             ),
             JSON.stringify(
@@ -172,6 +173,7 @@ QUnit.module("spreadsheet_account > Accounting", { beforeEach }, () => {
                     codes: ["100"],
                     companyId: null,
                     includeUnposted: false,
+                    partnerIds: [],
                 })
             ),
             JSON.stringify(
@@ -180,6 +182,7 @@ QUnit.module("spreadsheet_account > Accounting", { beforeEach }, () => {
                     codes: ["100"],
                     companyId: null,
                     includeUnposted: false,
+                    partnerIds: [],
                 })
             ),
             JSON.stringify(
@@ -188,6 +191,7 @@ QUnit.module("spreadsheet_account > Accounting", { beforeEach }, () => {
                     codes: ["10"],
                     companyId: null,
                     includeUnposted: false,
+                    partnerIds: [],
                 })
             ),
             JSON.stringify(
@@ -196,6 +200,7 @@ QUnit.module("spreadsheet_account > Accounting", { beforeEach }, () => {
                     codes: ["5"],
                     companyId: 2,
                     includeUnposted: false,
+                    partnerIds: [],
                 })
             ),
             JSON.stringify(
@@ -204,6 +209,7 @@ QUnit.module("spreadsheet_account > Accounting", { beforeEach }, () => {
                     codes: ["5"],
                     companyId: null,
                     includeUnposted: false,
+                    partnerIds: [],
                 })
             ),
             JSON.stringify(
@@ -212,6 +218,7 @@ QUnit.module("spreadsheet_account > Accounting", { beforeEach }, () => {
                     codes: ["5"],
                     companyId: null,
                     includeUnposted: false,
+                    partnerIds: [],
                 })
             ),
             JSON.stringify(
@@ -220,6 +227,7 @@ QUnit.module("spreadsheet_account > Accounting", { beforeEach }, () => {
                     codes: ["100"],
                     companyId: null,
                     includeUnposted: true,
+                    partnerIds: [],
                 })
             ),
         ]);
@@ -250,6 +258,7 @@ QUnit.module("spreadsheet_account > Accounting", { beforeEach }, () => {
                     codes: ["100", "200"],
                     companyId: null,
                     includeUnposted: false,
+                    partnerIds: [],
                 })
             ),
         ]);
@@ -283,6 +292,7 @@ QUnit.module("spreadsheet_account > Accounting", { beforeEach }, () => {
                     codes: ["100104", "200104"],
                     companyId: null,
                     includeUnposted: false,
+                    partnerIds: [],
                 })
             ),
         ]);
@@ -323,6 +333,7 @@ QUnit.module("spreadsheet_account > Accounting", { beforeEach }, () => {
                     codes: ["100"],
                     companyId: null,
                     includeUnposted: false,
+                    partnerIds: [],
                 })
             ),
             "spreadsheet_fetch_debit_credit",
@@ -332,6 +343,7 @@ QUnit.module("spreadsheet_account > Accounting", { beforeEach }, () => {
                     codes: ["100104", "200104"],
                     companyId: null,
                     includeUnposted: false,
+                    partnerIds: [],
                 })
             ),
         ]);

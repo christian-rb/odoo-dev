@@ -18,6 +18,7 @@ export class AccountingPlugin extends OdooUIPlugin {
         "getFiscalStartDate",
         "getFiscalEndDate",
         "getAccountResidual",
+        "getPartnerBalance",
     ]);
     constructor(config) {
         super(config);
@@ -45,10 +46,11 @@ export class AccountingPlugin extends OdooUIPlugin {
      * @param {number} offset end  date of the period to look
      * @param {number | null} companyId specific company to target
      * @param {boolean} includeUnposted wether or not select unposted entries
+     * @param {int[]} ids of the partners
      * @returns {number}
      */
-    getAccountPrefixCredit(codes, dateRange, offset, companyId, includeUnposted) {
-        const data = this._fetchAccountData(codes, dateRange, offset, companyId, includeUnposted);
+    getAccountPrefixCredit(codes, dateRange, offset, companyId, includeUnposted, partnerIds=[]) {
+        const data = this._fetchAccountData(codes, dateRange, offset, companyId, includeUnposted, partnerIds);
         return data.credit;
     }
 
@@ -59,10 +61,11 @@ export class AccountingPlugin extends OdooUIPlugin {
      * @param {number} offset end  date of the period to look
      * @param {number | null} companyId specific company to target
      * @param {boolean} includeUnposted wether or not select unposted entries
+     * @param {int[]} ids of the partners
      * @returns {number}
      */
-    getAccountPrefixDebit(codes, dateRange, offset, companyId, includeUnposted) {
-        const data = this._fetchAccountData(codes, dateRange, offset, companyId, includeUnposted);
+    getAccountPrefixDebit(codes, dateRange, offset, companyId, includeUnposted, partnerIds=[]) {
+        const data = this._fetchAccountData(codes, dateRange, offset, companyId, includeUnposted, partnerIds);
         return data.debit;
     }
 
@@ -102,7 +105,7 @@ export class AccountingPlugin extends OdooUIPlugin {
      * @param {boolean} includeUnposted wether or not select unposted entries
      * @returns {{ debit: number, credit: number }}
      */
-    _fetchAccountData(codes, dateRange, offset, companyId, includeUnposted) {
+    _fetchAccountData(codes, dateRange, offset, companyId, includeUnposted, partnerIds) {
         dateRange.year += offset;
         // Excel dates start at 1899-12-30, we should not support date ranges
         // that do not cover dates prior to it.
@@ -114,7 +117,7 @@ export class AccountingPlugin extends OdooUIPlugin {
         return this.serverData.batch.get(
             "account.account",
             "spreadsheet_fetch_debit_credit",
-            camelToSnakeObject({ dateRange, codes, companyId, includeUnposted })
+            camelToSnakeObject({ dateRange, codes, companyId, includeUnposted, partnerIds })
         );
     }
 
@@ -156,6 +159,30 @@ export class AccountingPlugin extends OdooUIPlugin {
         );
         if (result === false) {
             throw new EvaluationError(_t("The residual amount for given accounts could not be computed."));
+        }
+        return result;
+    }
+
+    /**
+     * Gets the balance of a partner for given account code prefixes and over a given period
+     * @param {number[]} partner_ids ids of the partners
+     * @param {string[]} codes prefixes of the accounts codes
+     * @param {DateRange} dateRange start date of the period to search
+     * @param {number} offset end date of the period to search
+     * @param {number} companyId specific company to target
+     * @param {boolean} includeUnposted whether or not select unposted entries
+     * @returns {number | undefined}
+     */
+    getPartnerBalance(partner_ids, codes, dateRange, offset, companyId, includeUnposted) {
+        dateRange.year += offset;
+
+        const result = this.serverData.batch.get(
+            "account.account",
+            "get_partner_balance",
+            camelToSnakeObject({ partner_ids, codes, dateRange, companyId, includeUnposted })
+        );
+        if (result === false) {
+            throw new EvaluationError(_t("The partners' balance could not be computed."));
         }
         return result;
     }
