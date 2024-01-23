@@ -75,8 +75,10 @@ registry.category("web_tour.tours").add("test_base_automation", {
             trigger: '.o_form_renderer div[name="action_server_ids"] button',
         },
         {
-            content: "Set new action to update the record",
-            trigger: ".modal-content .o_form_renderer [name='state'] span[value*='object_write']",
+            content: "Check the active action type is 'update the record'",
+            trigger:
+                ".modal-content .o_form_renderer [name='state'] span.active[value*='object_write']",
+            isCheck: true,
         },
         {
             content: "Focus on the 'update_path' field",
@@ -174,7 +176,9 @@ registry.category("web_tour.tours").add("test_base_automation_on_tag_added", {
             trigger: '.o_form_renderer div[name="action_server_ids"] button',
         },
         {
-            trigger: " .modal-content .o_form_renderer [name='state'] span[value*='object_write']",
+            trigger:
+                ".modal-content .o_form_renderer [name='state'] span.active[value*='object_write']",
+            isCheck: true,
         },
         {
             content: "Focus on the 'update_path' field",
@@ -204,7 +208,9 @@ registry.category("web_tour.tours").add("test_base_automation_on_tag_added", {
             trigger: '.o_form_renderer div[name="action_server_ids"] button',
         },
         {
-            trigger: " .modal-content .o_form_renderer [name='state'] span[value*='object_write']",
+            trigger:
+                ".modal-content .o_form_renderer [name='state'] span.active[value*='object_write']",
+            isCheck: true,
         },
         {
             content: "Focus on the 'update_path' field",
@@ -439,7 +445,9 @@ registry.category("web_tour.tours").add("test_form_view_resequence_actions", {
             },
         },
         {
-            trigger: ".modal-content .o_form_renderer [name='state'] span[value*='object_write']",
+            trigger:
+                ".modal-content .o_form_renderer [name='state'] span.active[value*='object_write']",
+            isCheck: true,
         },
         {
             trigger: ".modal-content .o_form_renderer [name='state'] span[value*='followers']",

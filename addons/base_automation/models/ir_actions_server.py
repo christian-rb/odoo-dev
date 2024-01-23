@@ -78,6 +78,8 @@ class ServerAction(models.Model):
                         'Create activity: %(activity_name)s',
                         activity_name=action.activity_summary or action.activity_type_id.name
                     )
+                case False:
+                    action.name = ''
                 case other:
                     action.name = dict(action._fields['state']._description_selection(self.env))[action.state]
         # Not sure, but IIRC assignation is mandatory and I don't want the name to be reset by accident
