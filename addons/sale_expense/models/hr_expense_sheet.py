@@ -1,6 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import models
+from odoo.tools import float_round
 
 
 class HrExpenseSheet(models.Model):
@@ -36,7 +37,8 @@ class HrExpenseSheet(models.Model):
                 AND sol.name IN %s
             ORDER BY sol.order_id, sol.product_id, sol.product_uom_qty, sol.price_unit, sol.name
         """
-        self.env.cr.execute(query, (sale_order_ids, product_ids, quantities, tuple(set(aml_sol_unit_price_map.values())), names))
+        self.env.cr.execute(query, (
+        sale_order_ids, product_ids, quantities, tuple({float_round(price, 4) for price in aml_sol_unit_price_map.values()}), names))
         potential_sols_map = {
             (row['order_id'], row['product_id'], row['product_uom_qty'], row['price_unit'], row['name']): row['id']
             for row in self.env.cr.dictfetchall()
