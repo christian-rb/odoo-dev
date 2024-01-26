@@ -6,7 +6,7 @@ from odoo import fields, models
 class ProductDocument(models.Model):
     _inherit = 'product.document'
 
-    attached_on = fields.Selection(
+    attached_on_sale = fields.Selection(
         selection=[
             ('hidden', "Hidden"),
             ('quotation', "On quote"),
@@ -14,7 +14,7 @@ class ProductDocument(models.Model):
         ],
         required=True,
         default='hidden',
-        string="Visibility",
+        string="Sale : Visible at",
         help="Allows you to share the document with your customers within a sale.\n"
             "On quote: the document will be sent to and accessible by customers at any time.\n"
                 "e.g. this option can be useful to share Product description files.\n"

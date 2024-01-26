@@ -11,7 +11,7 @@ import { getFixture, nextTick } from "@web/../tests/helpers/utils";
 import { click, contains, createFile, inputFiles } from "@web/../tests/utils";
 import { setupViewRegistries } from "@web/../tests/views/helpers";
 
-addModelNamesToFetch(["mrp.document"]);
+addModelNamesToFetch(["product.document"]);
 
 const serviceRegistry = registry.category("services");
 
@@ -41,10 +41,10 @@ QUnit.module('MrpDocumentsKanbanView', {
             mimetype: 'image/png',
             name: 'test.png',
         })
-        pyEnv['mrp.document'].create([
-            {name: 'test1', priority: 2, ir_attachment_id: irAttachment, mimetype: "image/png"},
-            {name: 'test2', priority: 1},
-            {name: 'test3', priority: 3},
+        pyEnv['product.document'].create([
+            {name: 'test1', ir_attachment_id: irAttachment, mimetype: "image/png"},
+            {name: 'test2'},
+            {name: 'test3'},
         ]);
         target = getFixture();
         setupViewRegistries();
@@ -57,8 +57,8 @@ QUnit.module('MrpDocumentsKanbanView', {
         assert.expect(4);
 
         const views = {
-            'mrp.document,false,kanban':
-                `<kanban js_class="mrp_documents_kanban" create="false"><templates><t t-name="kanban-box">
+            'product.document,false,kanban':
+                `<kanban js_class="product_documents_kanban" create="false"><templates><t t-name="kanban-box">
                     <div>
                         <field name="name"/>
                     </div>
@@ -68,7 +68,7 @@ QUnit.module('MrpDocumentsKanbanView', {
             serverData: { views },
         });
         await openView({
-            res_model: 'mrp.document',
+            res_model: 'product.document',
             views: [[false, 'kanban']],
         });
 
@@ -88,8 +88,8 @@ QUnit.module('MrpDocumentsKanbanView', {
         this.patchDocumentXHR(mockedXHRs, data => assert.step('xhrSend'));
 
         const views = {
-            'mrp.document,false,kanban':
-                `<kanban js_class="mrp_documents_kanban" create="false"><templates><t t-name="kanban-box">
+            'product.document,false,kanban':
+                `<kanban js_class="product_documents_kanban" create="false"><templates><t t-name="kanban-box">
                     <div>
                         <field name="name"/>
                     </div>
@@ -99,7 +99,7 @@ QUnit.module('MrpDocumentsKanbanView', {
             serverData: { views },
         });
         await openView({
-            res_model: 'mrp.document',
+            res_model: 'product.document',
             views: [[false, 'kanban']],
         });
 
@@ -131,8 +131,8 @@ QUnit.module('MrpDocumentsKanbanView', {
         this.patchDocumentXHR(mockedXHRs, data => assert.step('xhrSend'));
 
         const views = {
-            'mrp.document,false,kanban':
-                `<kanban js_class="mrp_documents_kanban" create="false"><templates><t t-name="kanban-box">
+            'product.document,false,kanban':
+                `<kanban js_class="product_documents_kanban" create="false"><templates><t t-name="kanban-box">
                     <div>
                         <field name="name"/>
                     </div>
@@ -142,7 +142,7 @@ QUnit.module('MrpDocumentsKanbanView', {
             serverData: { views },
         });
         await openView({
-            res_model: 'mrp.document',
+            res_model: 'product.document',
             views: [[false, 'kanban']],
         });
 
@@ -179,8 +179,8 @@ QUnit.module('MrpDocumentsKanbanView', {
 
     QUnit.test("mrp: click on image opens attachment viewer", async function (assert) {
         const views = {
-            "mrp.document,false,kanban": `
-                <kanban js_class="mrp_documents_kanban" create="false">
+            "product.document,false,kanban": `
+                <kanban js_class="product_documents_kanban" create="false">
                     <templates>
                         <t t-name="kanban-box">
                             <div class="o_kanban_image" t-if="record.ir_attachment_id.raw_value">
@@ -199,7 +199,7 @@ QUnit.module('MrpDocumentsKanbanView', {
         };
         const { openView } = await start({ serverData: { views } });
         await openView({
-            res_model: "mrp.document",
+            res_model: "product.document",
             views: [[false, "kanban"]],
         });
         await click(".o_kanban_previewer");
