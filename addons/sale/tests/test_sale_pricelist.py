@@ -84,6 +84,21 @@ class TestSaleOrder(TestSaleCommon):
             })],
         })
 
+        cls.pricelist_discount_excl_formula = cls.env['product.pricelist'].create({
+            'name': 'Pricelist D',
+            'discount_policy': 'without_discount',
+            'company_id': cls.env.company.id,
+            'item_ids': [(0, 0, {
+                'applied_on': '3_global',
+                'compute_price': 'formula',
+                'base': 'pricelist',
+                'base_pricelist_id': cls.pricelist_discount_excl_global.id,
+                'price_discount': -1.23,
+                'price_round': 0.10,
+                'price_surcharge': -0.02,
+            })],
+        })
+
         # create a generic Sale Order with all classical products and empty pricelist
         cls.sale_order = SaleOrder.create({
             'partner_id': cls.partner_a.id,
@@ -341,3 +356,30 @@ class TestSaleOrder(TestSaleCommon):
                              "Price unit should be the cost price for product")
             self.assertEqual(sol_form.discount, 10,
                              "Discount should be displayed on order line since its category get some discount")
+
+    def test_pricelist_price_round_and_surcharge(self):
+        """" Test for discount rounding errors.
+             Make sure prices remain the same when using a pricelist formula
+             with percentage discount, rounding and surcharge.
+        """
+        # Add group 'Discount on Lines' to the user
+        self.env.user.write({
+            'groups_id': [(4, self.env.ref('product.group_discount_per_so_line').id)]
+        })
+
+        # Change the pricelist
+        pricelist = self.pricelist_discount_excl_formula
+        self.sale_order.write({'pricelist_id': pricelist.id})
+
+        # Trigger onchange to reset discount, unit price, subtotal, ...
+        for line in self.sale_order.order_line:
+            line.product_id_change()
+            line._onchange_discount()
+
+        # Assert that Sale Order prices are equal to Pricelist prices based on a formula
+        precision = self.env['decimal.precision'].precision_get('Product Price')
+        for line in self.sale_order.order_line:
+            product_price = self.pricelist_discount_excl_formula.get_product_price(
+                line.product_id, line.product_uom_qty, self.partner_a)
+            self.assertAlmostEqual(line.price_reduce, product_price, precision,
+                "Sale order price for %s should equal pricelist price." % line.product_id.name)

@@ -348,7 +348,7 @@ class SaleOrder(models.Model):
     @api.depends('order_line.tax_id', 'order_line.price_unit', 'amount_total', 'amount_untaxed')
     def _compute_tax_totals_json(self):
         def compute_taxes(order_line):
-            price = order_line.price_unit * (1 - (order_line.discount or 0.0) / 100.0)
+            price = order_line.price_reduce
             order = order_line.order_id
             return order_line.tax_id._origin.compute_all(price, order.currency_id, order_line.product_uom_qty, product=order_line.product_id, partner=order.partner_shipping_id)
 
@@ -367,7 +367,11 @@ class SaleOrder(models.Model):
         for order in self:
             total = 0.0
             for line in order.order_line:
-                total += (line.price_subtotal * 100)/(100-line.discount) if line.discount != 100 else (line.price_unit * line.product_uom_qty)
+                undiscount = 100 - line._get_real_discount(line.discount)
+                if undiscount != 0.0:
+                    total += (line.price_subtotal * 100) / undiscount
+                else:
+                    total += line.price_unit * line.product_uom_qty
             order.amount_undiscounted = total
 
     @api.depends('state')

@@ -59,7 +59,8 @@ class SaleOrderLine(models.Model):
         Compute the amounts of the SO line.
         """
         for line in self:
-            price = line.price_unit * (1 - (line.discount or 0.0) / 100.0)
+            discount = line._get_real_discount(line.discount)
+            price = line.price_unit * (1.0 - discount / 100.0)
             taxes = line.tax_id.compute_all(price, line.order_id.currency_id, line.product_uom_qty, product=line.product_id, partner=line.order_id.partner_shipping_id)
             line.update({
                 'price_tax': sum(t.get('amount', 0.0) for t in taxes.get('taxes', [])),
@@ -121,7 +122,8 @@ class SaleOrderLine(models.Model):
     @api.depends('price_unit', 'discount')
     def _compute_price_reduce(self):
         for line in self:
-            line.price_reduce = line.price_unit * (1.0 - line.discount / 100.0)
+            discount = line._get_real_discount(line.discount)
+            line.price_reduce = line.price_unit * (1.0 - discount / 100.0)
 
     @api.depends('price_total', 'product_uom_qty')
     def _compute_price_reduce_taxinc(self):
@@ -487,7 +489,8 @@ class SaleOrderLine(models.Model):
                 # reduce (to include discount) without using `compute_all()` method on taxes.
                 price_subtotal = 0.0
                 uom_qty_to_consider = line.qty_delivered if line.product_id.invoice_policy == 'delivery' else line.product_uom_qty
-                price_reduce = line.price_unit * (1 - (line.discount or 0.0) / 100.0)
+                discount = line._get_real_discount(line.discount)
+                price_reduce = line.price_unit * (1.0 - discount / 100.0)
                 price_subtotal = price_reduce * uom_qty_to_consider
                 if len(line.tax_id.filtered(lambda tax: tax.price_include)) > 0:
                     # As included taxes are not excluded from the computed subtotal, `compute_all()` method
@@ -804,13 +807,20 @@ class SaleOrderLine(models.Model):
 
     @api.onchange('product_id', 'price_unit', 'product_uom', 'product_uom_qty', 'tax_id')
     def _onchange_discount(self):
-        if not (self.product_id and self.product_uom and
-                self.order_id.partner_id and self.order_id.pricelist_id and
-                self.order_id.pricelist_id.discount_policy == 'without_discount' and
-                self.env.user.has_group('product.group_discount_per_so_line')):
-            return
+        self.discount = self._get_real_discount()
 
-        self.discount = 0.0
+    def _get_real_discount(self, line_discount=None):
+        """ Get real pricelist discount without rounding.
+            Takes an optional parameter to compare the pricelist discount to.
+            Returns the given discount if it doesn't correspond to the
+            pricelist discount, i.e. when a discount was applied manually.
+        """
+        if not (self.product_id and self.product_uom and self.order_id.partner_id
+                and self.order_id.pricelist_id.discount_policy == 'without_discount'
+                and self.env.user.has_group('product.group_discount_per_so_line')):
+            return self.discount
+
+        real_discount = 0.0
         product = self.product_id.with_context(
             lang=self.order_id.partner_id.lang,
             partner=self.order_id.partner_id,
@@ -824,6 +834,11 @@ class SaleOrderLine(models.Model):
         product_context = dict(self.env.context, partner_id=self.order_id.partner_id.id, date=self.order_id.date_order, uom=self.product_uom.id)
 
         price, rule_id = self.order_id.pricelist_id.with_context(product_context).get_product_price_rule(self.product_id, self.product_uom_qty or 1.0, self.order_id.partner_id)
+        rule = self.env['product.pricelist.item'].browse(rule_id)
+        if line_discount is not None and rule.compute_price == 'percentage':
+            # if compute_price isn't formula or fixed, we don't need additional accuracy
+            return line_discount
+
         new_list_price, currency = self.with_context(product_context)._get_real_price_currency(product, rule_id, self.product_uom_qty, self.product_uom, self.order_id.pricelist_id.id)
 
         if new_list_price != 0:
@@ -834,7 +849,12 @@ class SaleOrderLine(models.Model):
                     self.order_id.company_id or self.env.company, self.order_id.date_order or fields.Date.today())
             discount = (new_list_price - price) / new_list_price * 100
             if (discount > 0 and new_list_price > 0) or (discount < 0 and new_list_price < 0):
-                self.discount = discount
+                real_discount = discount
+        precision = self.env['decimal.precision'].precision_get('Discount')
+        # if given discount doesn't match real_discount, assume manual change
+        was_modified = line_discount is not None \
+            and float_compare(real_discount, line_discount, precision) != 0
+        return real_discount if not was_modified else line_discount
 
     def _is_delivery(self):
         self.ensure_one()
