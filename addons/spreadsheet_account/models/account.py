@@ -4,6 +4,7 @@
 from datetime import date
 import calendar
 from dateutil.relativedelta import relativedelta
+from collections import defaultdict
 
 from odoo import models, api, _
 from odoo.osv import expression
@@ -12,6 +13,92 @@ from odoo.tools import date_utils
 
 class AccountMove(models.Model):
     _inherit = "account.account"
+
+    # ------------------------ #
+    # Domain utility functions #
+    # ------------------------ #
+
+    def _build_spreadsheet_formula_domain(self, formula_params):
+        codes = [code for code in formula_params["codes"] if code]
+        if not codes:
+            return expression.FALSE_DOMAIN
+
+        account_ids = self._search_accounts_with_codes_or_types(codes=codes).ids
+
+        company_id = formula_params["company_id"] or self.env.company.id
+        company = self.env["res.company"].browse(company_id)
+        start, end = self._get_date_period_boundaries(
+            formula_params["date_range"], company
+        )
+        balance_domain = [
+            ("account_id.include_initial_balance", "=", True),
+            ("date", "<=", end),
+        ]
+        pnl_domain = [
+            ("account_id.include_initial_balance", "=", False),
+            ("date", ">=", start),
+            ("date", "<=", end),
+        ]
+        code_domain = [("account_id", "in", account_ids)]
+        period_domain = expression.OR([balance_domain, pnl_domain])
+        domain = expression.AND([code_domain, period_domain, [("company_id", "=", company_id)]])
+        if formula_params["include_unposted"]:
+            domain = expression.AND(
+                [domain, [("move_id.state", "!=", "cancel")]]
+            )
+        else:
+            domain = expression.AND(
+                [domain, [("move_id.state", "=", "posted")]]
+            )
+        return domain
+
+    def _search_accounts_with_codes_or_types(self, codes=[], types=[], extra_domains=[]):
+        code_domain = expression.OR(
+            [
+                ("code", "=like", f"{code}%"),
+            ]
+            for code in codes
+        )
+        payable_receivable_domain = [('account_type', 'in', types)] if types else []
+        domain = expression.AND([
+            expression.OR([code_domain, payable_receivable_domain]),
+            extra_domains,
+        ])
+
+        return self.env["account.account"].search(domain)
+
+    def _get_accounts_and_lines_for_all_cells(self, args_list, extra_aggregates=[]):
+        company_ids = tuple(args['company_id'] or self.env.company.id for args in args_list)
+        account_codes = [
+            code
+            for args in args_list
+            for code in args["codes"]
+            if code
+        ]
+
+        all_accounts = self._search_accounts_with_codes_or_types(
+            codes=account_codes,
+            types=["liability_payable", "asset_receivable"],
+            extra_domains=[('company_id', 'in', company_ids)]
+        )
+
+        domain = [
+            ('company_id', 'in', company_ids),
+            ('account_id', 'in', all_accounts.ids),
+            ('parent_state', 'in', ('draft', 'posted')),
+        ]
+
+        all_lines = self.env['account.move.line']._read_group(
+            domain=domain,
+            groupby=['company_id', 'parent_state', 'account_id'],
+            aggregates=['date:array_agg'] + extra_aggregates,
+        )
+
+        return all_accounts, all_lines
+
+    # ------------------------ #
+    #      API functions       #
+    # ------------------------ #
 
     @api.model
     def _get_date_period_boundaries(self, date_period, company):
@@ -42,45 +129,6 @@ class AccountMove(models.Model):
             start, _ = date_utils.get_fiscal_year(end, fiscal_day, fiscal_month)
         return start, end
 
-    def _build_spreadsheet_formula_domain(self, formula_params):
-        codes = [code for code in formula_params["codes"] if code]
-        if not codes:
-            return expression.FALSE_DOMAIN
-        company_id = formula_params["company_id"] or self.env.company.id
-        company = self.env["res.company"].browse(company_id)
-        start, end = self._get_date_period_boundaries(
-            formula_params["date_range"], company
-        )
-        balance_domain = [
-            ("account_id.include_initial_balance", "=", True),
-            ("date", "<=", end),
-        ]
-        pnl_domain = [
-            ("account_id.include_initial_balance", "=", False),
-            ("date", ">=", start),
-            ("date", "<=", end),
-        ]
-        # It is more optimized to (like) search for code directly in account.account than in account_move_line
-        code_domain = expression.OR(
-            [
-                ("code", "=like", f"{code}%"),
-            ]
-            for code in codes
-        )
-        account_ids = self.env["account.account"].search(code_domain).ids
-        code_domain = [("account_id", "in", account_ids)]
-        period_domain = expression.OR([balance_domain, pnl_domain])
-        domain = expression.AND([code_domain, period_domain, [("company_id", "=", company_id)]])
-        if formula_params["include_unposted"]:
-            domain = expression.AND(
-                [domain, [("move_id.state", "!=", "cancel")]]
-            )
-        else:
-            domain = expression.AND(
-                [domain, [("move_id.state", "=", "posted")]]
-            )
-        return domain
-
     @api.model
     def spreadsheet_move_line_action(self, args):
         domain = self._build_spreadsheet_formula_domain(args)
@@ -108,14 +156,50 @@ class AccountMove(models.Model):
             include_unposted: bool
         }]
         """
-        results = []
-        for args in args_list:
-            company_id = args["company_id"] or self.env.company.id
-            domain = self._build_spreadsheet_formula_domain(args)
-            MoveLines = self.env["account.move.line"].with_company(company_id)
-            [(debit, credit)] = MoveLines._read_group(domain, aggregates=['debit:sum', 'credit:sum'])
-            results.append({'debit': debit or 0, 'credit': credit or 0})
+        all_accounts, all_lines = self._get_accounts_and_lines_for_all_cells(
+            args_list,
+            extra_aggregates=['debit:array_agg', 'credit:array_agg']
+        )
 
+        lines_dict = defaultdict(
+            lambda: (),
+            {(company.id, state, account.id): tuple(val) for company, state, account, *val in all_lines}
+        )
+
+        results = []
+
+        for args in args_list:
+            subcodes = {subcode for subcode in args["codes"] if subcode}
+
+            if not subcodes:
+                results.append({'credit': 0, 'debit': 0})
+                continue
+
+            company_id = args['company_id'] or self.env.company.id
+            company = self.env["res.company"].browse(company_id)
+            states = ['posted', 'draft'] if args['include_unposted'] else ['posted']
+            start, end = self._get_date_period_boundaries(
+                args['date_range'], company
+            )
+
+            accounts = self.env['account.account']
+            for subcode in subcodes:
+                accounts += all_accounts.filtered(lambda acc: acc.code.startswith(subcode))
+
+            cell_debit = 0.0
+            cell_credit = 0.0
+            for account in accounts:
+                include_initial_balance = account.include_initial_balance
+                for state in states:
+                    for line_date, line_debit, line_credit in zip(*lines_dict[(company_id, state, account.id)]):
+                        if (include_initial_balance and line_date > end) \
+                           or (not include_initial_balance and (line_date < start or line_date > end)):
+                            continue
+
+                        cell_debit += line_debit
+                        cell_credit += line_credit
+
+            results.append({'debit': cell_debit or 0, 'credit': cell_credit or 0})
         return results
 
     @api.model
