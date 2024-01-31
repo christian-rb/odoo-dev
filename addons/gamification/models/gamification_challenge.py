@@ -231,8 +231,8 @@ class Challenge(models.Model):
 
     ##### Update #####
 
-    @api.model # FIXME: check how cron functions are called to see if decorator necessary
-    def _cron_update(self, ids=False, commit=True):
+    @api.model
+    def _cron_update(self, ids=False, commit=True, batch_size=1000):
         """Daily cron check.
 
         - Start planned challenges (in draft and with start_date = today)
@@ -247,16 +247,20 @@ class Challenge(models.Model):
         planned_challenges = self.search([
             ('state', '=', 'draft'),
             ('start_date', '<=', fields.Date.today())
-        ])
+        ], limit=batch_size+1)
+        recall = len(planned_challenges) > batch_size
         if planned_challenges:
+            self.env['ir.cron']._log_progress(len(planned_challenges), 1 if recall else 0)
             planned_challenges.write({'state': 'inprogress'})
 
         # close scheduled challenges
         scheduled_challenges = self.search([
             ('state', '=', 'inprogress'),
             ('end_date', '<', fields.Date.today())
-        ])
+        ], limit=batch_size+1)
+        recall = recall or len(scheduled_challenges) > batch_size
         if scheduled_challenges:
+            self.env['ir.cron']._log_progress(len(scheduled_challenges), 1 if recall else 0)
             scheduled_challenges.write({'state': 'done'})
 
         records = self.browse(ids) if ids else self.search([('state', '=', 'inprogress')])
