@@ -1025,7 +1025,7 @@ class AccountChartTemplate(models.AbstractModel):
                 _logger.debug("No file %s found for template '%s'", model, module)
         return res
 
-    def _load_translations(self, langs=None, companies=None):
+    def _load_translations(self, langs=None, companies=None, template_data=None):
         """Load the translations of the chart template.
 
         :param langs: the lang code to load the translations for. If one of the codes is not present,
@@ -1040,7 +1040,7 @@ class AccountChartTemplate(models.AbstractModel):
 
         translation_importer = TranslationImporter(self.env.cr, verbose=False)
         for chart_template, chart_companies in groupby(companies, lambda c: c.chart_template):
-            template_data = self.env['account.chart.template']._get_chart_template_data(chart_template)
+            template_data = template_data or self.env['account.chart.template']._get_chart_template_data(chart_template)
             template_data.pop('template_data', None)
             for mname, data in template_data.items():
                 for _xml_id, record in data.items():
@@ -1052,6 +1052,6 @@ class AccountChartTemplate(models.AbstractModel):
                                 value = record.get(f"{fname}@{lang.split('_')[0]}")
                             if value:
                                 for company in chart_companies:
-                                    xml_id = f"account.{company.id}_{_xml_id}"
+                                    xml_id = _xml_id if self._context.get("is_xml_generated", False) else f"account.{company.id}_{_xml_id}"
                                     translation_importer.model_translations[mname][fname][xml_id][lang] = value
         translation_importer.save(overwrite=False)
