@@ -159,25 +159,41 @@ class Contract(models.Model):
                 ))
 
     @api.model
-    def update_state(self):
+    def update_state(self, batch_size=1000):
         from_cron = 'from_cron' in self.env.context
+        if self._update_state_kanban(batch_size=batch_size, from_cron=from_cron):
+            return
+        if self._update_state_close(batch_size=batch_size, from_cron=from_cron):
+            return
+        if self._update_state_open(batch_size=batch_size, from_cron=from_cron):
+            return
+        self._update_state_date_end(batch_size=batch_size, from_cron=from_cron)
+
+    def _update_state_kanban(self, batch_size=1000, from_cron=False):
         companies = self.env['res.company'].search([])
         contracts = self.env['hr.contract']
         work_permit_contracts = self.env['hr.contract']
+        remaining_contracts = batch_size + 1
+        remaining_work_permit_contracts = batch_size + 1
         for company in companies:
             contracts += self.search([
                 ('state', '=', 'open'), ('kanban_state', '!=', 'blocked'), ('company_id', '=', company.id),
                 '&',
                 ('date_end', '<=', fields.date.today() + relativedelta(days=company.contract_expiration_notice_period)),
                 ('date_end', '>=', fields.date.today() + relativedelta(days=1)),
-            ])
+            ], limit=remaining_contracts)
+            remaining_contracts = batch_size - len(contracts) + 1
 
             work_permit_contracts += self.search([
                 ('state', '=', 'open'), ('kanban_state', '!=', 'blocked'), ('company_id', '=', company.id),
                 '&',
                 ('employee_id.work_permit_expiration_date', '<=', fields.date.today() + relativedelta(days=company.work_permit_expiration_notice_period)),
                 ('employee_id.work_permit_expiration_date', '>=', fields.date.today() + relativedelta(days=1)),
-            ])
+            ], limit=remaining_work_permit_contracts)
+            remaining_work_permit_contracts = batch_size - len(work_permit_contracts) + 1
+
+        recall = len(contracts) > batch_size or len(work_permit_contracts) > batch_size
+        self.env['ir.cron']._log_progress(len(contracts) + len(work_permit_contracts), 1 if recall else 0)
 
         for contract in contracts:
             contract.with_context(mail_activity_quick_update=True).activity_schedule(
@@ -204,45 +220,69 @@ class Contract(models.Model):
             )
 
         if contracts:
+            self.env['ir.cron']._log_progress(len(contracts), 1 if recall else 0)
             contracts._safe_write_for_cron({'kanban_state': 'blocked'}, from_cron)
         if work_permit_contracts:
+            self.env['ir.cron']._log_progress(len(work_permit_contracts), 1 if recall else 0)
             work_permit_contracts._safe_write_for_cron({'kanban_state': 'blocked'}, from_cron)
 
-        contracts_to_close = self.search([
+        return recall
+
+    def _update_state_close(self, batch_size=1000, from_cron=False):
+        domain = [
             ('state', '=', 'open'),
             '|',
             ('date_end', '<=', fields.Date.to_string(date.today())),
             ('employee_id.work_permit_expiration_date', '<=', fields.Date.to_string(date.today())),
-        ])
+        ]
+
+        contracts_to_close_count = self.search_count(domain)
+        contracts_to_close = self.search(domain, limit=batch_size)
 
         if contracts_to_close:
+            self.env['ir.cron']._log_progress(len(contracts_to_close), contracts_to_close_count - len(contracts_to_close))
             contracts_to_close._safe_write_for_cron({'state': 'close'}, from_cron)
 
-        contracts_to_open = self.search([('state', '=', 'draft'), ('kanban_state', '=', 'done'), ('date_start', '<=', fields.Date.to_string(date.today())),])
+        return contracts_to_close_count > batch_size
+
+    def _update_state_open(self, batch_size=1000, from_cron=False):
+        domain = [
+            ('state', '=', 'draft'),
+            ('kanban_state', '=', 'done'),
+            ('date_start', '<=', fields.Date.to_string(date.today())),
+        ]
+
+        contracts_to_open_count = self.search_count(domain)
+        contracts_to_open = self.search(domain, limit=batch_size)
 
         if contracts_to_open:
+            self.env['ir.cron']._log_progress(len(contracts_to_open), contracts_to_open_count - len(contracts_to_open))
             contracts_to_open._safe_write_for_cron({'state': 'open'}, from_cron)
 
-        contract_ids = self.search([('date_end', '=', False), ('state', '=', 'close'), ('employee_id', '!=', False)])
+        return contracts_to_open_count > batch_size
+
+    def _update_state_date_end(self, batch_size=1000, from_cron=False):
+        domain = [('date_end', '=', False), ('state', '=', 'close'), ('employee_id', '!=', False)]
+        contract_count = self.search_count(domain)
+        contract_ids = self.search(domain, limit=batch_size)
         # Ensure all closed contract followed by a new contract have a end date.
         # If closed contract has no closed date, the work entries will be generated for an unlimited period.
+        self.env['ir.cron']._log_progress(0, contract_count)
         for contract in contract_ids:
+            # TODO remove search from loop
             next_contract = self.search([
                 ('employee_id', '=', contract.employee_id.id),
                 ('state', 'not in', ['cancel', 'draft']),
                 ('date_start', '>', contract.date_start)
-            ], order="date_start asc", limit=1)
-            if next_contract:
-                contract._safe_write_for_cron({'date_end': next_contract.date_start - relativedelta(days=1)}, from_cron)
-                continue
-            next_contract = self.search([
+            ], order="date_start asc", limit=1) or \
+                            self.search([
                 ('employee_id', '=', contract.employee_id.id),
                 ('date_start', '>', contract.date_start)
             ], order="date_start asc", limit=1)
             if next_contract:
+                self.env['ir.cron']._log_progress(1)
                 contract._safe_write_for_cron({'date_end': next_contract.date_start - relativedelta(days=1)}, from_cron)
-
-        return True
+        return contract_count > batch_size
 
     def _safe_write_for_cron(self, vals, from_cron=False):
         if from_cron:
