@@ -116,7 +116,7 @@ class FleetVehicleLogContract(models.Model):
         self.write({'state': 'expired'})
 
     @api.model
-    def scheduler_manage_contract_expiration(self):
+    def scheduler_manage_contract_expiration(self, batch_size=1000):
         # This method is called by a cron task
         # It manages the state of a contract, possibly by posting a message on the vehicle concerned and updating its status
         params = self.env['ir.config_parameter'].sudo()
@@ -131,21 +131,21 @@ class FleetVehicleLogContract(models.Model):
         ]
         ).filtered(
             lambda nec: reminder_activity_type not in nec.activity_ids.activity_type_id
-        )
+        )[:batch_size+1]
 
         for contract in nearly_expired_contracts:
             contract.activity_schedule(
                 'fleet.mail_act_fleet_contract_to_renew', contract.expiration_date,
                 user_id=contract.user_id.id)
 
-        expired_contracts = self.search([('state', 'not in', ['expired', 'closed']), ('expiration_date', '<',fields.Date.today() )])
+        expired_contracts = self.search([('state', 'not in', ['expired', 'closed']), ('expiration_date', '<',fields.Date.today())], limit=batch_size+1)
         expired_contracts.write({'state': 'expired'})
 
-        futur_contracts = self.search([('state', 'not in', ['futur', 'closed']), ('start_date', '>', fields.Date.today())])
+        futur_contracts = self.search([('state', 'not in', ['futur', 'closed']), ('start_date', '>', fields.Date.today())], limit=batch_size+1)
         futur_contracts.write({'state': 'futur'})
 
-        now_running_contracts = self.search([('state', '=', 'futur'), ('start_date', '<=', fields.Date.today())])
+        now_running_contracts = self.search([('state', '=', 'futur'), ('start_date', '<=', fields.Date.today())], limit=batch_size+1)
         now_running_contracts.write({'state': 'open'})
 
-    def run_scheduler(self):
-        self.scheduler_manage_contract_expiration()
+        progress = [len(nearly_expired_contracts), len(expired_contracts), len(futur_contracts), len(now_running_contracts)]
+        self.env['ir.cron']._log_progress(sum(progress), 1 if max(progress) > batch_size else 0)
