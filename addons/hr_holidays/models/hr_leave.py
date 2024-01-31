@@ -1692,15 +1692,17 @@ Attempting to double-book your time off won't magically make your vacation 2x be
     ####################################################
 
     @api.model
-    def _cancel_invalid_leaves(self):
+    def _cancel_invalid_leaves(self, batch_size=1000):
         inspected_date = fields.Date.today() + timedelta(days=31)
         start_datetime = datetime.combine(fields.Date.today(), datetime.min.time())
         end_datetime = datetime.combine(inspected_date, datetime.max.time())
-        concerned_leaves = self.search([
+        domain = [
             ('date_from', '>=', start_datetime),
             ('date_from', '<=', end_datetime),
             ('state', 'in', ['confirm', 'validate1', 'validate']),
-        ], order='date_from desc')
+        ]
+        concerned_leave_count = self.search_count(domain)
+        concerned_leaves = self.search(domain, order='date_from desc', limit=batch_size)
         accrual_allocations = self.env['hr.leave.allocation'].search([
             ('employee_id', 'in', concerned_leaves.employee_id.ids),
             ('holiday_status_id', 'in', concerned_leaves.holiday_status_id.ids),
@@ -1714,10 +1716,11 @@ Attempting to double-book your time off won't magically make your vacation 2x be
         concerned_leaves = concerned_leaves\
             .filtered(lambda leave: leave.holiday_status_id in accrual_allocations.holiday_status_id)\
             .sorted('date_from', reverse=True)
-        reason = _("the accruated amount is insufficient for that duration.")
+        reason = _("the accrued amount is insufficient for that duration.")
         for leave in concerned_leaves:
             to_recheck_leaves_per_leave_type = concerned_leaves.employee_id._get_consumed_leaves(leave.holiday_status_id)[1]
             exceeding_duration = to_recheck_leaves_per_leave_type[leave.employee_id][leave.holiday_status_id]['exceeding_duration']
             if not exceeding_duration:
                 continue
             leave._force_cancel(reason, 'mail.mt_note')
+        self.env['ir.cron']._log_progress(len(concerned_leaves), concerned_leave_count - len(concerned_leaves))
