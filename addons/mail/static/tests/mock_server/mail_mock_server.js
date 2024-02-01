@@ -528,6 +528,26 @@ async function mail_link_preview_hide(request) {
     return { link_preview_ids };
 }
 
+function modifyAnchorElements(body) {
+    if (!body) {
+        return body;
+    }
+    const divEl = document.createElement("div");
+    divEl.innerHTML = body;
+    divEl.querySelectorAll("a.o_message_redirect").forEach((el) => {
+        const message = this.env["mail.message"].search_read([
+            ["id", "=", Number(el.dataset.oeId)],
+        ])[0];
+        if (message) {
+            const thread = this.env[message.model].search_read([["id", "=", message.res_id]])[0];
+            el.innerHTML = `#${thread.display_name}<i class="fa fa-angle-right ps-2 pe-1"/><i class="fa fa-comment"/>`;
+        } else {
+            el.classList.remove("o_message_redirect");
+        }
+    });
+    return divEl.innerHTML;
+}
+
 registerRoute("/mail/message/post", mail_message_post);
 /** @type {RouteCallback} */
 export async function mail_message_post(request) {
@@ -578,6 +598,9 @@ export async function mail_message_post(request) {
         "parent_id",
     ]) {
         if (post_data[allowedField] !== undefined) {
+            if (allowedField === "body") {
+                post_data[allowedField] = modifyAnchorElements.call(this, post_data[allowedField]);
+            }
             finalData[allowedField] = post_data[allowedField];
         }
     }
@@ -591,6 +614,30 @@ export async function mail_message_post(request) {
         [thread_id],
         Kwargs({ ...kwargs, model: thread_model })
     );
+}
+
+registerRoute("/mail/message/redirect", mail_message_redirect);
+/** @type {RouteCallback} */
+async function mail_message_redirect(request) {
+    /** @type {import("mock_models").MailMessage} */
+    const MailMessage = this.env["mail.message"];
+    /** @type {import("mock_models").DiscussChannel} */
+    const DiscussChannel = this.env["discuss.channel"];
+
+    const { message_id } = await parseRequestParams(request);
+    const [message] = MailMessage.search_read([["id", "=", Number(message_id)]]);
+    if (!message) {
+        return { error: "Unauthorized" };
+    }
+    if (!message.body) {
+        return { error: "NotFound" };
+    }
+    return {
+        threadData:
+            message.model === "discuss.channel"
+                ? DiscussChannel._channel_info([message.res_id])[0]
+                : MailMessage._message_format([message.id])[0].thread,
+    };
 }
 
 registerRoute("/mail/message/reaction", mail_message_add_reaction);
@@ -617,7 +664,8 @@ async function mail_message_update_content(request) {
     /** @type {import("mock_models").MailMessage} */
     const MailMessage = this.env["mail.message"];
 
-    const { attachment_ids, body, message_id } = await parseRequestParams(request);
+    let { attachment_ids, body, message_id } = await parseRequestParams(request);
+    body = modifyAnchorElements.call(this, body);
     MailMessage.write([message_id], { body, attachment_ids });
     if (body === "") {
         MailMessage.write([message_id], { pinned_at: false });

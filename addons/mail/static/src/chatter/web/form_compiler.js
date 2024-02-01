@@ -1,4 +1,5 @@
 import { registry } from "@web/core/registry";
+import { router } from "@web/core/browser/router";
 import { SIZES } from "@web/core/ui/ui_service";
 import { patch } from "@web/core/utils/patch";
 import { append, createElement, setAttributes } from "@web/core/utils/xml";
@@ -17,6 +18,7 @@ function compileChatter(node, params) {
         threadModel: "__comp__.props.record.resModel",
         webRecord: "__comp__.props.record",
         saveRecord: "() => __comp__.save and __comp__.save()",
+        highlightMessageId: router.current.highlight_message_id,
     });
     const chatterContainerHookXml = createElement("div");
     chatterContainerHookXml.classList.add("o-mail-ChatterContainer", "o-mail-Form-chatter");

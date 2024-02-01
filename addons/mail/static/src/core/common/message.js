@@ -9,7 +9,7 @@ import { MessageReactionMenu } from "@mail/core/common/message_reaction_menu";
 import { MessageReactions } from "@mail/core/common/message_reactions";
 import { MessageSeenIndicator } from "@mail/core/common/message_seen_indicator";
 import { RelativeTime } from "@mail/core/common/relative_time";
-import { convertBrToLineBreak, htmlToTextContentInline } from "@mail/utils/common/format";
+import { formatMessageForEdit, htmlToTextContentInline } from "@mail/utils/common/format";
 import { isEventHandled, markEventHandled } from "@web/core/utils/misc";
 
 import {
@@ -27,6 +27,7 @@ import {
 } from "@odoo/owl";
 
 import { ActionSwiper } from "@web/core/action_swiper/action_swiper";
+import { browser } from "@web/core/browser/browser";
 import { hasTouch } from "@web/core/browser/feature_detection";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
@@ -37,7 +38,7 @@ import { usePopover } from "@web/core/popover/popover_hook";
 let rpc;
 import { user } from "@web/core/user";
 import { useService } from "@web/core/utils/hooks";
-import { url } from "@web/core/utils/urls";
+import { getOrigin, url } from "@web/core/utils/urls";
 import { useMessageActions } from "./message_actions";
 import { cookie } from "@web/core/browser/cookie";
 import { rpcWithEnv } from "@mail/utils/common/misc";
@@ -120,6 +121,7 @@ export class Message extends Component {
         this.hasTouch = hasTouch;
         this.messageBody = useRef("body");
         this.messageActions = useMessageActions();
+        this.notification = useService("notification");
         this.store = useState(useService("mail.store"));
         this.shadowBody = useRef("shadowBody");
         this.dialog = useService("dialog");
@@ -279,6 +281,10 @@ export class Message extends Component {
         return Boolean(!this.message.is_transient && this.message.thread);
     }
 
+    get copyable() {
+        return Boolean(this.message.message_type);
+    }
+
     get deletable() {
         return this.editable;
     }
@@ -370,6 +376,16 @@ export class Message extends Component {
         return true;
     }
 
+    async onClickCopy() {
+        const { model, id: threadId } = this.message.thread || {};
+        const { id: messageId } = this.message;
+        const pathname = `/mail/${model}/${threadId}/message/redirect/${messageId}`;
+        await browser.navigator.clipboard.writeText(`${getOrigin()}${pathname}`);
+        this.notification.add(_t("The message link was copied to your clipboard!"), {
+            type: "success",
+        });
+    }
+
     onClickDelete() {
         const message = toRaw(this.message);
         this.dialog.add(
@@ -433,8 +449,23 @@ export class Message extends Component {
             }
             return;
         }
+        const messageLinkEl = ev.target.closest(".o_message_redirect");
+        if (
+            messageLinkEl &&
+            ((messageLinkEl.dataset.oeModel === "discuss.channel" &&
+                (this.store.self.type !== "guest" ||
+                    (this.message.thread?.model === "discuss.channel" &&
+                        this.message.thread?.id === Number(messageLinkEl.dataset.oeResId)))) ||
+                (messageLinkEl.dataset.oeModel !== "discuss.channel" &&
+                    this.store.self.type !== "guest" &&
+                    this.message.thread?.model === messageLinkEl.dataset.oeModel &&
+                    this.message.thread?.id === Number(messageLinkEl.dataset.oeResId)))
+        ) {
+            ev.preventDefault();
+            this.redirectMessage(messageLinkEl.dataset.oeId);
+        }
         if (ev.target.tagName === "A") {
-            if (model && id) {
+            if (model && id && !ev.target.closest(".o_message_redirect")) {
                 ev.preventDefault();
                 this.env.services.action.doAction({
                     type: "ir.actions.act_window",
@@ -464,6 +495,27 @@ export class Message extends Component {
         }
     }
 
+    async redirectMessage(messageId) {
+        const { threadData, error } = await rpc("/mail/message/redirect", {
+            message_id: messageId,
+        });
+        if (error) {
+            const errorMessage =
+                error === "Unauthorized"
+                    ? _t("You do not have access to this conversation.")
+                    : error === "NotFound"
+                    ? _t("This message no longer exists.")
+                    : _t("Something went wrong.");
+            this.notification.add(errorMessage, { type: "danger" });
+            return;
+        }
+        const thread = this.store.Thread.insert(threadData);
+        thread.highlightMessageId = messageId;
+        if (thread.model === "discuss.channel") {
+            thread.open();
+        }
+    }
+
     onClickEdit() {
         this.enterEditMode();
     }
@@ -475,7 +527,7 @@ export class Message extends Component {
 
     enterEditMode() {
         const message = toRaw(this.props.message);
-        const text = convertBrToLineBreak(message.body);
+        const text = formatMessageForEdit(message.body);
         message.composer = {
             mentionedPartners: message.recipients,
             text,

@@ -35,6 +35,7 @@ export class DiscussPublic extends Component {
     }
 
     displayChannel() {
+        this.thread.highlightMessageId = this.props.data.discussPublicViewData.highlightMessageId;
         this.thread.setAsDiscussThread(false);
         this.thread.fetchChannelMembers();
     }

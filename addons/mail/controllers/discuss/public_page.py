@@ -107,7 +107,7 @@ class PublicPageController(http.Controller):
             channel = channel.with_context(guest=guest)
         return self._response_discuss_public_template(channel, discuss_public_view_data=discuss_public_view_data)
 
-    def _response_discuss_public_template(self, channel, discuss_public_view_data=None):
+    def _response_discuss_public_template(self, channel, discuss_public_view_data=None, highlight_message_id=None):
         discuss_public_view_data = discuss_public_view_data or {}
         return request.render(
             "mail.discuss_public_channel_template",
@@ -118,6 +118,7 @@ class PublicPageController(http.Controller):
                     "discussPublicViewData": dict(
                         {
                             "shouldDisplayWelcomeViewInitially": channel.default_display_mode == "video_full_screen",
+                            'highlightMessageId': highlight_message_id,
                         },
                         **discuss_public_view_data,
                     ),
