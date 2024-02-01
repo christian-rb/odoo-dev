@@ -306,6 +306,13 @@ class ir_cron(models.Model):
             job[field_name] = job[field_name] or 0
         return job
 
+    def _notify_admin(self, message):
+        _logger.warning(message)
+
+    def _notify_admin_deactivation(self, cron_name, cron_id, action_id):
+        self._notify_admin(_('The cron %s with id %s call from action %s has been deactivated after failing 5 consecutive times.\n'
+                             'Verify the cron logs for more information.', cron_name, cron_id, action_id))
+
     @classmethod
     def _process_job(cls, db, cron_cr, job):
         """ Execute the cron's server action in a dedicated transaction if the timeout limit has not been reached yet.

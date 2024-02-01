@@ -383,6 +383,7 @@ class TestIrCron(TransactionCase, CronMixinCase):
         try:
             with (
                 patch.object(self.registry['ir.cron'], '_callback', side_effect=Exception),
+                patch.object(self.registry['ir.cron'], '_notify_admin') as notify,
             ):
                 self.registry['ir.cron']._process_job(
                     self.registry.db_name,
@@ -395,6 +396,7 @@ class TestIrCron(TransactionCase, CronMixinCase):
         self.env.invalidate_all()
         self.assertEqual(self.cron.failure_count, 1, 'The cron should have failed once')
         self.assertEqual(self.cron.active, True, 'The cron should still be active')
+        self.assertFalse(notify.called)
 
         self.cron.failure_count = 4
         self.cron.first_failure_date = fields.Datetime.now() - timedelta(days=8)
@@ -405,6 +407,7 @@ class TestIrCron(TransactionCase, CronMixinCase):
         try:
             with (
                 patch.object(self.registry['ir.cron'], '_callback', side_effect=Exception),
+                patch.object(self.registry['ir.cron'], '_notify_admin') as notify,
             ):
                 self.registry['ir.cron']._process_job(
                     self.registry.db_name,
@@ -417,6 +420,7 @@ class TestIrCron(TransactionCase, CronMixinCase):
         self.env.invalidate_all()
         self.assertEqual(self.cron.failure_count, 0, 'The cron should have failed one more time and reset to 0')
         self.assertEqual(self.cron.active, False, 'The cron should have been deactivated after 5 failures')
+        self.assertTrue(notify.called)
 
     def test_cron_timeout_failure(self):
         self.cron._trigger()
