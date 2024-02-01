@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record model="ir.ui.view" id="auth_passkeys_users_form">
+        <field name="name">auth.passkeys.users.form</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form"/>
+        <field name="arch" type="xml">
+            <form position="attributes">
+                <attribute name="js_class">auth_passkeys_insert_creds_form</attribute>
+            </form>
+            <notebook>
+                <page string="Passkeys" name="passkeys">
+                    <field name="auth_passkeys_key_ids">
+                        <kanban>
+                            <field name="name"/>
+                            <templates>
+                                <t t-name="kanban-box">
+                                    <div style="background-color: red">
+                                        <h5><field name="name"/></h5>
+                                        <p>Created: <field name="create_date"/></p>
+                                        <p>Last used: <field name="write_date"/></p>
+                                    </div>
+                                </t>
+                            </templates>
+                        </kanban>
+                    </field>
+                </page>
+            </notebook>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="auth_passkeys_users_preferences">
+        <field name="name">auth.passkeys.users.preferences</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form_simple_modif"/>
+        <field name="arch" type="xml">
+            <form position="attributes">
+                <attribute name="js_class">auth_passkeys_insert_creds_form</attribute>
+            </form>
+            <page string="Account Security" name="page_account_security">
+                <group string="Passkeys">
+                    <div colspan="2">
+                        <field name="auth_passkeys_key_ids" colspan="4"/>
+                    </div>
+                </group>
+            </page>
+        </field>
+    </record>
+</odoo>

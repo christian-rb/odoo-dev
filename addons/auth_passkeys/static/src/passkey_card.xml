@@ -1,0 +1,9 @@
+<templates xml:space="preserve">
+    <t t-name="auth.passkeys.PasskeyCard">
+        <div style="background-color: red">
+            <h5 t-esc="name">Windows</h5>
+            <p>Created: 01/01/1970</p>
+            <p>Last used: 31/01/2020</p>
+        </div>
+    </t>
+</templates>

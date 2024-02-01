@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<odoo>
+    <record id="auth_passkeys_key_views_field" model="ir.ui.view">
+        <field name="name">auth.passkeys.key.views.field</field>
+        <field name="model">auth.passkeys.key</field>
+        <field name="arch" type="xml">
+            <form js_class="auth_passkeys_insert_creds_form">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="credential_identifier" invisible="true"/>
+                        <field name="public_key" invisible="true"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="auth_passkeys_key_views_tree" model="ir.ui.view">
+        <field name="name">auth.passkeys.key.views.tree</field>
+        <field name="model">auth.passkeys.key</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="credential_identifier" invisible="true"/>
+                <field name="public_key" invisible="true"/>
+            </tree>
+        </field>
+    </record>
+</odoo>
