@@ -21,12 +21,12 @@
                     <p>This picking appears to be chained with another operation. Later, if you receive the goods you are returning now, make sure to <b>reverse</b> the returned picking in order to avoid logistic rules to be applied again (which would create duplicated operations)</p>
                 </div>
                 <field name="product_return_moves">
-                    <tree editable="top" create="0">
+                    <list editable="top" create="0">
                         <field name="product_id"  options="{'no_create': True, 'no_open': True}" force_save="1"/>
                         <field name="quantity"/>
                         <field name="uom_id" groups="uom.group_uom"/>
                         <field name="move_id" column_invisible="True"/>
-                    </tree>
+                    </list>
                 </field>
                 <group>
                     <field name="location_id" groups="!stock.group_stock_multi_locations" invisible="True"/>

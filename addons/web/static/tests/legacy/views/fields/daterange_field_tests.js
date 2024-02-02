@@ -1119,9 +1119,9 @@ QUnit.module("Fields", (hooks) => {
             resModel: "partner",
             serverData,
             arch: /* xml */ `
-                <tree>
+                <list>
                     <field name="date" widget="daterange" options="{'end_date_field': 'date_end'}" />
-                </tree>`,
+                </list>`,
         });
 
         const arrowIcon = target.querySelector(".fa-long-arrow-right");
@@ -1150,9 +1150,9 @@ QUnit.module("Fields", (hooks) => {
             resModel: "partner",
             serverData,
             arch: /* xml */ `
-                <tree>
+                <list>
                     <field name="date" widget="daterange" options="{'end_date_field': 'date_end'}" />
-                </tree>`,
+                </list>`,
         });
 
         const arrowIcon = target.querySelector(".fa-long-arrow-right");

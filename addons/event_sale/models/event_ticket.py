@@ -42,7 +42,7 @@ class EventTemplateTicket(models.Model):
         for ticket in self:
             if ticket.product_id and ticket.product_id.description_sale:
                 ticket.description = ticket.product_id.description_sale
-            # initialize, i.e for embedded tree views
+            # initialize, i.e for embedded list views
             if not ticket.description:
                 ticket.description = False
 

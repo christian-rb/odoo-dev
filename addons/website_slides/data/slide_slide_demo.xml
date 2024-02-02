@@ -207,7 +207,7 @@
             <field name="slide_id" ref="slide_slide_demo_1_2"/>
         </record>
     <record id="slide_slide_demo_1_3" model="slide.slide">
-        <field name="name">How to plant a potted tree</field>
+        <field name="name">How to plant a potted.list</field>
         <field name="sequence">5</field>
         <field name="url">https://www.youtube.com/watch?v=QYmgrw0PgLU</field>
         <field name="image_1920" type="base64" file="website_slides/static/src/img/slide_demo_thumb_QYmgrw0PgLU.jpg"/>

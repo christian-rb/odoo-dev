@@ -802,7 +802,7 @@ class account_journal(models.Model):
         action['domain'] = (action['domain'] or []) + [('journal_id', '=', self.id)]
         return action
 
-    def open_payments_action(self, payment_type=False, mode='tree'):
+    def open_payments_action(self, payment_type=False, mode='list'):
         if payment_type == 'outbound':
             action_ref = 'account.action_account_payments_payable'
         elif payment_type == 'transfer':

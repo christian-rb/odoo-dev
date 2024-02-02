@@ -101,7 +101,7 @@ class TestUi(BaseTestUi):
         act_window = self.env["ir.actions.act_window"].create({
             "name": "model_multicompany_action",
             "res_model": "test.model_multicompany",
-            "view_ids": [Command.create({"view_mode": "tree"}), Command.create({"view_mode": "form"})]
+            "view_ids": [Command.create({"view_mode": "list"}), Command.create({"view_mode": "form"})]
         })
 
         self.env["ir.ui.menu"].create({

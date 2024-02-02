@@ -50,7 +50,7 @@
             <page name="event_notes" position="before">
                 <page string="Questions" name="questions">
                     <field name="question_ids" string="Question" nolabel="1">
-                        <tree>
+                        <list>
                             <field name="sequence" widget="handle" />
                             <field name="title"/>
                             <field name="is_mandatory_answer" string="Mandatory"/>
@@ -60,7 +60,7 @@
                                 invisible="question_type != 'simple_choice'" />
                             <button name="action_view_question_answers" type="object" class="p-0" icon="fa-bar-chart pe-1" string="Stats"
                                     title="Answer Breakdown" invisible="question_type not in ['simple_choice', 'text_box']"/>
-                        </tree>
+                        </list>
                         <!-- Need to repeat the whole tree form here to be able to create answers properly
                             Without this, the sub-fields of answer_ids are unknown to the web framework.
                             We need this because we create questions and answers when the event type changes. -->
@@ -79,12 +79,12 @@
                                 <notebook invisible="question_type != 'simple_choice'">
                                     <page string="Answers" name="answers">
                                         <field name="answer_ids">
-                                            <tree editable="bottom">
+                                            <list editable="bottom">
                                                 <!-- 'display_name' is necessary for the many2many_tags to work on the event view -->
                                                 <field name="display_name" column_invisible="True" />
                                                 <field name="sequence" widget="handle" />
                                                 <field name="name"/>
-                                            </tree>
+                                            </list>
                                         </field>
                                     </page>
                                 </notebook>

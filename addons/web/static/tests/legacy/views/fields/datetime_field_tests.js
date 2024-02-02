@@ -209,7 +209,7 @@ QUnit.module("Fields", (hooks) => {
             serverData,
             type: "list",
             resModel: "partner",
-            arch: `<tree editable="bottom"><field name="datetime"/></tree>`,
+            arch: `<list editable="bottom"><field name="datetime"/></list>`,
         });
 
         const expectedDateString = "02/08/2017 12:00:00"; // 10:00:00 without timezone
@@ -283,7 +283,7 @@ QUnit.module("Fields", (hooks) => {
                 serverData,
                 type: "list",
                 resModel: "partner",
-                arch: '<tree multi_edit="1"><field name="datetime"/></tree>',
+                arch: '<list multi_edit="1"><field name="datetime"/></list>',
             });
 
             const rows = target.querySelectorAll(".o_data_row");
@@ -322,7 +322,7 @@ QUnit.module("Fields", (hooks) => {
                 serverData,
                 type: "list",
                 resModel: "partner",
-                arch: '<tree multi_edit="1"><field name="datetime"/></tree>',
+                arch: '<list multi_edit="1"><field name="datetime"/></list>',
             });
 
             const rows = target.querySelectorAll(".o_data_row");
@@ -414,9 +414,9 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                     <form>
                         <field name="p">
-                            <tree>
+                            <list>
                                 <field name="datetime" />
-                            </tree>
+                            </list>
                             <form>
                                 <field name="datetime" widget="date" />
                             </form>
@@ -428,7 +428,7 @@ QUnit.module("Fields", (hooks) => {
             assert.strictEqual(
                 target.querySelector(".o_field_widget[name='p'] .o_data_cell").textContent,
                 expectedDateString,
-                "the datetime (datetime widget) should be correctly displayed in tree view"
+                "the datetime (datetime widget) should be correctly displayed in list view"
             );
 
             // switch to form view
@@ -457,9 +457,9 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                     <form>
                         <field name="p">
-                            <tree>
+                            <list>
                                 <field name="datetime" />
-                            </tree>
+                            </list>
                             <form>
                                 <field name="datetime" widget="date" />
                             </form>
@@ -471,7 +471,7 @@ QUnit.module("Fields", (hooks) => {
             assert.strictEqual(
                 target.querySelector(".o_field_widget[name='p'] .o_data_cell").textContent,
                 expectedDateString,
-                "the datetime (datetime widget) should be correctly displayed in tree view"
+                "the datetime (datetime widget) should be correctly displayed in list view"
             );
 
             // switch to form view

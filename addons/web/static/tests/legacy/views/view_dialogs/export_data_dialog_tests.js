@@ -186,7 +186,7 @@ QUnit.module("ViewDialogs", (hooks) => {
             serverData,
             type: "list",
             resModel: "partner",
-            arch: '<tree><field name="foo"/></tree>',
+            arch: '<list><field name="foo"/></list>',
             actionMenus: {},
             mockRPC(route) {
                 if (route === "/web/export/formats") {
@@ -255,7 +255,7 @@ QUnit.module("ViewDialogs", (hooks) => {
             type: "list",
             resModel: "partner",
             arch: `
-                <tree export_xlsx="1"><field name="foo"/></tree>`,
+                <list export_xlsx="1"><field name="foo"/></list>`,
             actionMenus: {},
             mockRPC(route, args) {
                 if (args.method === "create") {
@@ -443,7 +443,7 @@ QUnit.module("ViewDialogs", (hooks) => {
                 type: "list",
                 resModel: "partner",
                 arch: `
-                <tree export_xlsx="1"><field name="foo"/></tree>`,
+                <list export_xlsx="1"><field name="foo"/></list>`,
                 actionMenus: {},
                 mockRPC(route, args) {
                     if (args.method === "search_read") {
@@ -492,7 +492,7 @@ QUnit.module("ViewDialogs", (hooks) => {
             type: "list",
             resModel: "partner",
             arch: `
-                <tree export_xlsx="1"><field name="foo"/></tree>`,
+                <list export_xlsx="1"><field name="foo"/></list>`,
             actionMenus: {},
             mockRPC(route, args) {
                 if (route === "/web/export/formats") {
@@ -603,7 +603,7 @@ QUnit.module("ViewDialogs", (hooks) => {
             type: "list",
             resModel: "partner",
             arch: `
-                <tree export_xlsx="1"><field name="foo"/></tree>`,
+                <list export_xlsx="1"><field name="foo"/></list>`,
             actionMenus: {},
             mockRPC(route, args) {
                 if (route === "/web/export/formats") {
@@ -666,7 +666,7 @@ QUnit.module("ViewDialogs", (hooks) => {
                 serverData,
                 type: "list",
                 resModel: "partner",
-                arch: `<tree><field name="foo"/></tree>`,
+                arch: `<list><field name="foo"/></list>`,
                 actionMenus: {},
                 mockRPC(route, args) {
                     if (route === "/web/export/formats") {
@@ -695,7 +695,7 @@ QUnit.module("ViewDialogs", (hooks) => {
             serverData,
             type: "list",
             resModel: "partner",
-            arch: '<tree><field name="foo"/></tree>',
+            arch: '<list><field name="foo"/></list>',
             actionMenus: {},
             mockRPC(route, args) {
                 if (route === "/web/export/formats") {
@@ -734,11 +734,11 @@ QUnit.module("ViewDialogs", (hooks) => {
             serverData,
             type: "list",
             resModel: "partner",
-            arch: `<tree export_xlsx="1">
+            arch: `<list export_xlsx="1">
                 <field name="foo"/>
                 <field name="not_exportable"/>
                 <field name="exportable"/>
-            </tree>`,
+            </list>`,
             actionMenus: {},
             mockRPC(route, args) {
                 if (route === "/web/export/formats") {
@@ -804,7 +804,7 @@ QUnit.module("ViewDialogs", (hooks) => {
             type: "list",
             resModel: "partner",
             arch: `
-                <tree export_xlsx="1"><field name="foo"/></tree>`,
+                <list export_xlsx="1"><field name="foo"/></list>`,
             actionMenus: {},
             mockRPC(route, args) {
                 if (route === "/web/export/formats") {
@@ -918,10 +918,10 @@ QUnit.module("ViewDialogs", (hooks) => {
             type: "list",
             resModel: "partner",
             arch: `
-                <tree export_xlsx="1" limit="1">
+                <list export_xlsx="1" limit="1">
                     <field name="foo"/>
                     <field name="bar"/>
-                </tree>`,
+                </list>`,
             actionMenus: {},
             domain: [["bar", "!=", "glou"]],
             mockRPC(route) {
@@ -987,10 +987,10 @@ QUnit.module("ViewDialogs", (hooks) => {
             resModel: "partner",
             actionMenus: {},
             arch: `
-                <tree export_xlsx="1">
+                <list export_xlsx="1">
                     <field name="foo"/>
                     <field name="bar"/>
-                </tree>`,
+                </list>`,
             domain: [["bar", "!=", "glou"]],
         });
 
@@ -1038,10 +1038,10 @@ QUnit.module("ViewDialogs", (hooks) => {
             type: "list",
             resModel: "partner",
             arch: `
-                <tree>
+                <list>
                     <field name="foo"/>
                     <field name="bar"/>
-                </tree>`,
+                </list>`,
             groupBy: ["foo", "bar"],
             domain: [["bar", "!=", "glou"]],
         });
@@ -1055,10 +1055,10 @@ QUnit.module("ViewDialogs", (hooks) => {
             type: "list",
             resModel: "partner",
             arch: `
-                <tree>
+                <list>
                     <field name="foo" string="Foo"/>
                     <field name="foo" string="duplicate of Foo"/>
-                </tree>`,
+                </list>`,
             actionMenus: {},
             mockRPC(route) {
                 if (route === "/web/export/formats") {
@@ -1101,9 +1101,9 @@ QUnit.module("ViewDialogs", (hooks) => {
                 serverData,
                 type: "list",
                 resModel: "partner",
-                arch: `<tree export_xlsx="1">
+                arch: `<list export_xlsx="1">
                 <field name="foo"/>
-            </tree>`,
+            </list>`,
                 actionMenus: {},
                 mockRPC(route, args) {
                     if (route === "/web/export/formats") {
@@ -1142,7 +1142,7 @@ QUnit.module("ViewDialogs", (hooks) => {
             type: "list",
             resModel: "partner",
             arch: `
-                <tree export_xlsx="1"><field name="foo"/></tree>`,
+                <list export_xlsx="1"><field name="foo"/></list>`,
             actionMenus: {},
             mockRPC(route, args) {
                 if (route === "/web/export/formats") {
@@ -1182,7 +1182,7 @@ QUnit.module("ViewDialogs", (hooks) => {
             type: "list",
             resModel: "partner",
             arch: `
-                <tree export_xlsx="1"><field name="foo"/></tree>`,
+                <list export_xlsx="1"><field name="foo"/></list>`,
             actionMenus: {},
             mockRPC(route, args) {
                 if (route === "/web/export/formats") {
@@ -1234,7 +1234,7 @@ QUnit.module("ViewDialogs", (hooks) => {
             type: "list",
             resModel: "partner",
             arch: `
-                <tree export_xlsx="1"><field name="foo"/></tree>`,
+                <list export_xlsx="1"><field name="foo"/></list>`,
             actionMenus: {},
             mockRPC(route, args) {
                 if (route === "/web/export/formats") {
@@ -1281,10 +1281,10 @@ QUnit.module("ViewDialogs", (hooks) => {
             type: "list",
             resModel: "partner",
             arch: `
-                 <tree>
+                 <list>
                      <field name="foo" optional="show"/>
                      <field name="bar" optional="show"/>
-                 </tree>`,
+                 </list>`,
         });
 
         await click(target, "table .o_optional_columns_dropdown .dropdown-toggle");
@@ -1305,7 +1305,7 @@ QUnit.module("ViewDialogs", (hooks) => {
             type: "list",
             resModel: "partner",
             arch: `
-                <tree><field name="foo"/></tree>`,
+                <list><field name="foo"/></list>`,
             actionMenus: {},
             mockRPC(route, args) {
                 if (route === "/web/export/formats") {

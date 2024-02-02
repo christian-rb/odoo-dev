@@ -1451,7 +1451,7 @@ QUnit.module("ActionManager", (hooks) => {
         "list with default_order and favorite filter with no orderedBy",
         async function (assert) {
             serverData.views["partner,1,list"] =
-                '<tree default_order="foo desc"><field name="foo"/></tree>';
+                '<list default_order="foo desc"><field name="foo"/></list>';
             serverData.actions[100] = {
                 id: 100,
                 name: "Partners",
@@ -2248,7 +2248,7 @@ QUnit.module("ActionManager", (hooks) => {
             type: "ir.actions.act_window",
             target: "current",
             res_model: "partner",
-            views: [[false, "tree"]],
+            views: [[false, "list"]],
         });
         assert.containsOnce(target, ".o_list_view");
     });

@@ -221,9 +221,9 @@ test.tags("desktop")("many2many kanban: edition", async () => {
             </form>
         `,
         list: /* xml */ `
-            <tree>
+            <list>
                 <field name="name" />
-            </tree>
+            </list>
         `,
         search: /* xml */ `
             <search>

@@ -818,7 +818,7 @@ QUnit.module("test_mail", {}, function () {
         });
         Object.assign(serverData.views, {
             "mail.test.activity,false,list":
-                '<tree string="MailTestActivity"><field name="name"/></tree>',
+                '<list string="MailTestActivity"><field name="name"/></list>',
         });
         const { env, openView } = await start({
             mockRPC(route, args) {
@@ -880,7 +880,7 @@ QUnit.module("test_mail", {}, function () {
     test("activity view: Domain should not reset on load", async function (assert) {
         Object.assign(serverData.views, {
             "mail.test.activity,false,list":
-                '<tree string="MailTestActivity"><field name="name"/></tree>',
+                '<list string="MailTestActivity"><field name="name"/></list>',
         });
         const { env, openView } = await start({
             serverData,
@@ -920,7 +920,7 @@ QUnit.module("test_mail", {}, function () {
         });
         Object.assign(serverData.views, {
             "mail.test.activity,false,list":
-                '<tree string="MailTestActivity"><field name="name"/></tree>',
+                '<list string="MailTestActivity"><field name="name"/></list>',
         });
         await openViewAndPatchDoAction();
 

@@ -29,11 +29,11 @@
     </record>
 
     <record id="hr.hr_department_kanban_action" model="ir.actions.act_window">
-        <field name="view_mode">kanban,tree,hierarchy,form</field>
+        <field name="view_mode">kanban,list,hierarchy,form</field>
     </record>
 
     <record id="hr.hr_department_tree_action" model="ir.actions.act_window">
-        <field name="view_mode">tree,kanban,hierarchy,form</field>
+        <field name="view_mode">list,kanban,hierarchy,form</field>
     </record>
 
 </odoo>

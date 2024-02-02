@@ -354,7 +354,7 @@ QUnit.module("ActionManager", (hooks) => {
             serverData.views["partner,false,form"] = `
                 <form>
                     <field name="o2m">
-                    <tree><field name="foo"/></tree>
+                    <list><field name="foo"/></list>
                     <form><field name="foo"/></form>
                     </field>
                 </form>
@@ -379,7 +379,7 @@ QUnit.module("ActionManager", (hooks) => {
             serverData.views["partner,false,form"] = `
                 <form>
                     <field name="o2m">
-                    <tree><field name="foo"/></tree>
+                    <list><field name="foo"/></list>
                     <form><field name="foo"/></form>
                     </field>
                 </form>

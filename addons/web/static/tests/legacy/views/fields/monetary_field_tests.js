@@ -403,10 +403,10 @@ QUnit.module("Fields", (hooks) => {
             serverData,
             resModel: "partner",
             arch: `
-                <tree editable="bottom">
+                <list editable="bottom">
                     <field name="float_field" widget="monetary"/>
                     <field name="currency_id" column_invisible="1"/>
-                </tree>`,
+                </list>`,
         });
 
         const dollarValues = Array.from(target.querySelectorAll("td")).filter((x) =>
@@ -498,10 +498,10 @@ QUnit.module("Fields", (hooks) => {
             serverData,
             resModel: "partner",
             arch: `
-                <tree editable="bottom">
+                <list editable="bottom">
                     <field name="monetary_field"/>
                     <field name="currency_id" column_invisible="1"/>
-                </tree>`,
+                </list>`,
         });
 
         const dollarValues = Array.from(target.querySelectorAll("td")).filter((x) =>
@@ -688,10 +688,10 @@ QUnit.module("Fields", (hooks) => {
         };
         serverData.views = {
             "partner,false,list": `
-                <tree editable="bottom">
+                <list editable="bottom">
                     <field name="float_field" widget="monetary"/>
                     <field name="currency_id" invisible="1"/>
-                </tree>`,
+                </list>`,
         };
 
         await makeView({
@@ -769,11 +769,11 @@ QUnit.module("Fields", (hooks) => {
             resModel: "partner",
             serverData,
             arch: `
-                <tree editable="top">
+                <list editable="top">
                     <field name="int_field"/>
                     <field name="float_field" widget="monetary"/>
                     <field name="currency_id" invisible="1"/>
-                </tree>`,
+                </list>`,
         });
 
         await click(

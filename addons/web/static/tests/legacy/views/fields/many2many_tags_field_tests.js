@@ -330,7 +330,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.test("Many2ManyTagsField in tree view", async function (assert) {
+    QUnit.test("Many2ManyTagsField in list view", async function (assert) {
         serverData.models.partner.records[0].timmy = [12, 14];
 
         await makeView({
@@ -338,10 +338,10 @@ QUnit.module("Fields", (hooks) => {
             resModel: "partner",
             serverData,
             arch: `
-                <tree>
+                <list>
                     <field name="timmy" widget="many2many_tags" options="{'color_field': 'color'}"/>
                     <field name="foo"/>
-                </tree>`,
+                </list>`,
             selectRecord: () => {
                 assert.step("selectRecord");
             },
@@ -365,7 +365,7 @@ QUnit.module("Fields", (hooks) => {
         assert.containsNone(target, ".o_colorlist");
     });
 
-    QUnit.test("Many2ManyTagsField in tree view -- multi edit", async function (assert) {
+    QUnit.test("Many2ManyTagsField in list view -- multi edit", async function (assert) {
         serverData.models.partner.records[0].timmy = [12, 14];
 
         await makeView({
@@ -373,10 +373,10 @@ QUnit.module("Fields", (hooks) => {
             resModel: "partner",
             serverData,
             arch: `
-                <tree multi_edit="1">
+                <list multi_edit="1">
                     <field name="timmy" widget="many2many_tags" options="{'color_field': 'color'}"/>
                     <field name="foo"/>
-                </tree>`,
+                </list>`,
             selectRecord: () => {
                 assert.step("selectRecord");
             },
@@ -728,9 +728,9 @@ QUnit.module("Fields", (hooks) => {
             serverData,
             context: { take: "five" },
             arch: `
-                <tree editable="bottom">
+                <list editable="bottom">
                     <field name="timmy" widget="many2many_tags"/>
-                </tree>`,
+                </list>`,
             mockRPC: (route, { kwargs, method, model }) => {
                 if (method === "web_read" && model === "partner_type") {
                     assert.strictEqual(
@@ -1088,7 +1088,7 @@ QUnit.module("Fields", (hooks) => {
     QUnit.test("Many2ManyTagsField in one2many with display_name", async function (assert) {
         serverData.models.turtle.records[0].partner_ids = [2];
         serverData.views = {
-            "partner,false,list": '<tree><field name="foo"/></tree>',
+            "partner,false,list": '<list><field name="foo"/></list>',
         };
 
         await makeView({
@@ -1098,9 +1098,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="turtles">
-                        <tree>
+                        <list>
                             <field name="partner_ids" widget="many2many_tags"/>
-                        </tree>
+                        </list>
                         <form>
                             <field name="partner_ids"/>
                         </form>
@@ -1161,7 +1161,7 @@ QUnit.module("Fields", (hooks) => {
 
     QUnit.test("Many2ManyTagsField: select multiple records", async function (assert) {
         serverData.views = {
-            "partner_type,false,list": '<tree><field name="display_name"/></tree>',
+            "partner_type,false,list": '<list><field name="display_name"/></list>',
             "partner_type,false,search": '<search><field name="display_name"/></search>',
         };
 
@@ -1217,7 +1217,7 @@ QUnit.module("Fields", (hooks) => {
             serverData.models.partner.records[0].timmy = [12];
 
             serverData.views = {
-                "partner_type,false,list": '<tree><field name="display_name"/></tree>',
+                "partner_type,false,list": '<list><field name="display_name"/></list>',
                 "partner_type,false,search": '<search><field name="display_name"/></search>',
             };
 
@@ -1275,7 +1275,7 @@ QUnit.module("Fields", (hooks) => {
             }
 
             serverData.views = {
-                "partner_type,false,list": '<tree><field name="display_name"/></tree>',
+                "partner_type,false,list": '<list><field name="display_name"/></list>',
                 "partner_type,false,search": '<search><field name="display_name"/></search>',
                 "partner_type,false,form": '<form><field name="display_name"/></form>',
             };
@@ -1400,7 +1400,7 @@ QUnit.module("Fields", (hooks) => {
         }
 
         serverData.views = {
-            "partner,false,list": '<tree><field name="name"/></tree>',
+            "partner,false,list": '<list><field name="name"/></list>',
             "partner,false,search": "<search/>",
         };
 
@@ -1599,9 +1599,9 @@ QUnit.module("Fields", (hooks) => {
             resModel: "partner",
             serverData,
             arch: `
-                <tree editable="bottom">
+                <list editable="bottom">
                     <field name="timmy" widget="many2many_tags"/>
-                </tree>`,
+                </list>`,
         });
 
         target.querySelector("tr.o_data_row input[type=checkbox]").focus();
@@ -1628,10 +1628,10 @@ QUnit.module("Fields", (hooks) => {
             resModel: "partner",
             serverData,
             arch: `
-                <tree editable="bottom">
+                <list editable="bottom">
                     <field name="timmy" widget="many2many_tags"/>
                     <field name="name"/>
-                </tree>`,
+                </list>`,
         });
 
         const row = target.querySelector("tr.o_data_row");
@@ -1956,9 +1956,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `<form>
                 <field name="turtles" widget="many2many_tags"/>
                 <field name="turtles">
-                    <tree>
+                    <list>
                         <field name="display_name"/>
-                    </tree>
+                    </list>
                     <form>
                         <field name="display_name"/>
                     </form>

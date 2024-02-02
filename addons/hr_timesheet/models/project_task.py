@@ -171,7 +171,7 @@ class Task(models.Model):
         for view in action['views']:
             if view[1] == 'graph':
                 view = (graph_view_id, 'graph')
-            new_views.insert(0, view) if view[1] == 'tree' else new_views.append(view)
+            new_views.insert(0, view) if view[1] == 'list' else new_views.append(view)
         action.update({
             'display_name': _('Timesheets'),
             'context': {'default_project_id': self.project_id.id, 'grid_range': 'week'},
@@ -233,7 +233,7 @@ class Task(models.Model):
         # Use of sudo as the portal user doesn't have access to uom
         arch = self.env['account.analytic.line'].sudo()._apply_timesheet_label(arch)
 
-        if view_type in ['tree', 'pivot', 'graph', 'form'] and self.env.company.timesheet_encode_uom_id == self.env.ref('uom.product_uom_day'):
+        if view_type in ['list', 'pivot', 'graph', 'form'] and self.env.company.timesheet_encode_uom_id == self.env.ref('uom.product_uom_day'):
             arch = self.env['account.analytic.line']._apply_time_label(arch, related_model=self._name)
 
         return arch, view

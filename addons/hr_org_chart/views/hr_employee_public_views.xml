@@ -31,6 +31,6 @@
     </record>
 
     <record id="hr.hr_employee_public_action" model="ir.actions.act_window">
-        <field name="view_mode">kanban,tree,form,hierarchy</field>
+        <field name="view_mode">kanban,list,form,hierarchy</field>
     </record>
 </odoo>

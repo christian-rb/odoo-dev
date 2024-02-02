@@ -2885,7 +2885,7 @@ QUnit.module("Views", (hooks) => {
         serverData.views = {
             "partner,false,pivot": "<pivot/>",
             "partner,false,search": `<search><filter name="bayou" string="Bayou" domain="[(1,'=',1)]"/></search>`,
-            "partner,false,list": '<tree><field name="foo"/></tree>',
+            "partner,false,list": '<list><field name="foo"/></list>',
             "partner,false,form": '<form><field name="foo"/></form>',
         };
 
@@ -2935,7 +2935,7 @@ QUnit.module("Views", (hooks) => {
         serverData.views = {
             "partner,false,pivot": "<pivot/>",
             "partner,false,search": `<search><filter name="bayou" string="Bayou" domain="[(1,'=',1)]"/></search>`,
-            "partner,false,list": '<tree><field name="foo"/></tree>',
+            "partner,false,list": '<list><field name="foo"/></list>',
             "partner,false,form": '<form><field name="foo"/></form>',
         };
 
@@ -4086,7 +4086,7 @@ QUnit.module("Views", (hooks) => {
                     <search>
                         <filter name="bayou" string="Bayou" domain="[('foo','=', 12)]"/>
                     </search>`,
-                "partner,false,list": '<tree><field name="foo"/></tree>',
+                "partner,false,list": '<list><field name="foo"/></list>',
                 "partner,false,form": '<form><field name="foo"/></form>',
             };
 
@@ -4745,7 +4745,7 @@ QUnit.module("Views", (hooks) => {
                     <field name="customer" type="row"/>
                 </pivot>`,
             "partner,false,search": `<search/>`,
-            "partner,false,list": '<tree><field name="foo"/></tree>',
+            "partner,false,list": '<list><field name="foo"/></list>',
         };
 
         const mockRPC = (route, args) => {
@@ -4789,7 +4789,7 @@ QUnit.module("Views", (hooks) => {
                     <field name="customer" type="row"/>
                 </pivot>`,
             "partner,false,search": `<search/>`,
-            "partner,false,list": '<tree><field name="foo"/></tree>',
+            "partner,false,list": '<list><field name="foo"/></list>',
         };
 
         const webClient = await createWebClient({ serverData });
@@ -4832,7 +4832,7 @@ QUnit.module("Views", (hooks) => {
                     <field name="product_id" type="row"/>
                 </pivot>`,
             "partner,false,search": `<search/>`,
-            "partner,false,list": '<tree><field name="foo"/></tree>',
+            "partner,false,list": '<list><field name="foo"/></list>',
         };
 
         const webClient = await createWebClient({ serverData });
@@ -4875,7 +4875,7 @@ QUnit.module("Views", (hooks) => {
                     <field name="product_id" type="row"/>
                 </pivot>`,
             "partner,false,search": `<search/>`,
-            "partner,false,list": '<tree><field name="foo"/></tree>',
+            "partner,false,list": '<list><field name="foo"/></list>',
         };
 
         let def;

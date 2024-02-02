@@ -185,7 +185,7 @@ QUnit.module("Fields", (hooks) => {
             type: "list",
             serverData,
             resModel: "partner",
-            arch: '<tree><field name="user_id" widget="many2one_avatar"/></tree>',
+            arch: '<list><field name="user_id" widget="many2one_avatar"/></list>',
         });
 
         assert.deepEqual(
@@ -203,7 +203,7 @@ QUnit.module("Fields", (hooks) => {
             type: "list",
             serverData,
             resModel: "partner",
-            arch: '<tree editable="top"><field name="user_id" widget="many2one_avatar"/></tree>',
+            arch: '<list editable="top"><field name="user_id" widget="many2one_avatar"/></list>',
         });
 
         assert.deepEqual(
@@ -251,9 +251,9 @@ QUnit.module("Fields", (hooks) => {
             resModel: "partner",
             serverData,
             arch: `
-                <tree multi_edit="1">
+                <list multi_edit="1">
                     <field name="user_id" widget="many2one_avatar"/>
-                </tree>`,
+                </list>`,
         });
 
         await click(target.querySelectorAll(".o_data_row")[0], ".o_list_record_selector input");
@@ -276,9 +276,9 @@ QUnit.module("Fields", (hooks) => {
             resModel: "partner",
             serverData,
             arch: `
-                <tree editable="top">
+                <list editable="top">
                     <field name="user_id" widget="many2one_avatar"/>
-                </tree>`,
+                </list>`,
         });
 
         await click(target.querySelectorAll(".o_data_row")[0], ".o_list_record_selector input");
@@ -301,9 +301,9 @@ QUnit.module("Fields", (hooks) => {
             resModel: "partner",
             serverData,
             arch: `
-                <tree>
+                <list>
                     <field name="user_id" widget="many2one_avatar"/>
-                </tree>`,
+                </list>`,
         });
 
         await click(target.querySelector(".o_data_row .o_data_cell [name='user_id']"));
@@ -334,7 +334,7 @@ QUnit.module("Fields", (hooks) => {
                 type: "list",
                 serverData,
                 resModel: "partner",
-                arch: `<tree><field name="user_id" widget="many2one_avatar"/></tree>`,
+                arch: `<list><field name="user_id" widget="many2one_avatar"/></list>`,
             });
 
             assert.containsNone(target, "[name='user_id'] a");
@@ -354,9 +354,9 @@ QUnit.module("Fields", (hooks) => {
             resModel: "partner",
             serverData,
             arch: `
-                <tree editable="top">
+                <list editable="top">
                     <field name="user_id" widget="many2one_avatar"/>
-                </tree>`,
+                </list>`,
         });
 
         await click(target.querySelectorAll(".o_data_cell")[0]);
@@ -381,7 +381,7 @@ QUnit.module("Fields", (hooks) => {
         }
 
         serverData.views = {
-            "user,false,list": '<tree><field name="display_name"/></tree>',
+            "user,false,list": '<list><field name="display_name"/></list>',
             "user,false,search": "<search/>",
         };
         await makeView({

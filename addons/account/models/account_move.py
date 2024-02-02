@@ -2087,7 +2087,7 @@ class AccountMove(models.Model):
             ))
             action = self.env['ir.actions.actions']._for_xml_id('account.action_move_line_form')
             action['domain'] = [('id', 'in', duplicate_move_ids)]
-            action['views'] = [((view_id, 'list') if view_type == 'tree' else (view_id, view_type)) for view_id, view_type in action['views']]
+            action['views'] = [((view_id, 'list') if view_type == 'list' else (view_id, view_type)) for view_id, view_type in action['views']]
             raise RedirectWarning(
                 message=_("Duplicated vendor reference detected. You probably encoded twice the same vendor bill/credit note."),
                 action=action,
@@ -4254,7 +4254,7 @@ class AccountMove(models.Model):
             'res_model': 'account.move',
             'view_mode': 'form',
             'domain': [('id', 'in', self.tax_cash_basis_created_move_ids.ids)],
-            'views': [(self.env.ref('account.view_move_tree').id, 'tree'), (False, 'form')],
+            'views': [(self.env.ref('account.view_move_tree').id, 'list'), (False, 'form')],
         }
 
     def action_switch_move_type(self):

@@ -499,7 +499,7 @@ class HrExpense(models.Model):
         """
             Create the expenses from files.
 
-            :return: An action redirecting to hr.expense tree view.
+            :return: An action redirecting to hr.expense list view.
         """
         if not attachment_ids:
             raise UserError(_("No attachment was provided"))

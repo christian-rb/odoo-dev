@@ -18,7 +18,7 @@ class TestPortalTimesheet(TestProjectSharingCommon):
                 Command.create({'partner_id': self.user_portal.partner_id.id}),
             ],
         })
-        for view in ['form', 'tree']:
+        for view in ['form', 'list']:
             # Ensure that uom.uom records are not present in cache
             self.env.invalidate_all()
             # Should not raise any access error

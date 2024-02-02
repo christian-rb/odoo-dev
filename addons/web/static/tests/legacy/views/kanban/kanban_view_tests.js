@@ -3943,7 +3943,7 @@ QUnit.module("Views", (hooks) => {
                         </templates>
                     </kanban>`,
                 "partner,false,search": "<search/>",
-                "partner,false,list": '<tree><field name="foo"/></tree>',
+                "partner,false,list": '<list><field name="foo"/></list>',
                 "partner,false,form": `<form>
                     <field name="product_id"/>
                     <field name="foo"/>
@@ -7901,7 +7901,7 @@ QUnit.module("Views", (hooks) => {
                     </kanban>`,
                 "partner,false,search": "<search/>",
                 // list-view so that there is a view switcher, unused
-                "partner,false,list": '<tree><field name="foo"/></tree>',
+                "partner,false,list": '<list><field name="foo"/></list>',
             },
         });
         const webClient = await createWebClient({

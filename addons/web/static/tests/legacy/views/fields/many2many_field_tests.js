@@ -225,7 +225,7 @@ QUnit.module("Fields", (hooks) => {
 
         serverData.views = {
             "partner_type,false,form": '<form><field name="display_name"/></form>',
-            "partner_type,false,list": '<tree><field name="display_name"/></tree>',
+            "partner_type,false,list": '<list><field name="display_name"/></list>',
             "partner_type,false,search": '<search><field name="name" string="Name"/></search>',
         };
 
@@ -471,9 +471,9 @@ QUnit.module("Fields", (hooks) => {
 
     QUnit.test("field string is used in the SelectCreateDialog", async function (assert) {
         serverData.views = {
-            "partner_type,false,list": '<tree><field name="display_name"/></tree>',
+            "partner_type,false,list": '<list><field name="display_name"/></list>',
             "partner_type,false,search": '<search><field name="display_name"/></search>',
-            "turtle,false,list": '<tree><field name="display_name"/></tree>',
+            "turtle,false,list": '<list><field name="display_name"/></list>',
             "turtle,false,search": '<search><field name="display_name"/></search>',
         };
         await makeView({
@@ -483,14 +483,14 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="timmy">
-                        <tree>
+                        <list>
                             <field name="display_name"/>
-                        </tree>
+                        </list>
                     </field>
                     <field name="turtles" widget="many2many" string="Abcde">
-                        <tree>
+                        <list>
                             <field name="display_name"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
         });
@@ -511,7 +511,7 @@ QUnit.module("Fields", (hooks) => {
         serverData.models.partner.records[0].timmy = [12, 14];
 
         serverData.views = {
-            "partner_type,false,list": '<tree><field name="name"/></tree>',
+            "partner_type,false,list": '<list><field name="name"/></list>',
             "partner_type,false,search":
                 "<search>" + '<field name="display_name" string="Name"/>' + "</search>",
         };
@@ -559,7 +559,7 @@ QUnit.module("Fields", (hooks) => {
     QUnit.test("many2many kanban: conditional create/delete actions", async function (assert) {
         serverData.views = {
             "partner_type,false,form": '<form><field name="name"/></form>',
-            "partner_type,false,list": '<tree><field name="name"/></tree>',
+            "partner_type,false,list": '<list><field name="name"/></list>',
             "partner_type,false,search": "<search/>",
         };
         serverData.models.partner.records[0].timmy = [12, 14];
@@ -638,7 +638,7 @@ QUnit.module("Fields", (hooks) => {
         "many2many list (non editable): create a new record and click on action button 1",
         async function (assert) {
             serverData.views = {
-                "partner_type,false,list": '<tree><field name="display_name"/></tree>',
+                "partner_type,false,list": '<list><field name="display_name"/></list>',
                 "partner_type,false,search": '<search><field name="display_name"/></search>',
             };
             const list = await makeView({
@@ -648,9 +648,9 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                 <form>
                     <field name="timmy">
-                        <tree>
+                        <list>
                             <field name="display_name"/>
-                        </tree>
+                        </list>
                         <form>
                             <header>
                                 <button name="myaction" string="coucou" type="object"/>
@@ -697,7 +697,7 @@ QUnit.module("Fields", (hooks) => {
         "many2many list (non editable): create a new record and click on action button 2",
         async function (assert) {
             serverData.views = {
-                "partner_type,false,list": '<tree><field name="display_name"/></tree>',
+                "partner_type,false,list": '<list><field name="display_name"/></list>',
                 "partner_type,false,search": '<search><field name="display_name"/></search>',
             };
             const list = await makeView({
@@ -707,9 +707,9 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                 <form>
                     <field name="timmy">
-                        <tree>
+                        <list>
                             <field name="display_name"/>
-                        </tree>
+                        </list>
                         <form>
                             <header>
                                 <button name="myaction" string="coucou" type="object"/>
@@ -775,7 +775,7 @@ QUnit.module("Fields", (hooks) => {
         assert.expect(1);
 
         serverData.views = {
-            "partner_type,false,list": '<tree><field name="display_name"/></tree>',
+            "partner_type,false,list": '<list><field name="display_name"/></list>',
             "partner_type,false,search": '<search><field name="display_name"/></search>',
         };
         await makeView({
@@ -786,9 +786,9 @@ QUnit.module("Fields", (hooks) => {
                 <form>
                     <field name="int_field"/>
                     <field name="timmy" context="{'abc': int_field}">
-                        <tree>
+                        <list>
                             <field name="display_name"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             mockRPC(route, args) {
@@ -815,7 +815,7 @@ QUnit.module("Fields", (hooks) => {
         serverData.models.partner_type.fields.float_field = { string: "Float", type: "float" };
 
         serverData.views = {
-            "partner_type,false,list": '<tree><field name="display_name"/></tree>',
+            "partner_type,false,list": '<list><field name="display_name"/></list>',
             "partner_type,false,search": '<search><field name="display_name"/></search>',
         };
         await makeView({
@@ -825,10 +825,10 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="timmy">
-                        <tree editable="top">
+                        <list editable="top">
                             <field name="display_name"/>
                             <field name="float_field"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             mockRPC(route, args) {
@@ -970,9 +970,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="timmy">
-                        <tree create="true" delete="true">
+                        <list create="true" delete="true">
                             <field name="color"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -996,9 +996,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="timmy">
-                        <tree create="false" delete="false">
+                        <list create="false" delete="false">
                             <field name="color"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -1025,9 +1025,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="timmy">
-                        <tree create="0">
+                        <list create="0">
                             <field name="name"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -1047,9 +1047,9 @@ QUnit.module("Fields", (hooks) => {
 
         serverData.views = {
             "partner_type,false,list": `
-                <tree create="false" delete="false" edit="false">
+                <list create="false" delete="false" edit="false">
                     <field name="display_name"/>
-                </tree>`,
+                </list>`,
             "partner_type,false,search": '<search><field name="display_name"/></search>',
         };
 
@@ -1106,7 +1106,7 @@ QUnit.module("Fields", (hooks) => {
         serverData.models.partner.records[0].timmy = [12, 14];
 
         serverData.views = {
-            "partner_type,false,list": '<tree><field name="name"/></tree>',
+            "partner_type,false,list": '<list><field name="name"/></list>',
             "partner_type,false,search": "<search/>",
         };
 
@@ -1118,9 +1118,9 @@ QUnit.module("Fields", (hooks) => {
                 <form>
                     <field name="color"/>
                     <field name="timmy" options="{'create': [('color', '=', 'red')], 'delete': [('color', '=', 'red')]}">
-                        <tree>
+                        <list>
                             <field name="name"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -1174,7 +1174,7 @@ QUnit.module("Fields", (hooks) => {
     QUnit.test("many2many field with link/unlink options (list)", async function (assert) {
         serverData.models.partner.records[0].timmy = [12, 14];
         serverData.views = {
-            "partner_type,false,list": '<tree><field name="name"/></tree>',
+            "partner_type,false,list": '<list><field name="name"/></list>',
             "partner_type,false,search": "<search/>",
         };
 
@@ -1186,9 +1186,9 @@ QUnit.module("Fields", (hooks) => {
                 <form>
                     <field name="color"/>
                     <field name="timmy" options="{'link': [('color', '=', 'red')], 'unlink': [('color', '=', 'red')]}">
-                        <tree>
+                        <list>
                             <field name="name"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -1233,7 +1233,7 @@ QUnit.module("Fields", (hooks) => {
         async function (assert) {
             serverData.models.partner.records[0].timmy = [12, 14];
             serverData.views = {
-                "partner_type,false,list": '<tree><field name="name"/></tree>',
+                "partner_type,false,list": '<list><field name="name"/></list>',
                 "partner_type,false,search": "<search/>",
             };
 
@@ -1245,9 +1245,9 @@ QUnit.module("Fields", (hooks) => {
                 <form>
                     <field name="color"/>
                     <field name="timmy" options="{'link': [('color', '=', 'red')], 'unlink': [('color', '=', 'red')]}">
-                        <tree create="0">
+                        <list create="0">
                             <field name="name"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
                 resId: 1,
@@ -1292,7 +1292,7 @@ QUnit.module("Fields", (hooks) => {
         serverData.models.partner.records[0].timmy = [12, 14];
 
         serverData.views = {
-            "partner_type,false,list": '<tree><field name="name"/></tree>',
+            "partner_type,false,list": '<list><field name="name"/></list>',
             "partner_type,false,search": "<search/>",
         };
 
@@ -1343,7 +1343,7 @@ QUnit.module("Fields", (hooks) => {
     QUnit.test('many2many field with link option (kanban, create="0")', async function (assert) {
         serverData.models.partner.records[0].timmy = [12, 14];
         serverData.views = {
-            "partner_type,false,list": '<tree><field name="name"/></tree>',
+            "partner_type,false,list": '<list><field name="name"/></list>',
             "partner_type,false,search": "<search/>",
         };
 
@@ -1405,9 +1405,9 @@ QUnit.module("Fields", (hooks) => {
             arch:
                 "<form>" +
                 '<field name="turtles">' +
-                "<tree>" +
+                "<list>" +
                 '<field name="turtle_foo"/>' +
-                "</tree>" +
+                "</list>" +
                 "</field>" +
                 "</form>",
         });
@@ -1430,7 +1430,7 @@ QUnit.module("Fields", (hooks) => {
             ];
             serverData.models.partner.fields.turtles.type = "many2many";
             serverData.views = {
-                "turtle,false,list": '<tree><field name="display_name"/></tree>',
+                "turtle,false,list": '<list><field name="display_name"/></list>',
                 "turtle,false,search": '<search><field name="display_name"/></search>',
             };
 
@@ -1441,9 +1441,9 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
             <form>
                 <field name="turtles" context="{'test': turtles}" domain="[('id', 'in', turtles)]">
-                    <tree>
+                    <list>
                         <field name="turtle_foo"/>
-                    </tree>
+                    </list>
                 </field>
             </form>`,
                 mockRPC(route, args) {
@@ -1473,10 +1473,10 @@ QUnit.module("Fields", (hooks) => {
 
         serverData.views = {
             "partner_type,false,list": `
-                <tree>
+                <list>
                     <field name="display_name"/>
                     <field name="m2m" widget="many2many_tags"/>
-                </tree>`,
+                </list>`,
             "partner_type,false,search":
                 '<search><field name="display_name" string="Name"/></search>',
         };
@@ -1536,7 +1536,7 @@ QUnit.module("Fields", (hooks) => {
         // The domain specified on the field should not be replaced by the potential
         // domain the user writes in the dialog, they should rather be concatenated
         serverData.views = {
-            "partner_type,false,list": '<tree><field name="display_name"/></tree>',
+            "partner_type,false,list": '<list><field name="display_name"/></list>',
             "partner_type,false,search":
                 '<search><field name="display_name" string="Name"/></search>',
         };
@@ -1577,9 +1577,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="turtles">
-                        <tree>
+                        <list>
                             <field name="turtle_foo"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -1613,7 +1613,7 @@ QUnit.module("Fields", (hooks) => {
         });
         serverData.models.partner.records[0].turtles = [1, 2, 3, 4];
         serverData.views = {
-            "turtle,false,list": '<tree><field name="display_name"/></tree>',
+            "turtle,false,list": '<list><field name="display_name"/></list>',
             "turtle,false,search": '<search><field name="display_name" string="Name"/></search>',
         };
 
@@ -1627,9 +1627,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="turtles">
-                        <tree>
+                        <list>
                             <field name="turtle_foo"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -1656,7 +1656,7 @@ QUnit.module("Fields", (hooks) => {
         "many2many widget: creates a new record with a context containing the parentID",
         async function (assert) {
             serverData.views = {
-                "turtle,false,list": '<tree><field name="display_name"/></tree>',
+                "turtle,false,list": '<list><field name="display_name"/></list>',
                 "turtle,false,search": '<search><field name="display_name"/></search>',
                 "turtle,false,form":
                     '<form string="Turtle Power"><field name="turtle_trululu"/></form>',
@@ -1669,9 +1669,9 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                 <form>
                     <field name="turtles" widget="many2many" context="{'default_turtle_trululu': id}" >
-                        <tree>
+                        <list>
                             <field name="turtle_foo"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
                 resId: 1,
@@ -1841,9 +1841,9 @@ QUnit.module("Fields", (hooks) => {
                 <form>
                     <sheet>
                         <field name="timmy">
-                            <tree>
+                            <list>
                                 <field name="display_name"/>
-                            </tree>
+                            </list>
                         </field>
                         <field name="int_field"/>
                     </sheet>
@@ -1886,7 +1886,7 @@ QUnit.module("Fields", (hooks) => {
         }
 
         serverData.views = {
-            "partner_type,false,list": '<tree><field name="display_name"/></tree>',
+            "partner_type,false,list": '<list><field name="display_name"/></list>',
             "partner_type,false,search":
                 '<search><field name="display_name"/><field name="color"/></search>',
         };
@@ -1898,10 +1898,10 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="timmy" widget="many2many">
-                        <tree>
+                        <list>
                             <field name="display_name"/>
                             <field name="product_ids" widget="many2many_tags"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -2018,7 +2018,7 @@ QUnit.module("Fields", (hooks) => {
 
     QUnit.test("select create with _view_ref as text", async (assert) => {
         serverData.views = {
-            "partner_type,my.little.string,list": `<tree><field name="display_name"/></tree>`,
+            "partner_type,my.little.string,list": `<list><field name="display_name"/></list>`,
             "partner_type,false,search": `<search />`,
         };
 
@@ -2038,7 +2038,7 @@ QUnit.module("Fields", (hooks) => {
             serverData,
             arch: `
                 <form>
-                    <field name="timmy" widget="many2many_tags" context="{ 'tree_view_ref': 'my.little.string' }"/>
+                    <field name="timmy" widget="many2many_tags" context="{ 'list_view_ref': 'my.little.string' }"/>
                 </form>`,
             mockRPC(route, args) {
                 if (args.method === "get_views" && checkGetViews) {
@@ -2047,7 +2047,7 @@ QUnit.module("Fields", (hooks) => {
                         [false, "list"],
                         [false, "search"],
                     ]);
-                    assert.strictEqual(args.kwargs.context.tree_view_ref, "my.little.string");
+                    assert.strictEqual(args.kwargs.context.list_view_ref, "my.little.string");
                 }
             },
         });
@@ -2094,9 +2094,9 @@ QUnit.module("Fields", (hooks) => {
             resModel: "partner",
             serverData,
             arch: `
-                <tree editable="top">
+                <list editable="top">
                     <field name="timmy" widget="many2many_tags" context="{ 'default_partner_id': uid, 'allowed_company_ids': allowed_company_ids, 'company_id': current_company_id}"/>
-                </tree>`,
+                </list>`,
             mockRPC(route, args) {
                 if (args.method === "onchange") {
                     assert.strictEqual(args.kwargs.context.uid, 7);
@@ -2214,9 +2214,9 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                     <form>
                     <field name="p">
-                        <tree editable="top">
+                        <list editable="top">
                             <field name="timmy" widget="many2many_tags" context="{ 'default_partner_id': uid, 'allowed_company_ids': allowed_company_ids, 'company_id': current_company_id}"/>
-                        </tree>
+                        </list>
                     </field>
                     </form>`,
                 mockRPC(route, args) {

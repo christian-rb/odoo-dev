@@ -14,6 +14,6 @@ class AccountJournal(models.Model):
             'search_default_journal_id': self.id,
             'default_journal_id': self.id,
         }
-        action['view_mode'] = 'tree,form'
-        action['views'] = [(k,v) for k,v in action['views'] if v in ['tree', 'form']]
+        action['view_mode'] = 'list,form'
+        action['views'] = [(k, v) for k, v in action['views'] if v in ['list', 'form']]
         return action

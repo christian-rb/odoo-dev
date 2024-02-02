@@ -199,7 +199,7 @@ class ReturnPicking(models.TransientModel):
         })
         return {
             'name': _('Returned Picking'),
-            'view_mode': 'form,tree,calendar',
+            'view_mode': 'form,list,calendar',
             'res_model': 'stock.picking',
             'res_id': new_picking_id,
             'type': 'ir.actions.act_window',

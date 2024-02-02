@@ -506,9 +506,9 @@ QUnit.module("SettingsFormView", (hooks) => {
                         </app>
                     </form>`,
                 "task,2,list": `
-                    <tree>
+                    <list>
                         <field name="display_name"/>
-                    </tree>`,
+                    </list>`,
                 "res.config.settings,false,search": "<search></search>",
                 "task,false,search": "<search></search>",
             };
@@ -823,9 +823,9 @@ QUnit.module("SettingsFormView", (hooks) => {
                         </app>
                     </form>`,
             "task,2,list": `
-                    <tree>
+                    <list>
                         <field name="display_name"/>
-                    </tree>`,
+                    </list>`,
             "res.config.settings,false,search": "<search></search>",
             "task,false,search": "<search></search>",
         };
@@ -886,9 +886,9 @@ QUnit.module("SettingsFormView", (hooks) => {
                         </app>
                     </form>`,
                 "task,2,list": `
-                    <tree>
+                    <list>
                         <field name="display_name"/>
-                    </tree>`,
+                    </list>`,
                 "res.config.settings,false,search": "<search></search>",
                 "task,false,search": "<search></search>",
             };
@@ -939,9 +939,9 @@ QUnit.module("SettingsFormView", (hooks) => {
                         </app>
                     </form>`,
             "task,2,list": `
-                    <tree>
+                    <list>
                         <field name="display_name"/>
-                    </tree>`,
+                    </list>`,
             "res.config.settings,false,search": "<search></search>",
             "task,false,search": "<search></search>",
         };
@@ -992,7 +992,7 @@ QUnit.module("SettingsFormView", (hooks) => {
                             <button name="4" string="Execute action" type="action"/>
                         </app>
                     </form>`,
-                "task,2,list": '<tree><field name="display_name"/></tree>',
+                "task,2,list": '<list><field name="display_name"/></list>',
                 "res.config.settings,false,search": "<search></search>",
                 "task,false,search": "<search></search>",
             };
@@ -1082,7 +1082,7 @@ QUnit.module("SettingsFormView", (hooks) => {
                         <button name="4" string="Execute action" type="action"/>
                     </app>
                 </form>`,
-            "task,2,list": '<tree><field name="display_name"/></tree>',
+            "task,2,list": '<list><field name="display_name"/></list>',
             "res.config.settings,false,search": "<search></search>",
             "task,false,search": "<search></search>",
         };
@@ -1271,7 +1271,7 @@ QUnit.module("SettingsFormView", (hooks) => {
                             <button name="4" string="Execute action" type="action" noSaveDialog="true"/>
                         </app>
                     </form>`,
-                "task,2,list": '<tree><field name="display_name"/></tree>',
+                "task,2,list": '<list><field name="display_name"/></list>',
                 "res.config.settings,false,search": "<search></search>",
                 "task,false,search": "<search></search>",
             };
@@ -1441,7 +1441,7 @@ QUnit.module("SettingsFormView", (hooks) => {
             };
 
             serverData.views = {
-                "task,1,list": '<tree><field name="display_name"/></tree>',
+                "task,1,list": '<list><field name="display_name"/></list>',
                 "res.config.settings,2,form": `
                     <form string="Settings" js_class="base_settings">
                         <app string="CRM" name="crm">
@@ -1452,7 +1452,7 @@ QUnit.module("SettingsFormView", (hooks) => {
                             </block>
                         </app>
                     </form>`,
-                "task,3,list": '<tree><field name="display_name"/></tree>',
+                "task,3,list": '<list><field name="display_name"/></list>',
                 "res.config.settings,false,search": "<search></search>",
                 "task,false,search": "<search></search>",
             };
@@ -1494,7 +1494,7 @@ QUnit.module("SettingsFormView", (hooks) => {
                     <app string="Base Setting" name="base-setting">
                         <setting>
                             <field name="tasks">
-                                <tree><field name="display_name"/></tree>
+                                <list><field name="display_name"/></list>
                                 <form><field name="display_name"/></form>
                             </field>
                         </setting>
@@ -1549,7 +1549,7 @@ QUnit.module("SettingsFormView", (hooks) => {
                     </form>
                 `,
                 "res.config.settings,false,search": "<search></search>",
-                "task,false,list": "<tree></tree>",
+                "task,false,list": "<list></list>",
                 "task,false,search": "<search></search>",
             };
 
@@ -1615,7 +1615,7 @@ QUnit.module("SettingsFormView", (hooks) => {
                     </form>
                 `,
             "res.config.settings,false,search": "<search></search>",
-            "task,false,list": "<tree></tree>",
+            "task,false,list": "<list></list>",
             "task,false,search": "<search></search>",
         };
 

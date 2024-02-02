@@ -106,9 +106,9 @@ QUnit.module("Fields", ({ beforeEach }) => {
             resModel: "partner",
             serverData,
             arch: `
-                    <tree editable="top">
+                    <list editable="top">
                         <field name="txt"/>
-                    </tree>`,
+                    </list>`,
         });
         const txt = target.querySelector(".o_data_row [name='txt']");
         assert.strictEqual(txt.textContent, "some text");
@@ -131,9 +131,9 @@ QUnit.module("Fields", ({ beforeEach }) => {
                 resModel: "partner",
                 serverData,
                 arch: `
-                    <tree editable="top">
+                    <list editable="top">
                         <field name="txt"/>
-                    </tree>`,
+                    </list>`,
             });
 
             assert.strictEqual(target.querySelector(".o_data_row [name='txt']").textContent, "");

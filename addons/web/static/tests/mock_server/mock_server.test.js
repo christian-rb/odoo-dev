@@ -1362,10 +1362,10 @@ test("webRead sub-fields of a many2one field", async () => {
 
 test("List View: invisible on processed Arch", async () => {
     Bar._views[["list", 10001]] = /* xml */ `
-        <tree>
+        <list>
             <field name="bool" column_invisible="1"/>
             <field name="foo"/>
-        </tree>
+        </list>
     `;
     Bar._views[["search", 10001]] = /* xml */ `
         <search></search>
@@ -1374,10 +1374,10 @@ test("List View: invisible on processed Arch", async () => {
     await makeMockServer();
 
     const expectedList = /* xml */ `
-        <tree>
+        <list>
             <field name="bool" column_invisible="True"/>
             <field name="foo"/>
-        </tree>
+        </list>
     `;
 
     const { views } = await ormRequest({

@@ -154,7 +154,7 @@ class PaymentTransaction(models.Model):
             "payment request response (as an etree) for transaction with reference %s:\n%s",
             self.reference, etree.tostring(tree, pretty_print=True, encoding='utf-8')
         )
-        feedback_data = {'ORDERID': tree.get('orderID'), 'tree': tree}
+        feedback_data = {'ORDERID': tree.get('orderID'), 'list': tree}
         _logger.info(
             "handling feedback data from Ogone for transaction with reference %s with data:\n%s",
             self.reference, pprint.pformat(feedback_data)
@@ -194,8 +194,8 @@ class PaymentTransaction(models.Model):
         if self.provider_code != 'ogone':
             return
 
-        if 'tree' in notification_data:
-            notification_data = notification_data['tree']
+        if 'list' in notification_data:
+            notification_data = notification_data['list']
 
         # Update the provider reference.
         self.provider_reference = notification_data.get('PAYID')

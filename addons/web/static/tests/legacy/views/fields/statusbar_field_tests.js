@@ -629,7 +629,7 @@ QUnit.module("Fields", (hooks) => {
         "For the same record, a single rpc is done to recover the specialData",
         async function (assert) {
             serverData.views = {
-                "partner,3,list": '<tree><field name="display_name"/></tree>',
+                "partner,3,list": '<list><field name="display_name"/></list>',
                 "partner,9,search": `<search></search>`,
                 "partner,false,form": `<form>
                 <header>
@@ -673,7 +673,7 @@ QUnit.module("Fields", (hooks) => {
         "open form with statusbar, leave and come back to another one with other domain",
         async function (assert) {
             serverData.views = {
-                "partner,3,list": '<tree><field name="display_name"/></tree>',
+                "partner,3,list": '<list><field name="display_name"/></list>',
                 "partner,9,search": `<search></search>`,
                 "partner,false,form": `<form>
                 <header>

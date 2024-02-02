@@ -1211,15 +1211,15 @@ QUnit.module("Fields", (hooks) => {
         ];
         serverData.views = {
             "partner,false,list": `
-                <tree>
+                <list>
                     <field name="id"/>
                     <field name="display_name"/>
-                </tree>`,
+                </list>`,
             "res.users,false,list": `
-                <tree>
+                <list>
                     <field name="id"/>
                     <field name="display_name"/>
-                </tree>`,
+                </list>`,
             "res.users,false,search": `<search/>`,
         };
 

@@ -368,7 +368,7 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="p">
-                        <tree><field name="id"/></tree>
+                        <list><field name="id"/></list>
                         <form>
                             <field name="timmy" widget="many2many_checkboxes"/>
                         </form>

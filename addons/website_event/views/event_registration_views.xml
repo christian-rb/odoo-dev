@@ -3,7 +3,7 @@
     <record id="event_registration_action_from_visitor" model="ir.actions.act_window">
         <field name="name">Registrations</field>
         <field name="res_model">event.registration</field>
-        <field name="view_mode">kanban,tree,form</field>
+        <field name="view_mode">kanban,list,form</field>
         <field name="domain">[('visitor_id', 'in', [active_id])]</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_empty_folder">
@@ -24,7 +24,7 @@
                 <notebook>
                     <page string="Questions" name="questions">
                         <field name="registration_answer_ids" widget="one2many">
-                            <tree editable="bottom">
+                            <list editable="bottom">
                                 <field name="event_id" column_invisible="True" />
                                 <field name="question_id" domain="[('event_id', '=', event_id)]" options="{'no_create': True}" />
                                 <field name="question_type" string="Type" />
@@ -32,7 +32,7 @@
                                     invisible="question_type != 'simple_choice'"
                                     domain="[('question_id', '=', question_id)]" options="{'no_create': True}"/>
                                 <field name="value_text_box" invisible="question_type == 'simple_choice'" />
-                            </tree>
+                            </list>
                             <kanban class="o_kanban_mobile" create="false" delete="false">
                                 <field name="event_id"/>
                                 <field name="question_id"/>
@@ -65,7 +65,7 @@
     </record>
 
     <record id="event_registration_view_tree" model="ir.ui.view">
-        <field name="name">event.registration.view.tree.inherit.online</field>
+        <field name="name">event.registration.view.list.inherit.online</field>
         <field name="model">event.registration</field>
         <field name="inherit_id" ref="event.view_event_registration_tree"/>
         <field name="arch" type="xml">

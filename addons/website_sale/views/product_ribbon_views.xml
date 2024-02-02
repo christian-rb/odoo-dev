@@ -23,12 +23,12 @@
     </record>
 
     <record id="product_ribbon_view_tree" model="ir.ui.view">
-        <field name="name">product.ribbon.tree</field>
+        <field name="name">product.ribbon.list</field>
         <field name="model">product.ribbon</field>
         <field name="arch" type="xml">
-            <tree string="Products Ribbon">
+            <list string="Products Ribbon">
                 <field name="html" string="Name"/>
-            </tree>
+            </list>
         </field>
     </record>
 

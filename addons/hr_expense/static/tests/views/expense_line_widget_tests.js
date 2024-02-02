@@ -28,10 +28,10 @@ QUnit.module("Views", {}, function () {
                         <notebook>
                             <page name="expenses" string="Expense">
                                 <field name="expense_line_ids" widget="expense_lines_widget">
-                                    <tree>
+                                    <list>
                                         <field name="name"/>
                                         <field name="message_main_attachment_id"/>
-                                    </tree>
+                                    </list>
                                 </field>
                             </page>
                         </notebook>

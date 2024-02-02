@@ -99,11 +99,11 @@ QUnit.module("Fields", (hooks) => {
             resModel: "partner",
             serverData,
             arch: `
-                <tree editable="bottom">
+                <list editable="bottom">
                     <field name="foo"/>
                     <field name="selection" widget="label_selection"
                     options="{'classes': {'normal': 'secondary', 'blocked': 'warning','done': 'success'}}"/>
-                </tree>`,
+                </list>`,
         });
 
         assert.strictEqual(

@@ -77,7 +77,7 @@ QUnit.module("Fields", (hooks) => {
         serviceRegistry.add("http", fakeHTTPService);
 
         serverData.views = {
-            "ir.attachment,false,list": '<tree string="Pictures"><field name="name"/></tree>',
+            "ir.attachment,false,list": '<list string="Pictures"><field name="name"/></list>',
         };
 
         await makeView({
@@ -243,7 +243,7 @@ QUnit.module("Fields", (hooks) => {
         serviceRegistry.add("http", fakeHTTPService);
 
         serverData.views = {
-            "ir.attachment,false,list": '<tree string="Pictures"><field name="name"/></tree>',
+            "ir.attachment,false,list": '<list string="Pictures"><field name="name"/></list>',
         };
 
         await makeView({

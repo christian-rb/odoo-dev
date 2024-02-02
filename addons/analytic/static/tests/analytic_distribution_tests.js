@@ -107,9 +107,9 @@ QUnit.module("Analytic", (hooks) => {
             views: {
                 "account.analytic.account,false,search": `<search/>`,
                 "account.analytic.account,analytic.view_account_analytic_account_list_select,list": `
-                    <tree>
+                    <list>
                         <field name="name"/>
-                    </tree>
+                    </list>
                 `,
             }
         };
@@ -222,11 +222,11 @@ QUnit.module("Analytic", (hooks) => {
             resModel: "aml",
             serverData,
             arch: `
-                <tree multi_edit="1">
+                <list multi_edit="1">
                     <field name="label"/>
                     <field name="analytic_distribution" widget="analytic_distribution" options="{'force_applicability': 'optional'}"/>
                     <field name="amount"/>
-                </tree>`,
+                </list>`,
             mockRPC(route, { kwargs, method, model }) {
                 if (method === "get_relevant_plans" && model === "account.analytic.plan") {
                     assert.equal(kwargs.applicability, "optional");
@@ -284,11 +284,11 @@ QUnit.module("Analytic", (hooks) => {
                 <form>
                     <sheet>
                         <field name="line_ids">
-                            <tree editable="bottom">
+                            <list editable="bottom">
                                 <field name="label"/>
                                 <field name="analytic_distribution" widget="analytic_distribution"/>
                                 <field name="amount"/>
-                            </tree>
+                            </list>
                         </field>
                     </sheet>
                 </form>`,

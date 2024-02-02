@@ -59,10 +59,10 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="p">
-                        <tree editable="bottom">
+                        <list editable="bottom">
                             <field name="sequence" widget="handle" />
                             <field name="display_name" />
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
         });
@@ -106,10 +106,10 @@ QUnit.module("Fields", (hooks) => {
             resModel: "partner",
             serverData,
             arch: `
-                <tree>
+                <list>
                     <field name="sequence" widget="handle" />
                     <field name="display_name" />
-                </tree>`,
+                </list>`,
         });
 
         const visibleRowHandles = [...target.querySelectorAll(".o_row_handle")].filter(
@@ -134,10 +134,10 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="p" readonly="1">
-                        <tree editable="top">
+                        <list editable="top">
                             <field name="sequence" widget="handle" />
                             <field name="display_name" />
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,

@@ -104,9 +104,9 @@ QUnit.module("Fields", (hooks) => {
             resModel: "turtle",
             serverData,
             arch: `
-                <tree editable="bottom">
+                <list editable="bottom">
                     <field name="partner_ids" widget="many2many_tags_avatar"/>
-                </tree>`,
+                </list>`,
         });
         await contains(
             `.o_data_row:nth-child(1) .o_field_many2many_tags_avatar .o_avatar img.o_m2m_avatar[data-src='${getOrigin()}/web/image/partner/1/avatar_128']`
@@ -240,9 +240,9 @@ QUnit.module("Fields", (hooks) => {
                 resModel: "turtle",
                 serverData,
                 arch: /*xml*/ `
-                    <tree editable="bottom">
+                    <list editable="bottom">
                         <field name="partner_ids" widget="many2many_tags_avatar"/>
-                    </tree>
+                    </list>
                 `,
             });
 
@@ -286,7 +286,7 @@ QUnit.module("Fields", (hooks) => {
         serverData.models.turtle.records[2].partner_ids = [1, 2, 4, 5];
         serverData.views = {
             "turtle,false,form": '<form><field name="display_name"/></form>',
-            "partner,false,list": '<tree><field name="display_name"/></tree>',
+            "partner,false,list": '<list><field name="display_name"/></list>',
             "partner,false,search": "<search/>",
         };
 

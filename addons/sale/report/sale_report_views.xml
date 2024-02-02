@@ -50,10 +50,10 @@
     </record>
 
     <record id="sale_report_view_tree" model="ir.ui.view">
-        <field name="name">sale.report.view.tree</field>
+        <field name="name">sale.report.view.list</field>
         <field name="model">sale.report</field>
         <field name="arch" type="xml">
-            <tree string="Sales Analysis">
+            <list string="Sales Analysis">
                 <field name="date"/>
                 <field name="order_reference" optional="show"/>
                 <field name="partner_id" optional="hide"/>
@@ -66,7 +66,7 @@
                 <field name="state" optional="hide"/>
                 <field name="invoice_status" optional="hide"/>
                 <field name="currency_id" column_invisible="True"/>
-            </tree>
+            </list>
         </field>
     </record>
 

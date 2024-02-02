@@ -36,9 +36,9 @@ QUnit.module("Expense", (hooks) => {
         serverData.views = {
             "partner,false,search": `<search/>`,
             "partner,false,list": `
-                <tree js_class="hr_expense_dashboard_tree">
+                <list js_class="hr_expense_dashboard_tree">
                     <field name="display_name"/>
-                </tree>
+                </list>
             `,
         };
 

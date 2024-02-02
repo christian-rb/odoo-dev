@@ -38,10 +38,10 @@
         </record>
 
         <record id="view_department_tree" model="ir.ui.view">
-            <field name="name">hr.department.tree</field>
+            <field name="name">hr.department.list</field>
             <field name="model">hr.department</field>
             <field name="arch" type="xml">
-                <tree string="Companies" sample="1" editable="bottom">
+                <list string="Companies" sample="1" editable="bottom">
                     <field name="company_id" column_invisible="True"/>
                     <field name="name"/>
                     <field name="company_id" groups="base.group_multi_company" readonly="1"/>
@@ -49,7 +49,7 @@
                     <field name="total_employee" string="Employees"/>
                     <field name="parent_id"/>
                     <field name="color" widget="color_picker" string="Color"/>
-                </tree>
+                </list>
             </field>
         </record>
 
@@ -127,7 +127,7 @@
             <field name="name">Departments</field>
             <field name="res_model">hr.department</field>
             <field name="path">departments</field>
-            <field name="view_mode">kanban,tree,form</field>
+            <field name="view_mode">kanban,list,form</field>
             <field name="search_view_id" ref="view_department_filter"/>
             <field name="help" type="html">
               <p class="o_view_nocontent_smiling_face">
@@ -142,7 +142,7 @@
         <record id="hr_department_tree_action" model="ir.actions.act_window">
             <field name="name">Departments</field>
             <field name="res_model">hr.department</field>
-            <field name="view_mode">tree,form,kanban</field>
+            <field name="view_mode">list,form,kanban</field>
             <field name="search_view_id" ref="view_department_filter"/>
             <field name="help" type="html">
                 <p class="o_view_nocontent_smiling_face">

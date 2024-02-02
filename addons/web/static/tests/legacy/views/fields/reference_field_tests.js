@@ -292,10 +292,10 @@ QUnit.module("Fields", (hooks) => {
                     <field name="reference" />
                 </form>`,
             "partner,false,list": `
-                <tree>
+                <list>
                     <field name="display_name"/>
                     <field name="reference" />
-                </tree>`,
+                </list>`,
         };
 
         await makeView({
@@ -345,10 +345,10 @@ QUnit.module("Fields", (hooks) => {
                     <field name="reference" />
                 </form>`,
             "partner,false,list": `
-                <tree>
+                <list>
                     <field name="display_name"/>
                     <field name="reference" />
-                </tree>`,
+                </list>`,
         };
 
         await makeView({
@@ -529,7 +529,7 @@ QUnit.module("Fields", (hooks) => {
     QUnit.test("Many2One 'Search more...' updates on resModel change", async function (assert) {
 
         serverData.views = {
-            "product,false,list": '<tree><field name="display_name"/></tree>',
+            "product,false,list": '<list><field name="display_name"/></list>',
             "product,false,search": '<search/>',
         };
 
@@ -712,9 +712,9 @@ QUnit.module("Fields", (hooks) => {
                 <form>
                     <sheet>
                         <field name="turtles">
-                            <tree>
+                            <list>
                                 <field name="turtle_ref" />
-                            </tree>
+                            </list>
                         </field>
                     </sheet>
                 </form>`,
@@ -783,9 +783,9 @@ QUnit.module("Fields", (hooks) => {
             resModel: "partner",
             serverData,
             arch: `
-                <tree editable="bottom">
+                <list editable="bottom">
                     <field name="reference" />
-                </tree>`,
+                </list>`,
         });
 
         // edit first row
@@ -905,10 +905,10 @@ QUnit.module("Fields", (hooks) => {
             resModel: "partner",
             serverData,
             arch: `
-                <tree string="Test" editable="top">
+                <list string="Test" editable="top">
                     <field name="reference"/>
                     <field name="display_name"/>
-                </tree>`,
+                </list>`,
             mockRPC: (route, { method, args }) => {
                 if (method === "onchange") {
                     return {
@@ -952,11 +952,11 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                     <form>
                         <field name="partner_ids">
-                            <tree editable="bottom">
+                            <list editable="bottom">
                                 <field name="name" />
                                 <field name="model_id" />
                                 <field name="reference" options="{'model_field': 'model_id'}" class="reference_field" />
-                            </tree>
+                            </list>
                         </field>
                    </form>`,
             });
@@ -997,11 +997,11 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                     <form>
                         <field name="partner_ids">
-                            <tree editable="bottom">
+                            <list editable="bottom">
                                 <field name="name" />
                                 <field name="model_id" />
                                 <field name="reference" options='{"model_field": "model_id"}'/>
-                            </tree>
+                            </list>
                         </field>
                    </form>`,
             });
@@ -1044,11 +1044,11 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                     <form>
                         <field name="partner_ids">
-                            <tree editable="bottom">
+                            <list editable="bottom">
                                 <field name="name" />
                                 <field name="model_id"/>
                                 <field name="reference" required="true" options="{'model_field': 'model_id'}" class="reference_field" />
-                            </tree>
+                            </list>
                         </field>
                    </form>`,
             });

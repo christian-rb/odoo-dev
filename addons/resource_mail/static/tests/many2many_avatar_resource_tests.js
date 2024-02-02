@@ -126,10 +126,10 @@ QUnit.module("M2MAvatarResourceWidgetTests", {
     QUnit.test("many2many_avatar_resource widget in list view", async function (assert) {
         this.serverData.views = {
             "resource.task,false,list": `
-                    <tree>
+                    <list>
                         <field name="display_name"/>
                         <field name="resource_ids" widget="many2many_avatar_resource"/>
-                    </tree>`,
+                    </list>`,
         };
         const { openView } = await start({ serverData: this.serverData });
         await openView({

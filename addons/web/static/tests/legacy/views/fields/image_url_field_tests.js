@@ -177,9 +177,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="timmy" widget="many2many">
-                        <tree>
+                        <list>
                             <field name="image" widget="image_url"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,

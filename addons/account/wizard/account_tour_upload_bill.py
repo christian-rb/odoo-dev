@@ -65,9 +65,9 @@ class AccountTourUploadBill(models.TransientModel):
         return {
             'name': _('Generated Documents'),
             'domain': [('id', 'in', bill_ids)],
-            'view_mode': 'tree,form',
+            'view_mode': 'list,form',
             'res_model': 'account.move',
-            'views': [[False, "tree"], [False, "form"]],
+            'views': [[False, "list"], [False, "form"]],
             'type': 'ir.actions.act_window',
             'context': context
         }

@@ -91,10 +91,10 @@ QUnit.module("ViewDialogs", (hooks) => {
 
             serverData.views = {
                 "partner,false,list": `
-                    <tree string="Partner">
+                    <list string="Partner">
                         <field name="display_name"/>
                         <field name="foo"/>
-                    </tree>
+                    </list>
                     `,
                 "partner,false,search": `
                     <search>
@@ -202,10 +202,10 @@ QUnit.module("ViewDialogs", (hooks) => {
 
         serverData.views = {
             "partner,false,list": `
-                    <tree string="Partner">
+                    <list string="Partner">
                         <field name="display_name"/>
                         <field name="foo"/>
-                    </tree>
+                    </list>
                 `,
             "partner,false,search": `
                     <search>
@@ -234,10 +234,10 @@ QUnit.module("ViewDialogs", (hooks) => {
     QUnit.test("SelectCreateDialog list view in readonly", async function (assert) {
         serverData.views = {
             "partner,false,list": `
-                    <tree string="Partner" editable="bottom">
+                    <list string="Partner" editable="bottom">
                         <field name="display_name"/>
                         <field name="foo"/>
-                    </tree>
+                    </list>
                 `,
             "partner,false,search": `
                     <search/>
@@ -271,20 +271,20 @@ QUnit.module("ViewDialogs", (hooks) => {
             "partner,false,form": `
                 <form>
                     <field name="name"/>
-                    <field name="instrument" widget="one2many" mode="tree"/>
+                    <field name="instrument" widget="one2many" mode="list"/>
                 </form>
             `,
             "instrument,false,form": `
                 <form>
                     <field name="name"/>
                     <field name="badassery">
-                        <tree>
+                        <list>
                             <field name="level"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>
             `,
-            "badassery,false,list": `<tree><field name="level"/></tree>`,
+            "badassery,false,list": `<list><field name="level"/></list>`,
             "badassery,false,search": `<search><field name="level"/></search>`,
         };
 
@@ -297,10 +297,10 @@ QUnit.module("ViewDialogs", (hooks) => {
                 <form>
                     <field name="name"/>
                     <field name="partner" widget="one2many" >
-                        <tree editable="top">
+                        <list editable="top">
                             <field name="display_name"/>
                             <field name="instrument"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>
             `,
@@ -348,9 +348,9 @@ QUnit.module("ViewDialogs", (hooks) => {
 
         serverData.views = {
             "partner,false,list": `
-                <tree>
+                <list>
                     <field name="display_name"/>
-                </tree>
+                </list>
             `,
             "partner,false,search": `
                 <search>
@@ -420,10 +420,10 @@ QUnit.module("ViewDialogs", (hooks) => {
             assert.expect(1);
             serverData.views = {
                 "partner,false,list": `
-                        <tree limit="2" string="Partner">
+                        <list limit="2" string="Partner">
                             <field name="display_name"/>
                             <field name="foo"/>
-                        </tree>
+                        </list>
                     `,
                 "partner,false,search": `
                         <search>
@@ -453,10 +453,10 @@ QUnit.module("ViewDialogs", (hooks) => {
             assert.expect(1);
             serverData.views = {
                 "partner,false,list": `
-                        <tree limit="2" string="Partner">
+                        <list limit="2" string="Partner">
                             <field name="display_name"/>
                             <field name="foo"/>
-                        </tree>
+                        </list>
                     `,
                 "partner,false,search": `
                         <search>
@@ -483,7 +483,7 @@ QUnit.module("ViewDialogs", (hooks) => {
 
     QUnit.test("SelectCreateDialog: multiple clicks on record", async function (assert) {
         serverData.views = {
-            "partner,false,list": `<tree><field name="display_name"/></tree>`,
+            "partner,false,list": `<list><field name="display_name"/></list>`,
             "partner,false,search": `<search><field name="foo"/></search>`,
         };
         const webClient = await createWebClient({ serverData });
@@ -504,7 +504,7 @@ QUnit.module("ViewDialogs", (hooks) => {
 
     QUnit.test("SelectCreateDialog: default props, create a record", async function (assert) {
         serverData.views = {
-            "partner,false,list": `<tree><field name="display_name"/></tree>`,
+            "partner,false,list": `<list><field name="display_name"/></list>`,
             "partner,false,search": `
                 <search>
                     <filter name="bar" help="Bar" domain="[('bar', '=', True)]"/>
@@ -544,10 +544,10 @@ QUnit.module("ViewDialogs", (hooks) => {
         serverData.models.partner.records = [];
         serverData.views = {
             "partner,false,list": `
-                <tree>
+                <list>
                     <field name="display_name"/>
                     <field name="foo"/>
-                </tree>
+                </list>
             `,
             "partner,false,search": `<search/>`,
         };
@@ -568,10 +568,10 @@ QUnit.module("ViewDialogs", (hooks) => {
         serverData.models.partner.records = [];
         serverData.views = {
             "partner,false,list": `
-                <tree>
+                <list>
                     <field name="display_name"/>
                     <field name="foo"/>
-                </tree>
+                </list>
             `,
             "partner,false,search": `<search/>`,
         };

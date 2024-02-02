@@ -262,10 +262,10 @@ QUnit.module("Fields", (hooks) => {
                     <form>
                         <field name="foo"/>
                         <field name="p">
-                            <tree editable="bottom" default_order="int_field">
+                            <list editable="bottom" default_order="int_field">
                                 <field name="int_field" widget="handle"/>
                                 <field name="trululu"/>
-                            </tree>
+                            </list>
                         </field>
                     </form>`,
                 mockRPC(route, args) {
@@ -297,10 +297,10 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                     <form>
                         <field name="p">
-                            <tree editable="bottom">
+                            <list editable="bottom">
                                 <field name="int_field" widget="handle"/>
                                 <field name="trululu" context="{'my_context': 'list'}" />
-                            </tree>
+                            </list>
                             <form>
                                 <field name="trululu"  context="{'my_context': 'form'}"/>
                             </form>
@@ -331,10 +331,10 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                     <form>
                         <field name="p">
-                            <tree>
+                            <list>
                                 <field name="int_field" widget="handle"/>
                                 <field name="trululu" context="{'my_context': 'list'}" />
-                            </tree>
+                            </list>
                             <form>
                                 <field name="trululu"  context="{'my_context': 'form'}"/>
                             </form>
@@ -367,10 +367,10 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="p">
-                        <tree>
+                        <list>
                             <field name="foo" invisible="1"/>
                             <field name="display_name" />
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -421,10 +421,10 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                     <form>
                         <field name="p">
-                            <tree editable="bottom" limit="1" decoration-muted="foo != False" default_order="display_name">
+                            <list editable="bottom" limit="1" decoration-muted="foo != False" default_order="display_name">
                                 <field name="foo" invisible="1"/>
                                 <field name="display_name" />
-                            </tree>
+                            </list>
                         </field>
                     </form>`,
                 resId: 1,
@@ -489,9 +489,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="turtles">
-                        <tree>
+                        <list>
                             <field name="parent_id"/>
-                        </tree>
+                        </list>
                         <form>
                             <field name="parent_id" domain="[('id', 'in', parent.turtles)]"/>
                         </form>
@@ -551,9 +551,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="turtles">
-                        <tree>
+                        <list>
                             <field name="parent_id"/>
-                        </tree>
+                        </list>
                         <form>
                             <field name="parent_id"/>
                         </form>
@@ -614,9 +614,9 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                 <form>
                     <field name="turtles">
-                        <tree>
+                        <list>
                             <field name="display_name"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
                 async mockRPC(route, { method, model }) {
@@ -654,15 +654,15 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="turtles">
-                        <tree>
+                        <list>
                             <field name="display_name"/>
-                        </tree>
+                        </list>
                         <form>
                             <field name="partner_ids">
-                                <tree editable="top">
+                                <list editable="top">
                                     <field name="int_field" widget="handle"/>
                                     <field name="display_name"/>
-                                </tree>
+                                </list>
                             </field>
                         </form>
                     </field>
@@ -723,11 +723,11 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="p">
-                        <tree editable="bottom">
+                        <list editable="bottom">
                             <field name="turtles" invisible="1"/>
                             <field name="foo" readonly="turtles"/>
                             <field name="qux" readonly="turtles"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -795,11 +795,11 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                 <form>
                     <field name="p">
-                        <tree>
+                        <list>
                             <field name="int_field" widget="handle"/>
                             <field name="foo"/>
                             <field name="qux"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
                 resId: 1,
@@ -840,9 +840,9 @@ QUnit.module("Fields", (hooks) => {
                         <notebook>
                             <page string="Partner page">
                                 <field name="p">
-                                    <tree>
+                                    <list>
                                         <field name="foo"/>
-                                    </tree>
+                                    </list>
                                 </field>
                             </page>
                         </notebook>
@@ -868,9 +868,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="turtles">
-                        <tree editable="bottom">
+                        <list editable="bottom">
                             <field name="turtle_foo" class="hey"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -899,10 +899,10 @@ QUnit.module("Fields", (hooks) => {
                         <notebook>
                             <page string="Partner page">
                                 <field name="p">
-                                    <tree>
+                                    <list>
                                         <field name="date"/>
                                         <field name="datetime"/>
-                                    </tree>
+                                    </list>
                                 </field>
                             </page>
                         </notebook>
@@ -926,10 +926,10 @@ QUnit.module("Fields", (hooks) => {
                         <notebook>
                             <page string="P page">
                                 <field name="p">
-                                    <tree>
+                                    <list>
                                         <field name="foo"/>
                                         <field name="bar"/>
-                                    </tree>
+                                    </list>
                                 </field>
                             </page>
                         </notebook>
@@ -944,7 +944,7 @@ QUnit.module("Fields", (hooks) => {
     });
 
     QUnit.test(
-        "use the limit attribute in arch (in field o2m inline tree view)",
+        "use the limit attribute in arch (in field o2m inline list view)",
         async function (assert) {
             serverData.models.partner.records[0].turtles = [1, 2, 3];
             await makeView({
@@ -954,9 +954,9 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                     <form>
                         <field name="turtles">
-                            <tree limit="2">
+                            <list limit="2">
                                 <field name="turtle_foo"/>
-                            </tree>
+                            </list>
                         </field>
                     </form>`,
                 resId: 1,
@@ -972,8 +972,8 @@ QUnit.module("Fields", (hooks) => {
 
     QUnit.test("nested x2manys with inline form, but not list", async function (assert) {
         serverData.views = {
-            "turtle,false,list": `<tree><field name="turtle_foo"/></tree>`,
-            "partner,false,list": `<tree><field name="foo"/></tree>`,
+            "turtle,false,list": `<list><field name="turtle_foo"/></list>`,
+            "partner,false,list": `<list><field name="foo"/></list>`,
         };
         await makeView({
             type: "form",
@@ -1004,11 +1004,11 @@ QUnit.module("Fields", (hooks) => {
     });
 
     QUnit.test(
-        "use the limit attribute in arch (in field o2m non inline tree view)",
+        "use the limit attribute in arch (in field o2m non inline list view)",
         async function (assert) {
             serverData.models.partner.records[0].turtles = [1, 2, 3];
             serverData.views = {
-                "turtle,false,list": `<tree limit="2"><field name="turtle_foo"/></tree>`,
+                "turtle,false,list": `<list limit="2"><field name="turtle_foo"/></list>`,
             };
             await makeView({
                 type: "form",
@@ -1041,10 +1041,10 @@ QUnit.module("Fields", (hooks) => {
         serverData.models.partner.records[0].turtles = [1, 2, 3];
         serverData.views = {
             "turtle,false,list": `
-                <tree default_order="turtle_foo">
+                <list default_order="turtle_foo">
                     <field name="turtle_int"/>
                     <field name="turtle_foo"/>
-                </tree>`,
+                </list>`,
         };
         await makeView({
             type: "form",
@@ -1082,10 +1082,10 @@ QUnit.module("Fields", (hooks) => {
                         <notebook>
                             <page string="P page">
                                 <field name="p">
-                                    <tree>
+                                    <list>
                                         <field name="int_field" widget="handle"/>
                                         <field name="foo"/>
-                                    </tree>
+                                    </list>
                                 </field>
                             </page>
                         </notebook>
@@ -1110,10 +1110,10 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="turtles">
-                        <tree default_order="turtle_int">
+                        <list default_order="turtle_int">
                             <field name="turtle_int" widget="handle"/>
                             <field name="turtle_foo"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -1190,10 +1190,10 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                     <form>
                         <field name="turtles">
-                            <tree editable="bottom">
+                            <list editable="bottom">
                                 <field name="turtle_foo"/>
                                 <field name="partner_ids" widget="many2many_tags"/>
-                            </tree>
+                            </list>
                         </field>
                     </form>`,
             resId: 1,
@@ -1259,10 +1259,10 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                     <form>
                         <field name="turtles">
-                            <tree editable="bottom" limit="1">
+                            <list editable="bottom" limit="1">
                                 <field name="turtle_foo"/>
                                 <field name="partner_ids" widget="many2many_tags"/>
-                            </tree>
+                            </list>
                         </field>
                     </form>`,
                 resId: 1,
@@ -1327,10 +1327,10 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                     <form>
                         <field name="turtles">
-                            <tree editable="bottom">
+                            <list editable="bottom">
                                 <field name="turtle_foo"/>
                                 <field name="partner_ids" widget="many2many_tags"/>
-                            </tree>
+                            </list>
                         </field>
                     </form>`,
                 resId: 1,
@@ -1399,10 +1399,10 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="turtles">
-                        <tree default_order="turtle_int">
+                        <list default_order="turtle_int">
                             <field name="turtle_int" widget="handle"/>
                             <field name="turtle_foo"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -1446,10 +1446,10 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                     <form>
                         <field name="turtles">
-                            <tree default_order="turtle_int">
+                            <list default_order="turtle_int">
                                 <field name="turtle_int" widget="handle"/>
                                 <field name="turtle_foo"/>
-                            </tree>
+                            </list>
                         </field>
                     </form>`,
                 resId: 1,
@@ -1510,10 +1510,10 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                     <form>
                         <field name="turtles">
-                            <tree editable="bottom" default_order="turtle_int">
+                            <list editable="bottom" default_order="turtle_int">
                                 <field name="turtle_int" widget="handle"/>
                                 <field name="turtle_foo"/>
-                            </tree>
+                            </list>
                         </field>
                     </form>`,
             resId: 1,
@@ -1576,11 +1576,11 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                     <form>
                         <field name="turtles">
-                            <tree editable="bottom" default_order="turtle_int" limit="10">
+                            <list editable="bottom" default_order="turtle_int" limit="10">
                                 <field name="turtle_int" widget="handle"/>
                                 <field name="turtle_foo"/>
                                 <field name="turtle_qux" readonly="not turtle_foo"/>
-                            </tree>
+                            </list>
                         </field>
                     </form>`,
                 resId: 1,
@@ -1648,10 +1648,10 @@ QUnit.module("Fields", (hooks) => {
                     <sheet>
                         <group>
                             <field name="turtles">
-                                <tree editable="top" default_order="turtle_int">
+                                <list editable="top" default_order="turtle_int">
                                     <field name="turtle_int" widget="handle"/>
                                     <field name="turtle_foo"/>
-                                </tree>
+                                </list>
                             </field>
                         </group>
                     </sheet>
@@ -1781,10 +1781,10 @@ QUnit.module("Fields", (hooks) => {
                         <sheet>
                             <group>
                                 <field name="turtles">
-                                    <tree editable="bottom" default_order="turtle_int">
+                                    <list editable="bottom" default_order="turtle_int">
                                         <field name="turtle_int" widget="handle"/>
                                         <field name="turtle_foo"/>
-                                    </tree>
+                                    </list>
                                 </field>
                             </group>
                         </sheet>
@@ -1900,9 +1900,9 @@ QUnit.module("Fields", (hooks) => {
                 <form>
                     <field name="foo"/>
                     <field name="turtles">
-                        <tree>
+                        <list>
                             <field name="turtle_foo"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -1942,10 +1942,10 @@ QUnit.module("Fields", (hooks) => {
                             <group>
                                 <field name="foo"/>
                                 <field name="turtles">
-                                    <tree>
+                                    <list>
                                         <field name="turtle_foo"/>
                                         <field name="partner_ids" widget="many2many_tags"/>
-                                    </tree>
+                                    </list>
                                 </field>
                             </group>
                         </sheet>
@@ -2031,10 +2031,10 @@ QUnit.module("Fields", (hooks) => {
                             <group>
                                 <field name="foo"/>
                                 <field name="turtles">
-                                    <tree>
+                                    <list>
                                         <field name="turtle_foo"/>
                                         <field name="turtle_ref" class="ref_field"/>
-                                        </tree>
+                                        </list>
                                 </field>
                             </group>
                         </sheet>
@@ -2066,7 +2066,7 @@ QUnit.module("Fields", (hooks) => {
             },
         };
         serverData.views = {
-            "partner,false,list": '<tree><field name="foo"/></tree>',
+            "partner,false,list": '<list><field name="foo"/></list>',
             "partner,false,search": "<search></search>",
         };
 
@@ -2078,14 +2078,14 @@ QUnit.module("Fields", (hooks) => {
                 <form>
                     <field name="foo"/>
                     <field name="turtles">
-                        <tree>
+                        <list>
                             <field name="turtle_foo"/>
-                        </tree>
+                        </list>
                         <form>
                             <field name="partner_ids">
-                                <tree editable="top">
+                                <list editable="top">
                                     <field name="foo"/>
-                                </tree>
+                                </list>
                             </field>
                         </form>
                     </field>
@@ -2189,14 +2189,14 @@ QUnit.module("Fields", (hooks) => {
                     <form>
                         <field name="foo"/>
                         <field name="p">
-                            <tree>
+                            <list>
                                 <field name="turtles"/>
-                            </tree>
+                            </list>
                             <form>
                                 <field name="turtles">
-                                    <tree editable="top">
+                                    <list editable="top">
                                         <field name="turtle_foo"/>
-                                    </tree>
+                                    </list>
                                 </field>
                             </form>
                         </field>
@@ -2259,9 +2259,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                     <form>
                         <field name="turtles">
-                            <tree>
+                            <list>
                                 <field name="display_name"/>
-                            </tree>
+                            </list>
                             <form>
                                 <field name="display_name"/>
                             </form>
@@ -2322,15 +2322,15 @@ QUnit.module("Fields", (hooks) => {
                     <form>
                         <field name="display_name"/>
                         <field name="p">
-                            <tree>
+                            <list>
                                 <field name="display_name"/>
-                            </tree>
+                            </list>
                             <form>
                                 <field name="display_name"/>
                                 <field name="p">
-                                    <tree>
+                                    <list>
                                         <field name="display_name"/>
-                                    </tree>
+                                    </list>
                                     <form>
                                         <field name="display_name"/>
                                     </form>
@@ -2401,9 +2401,9 @@ QUnit.module("Fields", (hooks) => {
                     <form>
                         <field name="display_name"/>
                         <field name="turtles">
-                            <tree>
+                            <list>
                                 <field name="display_name"/>
-                            </tree>
+                            </list>
                         </field>
                     </form>`,
             });
@@ -2461,14 +2461,14 @@ QUnit.module("Fields", (hooks) => {
                     <form>
                         <field name="foo"/>
                         <field name="p">
-                            <tree>
+                            <list>
                                 <field name="turtles" widget="many2many_tags"/>
-                            </tree>
+                            </list>
                             <form>
                                 <field name="turtles">
-                                    <tree editable="top">
+                                    <list editable="top">
                                         <field name="turtle_foo"/>
-                                    </tree>
+                                    </list>
                                 </field>
                             </form>
                         </field>
@@ -2567,10 +2567,10 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                     <form>
                         <field name="turtles">
-                            <tree default_order="turtle_int">
+                            <list default_order="turtle_int">
                                 <field name="turtle_int" widget="handle"/>
                                 <field name="turtle_foo"/>
-                            </tree>
+                            </list>
                         </field>
                     </form>`,
                 resId: 1,
@@ -2614,10 +2614,10 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="p">
-                        <tree editable="top">
+                        <list editable="top">
                             <field name="int_field" widget="handle"/>
                             <field name="foo"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -3108,9 +3108,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="turtles" readonly='1'>
-                        <tree>
+                        <list>
                             <field name="display_name" />
-                        </tree>
+                        </list>
                         <form>
                             <field name="display_name" />
                         </form>
@@ -3146,9 +3146,9 @@ QUnit.module("Fields", (hooks) => {
                 <form>
                     <field name="display_name"/>
                     <field name="p">
-                        <tree>
+                        <list>
                             <field name="display_name"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             };
@@ -3336,7 +3336,7 @@ QUnit.module("Fields", (hooks) => {
                 <form>
                     <field name="int_field"/>
                     <field name="turtles" context="{'abc': int_field}">
-                        <tree><field name="display_name"/></tree>
+                        <list><field name="display_name"/></list>
                         <form><field name="display_name"/></form>
                     </field>
                 </form>`,
@@ -3366,9 +3366,9 @@ QUnit.module("Fields", (hooks) => {
             serverData.models.partner.onchanges.turtles = function () {};
             serverData.views = {
                 "turtle,false,list": `
-                    <tree>
+                    <list>
                         <field name="turtle_foo"/>
-                    </tree>`,
+                    </list>`,
                 "turtle,false,form": `
                     <form>
                         <group>
@@ -3411,9 +3411,9 @@ QUnit.module("Fields", (hooks) => {
                     <form>
                         <field name="display_name"/>
                         <field name="partner_ids">
-                            <tree>
+                            <list>
                                 <field name="display_name"/>
-                            </tree>
+                            </list>
                         </field>
                     </form>`,
             };
@@ -3426,9 +3426,9 @@ QUnit.module("Fields", (hooks) => {
                     <form>
                         <field name="display_name"/>
                         <field name="turtles">
-                            <tree>
+                            <list>
                                 <field name="turtle_foo"/>
-                            </tree>
+                            </list>
                         </field>
                     </form>`,
                 resId: 1,
@@ -3522,10 +3522,10 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="p">
-                        <tree>
+                        <list>
                             <field name="foo"/>
                             <field name="int_field"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -3581,10 +3581,10 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="p">
-                        <tree limit="2">
+                        <list limit="2">
                             <field name="foo"/>
                             <field name="int_field"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -3628,9 +3628,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="p">
-                        <tree editable="top">
+                        <list editable="top">
                             <field name="display_name"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 2,
@@ -3693,9 +3693,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="p">
-                        <tree create="0">
+                        <list create="0">
                             <field name="display_name"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -3714,9 +3714,9 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                 <form edit="0">
                     <field name="p">
-                        <tree editable="bottom">
+                        <list editable="bottom">
                             <field name="display_name"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
                 resId: 1,
@@ -3739,9 +3739,9 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                 <form>
                     <field name="p">
-                        <tree editable="bottom" edit="false">
+                        <list editable="bottom" edit="false">
                             <field name="display_name"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
                 resId: 1,
@@ -3763,9 +3763,9 @@ QUnit.module("Fields", (hooks) => {
                 <form>
                     <field name="bar"/>
                     <field name="p" options="{'create': [('bar', '=', True)], 'delete': [('bar', '=', True)]}">
-                        <tree>
+                        <list>
                             <field name="display_name"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -3791,10 +3791,10 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="p">
-                        <tree editable="top">
+                        <list editable="top">
                             <field name="bar"/>
                             <field name="name"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -3827,9 +3827,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="p" widget="many2many">
-                        <tree>
+                        <list>
                             <field name="display_name"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -3868,9 +3868,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="p">
-                        <tree>
+                        <list>
                             <field name="display_name"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -4181,9 +4181,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="turtles">
-                        <tree editable="bottom" limit="3">
+                        <list editable="bottom" limit="3">
                             <field name="turtle_foo"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -4214,10 +4214,10 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="p">
-                        <tree>
+                        <list>
                             <field name="display_name"/>
                             <field name="qux"/>
-                        </tree>
+                        </list>
                         <form>
                             <field name="display_name"/>
                         </form>
@@ -4283,9 +4283,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="p">
-                        <tree editable="top">
+                        <list editable="top">
                             <field name="foo"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -4335,9 +4335,9 @@ QUnit.module("Fields", (hooks) => {
                 <form>
                     <group>
                         <field name="turtles">
-                            <tree editable="top">
+                            <list editable="top">
                                 <field name="turtle_foo"/>
-                            </tree>
+                            </list>
                         </field>
                     </group>
                 </form>`,
@@ -4379,10 +4379,10 @@ QUnit.module("Fields", (hooks) => {
                 <form>
                     <group>
                         <field name="turtles">
-                            <tree editable="top">
+                            <list editable="top">
                                 <field name="turtle_trululu"/>
                                 <field name="turtle_description"/>
-                            </tree>
+                            </list>
                         </field>
                     </group>
                 </form>`,
@@ -4409,9 +4409,9 @@ QUnit.module("Fields", (hooks) => {
                 <form>
                     <group>
                         <field name="turtles">
-                            <tree editable="top">
+                            <list editable="top">
                                 <field name="turtle_foo"/>
-                            </tree>
+                            </list>
                         </field>
                     </group>
                 </form>`,
@@ -4444,9 +4444,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                     <form>
                         <field name="turtles">
-                            <tree editable="top">
+                            <list editable="top">
                                 <field name="turtle_foo"/>
-                            </tree>
+                            </list>
                         </field>
                     </form>`,
             resId: 2,
@@ -4478,9 +4478,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="p">
-                        <tree>
+                        <list>
                             <field name="display_name" />
-                        </tree>
+                        </list>
                         <form>
                             <field name="display_name" />
                         </form>
@@ -4518,9 +4518,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="turtles">
-                        <tree editable="bottom" limit="3">
+                        <list editable="bottom" limit="3">
                             <field name="turtle_foo"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -4556,9 +4556,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="turtles">
-                        <tree editable="bottom" limit="3">
+                        <list editable="bottom" limit="3">
                             <field name="turtle_foo"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -4589,9 +4589,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="turtles">
-                        <tree editable="bottom" limit="3">
+                        <list editable="bottom" limit="3">
                             <field name="turtle_foo"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -4619,10 +4619,10 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                     <form>
                         <field name="turtles">
-                            <tree editable="bottom" limit="3">
+                            <list editable="bottom" limit="3">
                                 <field name="turtle_foo"/>
                                 <field name="turtle_int"/>
-                            </tree>
+                            </list>
                         </field>
                     </form>`,
                 resId: 1,
@@ -4660,10 +4660,10 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="p">
-                        <tree editable="bottom">
+                        <list editable="bottom">
                             <field name="display_name" required="1"/>
                             <field name="int_field"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -4694,9 +4694,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="turtles">
-                        <tree editable="bottom" limit="3">
+                        <list editable="bottom" limit="3">
                             <field name="turtle_foo"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -4733,10 +4733,10 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="turtles">
-                        <tree editable="top">
+                        <list editable="top">
                             <field name="turtle_foo"/>
                             <field name="turtle_int"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 2,
@@ -4774,9 +4774,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="turtles">
-                        <tree editable="bottom">
+                        <list editable="bottom">
                             <field name="turtle_foo"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 2,
@@ -4801,9 +4801,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="turtles">
-                        <tree editable="bottom">
+                        <list editable="bottom">
                             <field name="turtle_foo"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 2,
@@ -4842,10 +4842,10 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                 <form>
                     <field name="turtles">
-                        <tree editable="bottom">
+                        <list editable="bottom">
                             <field name="turtle_int" widget="handle"/>
                             <field name="turtle_foo"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
                 resId: 2,
@@ -4883,10 +4883,10 @@ QUnit.module("Fields", (hooks) => {
                 <form>
                     <group>
                         <field name="turtles">
-                            <tree editable="top">
+                            <list editable="top">
                                 <field name="turtle_foo"/>
                                 <field name="turtle_int"/>
-                            </tree>
+                            </list>
                         </field>
                     </group>
                 </form>`,
@@ -4932,9 +4932,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="turtles">
-                        <tree editable="top">
+                        <list editable="top">
                             <field name="turtle_foo"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 2,
@@ -4963,9 +4963,9 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                     <form>
                         <field name="turtles">
-                            <tree editable="top">
+                            <list editable="top">
                                 <field name="turtle_foo"/>
-                            </tree>
+                            </list>
                         </field>
                     </form>`,
                 resId: 2,
@@ -4989,9 +4989,9 @@ QUnit.module("Fields", (hooks) => {
             "partner,false,form": `
                 <form>
                     <field name="p">
-                        <tree editable="bottom">
+                        <list editable="bottom">
                             <field name="display_name"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
         };
@@ -5003,9 +5003,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="p">
-                        <tree>
+                        <list>
                             <field name="display_name"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -5038,9 +5038,9 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                     <form>
                         <field name="turtles">
-                            <tree editable="top">
+                            <list editable="top">
                                 <field name="product_id"/>
-                            </tree>
+                            </list>
                         </field>
                     </form>`,
                 resId: 1,
@@ -5073,9 +5073,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="p">
-                        <tree editable="top">
+                        <list editable="top">
                             <field name="foo"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 2,
@@ -5118,9 +5118,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="p">
-                        <tree>
+                        <list>
                             <field name="foo"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             mockRPC(route, args) {
@@ -5149,9 +5149,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="p">
-                        <tree>
+                        <list>
                             <field name="date"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
         });
@@ -5175,9 +5175,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="turtles">
-                        <tree editable="bottom">
+                        <list editable="bottom">
                             <field name="turtle_int"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -5205,9 +5205,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="p">
-                        <tree editable="bottom">
+                        <list editable="bottom">
                             <field name="date"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -5255,7 +5255,7 @@ QUnit.module("Fields", (hooks) => {
                 <form>
                     <field name="foo"/>
                     <field name="turtles">
-                        <tree editable="bottom">
+                        <list editable="bottom">
                             <field name="display_name"/>
                             <field name="product_id"/>
                             <field name="turtle_bar"/>
@@ -5263,7 +5263,7 @@ QUnit.module("Fields", (hooks) => {
                             <field name="turtle_int"/>
                             <field name="turtle_qux"/>
                             <field name="turtle_ref"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             mockRPC: function (method, args) {
@@ -5359,10 +5359,10 @@ QUnit.module("Fields", (hooks) => {
                 <form>
                     <field name="foo"/>
                     <field name="turtles">
-                        <tree editable="bottom">
+                        <list editable="bottom">
                             <field name="display_name" widget="char"/>
                             <field name="turtle_int"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -5413,10 +5413,10 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                     <form>
                         <field name="turtles">
-                            <tree editable="bottom">
+                            <list editable="bottom">
                                 <field name="turtle_foo" widget="char" readonly="turtle_int == 11111"/>
                                 <field name="turtle_int"/>
-                            </tree>
+                            </list>
                         </field>
                     </form>`,
                 resId: 1,
@@ -5444,9 +5444,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="p">
-                        <tree editable="bottom">
+                        <list editable="bottom">
                             <field name="display_name"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -5477,10 +5477,10 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                     <form>
                         <field name="p">
-                            <tree editable="top">
+                            <list editable="top">
                                 <field name="display_name" readonly="not product_id"/>
                                 <field name="product_id"/>
-                            </tree>
+                            </list>
                         </field>
                     </form>`,
             resId: 1,
@@ -5512,9 +5512,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="p">
-                        <tree editable="top">
+                        <list editable="top">
                             <field name="foo"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
         });
@@ -5543,9 +5543,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="p">
-                        <tree>
+                        <list>
                             <field name="product_id"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -5582,7 +5582,7 @@ QUnit.module("Fields", (hooks) => {
             type: "form",
             resModel: "partner",
             serverData,
-            // don't remove foo field in sub tree view, it is useful to make sure
+            // don't remove foo field in sub list view, it is useful to make sure
             // the foo fieldwidget does not crash because the foo field is not in the form view
             arch: `
                 <form>
@@ -5591,10 +5591,10 @@ QUnit.module("Fields", (hooks) => {
                             <field name="product_id"/>
                             <field name="int_field"/>
                         </form>
-                        <tree>
+                        <list>
                             <field name="product_id"/>
                             <field name="foo"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -5680,9 +5680,9 @@ QUnit.module("Fields", (hooks) => {
                             <form>
                                 <field name="product_id" context="{'partner_foo':parent.foo, 'lalala': parent.product_id}"/>
                             </form>
-                            <tree>
+                            <list>
                                 <field name="product_id"/>
-                            </tree>
+                            </list>
                         </field>
                     </form>`,
                 resId: 1,
@@ -5758,9 +5758,9 @@ QUnit.module("Fields", (hooks) => {
                     <form>
                         <field name="foo"/>
                         <field name="p">
-                            <tree editable="bottom">
+                            <list editable="bottom">
                                 <field name="product_id" context="{'partner_foo':parent.foo}"/>
-                            </tree>
+                            </list>
                         </field>
                     </form>`,
                 resId: 1,
@@ -5795,9 +5795,9 @@ QUnit.module("Fields", (hooks) => {
                     <form>
                         <field name="foo"/>
                         <field name="turtles">
-                            <tree limit="2">
+                            <list limit="2">
                                 <field name="product_id" context="{'partner_foo': parent.foo}"/>
-                            </tree>
+                            </list>
                         </field>
                     </form>`,
                 resId: 1,
@@ -5833,9 +5833,9 @@ QUnit.module("Fields", (hooks) => {
                     <group>
                         <field name="date"/>
                         <field name="p" context="{'date':date}">
-                            <tree editable="top">
+                            <list editable="top">
                                 <field name="date"/>
-                            </tree>
+                            </list>
                         </field>
                     </group>
                 </form>`,
@@ -5865,9 +5865,9 @@ QUnit.module("Fields", (hooks) => {
                 <form>
                     <group>
                         <field name="turtles" context="{'turtles':turtles}">
-                            <tree editable="bottom">
+                            <list editable="bottom">
                                 <field name="turtle_foo"/>
-                            </tree>
+                            </list>
                         </field>
                     </group>
                 </form>`,
@@ -5898,9 +5898,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="p">
-                        <tree editable="top">
+                        <list editable="top">
                             <field name="foo"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -5941,9 +5941,9 @@ QUnit.module("Fields", (hooks) => {
                     <form>
                         <field name="int_field"/>
                         <field name="p" context="{'hello': 'world', 'abc': int_field}">
-                            <tree editable="top">
+                            <list editable="top">
                                 <field name="foo"/>
-                            </tree>
+                            </list>
                         </field>
                     </form>`,
                 resId: 1,
@@ -5977,9 +5977,9 @@ QUnit.module("Fields", (hooks) => {
                     <form>
                         <field name="int_field"/>
                         <field name="turtles" context="{'hello': 'world', 'abc': int_field, 'default_turtle_int': 5}">
-                            <tree>
+                            <list>
                                 <field name="turtle_foo"/>
-                            </tree>
+                            </list>
                         </field>
                     </form>`,
                 resId: 1,
@@ -6007,12 +6007,12 @@ QUnit.module("Fields", (hooks) => {
 
         serverData.views = {
             "turtle,false,list": `
-                <tree>
+                <list>
                     <field name="display_name"/>
                     <field name="turtle_foo"/>
                     <field name="turtle_bar"/>
                     <field name="product_id"/>
-                </tree>`,
+                </list>`,
             "turtle,false,search": `
                 <search>
                     <field name="turtle_foo"/>
@@ -6029,12 +6029,12 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="turtles" widget="many2many">
-                        <tree>
+                        <list>
                             <field name="turtle_foo"/>
                             <field name="turtle_qux"/>
                             <field name="turtle_int"/>
                             <field name="product_id"/>
-                        </tree>
+                        </list>
                         <form>
                             <group>
                                 <field name="turtle_foo"/>
@@ -6108,12 +6108,12 @@ QUnit.module("Fields", (hooks) => {
 
         serverData.views = {
             "turtle,false,list": `
-                <tree>
+                <list>
                     <field name="display_name"/>
                     <field name="turtle_foo"/>
                     <field name="turtle_bar"/>
                     <field name="product_id"/>
-                </tree>`,
+                </list>`,
             "turtle,false,search": `
                 <search>
                     <field name="turtle_foo"/>
@@ -6129,12 +6129,12 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="turtles" widget="many2many">
-                        <tree>
+                        <list>
                             <field name="turtle_foo"/>
                             <field name="turtle_qux"/>
                             <field name="turtle_int"/>
                             <field name="product_id"/>
-                        </tree>
+                        </list>
                         <form>
                             <group>
                                 <field name="turtle_foo"/>
@@ -6212,9 +6212,9 @@ QUnit.module("Fields", (hooks) => {
                     <form>
                         <field name="int_field"/>
                         <field name="p" context="{'hello': 'world', 'abc': int_field}">
-                            <tree editable="top">
+                            <list editable="top">
                                 <field name="foo"/>
-                            </tree>
+                            </list>
                         </field>
                     </form>`,
             mockRPC(route, args) {
@@ -6244,9 +6244,9 @@ QUnit.module("Fields", (hooks) => {
                     <field name="display_name"/>
                     <field name="foo"/>
                     <field name="p">
-                        <tree editable="top">
+                        <list editable="top">
                             <field name="bar"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -6288,11 +6288,11 @@ QUnit.module("Fields", (hooks) => {
                     <field name="display_name"/>
                     <field name="foo"/>
                     <field name="p">
-                        <tree editable="top">
+                        <list editable="top">
                             <field name="display_name"/>
                             <field name="foo"/>
                             <field name="turtles" widget="many2many_tags"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
                 resId: 1,
@@ -6344,9 +6344,9 @@ QUnit.module("Fields", (hooks) => {
                     <form>
                         <field name="foo"/>
                         <field name="turtles">
-                            <tree editable="top">
+                            <list editable="top">
                                 <field name="turtle_bar"/>
-                            </tree>
+                            </list>
                         </field>
                     </form>`,
                 mockRPC(route, args) {
@@ -6380,10 +6380,10 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="turtles">
-                        <tree>
+                        <list>
                             <field name="id"/>
                             <field name="turtle_foo"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
         });
@@ -6405,10 +6405,10 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="turtles">
-                        <tree editable="bottom">
+                        <list editable="bottom">
                             <field name="id" invisible="1"/>
                             <field name="turtle_foo"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             mockRPC(route, args) {
@@ -6441,9 +6441,9 @@ QUnit.module("Fields", (hooks) => {
                         <form>
                             <group><field name="foo"/></group>
                         </form>
-                        <tree>
+                        <list>
                             <field name="foo"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -6469,10 +6469,10 @@ QUnit.module("Fields", (hooks) => {
                 <form>
                     <field name="int_field"/>
                     <field name="p">
-                        <tree>
+                        <list>
                             <field name="foo"/>
                             <button name="method_name" type="object" icon="fa-plus"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -6532,11 +6532,11 @@ QUnit.module("Fields", (hooks) => {
         serverData.models.partner.records[0].turtles = [2, 3];
         serverData.views = {
             "turtle,false,list": `
-                <tree>
+                <list>
                     <field name="turtle_bar"/>
                     <field name="display_name"/>
                     <field name="partner_ids"/>
-                </tree>`,
+                </list>`,
         };
         await makeView({
             type: "form",
@@ -6579,11 +6579,11 @@ QUnit.module("Fields", (hooks) => {
                     <group>
                         <field name="int_field"/>
                         <field name="turtles">
-                            <tree editable="top">
+                            <list editable="top">
                                 <field name="display_name"/>
                                 <field name="product_id"/>
                                 <field name="partner_ids" widget="many2many_tags"/>
-                            </tree>
+                            </list>
                         </field>
                     </group>
                 </form>`,
@@ -6683,10 +6683,10 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                     <form>
                         <field name="turtles">
-                            <tree editable="top" limit="2">
+                            <list editable="top" limit="2">
                                 <field name="turtle_foo"/>
                                 <field name="partner_ids" widget="many2many_tags" readonly="turtle_foo == 'a'"/>
-                            </tree>
+                            </list>
                         </field>
                     </form>`,
                 resId: 1,
@@ -6772,11 +6772,11 @@ QUnit.module("Fields", (hooks) => {
                     <group>
                         <field name="int_field"/>
                         <field name="turtles">
-                            <tree editable="bottom">
+                            <list editable="bottom">
                                 <field name="display_name"/>
                                 <field name="product_id"/>
                                 <field name="partner_ids" widget="many2many_tags"/>
-                            </tree>
+                            </list>
                         </field>
                     </group>
                 </form>`,
@@ -6892,9 +6892,9 @@ QUnit.module("Fields", (hooks) => {
         serverData.models.partner.records[2].turtles = [1, 3];
         serverData.views = {
             "partner,false,list": `
-                <tree>
+                <list>
                     <field name="display_name"/>
-                </tree>`,
+                </list>`,
         };
 
         await makeView({
@@ -6912,9 +6912,9 @@ QUnit.module("Fields", (hooks) => {
                                     <field name="partner_ids"/>
                                 </group>
                             </form>
-                            <tree>
+                            <list>
                                 <field name="display_name"/>
-                            </tree>
+                            </list>
                         </field>
                     </group>
                 </form>`,
@@ -6929,7 +6929,7 @@ QUnit.module("Fields", (hooks) => {
     });
 
     QUnit.test(
-        "one2many (who contains a one2many) with tree view and without form view",
+        "one2many (who contains a one2many) with list view and without form view",
         async function (assert) {
             await makeView({
                 type: "form",
@@ -6939,9 +6939,9 @@ QUnit.module("Fields", (hooks) => {
                     <form edit="0">
                         <group>
                             <field name="turtles">
-                                <tree>
+                                <list>
                                     <field name="partner_ids"/>
-                                </tree>
+                                </list>
                                 <form>
                                     <field name="turtle_foo"/>
                                 </form>
@@ -6975,9 +6975,9 @@ QUnit.module("Fields", (hooks) => {
                 <form>
                     <group>
                         <field name="turtles">
-                            <tree>
+                            <list>
                                 <field name="turtle_foo"/>
-                            </tree>
+                            </list>
                             <form>
                                 <field name="partner_ids" widget="many2many_tags"/>
                             </form>
@@ -7020,7 +7020,7 @@ QUnit.module("Fields", (hooks) => {
         serverData.views = {
             "partner,false,form": '<form><field name="timmy"/></form>',
             "partner_type,false,list":
-                '<tree editable="bottom"><field name="display_name"/></tree>',
+                '<list editable="bottom"><field name="display_name"/></list>',
             "partner_type,false,search": "<search></search>",
         };
         await makeViewInDialog({
@@ -7030,9 +7030,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="turtles">
-                        <tree editable="bottom">
+                        <list editable="bottom">
                             <field name="turtle_trululu"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -7076,9 +7076,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="turtles">
-                        <tree editable="top">
+                        <list editable="top">
                             <field name="partner_ids" widget="many2many_tags"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
         });
@@ -7131,14 +7131,14 @@ QUnit.module("Fields", (hooks) => {
                 <form>
                     <field name="bar"/>
                     <field name="p">
-                        <tree>
+                        <list>
                             <field name="turtles"/>
-                        </tree>
+                        </list>
                         <form>
                             <field name="turtles">
-                                <tree>
+                                <list>
                                     <field name="turtle_foo"/>
-                                </tree>
+                                </list>
                             </field>
                         </form>
                     </field>
@@ -7184,9 +7184,9 @@ QUnit.module("Fields", (hooks) => {
             serverData.models.partner.records[0].p = [1];
             serverData.views = {
                 "partner,false,list": `
-                    <tree>
+                    <list>
                         <field name="turtles"/>
-                    </tree>`,
+                    </list>`,
                 "partner,false,form": `
                     <form>
                         <field name="turtles" widget="many2many_tags"/>
@@ -7215,7 +7215,7 @@ QUnit.module("Fields", (hooks) => {
     );
 
     QUnit.test(
-        "one2many (who contains display_name) with tree view and without form view",
+        "one2many (who contains display_name) with list view and without form view",
         async function (assert) {
             serverData.views = {
                 "turtle,false,form": '<form><field name="turtle_foo"/></form>',
@@ -7229,9 +7229,9 @@ QUnit.module("Fields", (hooks) => {
                     <form edit="0">
                         <group>
                             <field name="turtles">
-                                <tree>
+                                <list>
                                     <field name="display_name"/>
-                                </tree>
+                                </list>
                             </field>
                         </group>
                     </form>`,
@@ -7270,9 +7270,9 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                     <form>
                         <field name="turtles">
-                            <tree>
+                            <list>
                                 <field name="turtle_foo"/>
-                            </tree>
+                            </list>
                         </field>
                     </form>`,
                 resId: 1,
@@ -7573,10 +7573,10 @@ QUnit.module("Fields", (hooks) => {
                 <form>
                     <group>
                         <field name="turtles">
-                            <tree editable="top">
+                            <list editable="top">
                                 <field name="turtle_foo"/>
                                 <field name="turtle_int"/>
-                            </tree>
+                            </list>
                         </field>
                     </group>
                     <field name="foo"/>
@@ -7606,9 +7606,9 @@ QUnit.module("Fields", (hooks) => {
                 <form>
                     <group>
                         <field name="turtles">
-                            <tree editable="top">
+                            <list editable="top">
                                 <field name="turtle_foo"/>
-                            </tree>
+                            </list>
                         </field>
                     </group>
                 </form>`,
@@ -7653,9 +7653,9 @@ QUnit.module("Fields", (hooks) => {
                 <form>
                     <group>
                         <field name="turtles">
-                            <tree editable="bottom">
+                            <list editable="bottom">
                                 <field name="turtle_foo"/>
-                            </tree>
+                            </list>
                         </field>
                     </group>
                 </form>`,
@@ -7701,10 +7701,10 @@ QUnit.module("Fields", (hooks) => {
                     <group>
                         <field name="display_name"/>
                         <field name="turtles">
-                            <tree editable="bottom">
+                            <list editable="bottom">
                                 <field name="turtle_foo"/>
                                 <field name="turtle_bar" optional="hide"/>
-                            </tree>
+                            </list>
                         </field>
                     </group>
                 </form>`,
@@ -7734,10 +7734,10 @@ QUnit.module("Fields", (hooks) => {
                     <group>
                         <field name="display_name"/>
                         <field name="turtles">
-                            <tree editable="bottom">
+                            <list editable="bottom">
                                 <field name="turtle_foo"/>
                                 <field name="turtle_bar" optional="hide"/>
-                            </tree>
+                            </list>
                         </field>
                     </group>
                 </form>`,
@@ -7761,9 +7761,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="p">
-                        <tree>
+                        <list>
                             <field name="foo"/>
-                        </tree>
+                        </list>
                         <form>
                             <field name="display_name"/>
                         </form>
@@ -7788,9 +7788,9 @@ QUnit.module("Fields", (hooks) => {
                 <form>
                     <group>
                         <field mode="kanban" name="turtles">
-                            <tree>
+                            <list>
                                 <field name="turtle_foo"/>
-                            </tree>
+                            </list>
                             <kanban>
                                 <templates>
                                     <t t-name="kanban-box">
@@ -7832,10 +7832,10 @@ QUnit.module("Fields", (hooks) => {
                 <form>
                     <field name="int_field"/>
                     <field name="turtles">
-                        <tree editable="top">
+                        <list editable="top">
                             <field name="turtle_int"/>
                             <field name="turtle_foo"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             mockRPC(route, args) {
@@ -7888,13 +7888,13 @@ QUnit.module("Fields", (hooks) => {
 
             serverData.views = {
                 "turtle,false,list": `
-                    <tree editable="top">
+                    <list editable="top">
                         <field name="turtle_qux"/>
                         <field name="turtle_bar"/>
                         <field name="turtle_int"/>
                         <field name="turtle_foo"/>
                         <field name="partner_ids" widget="many2many_tags"/>
-                    </tree>`,
+                    </list>`,
             };
 
             await makeView({
@@ -7968,9 +7968,9 @@ QUnit.module("Fields", (hooks) => {
                     <form>
                         <field name="int_field"/>
                         <field name="turtles">
-                            <tree editable="top">
+                            <list editable="top">
                                 <field name="turtle_foo" required="1"/>
-                            </tree>
+                            </list>
                         </field>
                     </form>`,
                 resId: 1,
@@ -8015,10 +8015,10 @@ QUnit.module("Fields", (hooks) => {
                     <form>
                         <field name="int_field"/>
                         <field name="turtles">
-                            <tree editable="top">
+                            <list editable="top">
                                 <field name="turtle_int"/>
                                 <field name="turtle_foo" required='turtle_int == 0'/>
-                            </tree>
+                            </list>
                         </field>
                     </form>`,
                 resId: 1,
@@ -8062,9 +8062,9 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                     <form>
                         <field name="turtles">
-                            <tree editable="bottom">
+                            <list editable="bottom">
                                 <field name="turtle_trululu" required="1"/>
-                            </tree>
+                            </list>
                         </field>
                     </form>`,
                 async mockRPC(route, args) {
@@ -8112,9 +8112,9 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                     <form>
                         <field name="turtles">
-                            <tree editable="bottom">
+                            <list editable="bottom">
                                 <field name="turtle_trululu" required="1"/>
-                            </tree>
+                            </list>
                         </field>
                     </form>`,
                 async mockRPC(route, args) {
@@ -8165,9 +8165,9 @@ QUnit.module("Fields", (hooks) => {
                 <form>
                     <field name="datetime"/>
                     <field name="turtles">
-                        <tree editable="bottom">
+                        <list editable="bottom">
                             <field name="display_name"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             async mockRPC(route, args) {
@@ -8208,9 +8208,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="turtles">
-                        <tree editable="bottom">
+                        <list editable="bottom">
                             <field name="display_name"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -8257,9 +8257,9 @@ QUnit.module("Fields", (hooks) => {
                 <form>
                     <field name="foo"/>
                     <field name="timmy" context="{'key': foo, 'key2': 'hello'}">
-                        <tree editable="top">
+                        <list editable="top">
                             <field name="display_name"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             mockRPC(route, args) {
@@ -8316,10 +8316,10 @@ QUnit.module("Fields", (hooks) => {
                 <form>
                     <field name="foo"/>
                     <field name="p">
-                        <tree editable="top">
+                        <list editable="top">
                             <field name="display_name"/>
                             <field name="timmy" context="{'key': parent.foo, 'key2': 'hello'}" widget="many2many_tags"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             mockRPC(route, args) {
@@ -8379,14 +8379,14 @@ QUnit.module("Fields", (hooks) => {
                 <form>
                     <field name="foo"/>
                     <field name="p">
-                        <tree>
+                        <list>
                             <field name="display_name"/>
-                        </tree>
+                        </list>
                         <form>
                             <field name="p" context="{'parent_foo': parent.foo}">
-                                <tree>
+                                <list>
                                     <field name="display_name"/>
-                                </tree>
+                                </list>
                             </field>
                         </form>
                     </field>
@@ -8451,9 +8451,9 @@ QUnit.module("Fields", (hooks) => {
                     <form>
                         <field name="name"/>
                         <field name="p">
-                            <tree>
+                            <list>
                                 <field name="display_name"/>
-                            </tree>
+                            </list>
                             <form>
                                 <field name="display_name"/>
                                 <field name="timmy" widget="many2many_tags"/>
@@ -8514,11 +8514,11 @@ QUnit.module("Fields", (hooks) => {
                     <form>
                         <field name="name"/>
                         <field name="p" readonly="name == 'readonly'">
-                            <tree><field name="display_name"/></tree>
+                            <list><field name="display_name"/></list>
                             <form>
                                 <field name="display_name"/>
                                 <field name="p">
-                                    <tree><field name="display_name"/></tree>
+                                    <list><field name="display_name"/></list>
                                     <form><field name="display_name"/></form>
                                 </field>
                             </form>
@@ -8576,10 +8576,10 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="turtles">
-                        <tree editable="bottom">
+                        <list editable="bottom">
                             <field name="turtle_int"/>
                             <field name="turtle_foo" required="0"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -8609,15 +8609,15 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="p">
-                        <tree>
+                        <list>
                             <field name="display_name"/>
-                        </tree>
+                        </list>
                         <form>
                             <field name="display_name"/>
                             <field name="p">
-                                <tree editable="bottom">
+                                <list editable="bottom">
                                     <field name="display_name"/>
-                                </tree>
+                                </list>
                             </field>
                         </form>
                     </field>
@@ -8670,9 +8670,9 @@ QUnit.module("Fields", (hooks) => {
                 <form>
                     <sheet>
                         <field name="turtles">
-                            <tree editable="bottom">
+                            <list editable="bottom">
                                 <field name="turtle_foo"/>
-                            </tree>
+                            </list>
                         </field>
                     </sheet>
                 </form>`,
@@ -8715,9 +8715,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="turtles">
-                        <tree editable="bottom" limit="3">
+                        <list editable="bottom" limit="3">
                             <field name="turtle_foo"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -8749,9 +8749,9 @@ QUnit.module("Fields", (hooks) => {
                 <form>
                     <sheet>
                         <field name="turtles">
-                            <tree editable="top">
+                            <list editable="top">
                                 <field name="turtle_foo"/>
-                            </tree>
+                            </list>
                         </field>
                     </sheet>
                 </form>`,
@@ -8797,10 +8797,10 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                     <form>
                         <field name="p">
-                            <tree editable="bottom">
+                            <list editable="bottom">
                                 <field name="int_field"/>
                                 <field name="trululu"/>
-                            </tree>
+                            </list>
                         </field>
                     </form>`,
                 async mockRPC(route, args) {
@@ -8841,12 +8841,12 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                     <form>
                         <field name="p">
-                            <tree editable="bottom">
+                            <list editable="bottom">
                                 <field name="int_field"/>
                                 <button string="hello"/>
                                 <field name="qux"/>
                                 <field name="trululu"/>
-                            </tree>
+                            </list>
                         </field>
                     </form>`,
             async mockRPC(route, args) {
@@ -8896,9 +8896,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="p">
-                        <tree editable="bottom">
+                        <list editable="bottom">
                             <field name="bar"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
         });
@@ -8924,10 +8924,10 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                     <form>
                         <field name="p">
-                            <tree editable="bottom">
+                            <list editable="bottom">
                                 <field name="foo"/>
                                 <field name="int_field"/>
-                            </tree>
+                            </list>
                         </field>
                     </form>`,
             });
@@ -8960,10 +8960,10 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="p">
-                        <tree editable="bottom">
+                        <list editable="bottom">
                             <field name="display_name"/>
                             <field name="int_field"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -9006,9 +9006,9 @@ QUnit.module("Fields", (hooks) => {
                     <form>
                         <sheet>
                             <field name="p">
-                                <tree>
+                                <list>
                                     <field name="turtles"/>
-                                </tree>
+                                </list>
                             </field>
                         </sheet>
                     </form>`,
@@ -9059,9 +9059,9 @@ QUnit.module("Fields", (hooks) => {
                 <form>
                     <sheet>
                         <field name="turtles">
-                            <tree editable="bottom">
+                            <list editable="bottom">
                                 <field name="turtle_foo"/>
-                            </tree>
+                            </list>
                         </field>
                     </sheet>
                 </form>`,
@@ -9111,9 +9111,9 @@ QUnit.module("Fields", (hooks) => {
                 <form>
                     <sheet>
                         <field name="turtles">
-                            <tree editable="bottom">
+                            <list editable="bottom">
                                 <field name="turtle_foo"/>
-                            </tree>
+                            </list>
                         </field>
                     </sheet>
                 </form>`,
@@ -9160,9 +9160,9 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                     <form>
                         <field name="p">
-                            <tree>
+                            <list>
                                 <field name="turtles"/>
-                            </tree>
+                            </list>
                             <form>
                                 <field name="turtles" invisible="1"/>
                             </form>
@@ -9217,14 +9217,14 @@ QUnit.module("Fields", (hooks) => {
                     <sheet>
                         <field name="display_name"/>
                         <field name="p">
-                            <tree>
+                            <list>
                                 <field name="display_name"/>
-                            </tree>
+                            </list>
                             <form>
                                 <field name="turtles">
-                                    <tree>
+                                    <list>
                                         <field name="display_name"/>
-                                    </tree>
+                                    </list>
                                 </field>
                             </form>
                         </field>
@@ -9282,11 +9282,11 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="turtles">
-                        <tree limit="2">
+                        <list limit="2">
                             <field name="turtle_int" widget="handle"/>
                             <field name="turtle_foo"/>
                             <field name="partner_ids" invisible="1"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -9327,11 +9327,11 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                     <form>
                         <field name="turtles">
-                            <tree limit="2">
+                            <list limit="2">
                                 <field name="turtle_int" widget="handle"/>
                                 <field name="turtle_foo"/>
                                 <field name="partner_ids" invisible="1"/>
-                            </tree>
+                            </list>
                             <form/>
                         </field>
                     </form>`,
@@ -9379,10 +9379,10 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                     <form>
                         <field name="turtles">
-                            <tree editable="bottom">
+                            <list editable="bottom">
                                 <field name="turtle_int" widget="handle"/>
                                 <field name="turtle_foo"/>
-                            </tree>
+                            </list>
                         </field>
                     </form>`,
                 resId: 1,
@@ -9421,10 +9421,10 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                     <form>
                         <field name="turtles">
-                            <tree editable="top">
+                            <list editable="top">
                                 <field name="turtle_int" widget="handle"/>
                                 <field name="turtle_foo"/>
-                            </tree>
+                            </list>
                         </field>
                     </form>`,
                 resId: 1,
@@ -9464,10 +9464,10 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                     <form>
                         <field name="turtles">
-                            <tree>
+                            <list>
                                 <field name="turtle_int" widget="handle"/>
                                 <field name="turtle_foo"/>
-                            </tree>
+                            </list>
                             <form>
                                 <field name="turtle_int" invisible="1"/>
                                 <field name="turtle_foo"/>
@@ -9519,9 +9519,9 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                     <form>
                         <field name="turtles">
-                            <tree limit="2">
+                            <list limit="2">
                                 <field name="turtle_int" widget="handle"/>
-                            </tree>
+                            </list>
                             <form>
                                 <field name="turtle_int"/>
                             </form>
@@ -9549,9 +9549,9 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                     <form>
                         <field name="turtles">
-                            <tree limit="4">
+                            <list limit="4">
                                 <field name="turtle_int" widget="handle"/>
-                            </tree>
+                            </list>
                             <form>
                                 <field name="turtle_int"/>
                             </form>
@@ -9585,12 +9585,12 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                     <form>
                         <field name="turtles">
-                            <tree editable="bottom">
+                            <list editable="bottom">
                                 <field name="turtle_int" widget="handle"/>
                                 <field name="turtle_foo"/>
                                 <field name="not_required_product_id"/>
                                 <field name="turtle_description" widget="text"/>
-                            </tree>
+                            </list>
                         </field>
                     </form>`,
         });
@@ -9658,11 +9658,11 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="turtles">
-                        <tree editable="top" limit="2" default_order="turtle_foo">
+                        <list editable="top" limit="2" default_order="turtle_foo">
                             <field name="turtle_int"/>
                             <field name="turtle_foo" class="foo"/>
                             <field name="partner_ids" widget="many2many_tags"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             mockRPC(route, args) {
@@ -9722,10 +9722,10 @@ QUnit.module("Fields", (hooks) => {
                 <form>
                     <field name="foo"/>
                     <field name="turtles">
-                        <tree editable="top" limit="1">
+                        <list editable="top" limit="1">
                             <field name="turtle_int"/>
                             <field name="turtle_foo"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
                 mockRPC(route, { args, method }) {
@@ -9756,9 +9756,9 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                     <form>
                         <field name="turtles">
-                            <tree limit="2">
+                            <list limit="2">
                                 <field name="turtle_foo"/>
-                            </tree>
+                            </list>
                         </field>
                     </form>`,
                 context: { default_turtles: [1, 2, 3] },
@@ -9795,9 +9795,9 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                     <form>
                         <field name="turtles">
-                            <tree limit="3" editable="bottom">
+                            <list limit="3" editable="bottom">
                                 <field name="turtle_foo" required="1"/>
-                            </tree>
+                            </list>
                         </field>
                     </form>`,
                 resId: 1,
@@ -9831,10 +9831,10 @@ QUnit.module("Fields", (hooks) => {
             serverData.models.partner_type.records[0].partner_ids = [1, 2];
             serverData.views = {
                 "partner,false,list": `
-                    <tree>
+                    <list>
                         <field name="sequence" widget="handle"/>
                         <field name="display_name"/>
-                    </tree>`,
+                    </list>`,
             };
 
             await makeView({
@@ -9869,10 +9869,10 @@ QUnit.module("Fields", (hooks) => {
             };
             serverData.views = {
                 "turtle,false,list": `
-                    <tree editable="bottom">
+                    <list editable="bottom">
                         <field name="display_name"/>
                         <field name="turtle_int"/>
-                    </tree>`,
+                    </list>`,
             };
 
             await makeView({
@@ -9915,9 +9915,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="p">
-                        <tree>
+                        <list>
                             <field name="display_name" widget="char" class="do_not_remove_widget_char"/>
-                        </tree>
+                        </list>
                         <form>
                             <field name="display_name"/>
                         </form>
@@ -9967,9 +9967,9 @@ QUnit.module("Fields", (hooks) => {
                 <form>
                     <field name="display_name"/>
                     <field name="p" context="{'default_display_name': display_name}" >
-                        <tree>
+                        <list>
                             <field name="display_name"/>
-                        </tree>
+                        </list>
                         <form>
                             <field name="display_name"/>
                         </form>
@@ -10016,7 +10016,7 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="p">
-                        <tree editable="bottom">
+                        <list editable="bottom">
                             <control>
                                 <create string="Add food" context="" />
                                 <create string="Add pizza" context="{'default_display_name': 'pizza'}"/>
@@ -10025,7 +10025,7 @@ QUnit.module("Fields", (hooks) => {
                                 <create string="Add pasta" context="{'default_display_name': 'pasta'}"/>
                             </control>
                             <field name="display_name"/>
-                        </tree>
+                        </list>
                         <form>
                             <field name="display_name"/>
                         </form>
@@ -10084,7 +10084,7 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="p">
-                        <tree>
+                        <list>
                         <control>
                             <create string="Add food" context="" />
                             <create string="Add pizza" context="{'default_display_name': 'pizza'}" />
@@ -10093,7 +10093,7 @@ QUnit.module("Fields", (hooks) => {
                             <create string="Add pasta" context="{'default_display_name': 'pasta'}" />
                         </control>
                         <field name="display_name"/>
-                    </tree>
+                    </list>
                     <form>
                         <field name="display_name"/>
                         </form>
@@ -10149,13 +10149,13 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="p">
-                        <tree>
+                        <list>
                             <control>
                                 <create string="Create" context="{}" />
                                 <button string="Action Button" name="do_something" class="btn-link" type="object" context="{'parent_id': parent.id}"/>
                             </control>
                             <field name="display_name"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             mockRPC(route, args) {
@@ -10187,10 +10187,10 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="turtles">
-                        <tree>
+                        <list>
                             <field name="display_name"/>
                             <button string="Action Button" name="test_button" type="object" context="{'parent_name': parent.display_name}"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             mockRPC(route, args) {
@@ -10213,9 +10213,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="p">
-                        <tree>
+                        <list>
                             <field name="int_field" widget="handle"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
         });
@@ -10251,9 +10251,9 @@ QUnit.module("Fields", (hooks) => {
         serverData.models.partner.records[0].p = [2];
         serverData.views = {
             "partner_type,false,list": `
-                <tree>
+                <list>
                     <field name="display_name"/>
-                </tree>`,
+                </list>`,
         };
 
         await makeView({
@@ -10264,9 +10264,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="p">
-                        <tree>
+                        <list>
                             <field name="display_name"/>
-                        </tree>
+                        </list>
                         <form>
                             <button type="action" string="Set Timmy"/>
                             <field name="timmy"/>
@@ -10312,14 +10312,14 @@ QUnit.module("Fields", (hooks) => {
                             <field name="partner_ids">
                                 <form>
                                     <field name="turtles">
-                                        <tree editable="bottom">
+                                        <list editable="bottom">
                                             <field name="display_name"/>
-                                        </tree>
+                                        </list>
                                     </field>
                                 </form>
-                                <tree>
+                                <list>
                                     <field name="display_name"/>
-                                </tree>
+                                </list>
                             </field>
                         </group>
                     </sheet>
@@ -10379,10 +10379,10 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="turtles">
-                        <tree>
+                        <list>
                             <field name="display_name" widget="email"/>
                             <field name="turtle_foo" widget="url"/>
-                        </tree>
+                        </list>
                         <form/>
                     </field>
                 </form>`,
@@ -10417,9 +10417,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="turtles">
-                        <tree editable="top">
+                        <list editable="top">
                             <field name="turtle_trululu"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
         });
@@ -10474,9 +10474,9 @@ QUnit.module("Fields", (hooks) => {
                             <button name="post" type="object" string="Validate" class="oe_highlight"/>
                         </header>
                         <field name="turtles">
-                            <tree editable="bottom">
+                            <list editable="bottom">
                                 <field name="turtle_foo"/>
-                            </tree>
+                            </list>
                         </field>
                     </form>`,
             });
@@ -10497,9 +10497,9 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                     <form>
                         <field name="turtles">
-                            <tree editable="bottom">
+                            <list editable="bottom">
                                 <field name="turtle_foo" widget="text"/>
-                            </tree>
+                            </list>
                         </field>
                     </form>`,
                 resId: 1,
@@ -10534,12 +10534,12 @@ QUnit.module("Fields", (hooks) => {
                 <form>
                     <group>
                         <field name="turtles">
-                            <tree editable="bottom">
+                            <list editable="bottom">
                                 <control>
                                     <create string="Add soft shell turtle" context="{'default_turtle_foo': 'soft'}"/>
                                 </control>
                                 <field name="turtle_foo"/>
-                                </tree>
+                                </list>
                         </field>
                     </group>
                 </form>`,
@@ -10575,9 +10575,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                     <form>
                         <field name="turtles">
-                            <tree editable="bottom">
+                            <list editable="bottom">
                                 <field name="turtle_foo" required="1"/>
-                            </tree>
+                            </list>
                         </field>
                     </form>`,
             async mockRPC(route, args) {
@@ -10644,9 +10644,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="turtles">
-                        <tree editable="bottom">
+                        <list editable="bottom">
                             <field name="turtle_foo"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             async mockRPC(route, args) {
@@ -10702,9 +10702,9 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                     <form>
                         <field name="turtles">
-                            <tree editable="bottom">
+                            <list editable="bottom">
                                 <field name="turtle_foo"/>
-                            </tree>
+                            </list>
                         </field>
                     </form>`,
                 mockRPC(route, args) {
@@ -10743,10 +10743,10 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="p">
-                        <tree>
+                        <list>
                             <field name="datetime"/>
                             <field name="display_name"/>
-                        </tree>
+                        </list>
                         <form>
                             <field name="display_name"/>
                         </form>
@@ -10799,10 +10799,10 @@ QUnit.module("Fields", (hooks) => {
                             <page string="Partner page">
                                 <field name="bar"/>
                                 <field name="p">
-                                    <tree>
+                                    <list>
                                         <field name="foo" column_invisible="parent.product_id"/>
                                         <field name="bar" column_invisible="not parent.bar"/>
-                                    </tree>
+                                    </list>
                                 </field>
                             </page>
                         </notebook>
@@ -10850,10 +10850,10 @@ QUnit.module("Fields", (hooks) => {
                 <form>
                     <field name="product_id"/>
                     <field name="p">
-                        <tree>
+                        <list>
                             <field name="foo"/>
                             <button name="abc" string="Do it" class="some_button" column_invisible="not parent.product_id"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -10885,13 +10885,13 @@ QUnit.module("Fields", (hooks) => {
                     <field name="product_id"/>
                     <field name="trululu"/>
                     <field name="p">
-                        <tree>
+                        <list>
                             <button name="abc1" string="Do it 1" class="some_button1"/>
                             <button name="abc2" string="Do it 2" class="some_button2" column_invisible="parent.product_id"/>
                             <field name="foo"/>
                             <button name="abc3" string="Do it 3" class="some_button3" column_invisible="parent.product_id"/>
                             <button name="abc4" string="Do it 4" class="some_button4" column_invisible="parent.trululu"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -11037,7 +11037,7 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="turtles">
-                        <tree editable="bottom"><field name="turtle_int"/></tree>
+                        <list editable="bottom"><field name="turtle_int"/></list>
                     </field>
                 </form>`,
             resId: 1,
@@ -11110,10 +11110,10 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                     <form>
                         <field name="turtles">
-                            <tree editable="bottom">
+                            <list editable="bottom">
                                 <field name="turtle_foo"/>
                                 <field name="partner_ids" widget="many2many_tags"/>
-                            </tree>
+                            </list>
                         </field>
                     </form>`,
                 mockRPC(route, args) {
@@ -11164,10 +11164,10 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="turtles">
-                        <tree editable="bottom"><field name="name" required="1"/></tree>
+                        <list editable="bottom"><field name="name" required="1"/></list>
                     </field>
                     <field name="turtles2">
-                        <tree editable="bottom"><field name="name" required="1"/></tree>
+                        <list editable="bottom"><field name="name" required="1"/></list>
                     </field>
                 </form>`,
         });
@@ -11234,10 +11234,10 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="p">
-                        <tree editable="top">
+                        <list editable="top">
                             <field name="date"/>
                             <field name="foo"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
         });
@@ -11260,10 +11260,10 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="p">
-                        <tree editable="top">
+                        <list editable="top">
                             <field name="date"/>
                             <field name="foo"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -11295,10 +11295,10 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="p">
-                        <tree editable="top">
+                        <list editable="top">
                             <field name="date"/>
                             <field name="foo"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -11322,11 +11322,11 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="p">
-                        <tree editable="top">
+                        <list editable="top">
                             <field name="date" required="1"/>
                             <field name="foo"/>
                             <field name="int_field" optional="1"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
         });
@@ -11374,7 +11374,7 @@ QUnit.module("Fields", (hooks) => {
                     <form>
                         <field name="trululu"/>
                         <field name="p">
-                            <tree editable="top"><field name="product_id" required="1"/></tree>
+                            <list editable="top"><field name="product_id" required="1"/></list>
                         </field>
                     </form>`,
                 async mockRPC(route, args) {
@@ -11422,14 +11422,14 @@ QUnit.module("Fields", (hooks) => {
                     <form>
                         <field name="bar"/>
                         <field name="p">
-                            <tree>
+                            <list>
                                 <field name="turtles" widget="many2many_tags"/>
-                            </tree>
+                            </list>
                             <form>
                                 <field name="turtles">
-                                    <tree limit="2">
+                                    <list limit="2">
                                         <field name="display_name"/>
-                                    </tree>
+                                    </list>
                                 </field>
                             </form>
                         </field>
@@ -11465,14 +11465,14 @@ QUnit.module("Fields", (hooks) => {
                     <form>
                         <field name="bar"/>
                         <field name="p">
-                            <tree>
+                            <list>
                                 <field name="turtles" widget="many2many_tags"/>
-                            </tree>
+                            </list>
                             <form>
                                 <field name="turtles">
-                                    <tree editable="bottom">
+                                    <list editable="bottom">
                                         <field name="display_name"/>
-                                    </tree>
+                                    </list>
                                 </field>
                             </form>
                         </field>
@@ -11541,14 +11541,14 @@ QUnit.module("Fields", (hooks) => {
                     <form>
                         <field name="bar"/>
                         <field name="p">
-                            <tree>
+                            <list>
                                 <field name="turtles" widget="many2many_tags"/>
-                            </tree>
+                            </list>
                             <form>
                                 <field name="turtles">
-                                    <tree editable="bottom">
+                                    <list editable="bottom">
                                         <field name="turtle_foo" required="1"/>
-                                    </tree>
+                                    </list>
                                 </field>
                             </form>
                         </field>
@@ -11592,10 +11592,10 @@ QUnit.module("Fields", (hooks) => {
                 "partner,false,form": `
                 <form>
                     <field name="p">
-                        <tree editable="top">
+                        <list editable="top">
                             <field name="int_field" widget="handle"/>
                             <field name="display_name"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             };
@@ -11606,10 +11606,10 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                 <form>
                     <field name="p">
-                        <tree>
+                        <list>
                             <field name="display_name"/>
                             <field name="p" widget="many2many_tags"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
                 resId: 1,
@@ -11664,10 +11664,10 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="turtles">
-                        <tree editable="bottom">
+                        <list editable="bottom">
                             <field name="o2m"/>
                             <field name="turtle_bar"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             async mockRPC(route, args) {
@@ -11713,10 +11713,10 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="p">
-                        <tree editable="bottom">
+                        <list editable="bottom">
                             <field name="int_field"/>
                             <field name="color" widget="badge" decoration-warning="int_field == 9"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -11760,10 +11760,10 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                     <form>
                         <field name="turtles">
-                            <tree default_order="turtle_int">
+                            <list default_order="turtle_int">
                                 <field name="turtle_int" widget="handle"/>
                                 <field name="id"/>
-                            </tree>
+                            </list>
                         </field>
                     </form>`,
                 resId: 1,
@@ -11815,12 +11815,12 @@ QUnit.module("Fields", (hooks) => {
                 <form>
                     <sheet>
                         <field name="turtles" context="{'default_turtle_foo': 'hard', 'default_turtle_bar': True}">
-                            <tree editable="bottom">
+                            <list editable="bottom">
                                 <control>
                                     <create name="add_soft_shell_turtle" string="Add soft shell turtle" context="{'default_turtle_foo': 'soft', 'default_turtle_int': 2}"/>
                                 </control>
                                 <field name="turtle_foo"/>
-                            </tree>
+                            </list>
                         </field>
                     </sheet>
                 </form>`,
@@ -11900,10 +11900,10 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="p" >
-                        <tree default_order="int_field,id">
+                        <list default_order="int_field,id">
                             <field name="id"/>
                             <field name="int_field"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -11936,10 +11936,10 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="p" >
-                        <tree default_order="int_field,id" limit="4">
+                        <list default_order="int_field,id" limit="4">
                             <field name="id"/>
                             <field name="int_field"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -11965,12 +11965,12 @@ QUnit.module("Fields", (hooks) => {
             },
         };
         serverData.views = {
-            "partner,false,list": `<tree><field name="int_field"/></tree>`,
+            "partner,false,list": `<list><field name="int_field"/></list>`,
             "partner,false,search": `<search/>`,
             "partner,false,form": `
                 <form>
                     <field name="turtles">
-                        <tree><field name="turtle_foo"/></tree>
+                        <list><field name="turtle_foo"/></list>
                     </field>
                 </form>`,
         };
@@ -12002,7 +12002,7 @@ QUnit.module("Fields", (hooks) => {
     });
 
     QUnit.test(
-        "prevent the dialog in readonly x2many tree view with option no_open True",
+        "prevent the dialog in readonly x2many list view with option no_open True",
         async function (assert) {
             await makeView({
                 type: "form",
@@ -12012,9 +12012,9 @@ QUnit.module("Fields", (hooks) => {
                     <form>
                         <sheet>
                             <field name="turtles">
-                                <tree editable="bottom" no_open="True">
+                                <list editable="bottom" no_open="True">
                                     <field name="turtle_foo"/>
-                                </tree>
+                                </list>
                             </field>
                         </sheet>
                     </form>`,
@@ -12048,10 +12048,10 @@ QUnit.module("Fields", (hooks) => {
                         <sheet>
                             <group>
                                 <field name="turtles">
-                                    <tree editable="bottom" limit="1" decoration-muted="turtle_bar == False">
+                                    <list editable="bottom" limit="1" decoration-muted="turtle_bar == False">
                                         <field name="turtle_foo"/>
                                         <field name="turtle_bar"/>
-                                    </tree>
+                                    </list>
                                 </field>
                             </group>
                         </sheet>
@@ -12089,9 +12089,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="turtles">
-                        <tree editable="bottom" limit="2">
+                        <list editable="bottom" limit="2">
                             <field name="turtle_foo"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -12132,14 +12132,14 @@ QUnit.module("Fields", (hooks) => {
                         <form>
                             <field name="trululu"/>
                             <field name="turtles">
-                                <tree editable="bottom">
+                                <list editable="bottom">
                                     <field name="display_name"/>
-                                </tree>
+                                </list>
                             </field>
                         </form>
-                        <tree>
+                        <list>
                             <field name="display_name"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 17,
@@ -12202,9 +12202,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="turtles">
-                        <tree limit="1">
+                        <list limit="1">
                             <field name="display_name"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             async mockRPC(route, args) {
@@ -12250,10 +12250,10 @@ QUnit.module("Fields", (hooks) => {
                     <form>
                         <field name="bar"/>
                         <field name="p">
-                            <tree editable="bottom">
+                            <list editable="bottom">
                                 <field name="foo"/>
                                 <field name="int_field" column_invisible="not parent.bar"/>
-                            </tree>
+                            </list>
                         </field>
                     </form>`,
                 resId: 1,
@@ -12277,10 +12277,10 @@ QUnit.module("Fields", (hooks) => {
         serverData.models.partner.records[0].p = [2];
         serverData.views = {
             "partner,false,list": `
-                <tree>
+                <list>
                     <field name="foo" column_invisible="parent.product_id"/>
                     <field name="bar" column_invisible="not parent.bar"/>
-                </tree>`,
+                </list>`,
         };
 
         await makeView({
@@ -12337,10 +12337,10 @@ QUnit.module("Fields", (hooks) => {
             serverData.models.partner.records[0].p = [2];
             serverData.views = {
                 "partner,false,list": `
-                    <tree editable="top">
+                    <list editable="top">
                         <field name="foo" optional="show"/>
                         <field name="bar" optional="hide"/>
-                    </tree>`,
+                    </list>`,
             };
             await makeView({
                 type: "form",
@@ -12445,10 +12445,10 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="p">
-                        <tree>
+                        <list>
                             <field name="id"/>
                             <field name="trululu"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
         });
@@ -12487,10 +12487,10 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                     <form>
                         <field name="p">
-                            <tree>
+                            <list>
                                 <field name="datetime"/>
                                 <field name="display_name"/>
-                            </tree>
+                            </list>
                             <form>
                                 <field name="display_name"/>
                             </form>
@@ -12519,10 +12519,10 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                     <form>
                         <field name="p">
-                            <tree>
+                            <list>
                                 <field name="turtles"/>
                                 <field name="display_name"/>
-                            </tree>
+                            </list>
                             <form>
                                 <field name="display_name"/>
                             </form>
@@ -12565,9 +12565,9 @@ QUnit.module("Fields", (hooks) => {
                             <notebook>
                                 <page string="Partner page">
                                     <field name="turtles">
-                                        <tree editable="bottom">
+                                        <list editable="bottom">
                                             <field name="turtle_foo"/>
-                                        </tree>
+                                        </list>
                                     </field>
                                 </page>
                             </notebook>
@@ -12608,10 +12608,10 @@ QUnit.module("Fields", (hooks) => {
                             <notebook>
                                 <page string="Partner page">
                                     <field name="turtles">
-                                        <tree editable="bottom">
+                                        <list editable="bottom">
                                             <field name="turtle_foo"/>
                                             <field name="turtle_description"/>
-                                        </tree>
+                                        </list>
                                     </field>
                                 </page>
                             </notebook>
@@ -12673,10 +12673,10 @@ QUnit.module("Fields", (hooks) => {
                             <notebook>
                                 <page string="Partner page">
                                     <field name="turtles">
-                                        <tree editable="bottom">
+                                        <list editable="bottom">
                                             <field name="turtle_foo"/>
                                             <field name="turtle_description"/>
-                                        </tree>
+                                        </list>
                                     </field>
                                 </page>
                             </notebook>
@@ -12750,10 +12750,10 @@ QUnit.module("Fields", (hooks) => {
                             <notebook>
                                 <page string="Partner page">
                                     <field name="turtles">
-                                        <tree>
+                                        <list>
                                             <field name="turtle_foo"/>
                                             <field name="turtle_description"/>
-                                        </tree>
+                                        </list>
                                         <form>
                                             <group>
                                                 <field name="turtle_foo"/>
@@ -12823,10 +12823,10 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                     <form>
                         <field name="turtles">
-                            <tree editable="top">
+                            <list editable="top">
                                 <field name="turtle_foo"/>
                                 <field name="turtle_trululu"/>
-                            </tree>
+                            </list>
                         </field>
                     </form>`,
                 resId: 1,
@@ -12860,13 +12860,13 @@ QUnit.module("Fields", (hooks) => {
                     <form>
                         <field name="display_name"/>
                         <field name="p">
-                            <tree editable="bottom">
+                            <list editable="bottom">
                                 <control>
                                     <create string="Custom 1" context="{'default_foo': '1'}"/>
                                     <create string="Custom 2" context="{'default_foo': '2'}"/>
                                 </control>
                                 <field name="foo"/>
-                            </tree>
+                            </list>
                         </field>
                         <field name="int_field"/>
                     </form>`,
@@ -12960,9 +12960,9 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                     <form>
                         <field name="turtles">
-                            <tree editable="bottom">
+                            <list editable="bottom">
                                 <field name="turtle_int" />
-                            </tree>
+                            </list>
                         </field>
                     </form>`,
                 resId: 1,
@@ -12985,10 +12985,10 @@ QUnit.module("Fields", (hooks) => {
             arch: /* xml */ `
                 <form>
                     <field name="p">
-                        <tree editable="bottom">
+                        <list editable="bottom">
                             <field name="display_name" required="1" />
                             <field name="int_field" readonly="1" />
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -13056,14 +13056,14 @@ QUnit.module("Fields", (hooks) => {
                 <form string="Turtles">
                     <field string="Product" name="turtle_trululu"/>
                     <field readonly="1" string="Related field" name="product_ids">
-                        <tree>
+                        <list>
                             <field widget="many2many_tags" name="product_partner_ids"/>
-                        </tree>
+                        </list>
                     </field>
                     <field readonly="1" string="Second related field" name="user_ids">
-                        <tree>
+                        <list>
                             <field widget="many2many_tags" name="partner_ids"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -13100,13 +13100,13 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                 <form>
                     <field name="p">
-                        <tree>
+                        <list>
                             <field name="turtles">
-                                <tree>
+                                <list>
                                     <field name="turtle_foo"/>
-                                </tree>
+                                </list>
                             </field>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
                 resId: 1,
@@ -13118,7 +13118,7 @@ QUnit.module("Fields", (hooks) => {
     QUnit.test("open a one2many record containing a one2many", async (assert) => {
         serverData.views = {
             "partner,1234,form": `<form><field name="turtles" >
-                <tree><field name="display_name" /></tree></field>
+                <list><field name="display_name" /></list></field>
                 </form>`,
         };
 
@@ -13138,7 +13138,7 @@ QUnit.module("Fields", (hooks) => {
             type: "form",
             arch: `<form>
                 <field name="p" context="{ 'form_view_ref': 1234 }">
-                    <tree><field name="display_name" /></tree>
+                    <list><field name="display_name" /></list>
                 </field>
             </form>`,
             serverData,
@@ -13168,9 +13168,9 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                 <form>
                     <field name="p">
-                        <tree editable="bottom">
+                        <list editable="bottom">
                             <field name="display_name"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
                 resId: 1,
@@ -13257,9 +13257,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="turtles">
-                        <tree>
+                        <list>
                             <field name="turtle_bar" widget="boolean_toggle"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -13281,10 +13281,10 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                     <form>
                         <field name="p" invisible="1">
-                            <tree>
+                            <list>
                                 <field name="int_field"/>
                                 <field name="trululu"/>
-                            </tree>
+                            </list>
                         </field>
                     </form>`,
             mockRPC(route, args) {
@@ -13347,10 +13347,10 @@ QUnit.module("Fields", (hooks) => {
                     <form>
                         <field name="foo"/>
                         <field name="turtles" invisible="1">
-                            <tree>
+                            <list>
                                 <field name="turtle_foo"/>
                                 <field name="turtle_int"/>
-                            </tree>
+                            </list>
                         </field>
                     </form>`,
             mockRPC(route, args) {
@@ -13392,9 +13392,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                     <form>
                         <field name="turtles">
-                            <tree>
+                            <list>
                                 <field name="display_name"/>
-                            </tree>
+                            </list>
                         </field>
                     </form>`,
             resId: 1,
@@ -13414,10 +13414,10 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                     <form>
                         <field name="p">
-                            <tree editable="bottom">
+                            <list editable="bottom">
                                 <field name="display_name" required="1"/>
                                 <field name="int_field"/>
-                            </tree>
+                            </list>
                         </field>
                     </form>`,
                 resId: 1,
@@ -13461,15 +13461,15 @@ QUnit.module("Fields", (hooks) => {
                 <form>
                     <field name="int_field"/>
                     <field name="p">
-                        <tree editable="bottom" limit="1" default_order="display_name">
+                        <list editable="bottom" limit="1" default_order="display_name">
                             <field name="display_name" />
                             <field name="int_field" />
                             <field name="turtles">
-                                <tree editable="bottom">
+                                <list editable="bottom">
                                     <field name="turtle_int"/>
-                                </tree>
+                                </list>
                             </field>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -13501,9 +13501,9 @@ QUnit.module("Fields", (hooks) => {
                     <group>
                         <field name="int_field"/>
                         <field name="p">
-                            <tree limit="2">
+                            <list limit="2">
                                 <field name="display_name"/>
-                            </tree>
+                            </list>
                         </field>
                     </group>
                 </form>`,
@@ -13541,10 +13541,10 @@ QUnit.module("Fields", (hooks) => {
             arch: /* xml */ `
                 <form>
                     <field name="turtles">
-                        <tree editable="bottom" create="false" delete="false">
+                        <list editable="bottom" create="false" delete="false">
                             <field name="display_name" />
                             <field name="turtle_foo" />
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -13575,9 +13575,9 @@ QUnit.module("Fields", (hooks) => {
             arch: /* xml */ `
                 <form>
                     <field name="p">
-                        <tree>
+                        <list>
                             <field name="display_name"/>
-                        </tree>
+                        </list>
                         <form>
                             <field name="p">
                                 <kanban class="o-custom-class">
@@ -13629,9 +13629,9 @@ QUnit.module("Fields", (hooks) => {
             arch: /* xml */ `
                 <form>
                     <field name="p">
-                        <tree>
+                        <list>
                             <field name="display_name"/>
-                        </tree>
+                        </list>
                         <form>
                             <field name="p" mode="kanban" context="{ 'kanban_view_ref': 1234 }" />
                         </form>
@@ -13708,14 +13708,14 @@ QUnit.module("Fields", (hooks) => {
             arch: /* xml */ `
                 <form>
                     <field name="p">
-                        <tree>
+                        <list>
                             <field name="display_name"/>
-                        </tree>
+                        </list>
                         <form>
                             <field name="p">
-                                <tree editable="1" class="o-custom-class">
+                                <list editable="1" class="o-custom-class">
                                     <field name="display_name"/>
-                                </tree>
+                                </list>
                             </field>
                         </form>
                     </field>
@@ -13739,9 +13739,9 @@ QUnit.module("Fields", (hooks) => {
     QUnit.test("list one2many in opened view form (with _view_ref)", async function (assert) {
         serverData.views = {
             "partner,1234,list": /* xml */ `
-                <tree editable="1" class="o-custom-class">
+                <list editable="1" class="o-custom-class">
                     <field name="display_name"/>
-                </tree>
+                </list>
             `,
         };
         serverData.models.partner.records[0].p = [1];
@@ -13752,9 +13752,9 @@ QUnit.module("Fields", (hooks) => {
             arch: /* xml */ `
                 <form>
                     <field name="p">
-                        <tree>
+                        <list>
                             <field name="display_name"/>
-                        </tree>
+                        </list>
                         <form>
                             <field name="p" mode="list" context="{ 'list_view_ref': 1234 }" />
                         </form>
@@ -13784,9 +13784,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="p">
-                        <tree>
+                        <list>
                             <field name="display_name"/>
-                        </tree>
+                        </list>
                         <form>
                             <field name="display_name" required="1"/>
                         </form>
@@ -13850,10 +13850,10 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="o2m">
-                        <tree>
+                        <list>
                             <field name="display_name"/>
                             <field name="color" />
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             mockRPC(route, args) {
@@ -13893,9 +13893,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="p">
-                        <tree editable="bottom" >
+                        <list editable="bottom" >
                             <field name="display_name"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             resId: 1,
@@ -13946,14 +13946,14 @@ QUnit.module("Fields", (hooks) => {
             },
         };
         serverData.views = {
-            "partner,false,list": `<tree><field name="int_field"/></tree>`,
+            "partner,false,list": `<list><field name="int_field"/></list>`,
             "partner,false,search": `<search/>`,
             "partner,false,form": `
                 <form>
                     <field name="p">
-                        <tree editable="bottom">
+                        <list editable="bottom">
                             <field name="display_name"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
         };
@@ -14014,9 +14014,9 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                     <form>
                         <field name="turtles">
-                            <tree>
+                            <list>
                                 <field name="display_name" required="1"/>
-                            </tree>
+                            </list>
                         </field>
                     </form>`,
                 async mockRPC(route, args) {
@@ -14064,10 +14064,10 @@ QUnit.module("Fields", (hooks) => {
                 <form>
                     <field name="foo"/>
                     <field name="p">
-                        <tree>
+                        <list>
                             <field name="display_name" required="1"/>
                             <field name="p" invisible="1"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             async mockRPC(route, args) {
@@ -14155,15 +14155,15 @@ QUnit.module("Fields", (hooks) => {
                     <group>
                         <field name="int_field"/>
                         <field name="p">
-                            <tree>
+                            <list>
                                 <field name="foo"/>
-                            </tree>
+                            </list>
                             <form>
                                 <field name="turtles">
-                                    <tree editable="bottom">
+                                    <list editable="bottom">
                                         <field name="turtle_foo"/>
                                         <field name="partner_ids" widget="many2many_tags"/>
-                                    </tree>
+                                    </list>
                                 </field>
                             </form>
                         </field>
@@ -14250,9 +14250,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="p" >
-                        <tree editable="bottom">
+                        <list editable="bottom">
                             <field name="foo"/>
-                        </tree>
+                        </list>
                     </field>
                     <field name="display_name" readonly="p"/>
                     <field name="int_field" required="p"/>
@@ -14290,9 +14290,9 @@ QUnit.module("Fields", (hooks) => {
                 <form>
                     <field name="int_field"/>
                     <field name="p">
-                        <tree editable="top">
+                        <list editable="top">
                             <field name="turtles" widget="many2many_tags" context="{'x': parent.int_field, 'y': 2}"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
                 mockRPC(route, args) {
@@ -14325,10 +14325,10 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="turtles">
-                        <tree editable="top" default_order="turtle_int,id">
+                        <list editable="top" default_order="turtle_int,id">
                             <field name="turtle_int" widget="handle"/>
                             <field name="turtle_foo"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             mockRPC(route, args) {
@@ -14375,9 +14375,9 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="turtles">
-                        <tree editable="top">
+                        <list editable="top">
                             <field name="turtle_foo"/>
-                        </tree>
+                        </list>
                     </field>
                 </form>`,
             mockRPC(route, args) {
@@ -14435,9 +14435,9 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                 <form>
                     <field name="turtles" widget="custom">
-                        <tree editable="top">
+                        <list editable="top">
                             <field name="turtle_foo"/>
-                        </tree>
+                        </list>
                         <form>
                             <field name="display_name" />
                         </form>
@@ -14555,7 +14555,7 @@ QUnit.module("Fields", (hooks) => {
                     <form>
                         <field name="bar"/>
                         <field name="turtles">
-                            <tree><field name="display_name"/></tree>
+                            <list><field name="display_name"/></list>
                         </field>
                     </form>`,
                 mockRPC(route, args) {
@@ -14597,7 +14597,7 @@ QUnit.module("Fields", (hooks) => {
                     <form>
                         <field name="bar"/>
                         <field name="turtles">
-                            <tree><field name="display_name"/></tree>
+                            <list><field name="display_name"/></list>
                         </field>
                     </form>`,
                 resId: 1,
@@ -14644,9 +14644,9 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                     <form>
                         <field name="turtles">
-                            <tree editable="bottom">
+                            <list editable="bottom">
                                 <field name="display_name"/>
-                            </tree>
+                            </list>
                         </field>
                     </form>`,
                 resId: 1,

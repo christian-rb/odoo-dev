@@ -155,7 +155,7 @@ QUnit.module("ViewDialogs", (hooks) => {
         serverData.views = {
             "partner,false,form": `
                     <form string="Partner">
-                        <field name="poney_ids"><tree editable="top"><field name="display_name"/></tree></field>
+                        <field name="poney_ids"><list editable="top"><field name="display_name"/></list></field>
                         <footer><button string="Custom Button" type="object" class="my_button"/></footer>
                     </form>
                 `,
@@ -196,12 +196,12 @@ QUnit.module("ViewDialogs", (hooks) => {
             "instrument,false,form": `
                         <form>
                             <field name="name"/>
-                            <field name="badassery" widget="many2many" context="{'tree_view_ref': 'some_other_tree_view'}"/>
+                            <field name="badassery" widget="many2many" context="{'list_view_ref': 'some_other_tree_view'}"/>
                         </form>`,
             "badassery,false,list": `
-                        <tree>
+                        <list>
                             <field name="level"/>
-                        </tree>`,
+                        </list>`,
         };
 
         await makeViewInDialog({
@@ -212,7 +212,7 @@ QUnit.module("ViewDialogs", (hooks) => {
             arch: `
                 <form>
                     <field name="name"/>
-                    <field name="instrument" context="{'tree_view_ref': 'some_tree_view'}"/>
+                    <field name="instrument" context="{'list_view_ref': 'some_tree_view'}"/>
                 </form>`,
             mockRPC: function (route, args) {
                 if (args.method === "get_formview_id") {
@@ -223,7 +223,7 @@ QUnit.module("ViewDialogs", (hooks) => {
                         args.kwargs.context,
                         {
                             lang: "en",
-                            tree_view_ref: "some_tree_view",
+                            list_view_ref: "some_tree_view",
                             tz: "taht",
                             uid: 7,
                         },
@@ -235,7 +235,7 @@ QUnit.module("ViewDialogs", (hooks) => {
                         args.kwargs.context,
                         {
                             lang: "en",
-                            tree_view_ref: "some_other_tree_view",
+                            list_view_ref: "some_other_tree_view",
                             tz: "taht",
                             uid: 7,
                         },

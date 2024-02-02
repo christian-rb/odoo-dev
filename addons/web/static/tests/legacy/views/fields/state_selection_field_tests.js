@@ -227,10 +227,10 @@ QUnit.module("Fields", (hooks) => {
             resModel: "partner",
             serverData,
             arch: `
-                <tree>
+                <list>
                     <field name="graph_type" widget="state_selection" options="{'hide_label': True}"/>
                     <field name="selection" widget="state_selection" options="{'hide_label': False}"/>
-                </tree>`,
+                </list>`,
         });
 
         assert.containsN(
@@ -274,10 +274,10 @@ QUnit.module("Fields", (hooks) => {
             resModel: "partner",
             serverData,
             arch: `
-                <tree editable="bottom">
+                <list editable="bottom">
                     <field name="foo"/>
                     <field name="selection" widget="state_selection"/>
-                </tree>`,
+                </list>`,
         });
 
         assert.containsN(

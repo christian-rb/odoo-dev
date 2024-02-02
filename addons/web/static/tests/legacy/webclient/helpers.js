@@ -338,9 +338,9 @@ export function getActionManagerServerData() {
             '<div class="oe_kanban_global_click"><field name="foo"/></div>' +
             "</t></templates></kanban>",
         // list views
-        "partner,false,list": '<tree><field name="foo"/></tree>',
-        "partner,2,list": '<tree limit="3"><field name="foo"/></tree>',
-        "pony,false,list": '<tree><field name="name"/></tree>',
+        "partner,false,list": '<list><field name="foo"/></list>',
+        "partner,2,list": '<list limit="3"><field name="foo"/></list>',
+        "pony,false,list": '<list><field name="name"/></list>',
         // form views
         "partner,false,form":
             "<form>" +

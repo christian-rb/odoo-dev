@@ -544,9 +544,9 @@ QUnit.module("Views", ({ beforeEach }) => {
     QUnit.test("add a filter with the search more dialog", async (assert) => {
         serverData.views["partner,false,search"] = `<search></search>`;
         serverData.views["partner,false,list"] = `
-            <tree>
+            <list>
                 <field name="display_name" />
-            </tree>
+            </list>
         `;
         serverData.models.partner.records.push(
             { id: 5, display_name: "foo partner 5" },
@@ -5481,10 +5481,10 @@ QUnit.module("Views", ({ beforeEach }) => {
 
             serverData.views = {
                 "event,false,calendar": `<calendar date_start="start" date_stop="stop" mode="day"/>`,
-                "event,false,list": `<tree sample="1">
+                "event,false,list": `<list sample="1">
                     <field name="start"/>
                     <field name="stop"/>
-                </tree>`,
+                </list>`,
 
                 "event,false,search": `<search />`,
             };
