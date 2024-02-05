@@ -45,8 +45,8 @@ test("roundPrecision", () => {
     expect(roundPrecision(1.0, 0.00000001)).toBe(1);
     expect(roundPrecision(0.5, 1)).toBe(1);
     expect(roundPrecision(-0.5, 1)).toBe(-1);
-    expect(roundPrecision(2.6745, 0.001)).toBe(2.6750000000000003);
-    expect(roundPrecision(-2.6745, 0.001)).toBe(-2.6750000000000003);
+    expect(roundPrecision(2.6745, 0.001)).toBe(2.675);
+    expect(roundPrecision(-2.6745, 0.001)).toBe(-2.675);
     expect(roundPrecision(2.6744, 0.001)).toBe(2.674);
     expect(roundPrecision(-2.6744, 0.001)).toBe(-2.674);
     expect(roundPrecision(0.0004, 0.001)).toBe(0);
@@ -55,7 +55,7 @@ test("roundPrecision", () => {
     expect(roundPrecision(-357.4555, 0.001)).toBe(-357.456);
     expect(roundPrecision(457.4554, 0.001)).toBe(457.455);
     expect(roundPrecision(-457.4554, 0.001)).toBe(-457.455);
-    expect(roundPrecision(-457.4554, 0.05)).toBe(-457.45000000000005);
+    expect(roundPrecision(-457.4554, 0.05)).toBe(-457.45);
     expect(roundPrecision(457.444, 0.5)).toBe(457.5);
     expect(roundPrecision(457.3, 5)).toBe(455);
     expect(roundPrecision(457.5, 5)).toBe(460);
@@ -74,8 +74,8 @@ test("roundDecimals", () => {
     expect(roundDecimals(1.0, 8)).toBe(1);
     expect(roundDecimals(0.5, 0)).toBe(1);
     expect(roundDecimals(-0.5, 0)).toBe(-1);
-    expect(roundDecimals(2.6745, 3)).toBe(2.6750000000000003);
-    expect(roundDecimals(-2.6745, 3)).toBe(-2.6750000000000003);
+    expect(roundDecimals(2.6745, 3)).toBe(2.675);
+    expect(roundDecimals(-2.6745, 3)).toBe(-2.675);
     expect(roundDecimals(2.6744, 3)).toBe(2.674);
     expect(roundDecimals(-2.6744, 3)).toBe(-2.674);
     expect(roundDecimals(0.0004, 3)).toBe(0);

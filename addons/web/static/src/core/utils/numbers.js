@@ -45,9 +45,18 @@ export function roundPrecision(value, precision) {
     } else if (!precision || precision < 0) {
         precision = 1;
     }
-    let normalizedValue = value / precision;
+    let roundingFactor = precision;
+    let normalize = (val) => val / roundingFactor;
+    let denormalize = (val) => val * roundingFactor;
+    // inverting small rounding factors reduces rounding errors
+    if (roundingFactor < 1) {
+        const invertConst = 1795630070.0;  // accurately inverts up to {1,2,5}e-24
+        roundingFactor = invertConst / (invertConst * roundingFactor);
+        [normalize, denormalize] = [denormalize, normalize];
+    }
+    let normalizedValue = normalize(value);
     const epsilonMagnitude = Math.log2(Math.abs(normalizedValue));
-    const epsilon = Math.pow(2, epsilonMagnitude - 52);
+    const epsilon = Math.pow(2, epsilonMagnitude - 50);
     normalizedValue += normalizedValue >= 0 ? epsilon : -epsilon;
 
     /**
@@ -59,7 +68,7 @@ export function roundPrecision(value, precision) {
      */
     const sign = normalizedValue < 0 ? -1.0 : 1.0;
     const roundedValue = sign * Math.round(Math.abs(normalizedValue));
-    return roundedValue * precision;
+    return denormalize(roundedValue);
 }
 
 export function roundDecimals(value, decimals) {

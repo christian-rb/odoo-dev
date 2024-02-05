@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from __future__ import print_function
 import builtins
 import math
 
@@ -26,11 +24,15 @@ def _float_check_precision(precision_digits=None, precision_rounding=None):
     assert (precision_digits is not None or precision_rounding is not None) and \
         not (precision_digits and precision_rounding),\
          "exactly one of precision_digits and precision_rounding must be specified"
-    assert precision_rounding is None or precision_rounding > 0,\
-         "precision_rounding must be positive, got %s" % precision_rounding
     if precision_digits is not None:
+        assert math.trunc(precision_digits) == precision_digits >= 0,\
+            f"""precision_digits must be a non-negative int, got {precision_digits}
+                perhaps you meant to use precision_rounding"""
         return 10 ** -precision_digits
-    return precision_rounding
+    else:
+        assert precision_rounding > 0,\
+            "precision_rounding must be positive, got %s" % precision_rounding
+        return precision_rounding
 
 def float_round(value, precision_digits=None, precision_rounding=None, rounding_method='HALF-UP'):
     """Return ``value`` rounded to ``precision_digits`` decimal digits,
@@ -63,6 +65,19 @@ def float_round(value, precision_digits=None, precision_rounding=None, rounding_
     # In order to easily support rounding to arbitrary 'steps' (e.g. coin values),
     # we normalize the value before rounding it as an integer, and de-normalize
     # after rounding: e.g. float_round(1.3, precision_rounding=.5) == 1.5
+    def normalize(val):
+        return val / rounding_factor
+    def denormalize(val):
+        return val * rounding_factor
+
+    # inverting small rounding factors reduces rounding errors
+    if rounding_factor < 1:
+        invert_const = 1795630070.0  # accurately inverts up to {1,2,5}e-24
+        rounding_factor = invert_const / (invert_const * rounding_factor)
+        normalize, denormalize = denormalize, normalize
+
+    normalized_value = normalize(value)
+
     # Due to IEE754 float/double representation limits, the approximation of the
     # real value may be slightly below the tie limit, resulting in an error of
     # 1 unit in the last place (ulp) after rounding.
@@ -71,47 +86,31 @@ def float_round(value, precision_digits=None, precision_rounding=None, rounding_
     # the order of magnitude of the value, to tip the tie-break in the right
     # direction.
     # Credit: discussion with OpenERP community members on bug 882036
-
-    normalized_value = value / rounding_factor # normalize
-    sign = math.copysign(1.0, normalized_value)
     epsilon_magnitude = math.log(abs(normalized_value), 2)
-    epsilon = 2**(epsilon_magnitude-52)
+    # `epsilon_magnitude - 52` would be the minimal size, but we increase it to make it more
+    # tolerant of inaccuracies accumulated after multiple floating point operations
+    epsilon = 2**(epsilon_magnitude - 50)
 
-    # TIE-BREAKING: UP/DOWN (for ceiling[resp. flooring] operations)
-    # When rounding the value up[resp. down], we instead subtract[resp. add] the epsilon value
-    # as the approximation of the real value may be slightly *above* the
-    # tie limit, this would result in incorrectly rounding up[resp. down] to the next number
-    # The math.ceil[resp. math.floor] operation is applied on the absolute value in order to
-    # round "away from zero" and not "towards infinity", then the sign is
-    # restored.
+    match rounding_method:
+        case 'HALF-UP':
+            # HALF-UP tie-breaking rules: 0.5 rounds away from 0
+            result = round(normalized_value + math.copysign(epsilon, normalized_value))
+        case 'HALF-DOWN':
+            # HALF-DOWN tie-breaking rules: 0.5 rounds towards 0
+            result = round(normalized_value - math.copysign(epsilon, normalized_value))
+        case 'HALF-EVEN':
+            # HALF-EVEN tie-breaking rules: 0.5 rounds towards closest even number
+            result = math.copysign(builtins.round(normalized_value), normalized_value)
+        case 'UP':
+            # UP tie-breaking rules: round to number furthest from zero
+            result = math.trunc(normalized_value + math.copysign(1 - epsilon, normalized_value))
+        case 'DOWN':
+            # DOWN tie-breaking rules: round to number closest to zero
+            result = math.trunc(normalized_value + math.copysign(epsilon, normalized_value))
+        case _:
+            raise ValueError(f"Invalid rounding method: {rounding_method}")
 
-    if rounding_method == 'UP':
-        normalized_value -= sign*epsilon
-        rounded_value = math.ceil(abs(normalized_value)) * sign
-
-    elif rounding_method == 'DOWN':
-        normalized_value += sign*epsilon
-        rounded_value = math.floor(abs(normalized_value)) * sign
-
-    # TIE-BREAKING: HALF-EVEN
-    # We want to apply HALF-EVEN tie-breaking rules, i.e. 0.5 rounds towards closest even number.
-    elif rounding_method == 'HALF-EVEN':
-        rounded_value = math.copysign(builtins.round(normalized_value), normalized_value)
-
-    # TIE-BREAKING: HALF-DOWN
-    # We want to apply HALF-DOWN tie-breaking rules, i.e. 0.5 rounds towards 0.
-    elif rounding_method == 'HALF-DOWN':
-        normalized_value -= math.copysign(epsilon, normalized_value)
-        rounded_value = round(normalized_value)
-
-    # TIE-BREAKING: HALF-UP (for normal rounding)
-    # We want to apply HALF-UP tie-breaking rules, i.e. 0.5 rounds away from 0.
-    else:
-        normalized_value += math.copysign(epsilon, normalized_value)
-        rounded_value = round(normalized_value)     # round to integer
-
-    result = rounded_value * rounding_factor # de-normalize
-    return result
+    return denormalize(result)
 
 def float_is_zero(value, precision_digits=None, precision_rounding=None):
     """Returns true if ``value`` is small enough to be treated as

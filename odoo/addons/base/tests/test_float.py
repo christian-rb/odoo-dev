@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from math import log10
@@ -107,8 +106,8 @@ class TestFloatPrecision(TransactionCase):
         try_round(-2.6744, '-2.674', method='HALF-EVEN')
         try_round(0.0004, '0.000', method='HALF-EVEN')
         try_round(-0.0004, '-0.000', method='HALF-EVEN')
-        try_round(357.4555, '357.455', method='HALF-EVEN')
-        try_round(-357.4555, '-357.455', method='HALF-EVEN')
+        try_round(357.4555, '357.456', method='HALF-EVEN')
+        try_round(-357.4555, '-357.456', method='HALF-EVEN')
         try_round(457.4554, '457.455', method='HALF-EVEN')
         try_round(-457.4554, '-457.455', method='HALF-EVEN')
 

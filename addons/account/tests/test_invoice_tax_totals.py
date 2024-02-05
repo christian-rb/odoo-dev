@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 from odoo.fields import Command
 from odoo.tests import tagged
@@ -661,10 +659,10 @@ class TestTaxTotals(AccountTestInvoicingCommon):
             (-500, self.tax_10),
         ]
         run_case('round_per_line', lines, [15.45])
-        # 5.445 + 60 - 50 = 15.444999999999993 ~= 15.44
+        # 5.445 + 60 - 50 = 15.444999999999993 ~= 15.45
         # 5.445 - 50 + 60 = 15.445 ~= 15.45
         # 5.445 + 10 = 15.445 ~= 15.45
-        run_case('round_globally', lines, [15.44])
+        run_case('round_globally', lines, [15.45])
 
         lines = [
             (94.7, self.tax_23_1),
