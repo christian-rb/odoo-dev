@@ -219,6 +219,7 @@ class Task(models.Model):
     subtask_count = fields.Integer("Sub-task Count", compute='_compute_subtask_count')
     closed_subtask_count = fields.Integer("Closed Sub-tasks Count", compute='_compute_subtask_count')
     project_privacy_visibility = fields.Selection(related='project_id.privacy_visibility', string="Project Visibility")
+    subtask_completion_percentage = fields.Float(compute="_compute_task_completion_percentage", string="Completed sub-tasks percentage associated with this sale")
     # Computed field about working time elapsed between record creation and assignation/closing.
     working_hours_open = fields.Float(compute='_compute_elapsed', string='Working Hours to Assign', digits=(16, 2), store=True, aggregator="avg")
     working_hours_close = fields.Float(compute='_compute_elapsed', string='Working Hours to Close', digits=(16, 2), store=True, aggregator="avg")
@@ -1960,3 +1961,8 @@ class Task(models.Model):
                 group['personal_stage_type_id_count'] = group.pop('personal_stage_type_ids_count', 0)
             return result
         return super().read_group(domain, fields, groupby, offset, limit, orderby, lazy)
+
+    @api.depends('subtask_count', 'closed_subtask_count')
+    def _compute_task_completion_percentage(self):
+        for task in self:
+            task.subtask_completion_percentage = task.subtask_count and task.closed_subtask_count / task.subtask_count
