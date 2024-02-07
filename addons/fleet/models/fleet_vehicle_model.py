@@ -27,7 +27,7 @@ class FleetVehicleModel(models.Model):
     brand_id = fields.Many2one('fleet.vehicle.model.brand', 'Manufacturer', required=True, tracking=True)
     category_id = fields.Many2one('fleet.vehicle.model.category', 'Category', tracking=True)
     vendors = fields.Many2many('res.partner', 'fleet_vehicle_model_vendors', 'model_id', 'partner_id', string='Vendors')
-    image_128 = fields.Image(related='brand_id.image_128', readonly=True)
+    image_1920 = fields.Image(related='brand_id.image_1920', readonly=True)
     active = fields.Boolean(default=True)
     vehicle_type = fields.Selection([('car', 'Car'), ('bike', 'Bike')], default='car', required=True, tracking=True)
     transmission = fields.Selection([('manual', 'Manual'), ('automatic', 'Automatic')], 'Transmission', tracking=True)
@@ -44,6 +44,10 @@ class FleetVehicleModel(models.Model):
     horsepower = fields.Integer(tracking=True)
     horsepower_tax = fields.Float('Horsepower Taxation', tracking=True)
     electric_assistance = fields.Boolean(default=False, tracking=True)
+    power_unit = fields.Selection([
+        ('power', 'kW'),
+        ('horsepower', 'Horses')
+        ], 'Power Unit', default='power', required=True)
     vehicle_properties_definition = fields.PropertiesDefinition('Vehicle Properties')
 
     @api.model
