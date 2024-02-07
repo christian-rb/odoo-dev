@@ -1827,6 +1827,7 @@
                         <t t-set="selected_address" t-value="order.partner_shipping_id"/>
                     </t>
                 </t>
+                <t t-if="not only_services" t-call="website_sale.delivery_form"/>
             </div>
         </t>
     </template>
@@ -2076,14 +2077,26 @@
         <div class="card">
             <div class="card-body" id="shipping_and_billing">
                 <a class="float-end no-decoration" href="/shop/checkout"><i class="fa fa-pencil me-1"/>Edit</a>
-                <t t-set="same_shipping" t-value="bool(order.partner_shipping_id==order.partner_invoice_id or only_services)" />
+                <t t-set="same_shipping"
+                   t-value="bool(order.partner_shipping_id==order.partner_invoice_id and not order.access_point_address)"
+                />
                 <div>
                     <b>Billing<t t-if="same_shipping and not only_services"> &amp; Shipping</t>: </b>
                     <span t-esc="order.partner_invoice_id" t-options="dict(widget='contact', fields=['address'], no_marker=True, separator=', ')" class="address-inline"/>
                 </div>
                 <div t-if="not same_shipping and not only_services" groups="account.group_delivery_invoice_address">
-                    <b>Shipping: </b>
-                    <span t-esc="order.partner_shipping_id" t-options="dict(widget='contact', fields=['address'], no_marker=True, separator=', ')" class="address-inline"/>
+                    <b>Shipping</b>
+                    <t t-if="order.access_point_address">
+                        <b> to pickup point: </b>
+                        <t t-out="order.access_point_address.get('pick_up_point_name', '') + ', '+ order.access_point_address.get('address', '')"/>
+                    </t>
+                    <t t-else="">
+                        <b>: </b>
+                        <span t-esc="order.partner_shipping_id"
+                              t-options="dict(widget='contact', fields=['address'], no_marker=True, separator=', ')"
+                              class="address-inline"
+                        />
+                    </t>
                 </div>
             </div>
         </div>
@@ -2365,6 +2378,18 @@
     <template id="total">
         <div id="cart_total" t-if="website_sale_order and website_sale_order.website_order_line" t-att-class="_cart_total_classes">
             <table class="table mb-0">
+                <tr id="order_delivery" t-if="website_sale_order._is_delivery_needed()">
+                    <td colspan="2" class="ps-0 pt-0 pb-2 border-0 text-muted"
+                        title="Delivery will be updated after choosing a new delivery method">
+                        Delivery
+                    </td>
+                    <td class="text-end pe-0 pt-0 pb-2 border-0 text-muted">
+                        <span t-out="website_sale_order.amount_delivery"
+                              class="monetary_field"
+                              style="white-space: nowrap;"
+                              t-options='{"widget": "monetary", "display_currency": website_sale_order.currency_id}'/>
+                    </td>
+                </tr>
                 <tr id="order_total_untaxed">
                     <td id="cart_total_subtotal"
                         class="border-0 pb-2 ps-0 pt-0 text-start text-muted"

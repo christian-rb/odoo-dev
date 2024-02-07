@@ -627,48 +627,34 @@ class SaleOrder(models.Model):
             and not has_later_sale_order.get(abandoned_sale_order.partner_id, False)
         )
 
-    def _check_carrier_quotation(self, force_carrier_id=None, keep_carrier=False):
-        self.ensure_one()
-        DeliveryCarrier = self.env['delivery.carrier']
+    def _remove_delivery_line(self):
+        super()._remove_delivery_line()
+        self.access_point_address = {}  # reset pickup point address
 
+    def _choose_preferred_carrier(self):
+        self.ensure_one()
         if self.only_services:
             self._remove_delivery_line()
-            return True
-
-        self = self.with_company(self.company_id)
-        # attempt to use partner's preferred carrier
-        if not force_carrier_id and self.partner_shipping_id.property_delivery_carrier_id and not keep_carrier:
-            force_carrier_id = self.partner_shipping_id.property_delivery_carrier_id.id
-
-        carrier = force_carrier_id and DeliveryCarrier.browse(force_carrier_id) or self.carrier_id
+            return
         available_carriers = self._get_delivery_methods()
-        if carrier:
-            if carrier not in available_carriers:
-                carrier = DeliveryCarrier
+        carrier = self.carrier_id
+        if available_carriers and carrier not in available_carriers:
+            if self.partner_shipping_id.property_delivery_carrier_id in available_carriers:
+                carrier = self.partner_shipping_id.property_delivery_carrier_id
             else:
-                # set the forced carrier at the beginning of the list to be verfied first below
-                available_carriers -= carrier
-                available_carriers = carrier + available_carriers
-        if force_carrier_id or not carrier or carrier not in available_carriers:
-            for delivery in available_carriers:
-                verified_carrier = delivery._match_address(self.partner_shipping_id)
-                if verified_carrier:
-                    carrier = delivery
-                    break
-            self.write({'carrier_id': carrier.id})
-        self._remove_delivery_line()
-        if carrier:
-            res = carrier.rate_shipment(self)
-            if res.get('success'):
-                self.set_delivery_line(carrier, res['price'])
-                self.delivery_rating_success = True
-                self.delivery_message = res['warning_message']
-            else:
-                self.set_delivery_line(carrier, 0.0)
-                self.delivery_rating_success = False
-                self.delivery_message = res['error_message']
+                carrier = available_carriers[0]
+        self._set_carrier(carrier.id)
 
-        return bool(carrier)
+    def _set_carrier(self, carrier_id):
+        self.ensure_one()
+        carrier = self.env['delivery.carrier'].browse(carrier_id).exists()
+        if not carrier:
+            raise ValidationError(_('There is no carrier found with the provided id.'))
+        self._remove_delivery_line()
+        rate = carrier.rate_shipment(self)
+        if rate.get('success'):
+            self.set_delivery_line(carrier, rate['price'])
+            self.delivery_message = rate['warning_message']
 
     def _get_delivery_methods(self):
         # searching on website_published will also search for available website (_search method on computed field)
@@ -676,7 +662,10 @@ class SaleOrder(models.Model):
             ('website_published', '=', True),
         ]).filtered(lambda carrier: carrier._is_available_for_order(self))
 
-    #=== TOOLING ===#
+    def _is_delivery_needed(self):
+        return not self.only_services
+
+    # === TOOLING === #
 
     def _is_public_order(self):
         self.ensure_one()

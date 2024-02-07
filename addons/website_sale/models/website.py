@@ -137,7 +137,6 @@ class Website(models.Model):
     )
 
     # Computed fields
-    enabled_delivery = fields.Boolean(string="Enable Shipping", compute='_compute_enabled_delivery')
     fiscal_position_id = fields.Many2one(
         comodel_name='account.fiscal.position',
         compute='_compute_fiscal_position_id',
@@ -187,12 +186,6 @@ class Website(models.Model):
     def _compute_currency_id(self):
         for website in self:
             website.currency_id = website.pricelist_id.currency_id or website.company_id.currency_id
-
-    def _compute_enabled_delivery(self):
-        for website in self:
-            website.enabled_delivery = bool(website.env['delivery.carrier'].sudo().search_count(
-                [('website_id', 'in', (False, website.id)), ('is_published', '=', True)], limit=1
-            ))
 
     #=== SELECTION METHODS ===#
 
@@ -667,8 +660,8 @@ class Website(models.Model):
         steps.append((['website_sale.payment'], {
             'name': _lt("Payment"),
             'current_href': '/shop/payment',
-            'back_button':  _lt("Back to cart"),
-            'back_button_href': '/shop/cart',
+            'back_button':  _lt("Back to shipping"),
+            'back_button_href': '/shop/checkout',
         }))
         return steps
 

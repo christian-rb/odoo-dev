@@ -1,7 +1,6 @@
 /** @odoo-module **/
 
 import { _t } from '@web/core/l10n/translation';
-import { Component } from '@odoo/owl';
 
 import PaymentForm from '@payment/js/payment_form';
 
@@ -9,43 +8,6 @@ PaymentForm.include({
     events: Object.assign({}, PaymentForm.prototype.events || {}, {
         'change input[name="o_donation_amount"]': '_updateAmount',
     }),
-
-    // #=== WIDGET LIFECYCLE ===#
-
-    /**
-     * @override
-     */
-    async start() {
-        Component.env.bus.addEventListener('update_shipping_cost', (ev) => this._updateShippingCost(ev.detail));
-        return await this._super.apply(this, arguments);
-    },
-
-    // #=== EVENT HANDLERS ===#
-
-    /**
-     * Update the amount in the payment context with the user input.
-     *
-     * @private
-     * @param {Event} ev
-     * @return {void}
-     */
-    _updateAmount(ev) {
-        if (ev.target.value > 0) {
-            this.paymentContext.amount = ev.target.value;
-        }
-    },
-
-    /**
-     * Update the total amount to be paid.
-     *
-     * Called upon change of shipping method
-     *
-     * @private
-     * @param {float} amount
-     */
-     _updateShippingCost: function (amount) {
-        this.paymentContext.amount = amount;
-     },
 
     // #=== PAYMENT FLOW ===#
 

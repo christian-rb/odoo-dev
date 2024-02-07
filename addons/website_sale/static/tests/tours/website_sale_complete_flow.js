@@ -76,6 +76,7 @@
         content: "Click on next button",
         trigger: '.oe_cart .btn:contains("Save address")',
     },
+        tourUtils.confirm(),
     {
         content: "Check selected billing address is same as typed in previous step",
         trigger: '#shipping_and_billing:contains(SO1 Billing Street, 33):contains(SO1BillingCity):contains(Afghanistan)',
@@ -109,10 +110,7 @@
         content: "Click on next button",
         trigger: '.oe_cart .btn:contains("Save address")',
     },
-    {
-        content: "Confirm Address",
-        trigger: 'a.btn:contains("Confirm")',
-    },
+        tourUtils.confirm(),
     {
         content: "Check selected billing address is same as typed in previous step",
         trigger: '#shipping_and_billing:contains(SO1 Billing Street Edited, 33):contains(SO1BillingCityEdited):contains(Afghanistan)',
@@ -257,6 +255,7 @@
         content: "Click on next button",
         trigger: '.oe_cart .btn:contains("Save address")',
     },
+        tourUtils.confirm(),
     {
         content: "Select `Wire Transfer` payment method",
         trigger: 'input[name="o_payment_radio"][data-payment-method-code="wire_transfer"]',

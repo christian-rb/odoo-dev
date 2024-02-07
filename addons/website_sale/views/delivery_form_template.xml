@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="delivery_form">
+        <form id="o_delivery_form" class="o_delivery_form">
+            <h4 class="fs-6 small text-uppercase fw-bolder">Choose a delivery method</h4>
+            <div class="card border-0" id="delivery_methods">
+                <ul t-if="delivery_methods" class="list-group">
+                    <t t-foreach="delivery_methods" t-as="dm">
+                        <li name="o_delivery_option"
+                            class="list-group-item o_delivery_option text-muted o_outline">
+                            <t t-call="website_sale.delivery_method"/>
+                        </li>
+                    </t>
+                </ul>
+                <div t-else="" class="alert alert-warning">
+                    <strong>No suitable delivery option could be found.</strong>
+                </div>
+            </div>
+        </form>
+    </template>
+
+    <template id="delivery_method">
+        <t t-set="delivery_type" t-value="dm.delivery_type + '_use_locations'"/>
+        <t t-set="is_pickup_needed"
+           t-value="delivery_type in dm.fields_get() and dm[delivery_type]"
+        />
+        <div class="d-flex flex-wrap gap-2 mb-0 p-0">
+            <div class="form-check d-flex flex-grow-1 flex-wrap mb-0">
+                <div class="d-flex flex-wrap w-100">
+                    <!-- === Radio button === -->
+                    <input
+                        t-attf-id="delivery_{{dm.id}}"
+                        name="o_delivery_radio"
+                        type="radio"
+                        class="form-check-input position-absolute"
+                        disabled="True"
+                        t-att-value="dm.id"
+                        t-att-checked="order.carrier_id and order.carrier_id.id == dm.id"
+                        t-att-delivery_type="dm.delivery_type"
+                        t-att-data-is-pickup-needed="is_pickup_needed"
+                    />
+                    <div class="d-flex flex-grow-1">
+                        <!-- === Delivery label === -->
+                        <label
+                            class="o_delivery_name_label"
+                            t-field="dm.name"
+                            t-attf-for="delivery_{{dm.id}}"
+                        />
+                    </div>
+                    <div class="flex-wrap d-flex">
+                        <!-- === Delivery price badge === -->
+                        <span class="o_wsale_delivery_badge_price float-end fw-bold" name="price">
+                            Select to compute delivery rate
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="position-relative d-flex flex-column gap-2 mt-2">
+            <div class="o_order_location d-none ms-2">
+                <span>
+                    <b class="o_order_location_name"/>
+                    <br/>
+                    <i class="o_order_location_address"/>
+                </span>
+                <span
+                    class="fa fa-times ms-2 o_remove_order_location"
+                    aria-label="Remove this location"
+                    title="Remove this location"
+                />
+            </div>
+            <t t-if="is_pickup_needed">
+                <div class="o_list_pickup_locations"/>
+            </t>
+            </div>
+            <t t-if="dm.website_description">
+                <div t-field="dm.website_description" class="text-muted mt8"/>
+            </t>
+    </template>
+
+</odoo>

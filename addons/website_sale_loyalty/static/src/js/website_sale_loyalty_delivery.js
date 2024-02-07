@@ -1,33 +1,20 @@
 /** @odoo-module **/
 
-import PublicWidget from '@web/legacy/js/public/public_widget';
-import { patch } from "@web/core/utils/patch";
-import { _t } from "@web/core/l10n/translation";
+import websiteSaleCheckout from '@website_sale/js/checkout';
 
-patch(PublicWidget.registry.websiteSaleDelivery, {
-    //--------------------------------------------------------------------------
-    // Private
-    //--------------------------------------------------------------------------
+websiteSaleCheckout.include({
 
     /**
      * @override
      */
-    async _handleCarrierUpdateResult(carrierInput) {
-        await super._handleCarrierUpdateResult(...arguments);
-        if (this.result.new_amount_order_discounted) {
+    _updateCartSummary(result) {
+        this._super.apply(this, arguments);
+        if (result.amount_delivery_discounted) {
             // Update discount of the order
-            $('#order_discounted').html(this.result.new_amount_order_discounted);
-        }
-    },
-    /**
-     * @override
-     */
-    _handleCarrierUpdateResultBadge(result) {
-        super._handleCarrierUpdateResultBadge(...arguments);
-        if (result.new_amount_order_discounted) {
-            // We are in freeshipping, so every carrier is Free but we don't
-            // want to replace error message by 'Free'
-            $('#delivery_carrier .badge:not(.o_wsale_delivery_carrier_error)').text(_t('Free'));
+            const cart_summary_discount_line = document.querySelector('[data-reward-type="shipping"]')
+            if (cart_summary_discount_line) {
+                cart_summary_discount_line.innerHTML = result.amount_delivery_discounted;
+            }
         }
     },
 });

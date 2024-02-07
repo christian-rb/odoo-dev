@@ -3,7 +3,7 @@
 import json
 
 from odoo import _
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 from odoo.http import request, route
 
 from odoo.addons.payment import utils as payment_utils
@@ -13,40 +13,58 @@ from odoo.addons.website_sale.controllers.main import WebsiteSale
 class WebsiteSaleDelivery(WebsiteSale):
     _express_checkout_shipping_route = '/shop/express/shipping_address_change'
 
-    @route('/shop/update_carrier', type='json', auth='public', methods=['POST'], website=True)
-    def update_eshop_carrier(self, **post):
+    @route('/shop/delivery_carriers', type='json', auth='public', website=True, csrf=False)
+    def shop_delivery_carriers(self):
         order = request.website.sale_get_order()
-        if not post.get('no_reset_access_point_address'):
-            order.access_point_address = {}
-        carrier_id = int(post['carrier_id'])
-        if order and carrier_id != order.carrier_id.id:
-            if any(tx.sudo().state not in ('cancel', 'error', 'draft') for tx in order.transaction_ids):
-                raise UserError(_('It seems that there is already a transaction for your order, you can not change the delivery method anymore'))
-            order._check_carrier_quotation(force_carrier_id=carrier_id)
-        return self._update_website_sale_delivery_return(order, **post)
+        values = {
+            'order': order,
+            'delivery_methods': order._get_delivery_methods(),
+        }
+        return request.env['ir.ui.view']._render_template("website_sale.delivery_form", values)
 
-    @route('/shop/carrier_rate_shipment', type='json', auth='public', methods=['POST'], website=True)
-    def cart_carrier_rate_shipment(self, carrier_id, **kw):
-        order = request.website.sale_get_order(force_create=True)
+    @route('/shop/update_carrier', type='json', auth='public', methods=['POST'], website=True)
+    def shop_update_carrier(self, carrier_id=None, **post):
+        order = request.website.sale_get_order()
+        if not order:
+            return
+        carrier_id = int(carrier_id)
+        if carrier_id != order.carrier_id.id:
+            if any(
+                tx.sudo().state not in ('cancel', 'error', 'draft') for tx in order.transaction_ids
+            ):
+                raise UserError(_(
+                    "It seems that there is already a transaction for your order, you can not"
+                    " change the delivery method anymore"
+                ))
+            order._set_carrier(carrier_id=carrier_id)
+        return self._order_summary_values(order, **post)
+
+    @route('/shop/get_shipment_rate', type='json', auth='public', methods=['POST'], website=True)
+    def shop_get_shipment_rate(self, carrier_id, **kw):
+        order = request.website.sale_get_order()
+        if not order:
+            raise ValidationError(_("Your cart is empty."))
 
         if int(carrier_id) not in order._get_delivery_methods().ids:
-            raise UserError(_('It seems that a delivery method is not compatible with your address. Please refresh the page and try again.'))
+            raise UserError(_(
+                "It seems that a delivery method is not compatible with your address. "
+                "Please refresh the page and try again."
+            ))
 
         Monetary = request.env['ir.qweb.field.monetary']
 
-        res = {'carrier_id': carrier_id}
         carrier = request.env['delivery.carrier'].sudo().browse(int(carrier_id))
         rate = WebsiteSaleDelivery._get_rate(carrier, order)
-        if rate.get('success'):
-            res['status'] = True
-            res['new_amount_delivery'] = Monetary.value_to_html(rate['price'], {'display_currency': order.currency_id})
-            res['is_free_delivery'] = not bool(rate['price'])
-            res['error_message'] = rate['warning_message']
+        if rate['success']:
+            rate['amount_delivery'] = Monetary.value_to_html(
+                rate['price'], {'display_currency': order.currency_id}
+            )
+            rate['is_free_delivery'] = not bool(rate['price'])
         else:
-            res['status'] = False
-            res['new_amount_delivery'] = Monetary.value_to_html(0.0, {'display_currency': order.currency_id})
-            res['error_message'] = rate['error_message']
-        return res
+            rate['amount_delivery'] = Monetary.value_to_html(
+                0.0, {'display_currency': order.currency_id}
+            )
+        return rate
 
     @route(
         _express_checkout_shipping_route, type='json', auth='public', methods=['POST'],
@@ -102,7 +120,7 @@ class WebsiteSaleDelivery(WebsiteSale):
                     name=_('Anonymous express checkout partner for order %s', order_sudo.name),
             )
 
-        # Returns the list of develivery carrier available for the sale order.
+        # Returns the list of delivery carrier available for the sale order.
         return sorted([{
             'id': carrier.id,
             'name': carrier.name,
@@ -114,7 +132,7 @@ class WebsiteSaleDelivery(WebsiteSale):
         } for carrier in order_sudo._get_delivery_methods()],
         key=lambda carrier: carrier['minorAmount'])
 
-    @route('/shop/access_point/set', type='json', auth='public', methods=['POST'], website=True, sitemap=False)
+    @route('/shop/order_access_point/set', type='json', auth='public', methods=['POST'], website=True, sitemap=False)
     def set_access_point(self, access_point_encoded):
         order = request.website.sale_get_order()
         if hasattr(order.carrier_id, order.carrier_id.delivery_type + '_use_locations'):
@@ -122,7 +140,7 @@ class WebsiteSaleDelivery(WebsiteSale):
             access_point = use_location and (json.loads(access_point_encoded) if access_point_encoded else False) or False
             order.write({'access_point_address': access_point})
 
-    @route('/shop/access_point/get', type='json', auth='public', website=True, sitemap=False)
+    @route('/shop/order_access_point/get', type='json', auth='public', website=True, sitemap=False)
     def get_access_point(self):
         order = request.website.sale_get_order()
         if not order.carrier_id.delivery_type or not order.carrier_id.display_name:
@@ -132,19 +150,32 @@ class WebsiteSaleDelivery(WebsiteSale):
             return {}
         address = order_location['address']
         name = order_location['pick_up_point_name']
-        return {order.carrier_id.delivery_type + '_access_point': address, 'name': name, 'delivery_name': order.carrier_id.display_name}
+        return {
+            'pickup_address': address,
+            'name': name,
+            'delivery_name': order.carrier_id.display_name,
+        }
 
-    @route('/shop/access_point/close_locations', type='json', auth='public', website=True, sitemap=False)
+    @route('/shop/order_access_point/close_locations', type='json', auth='public', website=True, sitemap=False)
     def get_close_locations(self):
         order = request.website.sale_get_order()
         try:
             error = {'error': _('No pick-up point available for that shipping address')}
-            if not hasattr(order.carrier_id, '_' + order.carrier_id.delivery_type + '_get_close_locations'):
+            if not hasattr(
+                order.carrier_id, '_' + order.carrier_id.delivery_type + '_get_close_locations'
+            ):
                 return error
-            close_locations = getattr(order.carrier_id, '_' + order.carrier_id.delivery_type + '_get_close_locations')(order.partner_shipping_id)
+            close_locations = getattr(
+                order.carrier_id, '_' + order.carrier_id.delivery_type + '_get_close_locations'
+            )(order.partner_shipping_id)
             partner_address = order.partner_shipping_id
-            inline_partner_address = ' '.join((part or '') for part in [partner_address.street, partner_address.street2, partner_address.zip, partner_address.country_id.code])
-            if len(close_locations) < 0:
+            inline_partner_address = ' '.join((part or '') for part in [
+                partner_address.street,
+                partner_address.street2,
+                partner_address.zip,
+                partner_address.country_id.code
+            ])
+            if not close_locations:
                 return error
             for location in close_locations:
                 location['address_stringified'] = json.dumps(location)
@@ -189,20 +220,23 @@ class WebsiteSaleDelivery(WebsiteSale):
                     rate['price'] = taxes['total_included']
         return rate
 
-    def _update_website_sale_delivery_return(self, order, **post):
+    @staticmethod
+    def _order_summary_values(order, **post):
         Monetary = request.env['ir.qweb.field.monetary']
-        carrier_id = int(post['carrier_id'])
         currency = order.currency_id
-        if order:
-            return {
-                'status': order.delivery_rating_success,
-                'error_message': order.delivery_message,
-                'carrier_id': carrier_id,
-                'is_free_delivery': not bool(order.amount_delivery),
-                'new_amount_delivery': Monetary.value_to_html(order.amount_delivery, {'display_currency': currency}),
-                'new_amount_untaxed': Monetary.value_to_html(order.amount_untaxed, {'display_currency': currency}),
-                'new_amount_tax': Monetary.value_to_html(order.amount_tax, {'display_currency': currency}),
-                'new_amount_total': Monetary.value_to_html(order.amount_total, {'display_currency': currency}),
-                'new_amount_total_raw': order.amount_total,
-            }
-        return {}
+        return {
+            'success': True,
+            'is_free_delivery': not bool(order.amount_delivery),
+            'amount_delivery': Monetary.value_to_html(
+                order.amount_delivery, {'display_currency': currency}
+            ),
+            'amount_untaxed': Monetary.value_to_html(
+                order.amount_untaxed, {'display_currency': currency}
+            ),
+            'amount_tax': Monetary.value_to_html(
+                order.amount_tax, {'display_currency': currency}
+            ),
+            'amount_total': Monetary.value_to_html(
+                order.amount_total, {'display_currency': currency}
+            ),
+        }
