@@ -48,7 +48,7 @@ class ReturnPicking(models.TransientModel):
         for wizard in self:
             move_dest_exists = False
             product_return_moves = [(5,)]
-            if wizard.picking_id and wizard.picking_id.state != 'done':
+            if wizard.picking_id and wizard.picking_id.state != 'done' and not wizard.env.context.get("create_return_exchange"):
                 raise UserError(_("You may only return Done pickings."))
             # In case we want to set specific default values (e.g. 'to_refund'), we must fetch the
             # default values for creation.
@@ -182,7 +182,7 @@ class ReturnPicking(models.TransientModel):
         new_picking.action_assign()
         return new_picking.id, picking_type_id
 
-    def create_returns(self):
+    def action_create_returns(self):
         for wizard in self:
             new_picking_id, pick_type_id = wizard._create_returns()
         # Override the context to disable all the potential filters that could have been set previously
@@ -202,6 +202,35 @@ class ReturnPicking(models.TransientModel):
             'view_mode': 'form,tree,calendar',
             'res_model': 'stock.picking',
             'res_id': new_picking_id,
+            'type': 'ir.actions.act_window',
+            'context': ctx,
+        }
+
+    def action_create_exchanges(self):
+        # use to create a return of return (exchange)
+        for wizard in self:
+            new_picking_id, _ = wizard._create_returns()
+            return_picking = self.env['stock.return.picking'].with_context(create_return_exchange=True).create({'picking_id': new_picking_id})
+            return_exchange_picking_id, return_exchange_pick_type_id = return_picking._create_returns()
+            return_exchange_picking = self.env['stock.picking'].browse(return_exchange_picking_id)
+            return_exchange_picking.move_ids.move_line_ids.unlink()
+            return_exchange_picking.write({'state': 'waiting'})
+        ctx = dict(self.env.context)
+        ctx.update({
+            'default_partner_id': self.picking_id.partner_id.id,
+            'search_default_picking_type_id': return_exchange_pick_type_id,
+            'search_default_draft': False,
+            'search_default_assigned': False,
+            'search_default_confirmed': False,
+            'search_default_ready': False,
+            'search_default_planning_issues': False,
+            'search_default_available': False,
+        })
+        return {
+            'name': ('Exchanged Picking'),
+            'view_mode': 'form,tree,calendar',
+            'res_model': 'stock.picking',
+            'res_id': return_exchange_picking_id,
             'type': 'ir.actions.act_window',
             'context': ctx,
         }

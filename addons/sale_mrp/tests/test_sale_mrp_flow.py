@@ -975,7 +975,7 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
                 'quantity': expected_quantities[return_move.product_id],
                 'to_refund': True
             })
-        res = return_wiz.create_returns()
+        res = return_wiz.action_create_returns()
         return_pick = self.env['stock.picking'].browse(res['res_id'])
 
         # Process all components and validate the picking
@@ -990,7 +990,7 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
         return_wiz = stock_return_picking_form.save()
         for move in return_wiz.product_return_moves:
             move.quantity = expected_quantities[move.product_id]
-        res = return_wiz.create_returns()
+        res = return_wiz.action_create_returns()
         return_of_return_pick = self.env['stock.picking'].browse(res['res_id'])
 
         # Process all components except one of each
@@ -1718,7 +1718,7 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
                 'quantity': 1,
                 'to_refund': True
             })
-        res = return_wiz.create_returns()
+        res = return_wiz.action_create_returns()
         return_pick = self.env['stock.picking'].browse(res['res_id'])
         return_pick.move_line_ids.quantity = 1
         return_pick.button_validate()  # validate return
@@ -2129,7 +2129,7 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
         ctx = {'active_ids':picking.ids, 'active_id': picking.ids[0], 'active_model': 'stock.picking'}
         return_picking_wizard_form = Form(self.env['stock.return.picking'].with_context(ctx))
         return_picking_wizard = return_picking_wizard_form.save()
-        return_picking_wizard.create_returns()
+        return_picking_wizard.action_create_returns()
 
         price = line.product_id.with_company(line.company_id)._compute_average_price(0, line.product_uom_qty, line.move_ids)
         self.assertEqual(price, 10)
@@ -2189,7 +2189,7 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
         return_wizard = return_wizard_form.save()
         return_wizard.product_return_moves[0].quantity = 20
         return_wizard.product_return_moves[1].quantity = 40
-        action = return_wizard.create_returns()
+        action = return_wizard.action_create_returns()
         return_picking = self.env['stock.picking'].browse(action['res_id'])
         return_picking.move_ids.picked = True
         return_picking.button_validate()
