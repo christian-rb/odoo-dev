@@ -11,5 +11,5 @@ class AccountMoveLine(models.Model):
         indian_lines = self.filtered(lambda line: line.company_id.account_fiscal_country_id.code == 'IN')
         (self - indian_lines).l10n_in_hsn_code = False
         for line in indian_lines:
-            if line.product_id:
-                line.l10n_in_hsn_code = line.product_id.l10n_in_hsn_code
+            if line.product_id and line.product_id.l10n_in_hsn_code:
+                line.l10n_in_hsn_code = line.product_id.l10n_in_hsn_code[:int(line.company_id.l10n_in_hsn_code_digit)] if line.company_id.l10n_in_hsn_code_digit else line.product_id.l10n_in_hsn_code
