@@ -4,7 +4,7 @@ import { registry } from "@web/core/registry";
 import { _lt } from "@web/core/l10n/translation";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { initializeDesignTabCss } from "mass_mailing.design_constants";
-import { toInline, getCSSRules } from "web_editor.convertInline";
+import { toInline } from "web_editor.convertInline";
 import { loadBundle } from "@web/core/assets";
 import { qweb } from 'web.core';
 import { useService } from "@web/core/utils/hooks";
@@ -129,8 +129,13 @@ export class MassMailingHtmlField extends HtmlField {
             // Wait for the css and images to be loaded.
             await iframePromise;
             const editableClone = iframe.contentDocument.querySelector('.note-editable');
-            this.cssRules = this.cssRules || getCSSRules($editable[0].ownerDocument);
-            await toInline($(editableClone), this.cssRules, $(iframe));
+            // editableClone doesn't have wysiwyg in its data
+            // we use this hacky fix to assign it now so we can get it later in toInline
+            // from the editable
+            // TODO in master : Update the function toInline to accept an options dictionary
+            // as paraemeter.
+            $(editableClone).data("wysiwyg", this.wysiwyg);
+            await toInline($(editableClone), undefined, $(iframe));
             iframe.remove();
             this.wysiwyg.odooEditor.observerActive('toInline');
             const inlineHtml = editableClone.innerHTML;
