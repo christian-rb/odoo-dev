@@ -338,12 +338,15 @@ class WebsiteVisitor(models.Model):
         reason. """
         auto_commit = not getattr(threading.current_thread(), 'testing', False)
         visitor_model = self.env['website.visitor']
+        visitor_ids = visitor_model.search(self._inactive_visitors_domain()).ids
+        self.env['ir.cron']._log_progress(0, len(visitor_ids))
         for inactive_visitors_batch in split_every(
             1000,
-            visitor_model.sudo().search(self._inactive_visitors_domain()).ids,
+            visitor_ids,
             visitor_model.browse,
         ):
             inactive_visitors_batch.unlink()
+            self.env['ir.cron']._log_progress(len(inactive_visitors_batch))
             if auto_commit:
                 self.env.cr.commit()
 
