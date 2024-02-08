@@ -40,7 +40,7 @@ export class ChatWindow extends Record {
                 if (maxVisible <= this.store.discuss.chatWindows.length) {
                     const swaped = visible[visible.length - 1];
                     index = visible.length - 1;
-                    swaped.hide();
+                    swaped.toggleFold();
                 } else {
                     index = this.store.discuss.chatWindows.length;
                 }
@@ -148,11 +148,11 @@ export class ChatWindow extends Record {
     }
 
     toggleFold() {
-        this.folded = !this.folded;
-        const thread = this.thread;
-        if (thread) {
-            thread.state = this.folded ? "folded" : "open";
+        if (!this.thread) {
+            return this.store.closeNewMessage();
         }
+        this.folded = !this.folded;
+        this.thread.state = this.folded ? "folded" : "open";
         this.notifyState();
     }
 

@@ -66,11 +66,11 @@ patch(Thread.prototype, {
     },
     open(replaceNewMessageChatWindow, options) {
         if (!this.store.discuss.isActive && !this.store.env.services.ui.isSmall) {
-            this._openChatWindow(replaceNewMessageChatWindow, options);
+            this.openChatWindow(replaceNewMessageChatWindow, options);
             return;
         }
         if (this.store.env.services.ui.isSmall && this.model === "discuss.channel") {
-            this._openChatWindow(replaceNewMessageChatWindow, options);
+            this.openChatWindow(replaceNewMessageChatWindow, options);
             return;
         }
         if (this.model !== "discuss.channel") {
@@ -88,20 +88,5 @@ patch(Thread.prototype, {
         const chatWindow = this.store.discuss.chatWindows.find((c) => c.thread?.eq(this));
         await chatWindow?.close();
         super.unpin(...arguments);
-    },
-    _openChatWindow(replaceNewMessageChatWindow, { openMessagingMenuOnClose } = {}) {
-        const chatWindow = this.store.ChatWindow.insert(
-            assignDefined(
-                {
-                    folded: false,
-                    replaceNewMessageChatWindow,
-                    thread: this,
-                },
-                { openMessagingMenuOnClose }
-            )
-        );
-        chatWindow.autofocus++;
-        this.state = "open";
-        chatWindow.notifyState();
     },
 });

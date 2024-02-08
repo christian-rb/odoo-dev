@@ -1009,7 +1009,7 @@ test("out-of-focus notif on needaction message in channel", async () => {
             thread_model: "discuss.channel",
         })
     );
-    await contains(".o-mail-ChatWindow");
+    await contains(".o-mail-ChatBubble");
     await assertSteps(["set_title_part:1 Message"]);
 });
 
@@ -1056,7 +1056,7 @@ test("receive new chat message: out of odoo focus (notification, chat)", async (
             thread_model: "discuss.channel",
         })
     );
-    await contains(".o-mail-ChatWindow");
+    await contains(".o-mail-ChatBubble");
     await assertSteps(["set_title_part:1 Message"]);
 });
 

@@ -1,5 +1,4 @@
 import { ChatWindow } from "@mail/core/common/chat_window";
-
 import { Component, useExternalListener, useState, onMounted, useRef, useEffect } from "@odoo/owl";
 
 import { browser } from "@web/core/browser/browser";

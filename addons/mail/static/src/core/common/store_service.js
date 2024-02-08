@@ -23,6 +23,9 @@ export class Store extends BaseStore {
     CHAT_WINDOW_INBETWEEN_WIDTH = 5;
     CHAT_WINDOW_WIDTH = 360; // same value as $o-mail-ChatWindow-width
     CHAT_WINDOW_HIDDEN_WIDTH = 55;
+    CHAT_BUBBLE_SIZE = 56; // same value as $o-mail-ChatBubble-medium
+    CHAT_BUBBLE_PADDING = 20; // container has 10px padding, multiply by 2 for left and right together.
+    CHAT_BUBBLE_LIMIT = 7;
     isReady = new Deferred();
 
     /** @returns {import("models").Store|import("models").Store[]} */
@@ -39,6 +42,8 @@ export class Store extends BaseStore {
     CannedResponse;
     /** @type {typeof import("@mail/core/common/channel_member_model").ChannelMember} */
     ChannelMember;
+    /** @type {typeof import("@mail/core/common/chat_bubble_model").ChatBubble} */
+    ChatBubble;
     /** @type {typeof import("@mail/core/common/chat_window_model").ChatWindow} */
     ChatWindow;
     /** @type {typeof import("@mail/core/common/composer_model").Composer} */
@@ -216,18 +221,24 @@ export class Store extends BaseStore {
     }
 
     get maxVisibleChatWindows() {
+        const chatBubblesWidth = this.CHAT_BUBBLE_SIZE + this.CHAT_BUBBLE_PADDING;
         const startGap = this.env.services.ui.isSmall
             ? 0
             : this.hiddenChatWindows.length > 0
             ? this.CHAT_WINDOW_END_GAP_WIDTH + this.CHAT_WINDOW_HIDDEN_WIDTH
             : this.CHAT_WINDOW_END_GAP_WIDTH;
         const endGap = this.env.services.ui.isSmall ? 0 : this.CHAT_WINDOW_END_GAP_WIDTH;
-        const available = browser.innerWidth - startGap - endGap;
+        const available = browser.innerWidth - startGap - endGap - chatBubblesWidth;
         const maxAmountWithoutHidden = Math.max(
             1,
             Math.floor(available / (this.CHAT_WINDOW_WIDTH + this.CHAT_WINDOW_INBETWEEN_WIDTH))
         );
         return maxAmountWithoutHidden;
+    }
+
+    get chatBubbleLimit() {
+        const chatBubbleSpace = this.CHAT_BUBBLE_SIZE + this.CHAT_BUBBLE_PADDING;
+        return Math.min(this.CHAT_BUBBLE_LIMIT, Math.floor(browser.innerHeight / chatBubbleSpace));
     }
 
     closeNewMessage() {

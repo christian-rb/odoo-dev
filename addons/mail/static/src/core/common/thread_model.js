@@ -1,6 +1,6 @@
 import { AND, Record } from "@mail/core/common/record";
 import { prettifyMessageContent } from "@mail/utils/common/format";
-import { compareDatetime, rpcWithEnv } from "@mail/utils/common/misc";
+import { assignDefined, compareDatetime, rpcWithEnv } from "@mail/utils/common/misc";
 import { router } from "@web/core/browser/router";
 
 import { _t } from "@web/core/l10n/translation";
@@ -44,12 +44,7 @@ export class Thread extends Record {
         rpc = rpcWithEnv(this.env);
         const thread = super.new(data);
         Record.onChange(thread, ["state"], () => {
-            if (thread.state !== "closed" && !this.store.env.services.ui.isSmall) {
-                this.store.ChatWindow.insert({
-                    folded: thread.state === "folded",
-                    thread,
-                });
-            }
+            thread.updateDisplay();
         });
         return thread;
     }
@@ -937,7 +932,10 @@ export class Thread extends Record {
             return;
         }
         if (notify) {
-            this.store.ChatWindow.insert({ thread: this });
+            const chatWindow = this.store.ChatWindow.get({ thread: this });
+            if (!chatWindow) {
+                this.state = "folded";
+            }
             this.store.env.services["mail.out_of_focus"].notify(message, this);
         }
     }
@@ -950,12 +948,17 @@ export class Thread extends Record {
         this.setAsDiscussThread();
     }
 
-    openChatWindow(replaceNewMessageChatWindow) {
-        const chatWindow = this.store.ChatWindow.insert({
-            folded: false,
-            thread: this,
-            replaceNewMessageChatWindow,
-        });
+    openChatWindow(replaceNewMessageChatWindow, { openMessagingMenuOnClose } = {}) {
+        const chatWindow = this.store.ChatWindow.insert(
+            assignDefined(
+                {
+                    folded: false,
+                    replaceNewMessageChatWindow,
+                    thread: this,
+                },
+                { openMessagingMenuOnClose }
+            )
+        );
         chatWindow.autofocus++;
         this.state = "open";
         chatWindow.notifyState();
@@ -1127,6 +1130,23 @@ export class Thread extends Record {
                 [this.id],
                 { pinned: false }
             );
+        }
+    }
+
+    updateDisplay() {
+        if (!this.store.usingChatBubbles) {
+            return this.store.ChatWindow.insert({
+                thread: this,
+                folded: this.state === "folded",
+            });
+        }
+        if (this.state === "open" && !this.store.env.services.ui.isSmall) {
+            this.store.ChatBubble.get({ thread: this })?.delete();
+            this.store.ChatWindow.insert({ thread: this });
+        }
+        if (this.state === "folded") {
+            this.store.ChatWindow.get({ thread: this })?.delete();
+            this.store.ChatBubble.insert({ thread: this });
         }
     }
 
