@@ -36,6 +36,7 @@ class Lead(models.Model):
             '|', ('probability', '<', 100), ('probability', '=', False),
             ('create_date', '>', timeDelta)
         ])
+        self.env['ir.cron']._log_progress(0, len(leads))
         leads.iap_enrich(from_cron=True)
 
     @api.model_create_multi
@@ -110,6 +111,7 @@ class Lead(models.Model):
                 except OperationalError:
                     _logger.error('A batch of leads could not be enriched :%s', repr(leads))
                     continue
+                self.env['ir.cron']._log_progress(len(leads))
             # Commit processed batch to avoid complete rollbacks and therefore losing credits.
             if not self.env.registry.in_test_mode():
                 self.env.cr.commit()
