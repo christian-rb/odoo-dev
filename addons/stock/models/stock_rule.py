@@ -560,8 +560,10 @@ class ProcurementGroup(models.Model):
         domain = self._get_moves_to_assign_domain(company_id)
         moves_to_assign = self.env['stock.move'].search(domain, limit=None,
             order='reservation_date, priority desc, date asc, id asc')
+        self.env['ir.cron']._log_progress(0, len(moves_to_assign))
         for moves_chunk in split_every(1000, moves_to_assign.ids):
             self.env['stock.move'].browse(moves_chunk).sudo()._action_assign()
+            self.env['ir.cron']._log_progress(len(moves_chunk))
             if use_new_cursor:
                 self._cr.commit()
                 _logger.info("A batch of %d moves are assigned and committed", len(moves_chunk))
