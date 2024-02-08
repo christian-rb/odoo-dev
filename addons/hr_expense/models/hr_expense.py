@@ -1180,7 +1180,9 @@ class HrExpenseSheet(models.Model):
         self.activity_update()
 
     def reset_expense_sheets(self):
-        if not self.can_reset:
+        if not self:
+            raise UserError(_("There are no expense report selected."))
+        if False in self.mapped('can_reset'):
             raise UserError(_("Only HR Officers or the concerned employee can reset to draft."))
         self.mapped('expense_line_ids').write({'is_refused': False})
         self.write({'state': 'draft', 'approval_date': False})
