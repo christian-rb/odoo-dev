@@ -185,6 +185,7 @@ Wysiwyg.include({
      * @returns {Promise}
      */
     _saveViewBlocks: async function () {
+        this._restoreCarousels();
         await this._super.apply(this, arguments);
         if (this.isDirty()) {
             return this._restoreMegaMenus();
@@ -334,6 +335,30 @@ Wysiwyg.include({
         megaMenuEl.classList.add('o_no_parent_editor');
         this.odooEditor.observerActive("toggleMegaMenu");
         return this.snippetsMenu.activateSnippet($(megaMenuEl));
+    },
+    /**
+     * Restores all the carousels so their first slide is the active one.
+     *
+     * @private
+     */
+    _restoreCarousels() {
+        const carouselEls = this.$editable[0].querySelectorAll(".carousel");
+        carouselEls.forEach(carouselEl => {
+            // Set the first slide as the active one.
+            carouselEl.querySelectorAll(".carousel-item").forEach((itemEl, i) => {
+                itemEl.classList.remove("next", "prev", "left", "right", "active");
+                if (i === 0) {
+                    itemEl.classList.add("active");
+                }
+            });
+            carouselEl.querySelectorAll(".carousel-indicators li[data-slide-to]").forEach((indicatorEl, i) => {
+                indicatorEl.classList.remove("active");
+                indicatorEl.replaceChildren();
+                if (i === 0) {
+                    indicatorEl.classList.add("active");
+                }
+            });
+        });
     },
 });
 
