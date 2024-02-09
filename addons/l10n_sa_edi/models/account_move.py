@@ -98,7 +98,7 @@ class AccountMove(models.Model):
         invoice_time = xpath_ns('//cbc:IssueTime')
         invoice_datetime = datetime.strptime(invoice_date + ' ' + invoice_time, '%Y-%m-%d %H:%M:%S')
 
-        if invoice_datetime and journal_id.company_id.vat and x509_cert:
+        if invoice_datetime and journal_id.company_id.vat and x509_cert and signature:
             prehash_content = etree.tostring(root)
             invoice_hash = edi_format._l10n_sa_generate_invoice_xml_hash(prehash_content, 'digest')
 
@@ -197,6 +197,13 @@ class AccountMove(models.Model):
         """
         zatca_doc_ids = self.edi_document_ids.filtered(lambda d: d.edi_format_id.code == 'sa_zatca')
         return len(zatca_doc_ids) > 0 and not any(zatca_doc_ids.filtered(lambda d: d.state == 'to_send'))
+
+    def _post(self, soft=True):
+        res = super()._post(soft)
+        for record in self:
+            if record.country_code == 'SA' and record.move_type in ('out_invoice', 'out_refund'):
+                record._l10n_sa_generate_unsigned_data()
+        return res
 
 
 class AccountMoveLine(models.Model):
