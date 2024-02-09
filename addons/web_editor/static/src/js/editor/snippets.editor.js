@@ -1986,7 +1986,7 @@ class SnippetsMenu extends Component {
         // blocks should not be taken into account here because they have
         // tooltips with a particular behavior (see _showSnippetTooltip).
         this.tooltips = new Tooltip(this.el, {
-            selector: 'we-title, [title]:not(.oe_snippet)',
+            selector: 'we-title, [title]:not(.oe_snippet), [data-bs-original-title]:not(.oe_snippet)',
             placement: 'bottom',
             delay: 100,
             // Ensure the tooltips have a good position when in iframe.
@@ -1997,7 +1997,7 @@ class SnippetsMenu extends Component {
                 // Workaround BS regression: https://github.com/twbs/bootstrap/issues/38720
                 const el = this === undefined ? arguments[0] : this.el;
                 if (el.tagName !== 'WE-TITLE') {
-                    return el.title;
+                    return el.title || el.dataset.bsOriginalTitle;
                 }
                 // On Firefox, el.scrollWidth is equal to el.clientWidth when
                 // overflow: hidden, so we need to update the style before to
