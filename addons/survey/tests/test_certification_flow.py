@@ -113,10 +113,10 @@ class TestCertificationFlow(common.TestSurveyCommon, HttpCase):
             self._answer_question(q04, q04.suggested_answer_ids.ids[0], answer_token, csrf_token, button_submit='previous')
             self._answer_question(q03, "Just kidding, I don't like it...", answer_token, csrf_token)
             self._answer_question(q04, q04.suggested_answer_ids.ids[0], answer_token, csrf_token,
-                                  submit_query_count=47, access_page_query_count=30)
+                                  submit_query_count=43, access_page_query_count=26)
             # Not the last to not add completion flow queries to answer validation
             self._answer_question(q05, [q05.suggested_answer_ids.ids[0], q05.suggested_answer_ids.ids[1], q05.suggested_answer_ids.ids[3]], answer_token, csrf_token,
-                                  submit_query_count=36, access_page_query_count=30)
+                                  submit_query_count=32, access_page_query_count=26)
             self._answer_question(q06, q06.suggested_answer_ids.ids[0], answer_token, csrf_token)
 
         user_inputs.invalidate_recordset()
