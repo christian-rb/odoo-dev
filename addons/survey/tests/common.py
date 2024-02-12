@@ -163,16 +163,24 @@ class SurveyCase(common.TransactionCase):
     def _access_start(self, survey):
         return self.url_open('/survey/start/%s' % survey.access_token)
 
-    def _access_page(self, survey, token):
-        return self.url_open('/survey/%s/%s' % (survey.access_token, token))
+    def _access_page(self, survey, token, query_count=None):
+        if query_count:
+            with self.assertQueryCount(query_count):
+                return self.url_open('/survey/%s/%s' % (survey.access_token, token))
+        else:
+            return self.url_open('/survey/%s/%s' % (survey.access_token, token))
 
     def _access_begin(self, survey, token):
         url = survey.get_base_url() + '/survey/begin/%s/%s' % (survey.access_token, token)
         return self.opener.post(url=url, json={})
 
-    def _access_submit(self, survey, token, post_data):
+    def _access_submit(self, survey, token, post_data, query_count=None):
         url = survey.get_base_url() + '/survey/submit/%s/%s' % (survey.access_token, token)
-        return self.opener.post(url=url, json={'params': post_data})
+        if query_count:
+            with self.assertQueryCount(query_count):
+                return self.opener.post(url=url, json={'params': post_data})
+        else:
+            return self.opener.post(url=url, json={'params': post_data})
 
     def _find_csrf_token(self, text):
         csrf_token_re = re.compile("(input.+csrf_token.+value=\")([a-f0-9]{40}o[0-9]*)", re.MULTILINE)
@@ -195,14 +203,15 @@ class SurveyCase(common.TransactionCase):
             post_data[question.id] = str(values)
         return post_data
 
-    def _answer_question(self, question, answer, answer_token, csrf_token, button_submit='next'):
+    def _answer_question(self, question, answer, answer_token, csrf_token, button_submit='next',
+                         submit_query_count=None, access_page_query_count=None):
         # Employee submits the question answer
         post_data = self._format_submission_data(question, answer, {'csrf_token': csrf_token, 'token': answer_token, 'button_submit': button_submit})
-        response = self._access_submit(question.survey_id, answer_token, post_data)
+        response = self._access_submit(question.survey_id, answer_token, post_data, query_count=submit_query_count)
         self.assertResponse(response, 200)
 
         # Employee is redirected on next question
-        response = self._access_page(question.survey_id, answer_token)
+        response = self._access_page(question.survey_id, answer_token, query_count=access_page_query_count)
         self.assertResponse(response, 200)
 
     def _answer_page(self, page, answers, answer_token, csrf_token):
