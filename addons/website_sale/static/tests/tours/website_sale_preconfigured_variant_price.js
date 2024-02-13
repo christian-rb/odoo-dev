@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { registry } from "@web/core/registry";
+import configuratorTourUtils from "@sale/js/tours/product_configurator_tour_utils";
 
 registry.category("web_tour.tours").add('website_sale_product_configurator_optional_products_tour', {
     test: true,
@@ -11,9 +12,6 @@ registry.category("web_tour.tours").add('website_sale_product_configurator_optio
 }, {
     name: 'Add to cart',
     trigger: '#add_to_cart',
-}, {
-    name: 'Check that modal was opened with the correct variant price',
-    trigger: 'main.oe_advanced_configurator_modal',
-    extra_trigger: 'main.oe_advanced_configurator_modal span:contains("800.40")',
-    run: () => {},
-}]});
+},
+configuratorTourUtils.assertPriceTotal("800.40"),
+]});

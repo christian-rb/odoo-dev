@@ -35,9 +35,7 @@ Then it can be made specific at the product level.
             'website_sale_stock/static/src/xml/**/*',
         ],
         'web.assets_tests': [
-            'website_sale_stock/static/tests/tours/website_sale_stock_multilang.js',
-            'website_sale_stock/static/tests/tours/website_sale_stock_stock_notification.js',
-            'website_sale_stock/static/tests/tours/website_sale_stock_message_after_close_configurator_modal.js'
+            'website_sale_stock/static/tests/tours/*',
         ],
     },
     'license': 'LGPL-3',
