@@ -6,7 +6,7 @@ import { Product } from "../product/product";
 
 export class ProductList extends Component {
     static components = { Product };
-    static template = "saleProductConfigurator.productList";
+    static template = "sale.ProductList";
     static props = {
         products: Array,
         areProductsOptional: { type: Boolean, optional: true },
@@ -26,7 +26,7 @@ export class ProductList extends Component {
                 (totalPrice, product) => totalPrice + product.price * product.quantity,
                 0
             ),
-            this.env.currencyId
+            this.env.getCurrencyId(),
         );
     }
 }

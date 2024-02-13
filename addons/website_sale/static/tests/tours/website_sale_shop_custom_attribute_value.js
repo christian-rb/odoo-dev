@@ -11,21 +11,18 @@
     }, {
         trigger: 'li.js_attribute_value span:contains(Custom)',
         extra_trigger: 'li.js_attribute_value',
-        run: 'click',
     }, {
         trigger: 'input.variant_custom_value',
         run: "edit Wood",
     }, {
         id: 'add_cart_step',
         trigger: 'a:contains(Add to cart)',
-        run: 'click',
     },
     {
-        trigger: 'button:has(span:contains(Proceed to Checkout))',
-        run: 'click',
+        trigger: 'button:contains(Proceed to Checkout)',
     },
     {
         trigger: 'span:contains(Custom: Wood)',
         extra_trigger: '#cart_products',
-        run: function (){}, // check
+        isCheck: true,
     }]});

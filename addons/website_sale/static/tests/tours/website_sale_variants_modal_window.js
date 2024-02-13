@@ -37,9 +37,8 @@
         },
         {
             content: "Go through the modal window of the product configurator",
-            extra_trigger: '.oe_advanced_configurator_modal',
-            trigger: 'button span:contains(Proceed to Checkout)',
-            run: 'click'
+            extra_trigger: 'table.o_sale_product_configurator_table',
+            trigger: 'button:contains(Proceed to Checkout)',
         },
         {
             content: "Check the product is in the cart",

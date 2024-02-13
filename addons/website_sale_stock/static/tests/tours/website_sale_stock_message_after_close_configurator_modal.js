@@ -12,19 +12,18 @@ registry.category("web_tour.tours").add('website_sale_stock_message_after_close_
     }, {
         content: "Check that the stock quantity is displayed and correct",
         trigger: '#threshold_message:contains("30")',
-        run: function () { },
+        isCheck: true,
     }, {
         content: "Add to cart",
         trigger: '#add_to_cart',
     }, {
         content: "Continue shoppping",
-        extra_trigger: '.oe_advanced_configurator_modal',
-        trigger: 'button span:contains(Continue Shopping)',
-        run: 'click'
+        extra_trigger: 'table.o_sale_product_configurator_table',
+        trigger: 'button:contains(Continue Shopping)',
     }, {
         content: "Check that the stock quantity is displayed and correct after adding to cart",
         trigger: '#threshold_message:contains("29")',
-        run: function () { },
+        isCheck: true,
     }
     ]
 });
@@ -39,14 +38,14 @@ registry.category("web_tour.tours").add('website_sale_stock_message_after_close_
     }, {
         content: "Check that the stock quantity is displayed and correct",
         trigger: '#threshold_message:contains("30")',
-        run: function () { },
+        isCheck: true,
     }, {
         content: "Add to cart",
         trigger: '#add_to_cart',
     }, {
         content: "Check that the stock quantity is displayed and correct after adding to cart",
         trigger: '#threshold_message:contains("29")',
-        run: function () { },
+        isCheck: true,
     }
     ]
 });

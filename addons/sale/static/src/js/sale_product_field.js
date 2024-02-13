@@ -234,7 +234,13 @@ export class SaleOrderLineProductField extends Many2OneField {
             discard: () => {
                 saleOrderRecord.data.order_line.delete(this.props.record);
             },
+            ...this._getAdditionalDialogProps(),
         });
+    }
+
+    // Hook to append additional props in overriding modules.
+    _getAdditionalDialogProps() {
+        return {};
     }
 }
 

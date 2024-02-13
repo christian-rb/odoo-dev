@@ -8,7 +8,7 @@ import { ProductList } from "../product_list/product_list";
 
 export class ProductConfiguratorDialog extends Component {
     static components = { Dialog, ProductList};
-    static template = 'sale_product_configurator.dialog';
+    static template = 'sale.ProductConfiguratorDialog';
     static props = {
         productTemplateId: Number,
         ptavIds: { type: Array, element: Number },
@@ -24,7 +24,7 @@ export class ProductConfiguratorDialog extends Component {
         productUOMId: { type: Number, optional: true },
         companyId: { type: Number, optional: true },
         pricelistId: { type: Number, optional: true },
-        currencyId: Number,
+        currencyId: { type: Number, optional: true },
         soDate: String,
         edit: { type: Boolean, optional: true },
         save: Function,
@@ -41,10 +41,14 @@ export class ProductConfiguratorDialog extends Component {
             products: [],
             optionalProducts: [],
         });
+        this.getValuesUrl = '/sale_product_configurator/get_values';
+        this.createProductUrl = '/sale_product_configurator/create_product';
+        this.updateCombinationUrl = '/sale_product_configurator/update_combination';
+        this.getOptionalProductsUrl = '/sale_product_configurator/get_optional_products';
 
         useSubEnv({
             mainProductTmplId: this.props.productTemplateId,
-            currencyId: this.props.currencyId,
+            getCurrencyId: this._getCurrencyId.bind(this),
             addProduct: this._addProduct.bind(this),
             removeProduct: this._removeProduct.bind(this),
             setQuantity: this._setQuantity.bind(this),
@@ -54,7 +58,11 @@ export class ProductConfiguratorDialog extends Component {
         });
 
         onWillStart(async () => {
-            const { products, optional_products } = await this._loadData(this.props.edit);
+            const {
+                products,
+                optional_products,
+                currency_id,
+            } = await this._loadData(this.props.edit);
             this.state.products = products;
             this.state.optionalProducts = optional_products;
             for (const customValue of this.props.customAttributeValues) {
@@ -65,6 +73,8 @@ export class ProductConfiguratorDialog extends Component {
                 );
             }
             this._checkExclusions(this.state.products[0]);
+            // Use the currency id retrieved from the server if none was provided in the props.
+            this.props.currencyId ??= currency_id;
         });
     }
 
@@ -73,7 +83,7 @@ export class ProductConfiguratorDialog extends Component {
     //--------------------------------------------------------------------------
 
     async _loadData(onlyMainProduct) {
-        return rpc('/sale_product_configurator/get_values', {
+        return rpc(this.getValuesUrl, {
             product_template_id: this.props.productTemplateId,
             quantity: this.props.quantity,
             currency_id: this.props.currencyId,
@@ -83,18 +93,19 @@ export class ProductConfiguratorDialog extends Component {
             pricelist_id: this.props.pricelistId,
             ptav_ids: this.props.ptavIds,
             only_main_product: onlyMainProduct,
+            ...this._getAdditionalRpcParams(),
         });
     }
 
     async _createProduct(product) {
-        return rpc('/sale_product_configurator/create_product', {
+        return rpc(this.createProductUrl, {
             product_template_id: product.product_tmpl_id,
             combination: this._getCombination(product),
         });
     }
 
     async _updateCombination(product, quantity) {
-        return rpc('/sale_product_configurator/update_combination', {
+        return rpc(this.updateCombinationUrl, {
             product_template_id: product.product_tmpl_id,
             combination: this._getCombination(product),
             currency_id: this.props.currencyId,
@@ -103,11 +114,12 @@ export class ProductConfiguratorDialog extends Component {
             product_uom_id: this.props.productUOMId,
             company_id: this.props.companyId,
             pricelist_id: this.props.pricelistId,
+            ...this._getAdditionalRpcParams(),
         });
     }
 
     async _getOptionalProducts(product) {
-        return rpc('/sale_product_configurator/get_optional_products', {
+        return rpc(this.getOptionalProductsUrl, {
             product_template_id: product.product_tmpl_id,
             combination: this._getCombination(product),
             parent_combination: this._getParentsCombination(product),
@@ -115,12 +127,28 @@ export class ProductConfiguratorDialog extends Component {
             so_date: this.props.soDate,
             company_id: this.props.companyId,
             pricelist_id: this.props.pricelistId,
+            ...this._getAdditionalRpcParams(),
         });
+    }
+
+    // Hook to append additional RPC params in overriding modules.
+    _getAdditionalRpcParams() {
+        return {};
     }
 
     //--------------------------------------------------------------------------
     // Handlers
     //--------------------------------------------------------------------------
+
+    /**
+     * Return the id of the currency to display.
+     *
+     * This method is a hack which allows to add the currency id to the env after retrieving it
+     * from the server (asynchronously).
+     */
+    _getCurrencyId() {
+        return this.props.currencyId;
+    }
 
     /**
      * Add the product to the list of products and fetch his optional products.
@@ -183,27 +211,29 @@ export class ProductConfiguratorDialog extends Component {
      * Set the quantity of the product to a given value.
      *
      * If the value is less than or equal to zero, the product is removed from the product list
-     * instead, unless it is the main product, in which case the changes are ignored.
+     * instead, unless it is the main product, in which case the quantity is set to 1.
      *
      * @param {Number} productTmplId - The product template id, as a `product.template` id.
      * @param {Number} quantity - The new quantity of the product.
+     * @return {Boolean} - Whether the quantity was updated.
      */
     async _setQuantity(productTmplId, quantity) {
         if (quantity <= 0) {
             if (productTmplId === this.env.mainProductTmplId) {
-                const product = this._findProduct(productTmplId);
-                const { price } = await this._updateCombination(product, 1);
-                product.quantity = 1;
-                product.price = parseFloat(price);
-                return;
-            };
-            this._removeProduct(productTmplId);
-        } else {
-            const product = this._findProduct(productTmplId);
-            const { price } = await this._updateCombination(product, quantity);
-            product.quantity = quantity;
-            product.price = parseFloat(price);
+                quantity = 1;
+            } else {
+                this._removeProduct(productTmplId);
+                return true;
+            }
         }
+        const product = this._findProduct(productTmplId);
+        if (product.quantity === quantity) {
+            return false;
+        }
+        const { price } = await this._updateCombination(product, quantity);
+        product.quantity = quantity;
+        product.price = parseFloat(price);
+        return true;
     }
 
     /**
@@ -400,7 +430,7 @@ export class ProductConfiguratorDialog extends Component {
      *
      * @return {undefined}
      */
-    async onConfirm() {
+    async onConfirm(options) {
         if (!this.isPossibleConfiguration()) return;
         // Create the products with dynamic attributes
         for (const product of this.state.products) {
@@ -419,6 +449,7 @@ export class ProductConfiguratorDialog extends Component {
             this.state.products.filter(
                 p => p.product_tmpl_id !== this.env.mainProductTmplId
             ),
+            options,
         );
         this.props.close();
     }

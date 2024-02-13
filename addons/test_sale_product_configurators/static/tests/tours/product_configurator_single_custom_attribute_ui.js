@@ -1,9 +1,9 @@
 /** @odoo-module **/
 
+import { queryOne } from "@odoo/hoot-dom";
 import { registry } from "@web/core/registry";
 import { stepUtils, TourError } from "@web_tour/tour_service/tour_utils";
-import configuratorTourUtils from "@test_sale_product_configurators/js/tour_utils";
-import { queryOne } from "@odoo/hoot-dom";
+import configuratorTourUtils from "@sale/js/tours/product_configurator_tour_utils";
 
 registry.category("web_tour.tours").add('sale_product_configurator_single_custom_attribute_tour', {
     url: '/web',

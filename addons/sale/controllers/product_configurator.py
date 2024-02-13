@@ -5,10 +5,10 @@ from datetime import datetime
 from odoo.http import Controller, request, route
 
 
-class ProductConfiguratorController(Controller):
+class SaleProductConfiguratorController(Controller):
 
-    @route('/sale_product_configurator/get_values', type='json', auth='user')
-    def get_product_configurator_values(
+    @route(route='/sale_product_configurator/get_values', type='json', auth='user')
+    def sale_product_configurator_get_values(
         self,
         product_template_id,
         quantity,
@@ -19,6 +19,7 @@ class ProductConfiguratorController(Controller):
         pricelist_id=None,
         ptav_ids=None,
         only_main_product=False,
+        **kwargs,
     ):
         """ Return all product information needed for the product configurator.
 
@@ -56,6 +57,9 @@ class ProductConfiguratorController(Controller):
             )
         if not combination:
             combination = product_template._get_first_possible_combination()
+        currency = request.env['res.currency'].browse(currency_id)
+        pricelist = request.env['product.pricelist'].browse(pricelist_id)
+        so_date = datetime.fromisoformat(so_date)
 
         return dict(
             products=[
@@ -63,11 +67,12 @@ class ProductConfiguratorController(Controller):
                     **self._get_product_information(
                         product_template,
                         combination,
-                        currency_id,
+                        currency,
+                        pricelist,
                         so_date,
                         quantity=quantity,
                         product_uom_id=product_uom_id,
-                        pricelist_id=pricelist_id,
+                        **kwargs,
                     ),
                     parent_product_tmpl_ids=[],
                 )
@@ -79,19 +84,27 @@ class ProductConfiguratorController(Controller):
                         optional_product_template._get_first_possible_combination(
                             parent_combination=combination
                         ),
-                        currency_id,
+                        currency,
+                        pricelist,
                         so_date,
                         # giving all the ptav of the parent product to get all the exclusions
                         parent_combination=product_template.attribute_line_ids.\
                             product_template_value_ids,
-                        pricelist_id=pricelist_id,
+                        **kwargs,
                     ),
                     parent_product_tmpl_ids=[product_template.id],
-                ) for optional_product_template in product_template.optional_product_ids
-            ] if not only_main_product else []
+                ) for optional_product_template in product_template.optional_product_ids if
+                self._show_product(optional_product_template, combination)
+            ] if not only_main_product else [],
+            currency_id=currency_id,
         )
 
-    @route('/sale_product_configurator/create_product', type='json', auth='user')
+    @route(
+        route='/sale_product_configurator/create_product',
+        type='json',
+        auth='user',
+        methods=['POST'],
+    )
     def sale_product_configurator_create_product(self, product_template_id, combination):
         """ Create the product when there is a dynamic attribute in the combination.
 
@@ -107,7 +120,12 @@ class ProductConfiguratorController(Controller):
         product = product_template._create_product_variant(combination)
         return product.id
 
-    @route('/sale_product_configurator/update_combination', type='json', auth='user')
+    @route(
+        route='/sale_product_configurator/update_combination',
+        type='json',
+        auth='user',
+        methods=['POST'],
+    )
     def sale_product_configurator_update_combination(
         self,
         product_template_id,
@@ -118,6 +136,7 @@ class ProductConfiguratorController(Controller):
         product_uom_id=None,
         company_id=None,
         pricelist_id=None,
+        **kwargs,
     ):
         """ Return the updated combination information.
 
@@ -152,9 +171,10 @@ class ProductConfiguratorController(Controller):
             uom=product_uom,
             currency=currency,
             date=datetime.fromisoformat(so_date),
+            **kwargs,
         )
 
-    @route('/sale_product_configurator/get_optional_products', type='json', auth='user')
+    @route(route='/sale_product_configurator/get_optional_products', type='json', auth='user')
     def sale_product_configurator_get_optional_products(
         self,
         product_template_id,
@@ -164,6 +184,7 @@ class ProductConfiguratorController(Controller):
         so_date,
         company_id=None,
         pricelist_id=None,
+        **kwargs,
     ):
         """ Return information about optional products for the given `product.template`.
 
@@ -187,6 +208,8 @@ class ProductConfiguratorController(Controller):
         parent_combination = request.env['product.template.attribute.value'].browse(
             parent_combination + combination
         )
+        currency = request.env['res.currency'].browse(currency_id)
+        pricelist = request.env['product.pricelist'].browse(pricelist_id)
         return [
             dict(
                 **self._get_product_information(
@@ -194,25 +217,28 @@ class ProductConfiguratorController(Controller):
                     optional_product_template._get_first_possible_combination(
                         parent_combination=parent_combination
                     ),
-                    currency_id,
-                    so_date,
+                    currency,
+                    pricelist,
+                    datetime.fromisoformat(so_date),
                     parent_combination=parent_combination,
-                    pricelist_id=pricelist_id,
+                    **kwargs,
                 ),
                 parent_product_tmpl_ids=[product_template.id],
-            ) for optional_product_template in product_template.optional_product_ids
+            ) for optional_product_template in product_template.optional_product_ids if
+            self._show_product(optional_product_template, parent_combination)
         ]
 
     def _get_product_information(
         self,
         product_template,
         combination,
-        currency_id,
+        currency,
+        pricelist,
         so_date,
         quantity=1,
         product_uom_id=None,
-        pricelist_id=None,
         parent_combination=None,
+        **kwargs,
     ):
         """ Return complete information about a product.
 
@@ -220,11 +246,12 @@ class ProductConfiguratorController(Controller):
                                            `product.template` record.
         :param recordset combination: The combination of the product, as a
                                       `product.template.attribute.value` recordset.
-        :param int currency_id: The currency of the transaction, as a `res.currency` id.
-        :param str so_date: The date of the `sale.order`, to compute the price at the right rate.
+        :param recordset currency: The currency of the transaction, as a `res.currency` record.
+        :param recordset pricelist: The pricelist to use, as a `product.pricelist` record.
+        :param datetime so_date: The date of the `sale.order`, to compute the price at the right
+                                 rate.
         :param int quantity: The quantity of the product.
         :param int|None product_uom_id: The unit of measure of the product, as a `uom.uom` id.
-        :param int|None pricelist_id:  The pricelist to use, as a `product.pricelist` id.
         :param recordset|None parent_combination: The combination of the parent product, as a
                                                   `product.template.attribute.value` recordset.
         :rtype: dict
@@ -258,25 +285,25 @@ class ProductConfiguratorController(Controller):
                 'parent_exclusions': dict,
             }
         """
-        pricelist = request.env['product.pricelist'].browse(pricelist_id)
         product_uom = request.env['uom.uom'].browse(product_uom_id)
-        currency = request.env['res.currency'].browse(currency_id)
         product = product_template._get_variant_for_combination(combination)
         attribute_exclusions = product_template._get_attribute_exclusions(
             parent_combination=parent_combination,
             combination_ids=combination.ids,
         )
+        product_or_template = product or product_template
 
         return dict(
             product_tmpl_id=product_template.id,
             **self._get_basic_product_information(
-                product or product_template,
+                product_or_template,
                 pricelist,
                 combination,
                 quantity=quantity,
                 uom=product_uom,
                 currency=currency,
-                date=datetime.fromisoformat(so_date),
+                date=so_date,
+                **kwargs,
             ),
             quantity=quantity,
             attribute_lines=[dict(
@@ -285,11 +312,8 @@ class ProductConfiguratorController(Controller):
                 attribute_values=[
                     dict(
                         **ptav.read(['name', 'html_color', 'image', 'is_custom'])[0],
-                        price_extra=ptav.currency_id._convert(
-                            ptav.price_extra,
-                            currency,
-                            request.env.company,
-                            datetime.fromisoformat(so_date).date(),
+                        price_extra=self._get_ptav_price_extra(
+                            ptav, currency, so_date, product_or_template
                         ),
                     ) for ptav in ptal.product_template_value_ids
                     if ptav.ptav_active or combination and ptav.id in combination.ids
@@ -345,3 +369,36 @@ class ProductConfiguratorController(Controller):
                 **kwargs,
             ),
         )
+
+    def _get_ptav_price_extra(self, ptav, currency, so_date, product_or_template):
+        """ Hook which returns the extra price for a product template attribute value.
+
+        :param recordset ptav: The product template attribute value for which to compute the extra
+                               price, as a `product.template.attribute.value` recordset.
+        :param recordset currency: The currency of the transaction, as a `res.currency` record.
+        :param datetime so_date: The date of the `sale.order`, to compute the price at the right
+                                 rate.
+        :param recordset product_or_template: The product on which the product template attribute
+                                              value applies, as a `product.product` or
+                                              `product.template` record.
+        :rtype: float
+        :return: The extra price for the product template attribute value.
+        """
+        return ptav.currency_id._convert(
+            ptav.price_extra,
+            currency,
+            request.env.company,
+            so_date.date(),
+        )
+
+    def _show_product(self, product_template, parent_combination):
+        """ Hook which returns whether a product should be shown in the configurator.
+
+        :param recordset product_template: The product being checked, as a `product.template`
+                                           record.
+        :param recordset parent_combination: The combination of the parent product, as a
+                                             `product.template.attribute.value` recordset.
+        :rtype: bool
+        :return: Whether the product should be shown in the configurator.
+        """
+        return True
