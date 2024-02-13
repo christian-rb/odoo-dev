@@ -71,7 +71,7 @@ class ProjectUpdate(models.Model):
         costs_revenues = project.analytic_account_id and project.allow_billable
         if not (self.env.user.has_group('project.group_project_manager') and costs_revenues):
             return {}
-        profitability_items = project._get_profitability_items(False)
+        profitability_items = project._get_profitability_items(None, None, with_action=False)
         costs = sum(profitability_items['costs']['total'].values())
         revenues = sum(profitability_items['revenues']['total'].values())
         margin = revenues + costs
