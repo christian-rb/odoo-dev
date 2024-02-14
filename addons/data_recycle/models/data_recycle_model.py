@@ -142,8 +142,11 @@ class DataRecycleModel(models.Model):
                         self.env.cr.commit()
             else:
                 records_to_clean = records_to_clean + records_to_create
+
+        self.env['ir.cron']._log_progress(0, len(records_to_clean))
         for records_to_clean_batch in split_every(DR_CREATE_STEP_MANUAL, records_to_clean):
             self.env['data_recycle.record'].create(records_to_clean_batch)
+            self.env['ir.cron']._log_progress(len(records_to_clean_batch))
             if batch_commits and not is_test:
                 self.env.cr.commit()
 
