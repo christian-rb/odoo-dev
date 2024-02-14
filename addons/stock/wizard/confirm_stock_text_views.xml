@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_text_confirm" model="ir.ui.view">
+        <field name="name">confirm.stock.text</field>
+        <field name="model">confirm.stock.text</field>
+        <field name="arch" type="xml">
+            <form string="Text Confirmation">
+                <div>
+                    <div>
+                        You are about to confirm this Delivery Order by <strong><field name="confirmation_type" readonly="True"/></strong> Text Message.
+                    </div>
+                    <div groups="base.group_erp_manager">
+                        <field name="is_installed_stock_sms" invisible="1"/>
+                        <field name="is_installed_whatsapp_stock" invisible="1"/>
+                        <strong>Please select the confirmation type...</strong><br/>
+                        <field name="confirmation_type" widget="radio" options="{'horizontal': True}"/>
+                        <div class="content-group" id="module_install_warning">
+                            <div class="mt16 text-warning" id="module_install_warning_sms" invisible="confirmation_type != 'sms' or is_installed_stock_sms">
+                                <strong>Confirming</strong> this will intall Stock - SMS module.
+                            </div>
+                            <div class="mt16 text-warning" id="module_install_warning_whatsapp" invisible="confirmation_type != 'whatsapp' or is_installed_whatsapp_stock">
+                                <strong>Confirming</strong> this will intall WhatsApp-Stock module.
+                                <a href="https://www.odoo.com/documentation/17.0/applications/productivity/whatsapp.html" target="_blank">
+                                    <i title="Learn more about whatsapp module" class="o_doc_link"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        This feature can easily be disabled from the Settings of Inventory or by clicking on "Disable Text".
+                    </div>
+                </div>
+                <footer>
+                    <button name="send_text" type="object" data-hotkey="q"
+                            string="Confirm" class="oe_highlight"/>
+                    <button name="dont_send_text" type="object" data-hotkey="w"
+                            string="Disable Text" class="btn btn-secondary"/>
+                    <button special="cancel" data-hotkey="x" string="Cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

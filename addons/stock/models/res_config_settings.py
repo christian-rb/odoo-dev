@@ -30,7 +30,8 @@ class ResConfigSettings(models.TransientModel):
         help="Group your move operations in wave transfer to process them together")
     module_stock_barcode = fields.Boolean("Barcode Scanner")
     stock_move_email_validation = fields.Boolean(related='company_id.stock_move_email_validation', readonly=False)
-    module_stock_sms = fields.Boolean("SMS Confirmation")
+    module_stock_sms = fields.Boolean("SMS Confirmation", compute='_compute_stock_confirmation_modules', store=True)
+    module_whatsapp_stock = fields.Boolean("Whatsapp Confirmation", compute='_compute_stock_confirmation_modules', store=True)
     module_delivery = fields.Boolean("Delivery Methods")
     module_delivery_dhl = fields.Boolean("DHL Express Connector")
     module_delivery_fedex = fields.Boolean("FedEx Connector")
@@ -50,6 +51,17 @@ class ResConfigSettings(models.TransientModel):
     annual_inventory_day = fields.Integer(related='company_id.annual_inventory_day', readonly=False)
     group_stock_reception_report = fields.Boolean("Reception Report", implied_group='stock.group_reception_report')
     module_stock_dropshipping = fields.Boolean("Dropshipping")
+    text_confirmation = fields.Boolean(related='company_id.text_confirmation', readonly=False)
+    confirmation_type = fields.Selection(related='company_id.confirmation_type', readonly=False)
+
+    @api.depends('confirmation_type')
+    def _compute_stock_confirmation_modules(self):
+        for setting in self:
+            if setting.text_confirmation:
+                if setting.confirmation_type == 'sms':
+                    setting.module_stock_sms = True
+                elif setting.confirmation_type == 'whatsapp':
+                    setting.module_whatsapp_stock = True
 
     @api.onchange('group_stock_multi_locations')
     def _onchange_group_stock_multi_locations(self):
