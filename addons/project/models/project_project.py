@@ -916,15 +916,19 @@ class Project(models.Model):
 
     # This method should be called once a day by the scheduler
     @api.model
-    def _send_rating_all(self):
-        projects = self.search([
+    def _send_rating_all(self, batch_size=20):
+        domain = [
             ('rating_active', '=', True),
             ('rating_status', '=', 'periodic'),
             ('rating_request_deadline', '<=', fields.Datetime.now())
-        ])
+        ]
+        projects = self.search(domain, limit=batch_size)
+        project_count = len(projects) if len(projects) < batch_size else self.search_count(domain)
+        self.env['ir.cron']._log_progress(0, project_count)
         for project in projects:
             project.task_ids._send_task_rating_mail()
             project._compute_rating_request_deadline()
+            self.env['ir.cron']._log_progress(1)
             self.env.cr.commit()
 
     # ---------------------------------------------------
