@@ -1,4 +1,7 @@
 /** @odoo-module */
+
+import { simulateBarCode } from "@barcodes/../tests/helpers";
+
 export function inLeftSide(steps) {
     return [
         {
@@ -41,4 +44,14 @@ export function elementDoesNotExist(selector) {
         trigger: negate(selector),
         isCheck: true,
     };
+}
+
+export function scan_barcode(barcode) {
+    return [
+        {
+            content: `PoS model scan barcode '${barcode}'`,
+            trigger: "body", // The element here does not really matter as long as it is present
+            run: () => simulateBarCode([...barcode, "Enter"]),
+        },
+    ];
 }
