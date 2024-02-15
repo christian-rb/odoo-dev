@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_move_form_l10n_gr_mydata" model="ir.ui.view">
+        <field name="name">account.move.form</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//group[@id='header_right_group']" position="inside">
+                <field name="l10n_gr_edi_available_inv_type" invisible="1"/>
+                <field name="l10n_gr_edi_need_correlated" invisible="1"/>
+                <field name="l10n_gr_edi_inv_type"
+                       widget="selection_l10n_gr_edi_inv_type"
+                       invisible="country_code != 'GR'"
+                       required="1"
+                       readonly="state != 'draft'"/>
+                <field name="l10n_gr_edi_correlation_id"
+                       invisible="not l10n_gr_edi_need_correlated"
+                       required="l10n_gr_edi_need_correlated"
+                       readonly="state != 'draft'"/>
+                <field name="l10n_gr_edi_mark"
+                       invisible="country_code != 'GR' or not l10n_gr_edi_mark"
+                       readonly="1"/>
+                <field name="state"
+                       invisible="country_code != 'GR' or move_type not in ('in_invoice', 'in_refund')"
+                       readonly="1"/>
+            </xpath>
+
+            <xpath expr="//notebook/page[@name='invoice_tab']//tree/field[@name='name']" position="after">
+                <field name="l10n_gr_edi_available_cls_category" column_invisible="1"/>
+                <field name="l10n_gr_edi_available_cls_type" column_invisible="1"/>
+                <field name="l10n_gr_edi_available_cls_vat" column_invisible="1"/>
+                <field name="l10n_gr_edi_detail_type" optional="hide" column_invisible="parent.country_code != 'GR'"/>
+                <field name="l10n_gr_edi_cls_category" widget="selection_l10n_gr_edi_cls_category" optional="show" column_invisible="parent.country_code != 'GR'"/>
+                <field name="l10n_gr_edi_cls_type" widget="selection_l10n_gr_edi_cls_type" optional="show" column_invisible="parent.country_code != 'GR'"/>
+                <field name="l10n_gr_edi_cls_vat" widget="selection_l10n_gr_edi_cls_vat" optional="hide" column_invisible="parent.country_code != 'GR'"/>
+            </xpath>
+
+            <xpath expr="//notebook/page[@name='invoice_tab']//tree/field[@name='tax_ids']" position="after">
+                <field name="l10n_gr_edi_need_exemption_category" column_invisible="True"/>
+                <field name="l10n_gr_edi_tax_exemption_category"
+                       optional="hide"
+                       column_invisible="parent.country_code != 'GR'"
+                       readonly="not l10n_gr_edi_need_exemption_category"/>
+            </xpath>
+
+            <!-- MyDATA Documents Tab -->
+            <xpath expr="//page[@id='other_tab_entry']" position="after">
+                <page id="l10n_gr_mydata_documents"
+                      string="MyDATA"
+                      invisible="not l10n_gr_edi_document_ids">
+                    <field name="l10n_gr_edi_document_ids">
+                        <tree create="false" edit="false"
+                              decoration-primary="state == False"
+                              decoration-danger="state == 'error'"
+                              decoration-success="state == 'sent'">
+                            <field name="attachment_id" column_invisible="1"/>
+                            <field name="datetime"/>
+                            <field name="state"/>
+                            <button name="action_download"
+                                    type="object"
+                                    string="Download"
+                                    invisible="not attachment_id"/>
+                        </tree>
+                    </field>
+                </page>
+            </xpath>
+
+            <xpath expr="//header" position="inside">
+                <button name="mydata_save_classifications"
+                        type="object"
+                        string="Save Classification Preferences"
+                        invisible="country_code != 'GR' or state != 'draft'"/>
+                <button name="mydata_send_expense_classifications"
+                        type="object"
+                        string="Send Expense Classifications to MyDATA"
+                        invisible="country_code != 'GR'
+                                    or move_type not in ('in_invoice', 'in_refund')
+                                    or state != 'posted'"/>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>
