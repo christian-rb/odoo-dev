@@ -4,6 +4,7 @@ import publicWidget from "@web/legacy/js/public/public_widget";
 import { rpc } from "@web/core/network/rpc";
 import DynamicSnippetCarousel from "@website/snippets/s_dynamic_snippet_carousel/000";
 import wSaleUtils from "@website_sale/js/website_sale_utils";
+import { WebsiteSale } from "../../js/website_sale";
 
 const DynamicSnippetProducts = DynamicSnippetCarousel.extend({
     selector: '.s_dynamic_snippet_products',
@@ -93,6 +94,9 @@ const DynamicSnippetProducts = DynamicSnippetCarousel.extend({
             }
             searchDomain.push(...nameDomain);
         }
+        if (!this.el.dataset.showVariants) {
+            searchDomain.push('hide_variants')
+        }
         return searchDomain;
     },
     /**
@@ -106,7 +110,7 @@ const DynamicSnippetProducts = DynamicSnippetCarousel.extend({
     },
 });
 
-const DynamicSnippetProductsCard = publicWidget.Widget.extend({
+const DynamicSnippetProductsCard = WebsiteSale.extend({
     selector: '.o_carousel_product_card',
     read_events: {
         'click .js_add_cart': '_onClickAddToCart',
@@ -133,6 +137,9 @@ const DynamicSnippetProductsCard = publicWidget.Widget.extend({
      */
     async _onClickAddToCart(ev) {
         const $card = $(ev.currentTarget).closest('.card');
+        if ($card.find('input[data-is-template]').data('is-template')) {
+            return this._onClickAdd(ev);
+        }
         const data = await rpc("/shop/cart/update_json", {
             product_id: $card.find('input[data-product-id]').data('product-id'),
             add_qty: 1,

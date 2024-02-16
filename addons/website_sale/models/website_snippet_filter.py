@@ -56,12 +56,22 @@ class WebsiteSnippetFilter(models.Model):
         return samples
 
     def _filter_records_to_values(self, records, is_sample=False):
+        hide_variants = self.env.context.get('hide_variants') and not isinstance(records, list)
+        if hide_variants:
+            records = records.product_tmpl_id
         res_products = super()._filter_records_to_values(records, is_sample)
         if self.model_name == 'product.product':
             for res_product in res_products:
                 product = res_product.get('_record')
                 if not is_sample:
-                    res_product.update(product._get_combination_info_variant())
+                    if hide_variants:
+                        res_product.update(product._get_combination_info())
+                        if product.product_variant_count > 1:
+                            res_product['is_template'] = True
+                        else:
+                            res_product['_record'] = product.product_variant_ids[0]
+                    else:
+                        res_product.update(product._get_combination_info_variant())
                     if records.env.context.get('add2cart_rerender'):
                         res_product['_add2cart_rerender'] = True
         return res_products
@@ -196,3 +206,14 @@ class WebsiteSnippetFilter(models.Model):
                     display_default_code=False,
                 ).search(domain, limit=limit)
         return products
+
+    def _prepare_values(self, limit=None, search_domain=None):
+        hide_variants = False
+        if self.filter_id and search_domain and 'hide_variants' in search_domain:
+            hide_variants = True
+            search_domain.remove('hide_variants')
+            search_domain = search_domain or None
+        return super(
+            WebsiteSnippetFilter,
+            self.with_context(hide_variants=hide_variants)
+        )._prepare_values(limit, search_domain)

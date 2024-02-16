@@ -862,3 +862,7 @@ class ProductTemplate(models.Model):
     def _website_show_quick_add(self):
         website = self.env['website'].get_current_website()
         return self.sale_ok and (not website.prevent_zero_price_sale or self._get_contextual_price())
+
+    def _get_contextual_price_tax_selection(self):
+        self.ensure_one()
+        return self.product_variant_id._get_contextual_price_tax_selection()
