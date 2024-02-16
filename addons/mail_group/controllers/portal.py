@@ -207,6 +207,38 @@ class PortalMailGroup(http.Controller):
     # SUBSCRIPTION
     # ------------------------------------------------------------
 
+    # csrf is disabled here because it will be called by the MUA with unpredictable session at that time
+    @http.route('/group/<int:group_id>/unsubscribe_oc', type='http', website=True, auth='public', methods=['GET', 'POST'],
+           csrf=False)
+    def group_unsubscribe_oneclick(self, group_id, token, email):
+        """ Unsubscribe a given user from a given group. One-click unsubscribe
+        allow mail user agent to propose a one click button to the user to
+        unsubscribe as defined in rfc8058. Only POST method is allowed preventing
+        the risk that anti-spam trigger unwanted unsubscribe (scenario explained
+        in the same rfc).
+
+        :param int group_id: group ID from which user wants to unsubscribe;
+        :param str token: optional access token ensuring security;
+        :param email: email to unsubscribe;
+        """
+        if request.httprequest.method != "POST":
+            raise werkzeug.exceptions.Forbidden()
+
+        group_sudo = request.env['mail.group'].sudo().browse(group_id).exists()
+
+        # new route parameters
+        if group_sudo and token and email:
+            correct_token = group_sudo._generate_group_access_token()
+            if not consteq(correct_token, token):
+                raise werkzeug.exceptions.NotFound()
+            digest_sudo._action_unsubscribe_users(request.env['res.users'].sudo().browse(int(user_id)))
+        else:
+            raise werkzeug.exceptions.NotFound()
+
+        return request.render('digest.portal_digest_unsubscribed', {
+            'digest': digest_sudo,
+        })
+
     @http.route('/group/subscribe', type='json', auth='public', website=True)
     def group_subscribe(self, group_id=0, email=None, token=None, **kw):
         """Subscribe the current logged user or the given email address to the mailing list.

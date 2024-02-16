@@ -430,6 +430,7 @@ class MailGroup(models.Model):
                     'List-Archive': f'<{base_url}/groups/{slug(self)}>',
                     'List-Subscribe': f'<{base_url}/groups?email={email_url_encoded}>',
                     'List-Unsubscribe': f'<{base_url}/groups?unsubscribe&email={email_url_encoded}>',
+                    'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
                     'Precedence': 'list',
                     'X-Auto-Response-Suppress': 'OOF',  # avoid out-of-office replies from MS Exchange
                 }
@@ -665,6 +666,14 @@ class MailGroup(models.Model):
         """Generate an action token to be able to subscribe / unsubscribe from the mailing list."""
         self.ensure_one()
         return hmac(self.env(su=True), 'mail_group-access-token-portal', self.id)
+
+    def _generate_group_access_token_email_based(self, email):
+        """Generate an action token to be able to unsubscribe from the mailing
+        list, while hashing the target email to avoid spoofind other emails.
+
+        :param str email: email included in hash, should be normalized
+        """
+        return tools.hmac(self.env(su=True), 'mail_group-access-token-portal-email', (self.id, email))
 
     def _find_member(self, email, partner_id=None):
         """Return the <mail.group.member> corresponding to the given email address."""
