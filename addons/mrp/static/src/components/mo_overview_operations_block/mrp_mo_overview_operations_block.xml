@@ -3,10 +3,10 @@
 
     <t t-name="mrp.MoOverviewOperationsBlock">
         <t t-if="hasOperations">
-            <tr>
+            <tr t-on-click="toggleFolded">
                 <td class="text-start">
                     <span t-attf-style="margin-left: {{ level * 20 }}px"/>
-                    <button t-on-click="toggleFolded" class="btn btn-light ps-0 py-0" t-attf-aria-label="{{ state.isFolded ? 'Unfold' : 'Fold' }}" t-attf-title="{{ state.isFolded ? 'Unfold' : 'Fold' }}">
+                    <button class="btn btn-light ps-0 py-0" t-attf-aria-label="{{ state.isFolded ? 'Unfold' : 'Fold' }}" t-attf-title="{{ state.isFolded ? 'Unfold' : 'Fold' }}">
                         <i t-attf-class="fa fa-fw fa-caret-{{ state.isFolded ? 'right' : 'down' }}" role="img"/>
                         Operations
                     </button>
