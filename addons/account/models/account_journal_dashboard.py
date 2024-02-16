@@ -482,7 +482,7 @@ class account_journal(models.Model):
         payment_field_list = [
             "account_move_line.journal_id",
             "account_move_line.move_id",
-            "-account_move_line.amount_residual AS amount_total_company",
+            "ABS(account_move_line.amount_residual) AS amount_total_company",
         ]
         # DRAFTS
         query, params = sale_purchase_journals._get_draft_bills_query().select(*bills_field_list)
@@ -492,32 +492,32 @@ class account_journal(models.Model):
         # WAITING BILLS AND PAYMENTS
         query_results_to_pay = {}
         if purchase_journals:
-            query, params = purchase_journals._get_open_payments_query().select(*payment_field_list)
+            query, params = purchase_journals._get_open_purchases_query().select(*payment_field_list)
             self.env.cr.execute(query, params)
-            query_results_payments_to_pay = group_by_journal(self.env.cr.dictfetchall())
+            query_results_purchases_to_pay = group_by_journal(self.env.cr.dictfetchall())
             for journal in purchase_journals:
-                query_results_to_pay[journal.id] = query_results_payments_to_pay[journal.id]
+                query_results_to_pay[journal.id] = query_results_purchases_to_pay[journal.id]
         if sale_journals:
-            query, params = sale_journals._get_open_bills_to_pay_query().select(*bills_field_list)
+            query, params = sale_journals._get_open_sales_query().select(*payment_field_list)
             self.env.cr.execute(query, params)
-            query_results_bills_to_pay = group_by_journal(self.env.cr.dictfetchall())
+            query_results_sales_to_pay = group_by_journal(self.env.cr.dictfetchall())
             for journal in sale_journals:
-                query_results_to_pay[journal.id] = query_results_bills_to_pay[journal.id]
+                query_results_to_pay[journal.id] = query_results_sales_to_pay[journal.id]
 
         # LATE BILLS AND PAYMENTS
         late_query_results = {}
         if purchase_journals:
-            query, params = purchase_journals._get_late_payment_query().select(*payment_field_list)
+            query, params = purchase_journals._get_late_purchases_query().select(*payment_field_list)
             self.env.cr.execute(query, params)
-            late_payments_query_results = group_by_journal(self.env.cr.dictfetchall())
+            query_results_late_purchases = group_by_journal(self.env.cr.dictfetchall())
             for journal in purchase_journals:
-                late_query_results[journal.id] = late_payments_query_results[journal.id]
+                late_query_results[journal.id] = query_results_late_purchases[journal.id]
         if sale_journals:
-            query, params = sale_journals._get_late_bills_query().select(*bills_field_list)
+            query, params = sale_journals._get_late_sales_query().select(*payment_field_list)
             self.env.cr.execute(query, params)
-            late_bills_query_results = group_by_journal(self.env.cr.dictfetchall())
+            query_results_late_sales = group_by_journal(self.env.cr.dictfetchall())
             for journal in sale_journals:
-                late_query_results[journal.id] = late_bills_query_results[journal.id]
+                late_query_results[journal.id] = query_results_late_sales[journal.id]
 
         to_check_vals = {
             journal.id: (amount_total_signed_sum, count)
@@ -585,15 +585,6 @@ class account_journal(models.Model):
                 'to_check_balance': currency.format(amount_total_signed_sum),
             })
 
-    def _get_open_bills_to_pay_query(self):
-        return self.env['account.move']._where_calc([
-            *self.env['account.move']._check_company_domain(self.env.companies),
-            ('journal_id', 'in', self.ids),
-            ('state', '=', 'posted'),
-            ('payment_state', 'in', ('not_paid', 'partial')),
-            ('move_type', 'in', self.env['account.move'].get_invoice_types(include_receipts=True)),
-        ])
-
     def _get_draft_bills_query(self):
         return self.env['account.move']._where_calc([
             *self.env['account.move']._check_company_domain(self.env.companies),
@@ -603,17 +594,29 @@ class account_journal(models.Model):
             ('move_type', 'in', self.env['account.move'].get_invoice_types(include_receipts=True)),
         ])
 
-    def _get_late_bills_query(self):
-        return self.env['account.move']._where_calc([
-            *self.env['account.move']._check_company_domain(self.env.companies),
+    def _get_open_sales_query(self):
+        return self.env['account.move.line']._where_calc([
+            *self.env['account.move.line']._check_company_domain(self.env.companies),
             ('journal_id', 'in', self.ids),
-            ('invoice_date_due', '<', fields.Date.context_today(self)),
-            ('state', '=', 'posted'),
-            ('payment_state', 'in', ('not_paid', 'partial')),
-            ('move_type', 'in', self.env['account.move'].get_invoice_types(include_receipts=True)),
+            ('move_id.payment_state', 'in', ('not_paid', 'partial')),
+            ('date_maturity', '!=', False),
+            ('amount_residual', '>', 0),
+            ('parent_state', '=', 'posted'),
+            ('journal_id.type', '=', 'sale'),
         ])
 
-    def _get_open_payments_query(self):
+    def _get_late_sales_query(self):
+        return self.env['account.move.line']._where_calc([
+            *self.env['account.move.line']._check_company_domain(self.env.companies),
+            ('journal_id', 'in', self.ids),
+            ('move_id.payment_state', 'in', ('not_paid', 'partial')),
+            ('date_maturity', '<', fields.Date.context_today(self)),
+            ('amount_residual', '>', 0),
+            ('parent_state', '=', 'posted'),
+            ('journal_id.type', '=', 'sale'),
+        ])
+
+    def _get_open_purchases_query(self):
         return self.env['account.move.line']._where_calc([
             *self.env['account.move.line']._check_company_domain(self.env.companies),
             ('journal_id', 'in', self.ids),
@@ -624,7 +627,7 @@ class account_journal(models.Model):
             ('journal_id.type', '=', 'purchase'),
         ])
 
-    def _get_late_payment_query(self):
+    def _get_late_purchases_query(self):
         return self.env['account.move.line']._where_calc([
             *self.env['account.move.line']._check_company_domain(self.env.companies),
             ('journal_id', 'in', self.ids),

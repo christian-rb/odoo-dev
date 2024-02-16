@@ -407,12 +407,14 @@ class AccountPaymentRegister(models.TransientModel):
 
     @api.depends('can_edit_wizard')
     def _compute_group_payment(self):
-        for wizard in self:
-            if wizard.can_edit_wizard:
-                batches = wizard._get_batches()
-                wizard.group_payment = len(batches[0]['lines'].move_id) == 1
-            else:
-                wizard.group_payment = False
+        self.group_payment = self._context.get('force_group_payment')
+        if not self.group_payment:
+            for wizard in self:
+                if wizard.can_edit_wizard:
+                    batches = wizard._get_batches()
+                    wizard.group_payment = len(batches[0]['lines'].move_id) == 1
+                else:
+                    wizard.group_payment = False
 
     @api.depends('journal_id')
     def _compute_currency_id(self):
@@ -946,6 +948,7 @@ class AccountPaymentRegister(models.TransientModel):
         payments = self._init_payments(to_process, edit_mode=edit_mode)
         self._post_payments(to_process, edit_mode=edit_mode)
         self._reconcile_payments(to_process, edit_mode=edit_mode)
+        self.group_payment = self._context.get('force_group_payment')
         return payments
 
     def action_create_payments(self):
