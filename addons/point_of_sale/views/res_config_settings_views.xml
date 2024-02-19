@@ -283,14 +283,19 @@
                                     </div>
                                 </div>
                             </setting>
-                            <setting help="Print a QR code on the receipt to allow the user to easily request the invoice for an order.">
-                                <field name="point_of_sale_use_ticket_qr_code"/>
-                            </setting>
-                            <setting help="Add a 5-digit code on the receipt to allow the user to request the invoice for an order on the portal.">
-                                <field name="point_of_sale_ticket_unique_code"/>
-                            </setting>
                             <setting id="order_reference" groups="base.group_no_one" string="Order Reference" help="Generation of your order references">
                                 <field name="pos_sequence_id" readonly="1"/>
+                            </setting>
+                            <setting help="Print information on the receipt to allow the customer to easily request the invoice anytime, from Odoo's portal.">
+                                <field name="point_of_sale_use_ticket_qr_code"/>
+                                <div class="content-group mt16" invisible="not point_of_sale_use_ticket_qr_code">
+                                    <div class="col mt16">
+                                        <div class="content-group row">
+                                            <label for="point_of_sale_ticket_portal_url_display_mode" class="col-lg-2" string="Print"/>
+                                            <field name="point_of_sale_ticket_portal_url_display_mode"/>
+                                        </div>
+                                    </div>
+                                </div>
                             </setting>
                         </block>
 
