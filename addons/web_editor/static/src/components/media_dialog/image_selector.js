@@ -141,7 +141,13 @@ export class ImageSelector extends FileSelector {
         await fetch(url).then(async result => {
             const blob = await result.blob();
             blob.id = new Date().getTime();
-            blob.name = new URL(url).pathname.split("/").findLast(s => s);
+            let docHref = this.props.media.ownerDocument.defaultView.location.href;
+            if (docHref === "about:srcdoc") {
+                // If the iframe has a `srcdoc` attribute, use the url of the
+                // main window as a base for the URL creation.
+                docHref = window.location.href;
+            }
+            blob.name = new URL(url, docHref).pathname.split("/").findLast(s => s);
             await this.uploadFiles([blob]);
         }).catch(async () => {
             await new Promise(resolve => {
