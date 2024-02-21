@@ -10,16 +10,16 @@
                         <h2>Inventory Count Sheet</h2>
                         <t t-set="locations" t-value="docs.mapped('location_id')"/>
                         <div class="oe_structure"></div>
-                        <table class="table table-sm">
+                        <table class="o_main_table table table-sm table-borderless">
                             <thead>
                                 <tr>
-                                    <th groups="stock.group_stock_multi_locations"><strong>Location</strong></th>
-                                    <th><strong>Product</strong></th>
-                                    <th groups="stock.group_production_lot"><strong>Lot/Serial Number</strong></th>
-                                    <th groups="stock.group_tracking_lot"><strong>Package</strong></th>
-                                    <th class="text-end"><strong>Available Quantity</strong></th>
-                                    <th class="text-end"><strong>On hand Quantity</strong></th>
-                                    <th class="text-end"><strong>Counted Quantity</strong></th>
+                                    <th groups="stock.group_stock_multi_locations">Location</th>
+                                    <th>Product</th>
+                                    <th groups="stock.group_production_lot">Lot/Serial Number</th>
+                                    <th groups="stock.group_tracking_lot">Package</th>
+                                    <th class="text-end">Available Quantity</th>
+                                    <th class="text-end">On hand Quantity</th>
+                                    <th class="text-end">Counted Quantity</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -35,9 +35,9 @@
                                         <td><span t-field="line.product_id">Laptop</span></td>
                                         <td groups="stock.group_production_lot"><span t-field="line.lot_id">4</span></td>
                                         <td groups="stock.group_tracking_lot"><span t-field="line.package_id">98</span></td>
-                                        <td class="text-end"><span t-field="line.available_quantity">2</span> <span t-field="line.product_uom_id" groups="uom.group_uom">Units</span></td>
-                                        <td class="text-end"><span t-field="line.quantity">5</span> <span t-field="line.product_uom_id" groups="uom.group_uom">Units</span></td>
-                                        <td class="text-end">
+                                        <td class="text-end font-monospace"><span t-field="line.available_quantity">2</span> <span t-field="line.product_uom_id" groups="uom.group_uom">Units</span></td>
+                                        <td class="text-end font-monospace"><span t-field="line.quantity">5</span> <span t-field="line.product_uom_id" groups="uom.group_uom">Units</span></td>
+                                        <td class="text-end font-monospace">
                                             <!-- If 0, then leave blank so users have space to write a number -->
                                             <t t-if="line.inventory_quantity == 0"><span></span></t>
                                             <t t-else=""><span t-field="line.inventory_quantity">7</span></t>

@@ -9,7 +9,7 @@
         </t>
         <t t-if="o.dest_address_id">
             <t t-set="information_block">
-                <strong>Shipping address:</strong>
+                <strong>Shipping address</strong>
                 <div t-if="o.dest_address_id">
                     <div t-field="o.dest_address_id"
                         t-options='{"widget": "contact", "fields": ["address", "name", "phone"], "no_marker": True, "phone_icons": True}' name="purchase_shipping_address"/>
@@ -28,19 +28,19 @@
 
             <div id="informations" class="row mt-4 mb32">
                 <div t-if="o.user_id" class="col-3 bm-2">
-                    <strong>Purchase Representative:</strong>
+                    <strong>Purchase Representative</strong>
                     <p t-field="o.user_id" class="m-0"/>
                 </div>
                 <div t-if="o.partner_ref" class="col-3 bm-2">
-                    <strong>Your Order Reference:</strong>
+                    <strong>Your Order Reference</strong>
                     <p t-field="o.partner_ref" class="m-0"/>
                 </div>
                 <div t-if="o.state in ['purchase','done'] and o.date_approve" class="col-3 bm-2">
-                    <strong>Order Date:</strong>
+                    <strong>Order Date</strong>
                     <p t-field="o.date_approve" class="m-0"/>
                 </div>
                 <div t-elif="o.date_order" class="col-3 bm-2">
-                    <strong>Order Deadline:</strong>
+                    <strong>Order Deadline</strong>
                     <p t-field="o.date_order" class="m-0"/>
                 </div>
             </div>
