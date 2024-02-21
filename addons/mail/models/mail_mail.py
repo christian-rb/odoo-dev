@@ -215,7 +215,7 @@ class MailMail(models.Model):
         return self.write({'state': 'cancel'})
 
     @api.model
-    def process_email_queue(self, ids=None):
+    def process_email_queue(self, ids=None, batch_size=1000):
         """Send immediately queued messages, committing after each
            message is sent - this is not transactional and should
            not be called during another transaction!
@@ -239,9 +239,21 @@ class MailMail(models.Model):
         if 'filters' in self._context:
             filters.extend(self._context['filters'])
         # TODO: make limit configurable
-        filtered_ids = self.search(filters, limit=10000).ids
+        filtered_ids = self.search(filters, limit=batch_size if not ids else 10000).ids
+        log_cb = None
         if not ids:
+            ids_count = len(filtered_ids) if len(filtered_ids) < batch_size else self.search_count(filters)
             ids = filtered_ids
+
+            def closure(todo):
+                state = [set(), todo]
+
+                def cb(ids):
+                    state[0].update(ids)
+                    done = len(state[0])
+                    self.env['ir.cron']._notify_progress(done=done, remaining=state[1] - done)
+                return cb
+            log_cb = closure(ids_count)
         else:
             ids = list(set(filtered_ids) & set(ids))
         ids.sort()
@@ -250,7 +262,7 @@ class MailMail(models.Model):
         try:
             # auto-commit except in testing mode
             auto_commit = not getattr(threading.current_thread(), 'testing', False)
-            res = self.browse(ids).send(auto_commit=auto_commit)
+            res = self.browse(ids).send(auto_commit=auto_commit, log_callback=log_cb)
         except Exception:
             _logger.exception("Failed processing mail queue")
 
@@ -536,7 +548,7 @@ class MailMail(models.Model):
             for batch_ids in tools.split_every(batch_size, record_ids):
                 yield mail_server_id, alias_domain_id, smtp_from, batch_ids
 
-    def send(self, auto_commit=False, raise_exception=False):
+    def send(self, auto_commit=False, raise_exception=False, log_callback=None):
         """ Sends the selected emails immediately, ignoring their current
             state (mails that have already been sent should not be passed
             unless they should actually be re-sent).
@@ -570,6 +582,7 @@ class MailMail(models.Model):
                     raise_exception=raise_exception,
                     smtp_session=smtp_session,
                     alias_domain_id=alias_domain_id,
+                    log_callback=log_callback
                 )
                 _logger.info(
                     'Sent batch %s emails via mail server ID #%s',
@@ -578,7 +591,7 @@ class MailMail(models.Model):
                 if smtp_session:
                     smtp_session.quit()
 
-    def _send(self, auto_commit=False, raise_exception=False, smtp_session=None, alias_domain_id=False):
+    def _send(self, auto_commit=False, raise_exception=False, smtp_session=None, alias_domain_id=False, log_callback=None):
         IrMailServer = self.env['ir.mail_server']
         # Only retrieve recipient followers of the mails if needed
         mails_with_unfollow_link = self.filtered(lambda m: m.body_html and '/mail/unfollow' in m.body_html)
@@ -591,7 +604,6 @@ class MailMail(models.Model):
             success_pids = []
             failure_reason = None
             failure_type = None
-            processing_pid = None
             mail = None
             try:
                 mail = self.browse(mail_id)
@@ -743,7 +755,10 @@ class MailMail(models.Model):
                             value = '. '.join(e.args)
                         raise MailDeliveryException(value)
                     raise
-
             if auto_commit is True:
+                if log_callback:
+                    log_callback([mail_id])
                 self._cr.commit()
+        if log_callback:
+            log_callback(self.ids)
         return True

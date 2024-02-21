@@ -1123,12 +1123,17 @@ class MassMailing(models.Model):
     @api.model
     def _process_mass_mailing_queue(self):
         mass_mailings = self.search([('state', 'in', ('in_queue', 'sending')), '|', ('schedule_date', '<', fields.Datetime.now()), ('schedule_date', '=', False)])
+        done_mailings, remaining_mailings = 0, len(mass_mailings)
         for mass_mailing in mass_mailings:
+            done_mailings += 1
+            self.env['ir.cron']._notify_progress(done=done_mailings, remaining=remaining_mailings - done_mailings)
             context_user = mass_mailing.user_id or mass_mailing.write_uid or self.env.user
             mass_mailing = mass_mailing.with_context(
                 **self.env['res.users'].with_user(context_user).context_get()
             )
-            if len(mass_mailing._get_remaining_recipients()) > 0:
+
+            remaining_mailing_recipient_count = len(mass_mailing._get_remaining_recipients())
+            if remaining_mailing_recipient_count > 0:
                 mass_mailing.state = 'sending'
                 mass_mailing.action_send_mail()
             else:
