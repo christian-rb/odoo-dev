@@ -87,12 +87,12 @@ class SlidesPortalChatter(PortalChatter):
             rating = request.env['rating.rating'].sudo().search(domain, order='write_date DESC', limit=1)
             rating.write({
                 'rating': float(post['rating_value']),
-                'feedback': html2plaintext(message.body),
+                'feedback': html2plaintext(message.get_body()),
             })
         channel = request.env[res_model].browse(res_id)
         return {
             'default_message_id': message.id,
-            'default_message': html2plaintext(message.body),
+            'default_message': html2plaintext(message.get_body()),
             'default_rating_value': message.rating_value,
             'rating_avg': channel.rating_avg,
             'rating_count': channel.rating_count,

@@ -27,6 +27,12 @@ class ThreadController(http.Controller):
             res["messages"].set_message_done()
         return {**res, "messages": res["messages"].message_format()}
 
+    @http.route("/mail/thread/message/markdown", methods=["post"], type="json", auth="public")
+    @add_guest_to_context
+    def mail_thread_messages_markdown(self, message_id):
+        guest = request.env["mail.guest"]._get_guest_from_context()
+        return guest.env["mail.message"].search_read([("id", "=", message_id)], ["markdown"])
+
     @http.route("/mail/partner/from_email", methods=["POST"], type="json", auth="user")
     def mail_thread_partner_from_email(self, emails, additional_values=None):
         partners = [
@@ -106,7 +112,8 @@ class ThreadController(http.Controller):
             )]
         post_data["partner_ids"] = list(set((post_data.get("partner_ids", [])) + new_partners))
         message_data = thread.message_post(
-            **{key: value for key, value in post_data.items() if key in self._get_allowed_message_post_params()}
+            **{key: value for key, value in post_data.items() if key in self._get_allowed_message_post_params()},
+            body_is_markdown=True
         ).message_format()[0]
         if "temporary_id" in request.context:
             message_data["temporary_id"] = request.context["temporary_id"]
@@ -122,8 +129,14 @@ class ThreadController(http.Controller):
             raise NotFound()
         if not message_sudo.model or not message_sudo.res_id:
             raise NotFound()
-        body = Markup(body) if body else body  # may contain HTML such as @mentions
-        guest.env[message_sudo.model].browse([message_sudo.res_id])._message_update_content(
-            message_sudo, body, attachment_ids=attachment_ids, partner_ids=partner_ids
-        )
+
+        if message_sudo.body:
+            body = Markup(body) if body else body  # may contain HTML such as @mention
+            guest.env[message_sudo.model].browse([message_sudo.res_id])._message_update_content(
+                message_sudo, body=body, attachment_ids=attachment_ids, partner_ids=partner_ids
+            )
+        else:
+            guest.env[message_sudo.model].browse([message_sudo.res_id])._message_update_content(
+                message_sudo, markdown=body, attachment_ids=attachment_ids, partner_ids=partner_ids
+            )
         return message_sudo.message_format()[0]
