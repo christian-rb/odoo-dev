@@ -47,9 +47,48 @@ class X2ManyButtons extends Component {
     }
 }
 
+class X2ManyMultipleModels extends X2ManyButtons {
+    /**
+     * This extension allows the use of X2ManyButtons when dealing with
+     * form views of different models. actionName is a function that
+     * returns the appropriate action when it receives one or multiple ids.
+     */
+    static props = {
+        ...standardFieldProps,
+        actionName: { type: String },
+    };
+
+    setup() {
+        this.orm = useService("orm");
+        this.action = useService("action");
+    }
+
+    async openFormAndDiscard(id) {
+        const action = await this.orm.call(this.currentField.resModel, this.props.actionName, [id], {});
+        await this.props.record.discard();
+        this.action.doAction(action);
+    }
+
+    async openTreeAndDiscard() {
+        const ids = this.currentField.currentIds;
+        const action = await this.orm.call(this.currentField.resModel, this.props.actionName, [ids], {});
+        await this.props.record.discard();
+        this.action.doAction(action);
+    }
+}
+
 X2ManyButtons.template = "account.X2ManyButtons";
-registry.category("fields").add("x2many_buttons", {
+export const x2ManyButtons = {
     component: X2ManyButtons,
     relatedFields: [{ name: "display_name", type: "char" }],
     extractProps: ({ string }) => ({ treeLabel: string || _t("Records") }),
-});
+}
+export const x2ManyMultipleModels = {
+    ...x2ManyButtons,
+    component: X2ManyMultipleModels,
+    extractProps: ( fieldInfo ) => {
+        return { actionName: fieldInfo.attrs.action_name };
+    },
+}
+registry.category("fields").add("x2many_buttons", x2ManyButtons);
+registry.category("fields").add("x2many_multiple_models", x2ManyMultipleModels);

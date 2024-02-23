@@ -1446,3 +1446,26 @@ class TestAccountPaymentRegister(AccountTestInvoicingCommon):
                 'reconciled': False,
             },
         ])
+
+    def test_register_payment_single_batch_duplicate_payments(self):
+        ''' Test that duplicate_move_ids is correctly calculated for single batches '''
+        payment_1 = self.env['account.payment.register'].with_context(active_model='account.move', active_ids=self.out_invoice_1.ids).create({})
+        payment_2 = self.env['account.payment.register'].with_context(active_model='account.move', active_ids=self.in_invoice_1.ids).create({})
+        active_ids = (self.out_invoice_1 + self.out_invoice_2).ids
+        combined_payments = self.env['account.payment.register'].with_context(active_model='account.move', active_ids=active_ids).create({
+            'amount': 1000.0,
+            'group_payment': True,
+            'payment_difference_handling': 'open',
+            'currency_id': self.company_data['currency'].id,
+            'payment_method_line_id': self.inbound_payment_method_line.id,
+        })
+        existing_payment = self.env['account.payment'].create({
+            'amount': 1000.0,
+            'payment_type': 'inbound',
+            'partner_id': self.partner_a.id,
+            'destination_account_id': self.company_data['default_account_receivable'].id,
+        })
+
+        self.assertRecordValues(payment_1, [{'duplicate_move_ids': [existing_payment.move_id.id]}])
+        self.assertRecordValues(payment_2, [{'duplicate_move_ids': []}])  # different payment_type
+        self.assertRecordValues(combined_payments, [{'duplicate_move_ids': [existing_payment.move_id.id]}])

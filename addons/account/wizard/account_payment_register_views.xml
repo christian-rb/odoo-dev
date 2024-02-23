@@ -32,6 +32,7 @@
                     <field name="writeoff_is_exchange_account" invisible="1"/>
                     <field name="untrusted_bank_ids" invisible="1"/>
                     <field name="missing_account_partners" invisible="1"/>
+                    <field name="duplicate_move_ids" invisible="1" />
 
                     <div role="alert" class="alert alert-info" invisible="not hide_writeoff_section">
                         <p><b>Early Payment Discount applied.</b></p>
@@ -41,6 +42,10 @@
                     </div>
                     <div role="alert" class="alert alert-warning" invisible="not missing_account_partners">
                         <span class="fw-bold">Payments related to partners with no bank account specified will be skipped. <button class="oe_link p-0 align-baseline" type="object" name="action_open_missing_account_partners">View Partner(s)</button></span>
+                    </div>
+                    <div role="alert" class="alert alert-warning" invisible="not duplicate_move_ids">
+                        <span>This payment has the same partner, amount and date as </span>
+                        <field name="duplicate_move_ids" widget="x2many_multiple_models" string="Duplicated Payments" action_name="action_open_duplicated_payments"/>
                     </div>
                     <group>
                         <group name="group1">

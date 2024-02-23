@@ -2,7 +2,7 @@
 from odoo import models, fields, api, _, Command
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools.misc import format_date, formatLang
-
+from odoo.tools import SQL
 
 class AccountPayment(models.Model):
     _name = "account.payment"
@@ -159,6 +159,8 @@ class AccountPayment(models.Model):
         help='Negative value of amount field if payment_type is outbound')
     amount_company_currency_signed = fields.Monetary(
         currency_field='company_currency_id', compute='_compute_amount_company_currency_signed', store=True)
+    # used to get and display duplicate move warning if partner, amount and date match existing payments
+    duplicate_move_ids = fields.Many2many(comodel_name='account.move', compute='_compute_duplicate_move_ids')
 
     _sql_constraints = [
         (
@@ -671,6 +673,95 @@ class AccountPayment(models.Model):
     def _compute_payment_receipt_title(self):
         """ To override in order to change the title displayed on the payment receipt report """
         self.payment_receipt_title = _('Payment Receipt')
+
+    @api.depends('partner_id', 'amount', 'date', 'payment_type')
+    def _compute_duplicate_move_ids(self):
+        """ Retrieve ids of payments with same partner_id, amount and date as the current payment """
+        payment_to_duplicate_payment = self._fetch_duplicate_reference()
+        for payment in self:
+            # Uses payment._origin.id to handle records in edition/existing records and 0 for new records
+            moves = payment_to_duplicate_payment.get(payment._origin.id, self.env['account.move'])
+            # Remove moves with reconciled move lines from the result
+            reconciled_moves = moves.line_ids.filtered(lambda line: line.reconciled).move_id
+            payment.duplicate_move_ids = moves - reconciled_moves
+
+    def _fetch_duplicate_reference(self, matching_states=('draft', 'posted')):
+        # Does not perform unnecessary check if partner_id or amount are not set, nor if payment is posted
+        payments = self.filtered(lambda p: p.partner_id and p.amount and p.state != 'posted')
+
+        if not payments:
+            return {}
+
+        # Update tables involved in the query
+        self.env['account.move.line'].flush_model(('move_id', 'payment_id', 'balance', 'account_id', 'company_id', 'date', 'partner_id'))
+        self.env['account.payment'].flush_model(('move_id', 'payment_type'))
+
+        move_table_and_alias = SQL('''
+            (SELECT account_move_line.*, account_payment.payment_type
+               FROM account_move_line
+               JOIN account_payment
+                 ON account_payment.move_id = account_move_line.move_id) AS move_line
+        ''')
+        suspense_account_id = payments.company_id.account_journal_suspense_account_id.id
+
+        if not self[0].id:  # if record is under creation/edition in UI, safely inject values in the query
+            # Necessary since new record aren't searchable in the DB and record in edition aren't up to date yet
+            place_holders = {
+                'move_id': self._origin.move_id.id or 0,
+                'payment_id': self._origin.id or 0,
+                'payment_type': self.payment_type,
+                'balance': self.amount if self.payment_type == 'outbound' else -self.amount,
+                'account_id': self.destination_account_id.id,
+                'company_id': self.company_id.id or None,
+                'date': self.date or None,
+                'partner_id': self.partner_id.id,
+            }
+            move_table_and_alias = SQL('''
+                (VALUES (%(move_id)s, %(payment_id)s, %(company_id)s, %(date)s, %(partner_id)s, %(balance)s, %(payment_type)s, %(account_id)s))
+                AS move_line(move_id, payment_id, company_id, date, partner_id, balance, payment_type, account_id)
+            ''', **place_holders)
+
+        query = SQL(
+            """
+            SELECT
+                   move_line.payment_id,
+                   array_agg(dup_move_line.move_id) AS duplicate_move_ids
+              FROM %(move_table_and_alias)s
+              JOIN account_move_line AS dup_move_line
+                ON move_line.move_id != dup_move_line.move_id
+               AND move_line.partner_id = dup_move_line.partner_id
+               AND move_line.company_id = dup_move_line.company_id
+               AND move_line.date = dup_move_line.date
+               AND dup_move_line.parent_state IN %(matching_states)s
+               AND move_line.balance = dup_move_line.balance
+               AND (
+                   move_line.account_id = dup_move_line.account_id
+                   OR dup_move_line.account_id = %(suspense_account_id)s
+               )
+               AND NOT dup_move_line.reconciled
+             WHERE move_line.payment_id IN %(payments)s
+               AND (
+                   -- Since account_move_line stores both the credit and the debit lines, select the relevant one
+                   move_line.payment_type = 'inbound' AND move_line.balance < 0.0
+                   OR move_line.payment_type = 'outbound' AND move_line.balance > 0.0
+               )
+          GROUP BY move_line.payment_id
+        """,
+            move_table_and_alias=move_table_and_alias,
+            matching_states=tuple(matching_states),
+            payments=tuple(self.ids or [0]),
+            suspense_account_id=suspense_account_id,
+        )
+        self.env.cr.execute(query)
+        results = self.env.cr.dictfetchall()
+
+        # To avoid browsing in loops when the function fetches duplicates for multiple payments, browse all moves first
+        move_ids = {move_id for res in results for move_id in res['duplicate_move_ids']}
+        moves = self.env['account.move'].browse(move_ids)
+        return {
+            res['payment_id']: moves.filtered(lambda x: x.id in res['duplicate_move_ids'])
+            for res in results
+        }
 
     # -------------------------------------------------------------------------
     # ONCHANGE METHODS

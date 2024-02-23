@@ -4345,6 +4345,22 @@ class AccountMove(models.Model):
             'target': 'current',
         }
 
+    def action_open_duplicated_payments(self):
+        if len(self) == 1:
+            return self.action_open_business_doc()
+        else:
+            return {
+                'name': _('Duplicated Payments'),
+                'type': 'ir.actions.act_window',
+                'views': [
+                    (self.env.ref('account.view_duplicated_payments_tree_js').id, 'list'),
+                    (False, 'form')
+                ],
+                'res_model': 'account.move',
+                'target': 'current',
+                'domain': [["id", "in", self.ids]],
+            }
+
     def open_created_caba_entries(self):
         self.ensure_one()
         return {
