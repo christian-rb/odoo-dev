@@ -694,7 +694,7 @@ QUnit.module("Components", ({ beforeEach }) => {
             ],
             time: [
                 [13, 0],
-                [13, 0],
+                [14, 0],
             ],
         });
 
@@ -864,7 +864,7 @@ QUnit.module("Components", ({ beforeEach }) => {
             ],
             time: [
                 [13, 0],
-                [13, 0],
+                [14, 0],
             ],
         });
 
@@ -898,7 +898,7 @@ QUnit.module("Components", ({ beforeEach }) => {
             ],
             time: [
                 [13, 0],
-                [13, 0],
+                [14, 0],
             ],
         });
     });

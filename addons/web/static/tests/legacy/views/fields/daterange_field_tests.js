@@ -578,11 +578,11 @@ QUnit.module("Fields", (hooks) => {
         // Add an end date
         await click(target.querySelector(".o_add_date"));
 
-        const [startInput, endInput] = target.querySelectorAll(".o_field_daterange input");
+        const endInput = target.querySelectorAll(".o_field_daterange input")[1];
         assert.strictEqual(
-            startInput.value,
+            "08/14/2014 13:00:00",
             endInput.value,
-            "the end date should be set to the same value as the start date"
+            "the end datetime should be one hour more than start datetime"
         );
     });
 
@@ -609,7 +609,7 @@ QUnit.module("Fields", (hooks) => {
 
         assert.strictEqual(
             target.querySelectorAll(".o_field_daterange input")[0].value,
-            "08/14/2014 12:00:00",
+            "08/14/2014 13:00:00",
             "end date should be set properly"
         );
         assert.notOk(isHiddenByCSS(target.querySelector(".o_add_date")));
@@ -621,11 +621,11 @@ QUnit.module("Fields", (hooks) => {
         // Add an end date
         await click(target.querySelector(".o_add_date"));
 
-        const [startInput, endInput] = target.querySelectorAll(".o_field_daterange input");
+        const endInput = target.querySelectorAll(".o_field_daterange input")[1];
         assert.strictEqual(
-            startInput.value,
+            "08/14/2014 13:00:00",
             endInput.value,
-            "the end date should be set to the same value as the start date"
+            "the end datetime should be one hour more than start datetime"
         );
     });
 
@@ -661,12 +661,12 @@ QUnit.module("Fields", (hooks) => {
         // Add an end date
         await click(target.querySelector(".o_add_date"));
 
-        const [startInput, endInput] = target.querySelectorAll(".o_field_daterange input");
         assert.containsOnce(target, ".o_datetime_picker");
+        const endInput = target.querySelectorAll(".o_field_daterange input")[1];
         assert.strictEqual(
-            startInput.value,
+            "03/13/2017 06:30:00",
             endInput.value,
-            "the end date should be set to the same value as the start date"
+            "the end datetime should be one hour more than start datetime"
         );
     });
 
@@ -702,11 +702,11 @@ QUnit.module("Fields", (hooks) => {
         // Add a start date
         await click(target.querySelector(".o_add_date"));
 
-        const [startInput, endInput] = target.querySelectorAll(".o_field_daterange input");
+        const endInput = target.querySelectorAll(".o_field_daterange input")[1];
         assert.strictEqual(
-            startInput.value,
+            "03/13/2017 05:30:00",
             endInput.value,
-            "the start date should be set to the same value as the end date"
+            "the end datetime should be one hour more than start datetime"
         );
     });
 
