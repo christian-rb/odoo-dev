@@ -12,6 +12,7 @@ export const SHOW_OPTIONS = {
         receipts: Boolean,
         unitCosts: Boolean,
         moCosts: Boolean,
+        bomCosts: Boolean,
         realCosts: Boolean,
     },
 };
@@ -21,24 +22,30 @@ export class MoOverviewDisplayFilter extends BomOverviewDisplayFilter {
         showOptions: SHOW_OPTIONS,
         changeDisplay: Function,
         limited: { type: Boolean, optional: true },
+        isProductionDraft: { type: Boolean, optional: true},
     };
     static defaultProps = {
         limited: false,
+        isProductionDraft: false,
     };
 
     setup() {
-        if (!this.props.limited) {
-            this.displayOptions = {
-                replenishments: _t("Replenishments"),
-                availabilities: _t("Availabilities"),
-                receipts: _t("Receipts"),
-            };
-        }
         this.displayOptions = {
-            ...(this.displayOptions || {}),
+            replenishments: _t("Replenishments"),
+            availabilities: _t("Availabilities"),
+            receipts: _t("Receipts"),
             unitCosts: _t("Unit Costs"),
             moCosts: _t("MO Costs"),
+            bomCosts: _t("BoM Costs"), // AJOC TODO add to pot file
             realCosts: _t("Real Costs"),
-        };
+        }
+        if (this.props.limited) {
+            delete this.displayOptions.replenishments;
+            delete this.displayOptions.availabilities;
+            delete this.displayOptions.receipts;
+        }
+        if (this.props.isProductionDraft) {
+            delete this.displayOptions.realCosts;
+        }
     }
 }

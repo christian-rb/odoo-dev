@@ -171,3 +171,6 @@ class MrpRoutingWorkcenter(models.Model):
             return False
         self.ensure_one()
         return tuple(self[key] for key in  ('name', 'company_id', 'workcenter_id', 'time_mode', 'time_cycle_manual', 'bom_product_template_attribute_value_ids'))
+
+    def _compute_expected_operation_cost(self):
+        return (self.time_cycle / 60.0) * self.workcenter_id.costs_hour
