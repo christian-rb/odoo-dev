@@ -2,6 +2,9 @@
     img {
         height: 60px;
         aspect-ratio: 1;
+        @media screen  and (max-width: 480px) {
+            height: 30px;
+        }
     }
 
     .o_card_avatar_im_status {
@@ -11,9 +14,16 @@
         background-color: white;
         height: 18px;
         width: 18px;
+        @media screen  and (max-width: 480px) {
+            height: 13px;
+            width: 13px;
+            }
     }
 }
 
 .o_avatar_card {
-    width: 380px;
+    max-width: 380px;
+    @media screen  and (max-width: 480px) {
+        max-width: 240px;
+    }
 }
