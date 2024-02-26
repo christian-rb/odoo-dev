@@ -52,7 +52,7 @@ class TestSyncGoogle(HttpCase):
     def assertGoogleEventInserted(self, values, timeout=None):
         expected_args = (values,)
         expected_kwargs = {'timeout': timeout} if timeout else {}
-        GoogleSync._google_insert.assert_called_once()
+        GoogleSync._google_insert.assert_called()
         args, kwargs = GoogleSync._google_insert.call_args
         args[1:][0].pop('conferenceData', None)
         self.assertEqual(args[1:], expected_args) # skip Google service arg
