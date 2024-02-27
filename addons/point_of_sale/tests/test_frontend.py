@@ -38,12 +38,12 @@ class TestPointOfSaleHttpCommon(AccountTestInvoicingHttpCommon):
         account_obj = env['account.account']
         main_company = cls._get_main_company()
 
-        account_receivable = account_obj.create({'code': 'X1012',
+        cls.account_receivable = account_obj.create({'code': 'X1012',
                                                  'name': 'Account Receivable - Test',
                                                  'account_type': 'asset_receivable',
                                                  'reconcile': True})
-        env.company.account_default_pos_receivable_account_id = account_receivable
-        env['ir.property']._set_default('property_account_receivable_id', 'res.partner', account_receivable, main_company)
+        env.company.account_default_pos_receivable_account_id = cls.account_receivable
+        env['ir.property']._set_default('property_account_receivable_id', 'res.partner', cls.account_receivable, main_company)
         # Pricelists are set below, do not take demo data into account
         env['ir.property'].sudo().search([('name', '=', 'property_product_pricelist')]).unlink()
 
@@ -77,7 +77,7 @@ class TestPointOfSaleHttpCommon(AccountTestInvoicingHttpCommon):
             'sequence': 10,
         })
 
-        env['pos.payment.method'].create({
+        cls.bank_payment_method = env['pos.payment.method'].create({
             'name': 'Bank',
             'journal_id': cls.bank_journal.id,
         })
@@ -501,7 +501,7 @@ class TestPointOfSaleHttpCommon(AccountTestInvoicingHttpCommon):
             'invoice_journal_id': test_sale_journal.id,
             'payment_method_ids': [(0, 0, { 'name': 'Cash',
                                             'journal_id': cash_journal.id,
-                                            'receivable_account_id': account_receivable.id,
+                                            'receivable_account_id': cls.account_receivable.id,
             })],
             'use_pricelist': True,
             'pricelist_id': public_pricelist.id,
