@@ -526,7 +526,6 @@ class AccountReportExpression(models.Model):
             ('from_fiscalyear', 'From the start of the fiscal year'),
             ('to_beginning_of_fiscalyear', 'At the beginning of the fiscal year'),
             ('to_beginning_of_period', 'At the beginning of the period'),
-            ('normal', 'According to each type of account'),
             ('strict_range', 'Strictly on the given dates'),
             ('previous_tax_period', "From previous tax period")
         ],
@@ -810,7 +809,7 @@ class AccountReportExpression(models.Model):
         if column_group_key:
             options = self.report_line_id.report_id._get_column_group_options(options, column_group_key)
 
-        date_from, date_to, dummy = self.report_line_id.report_id._get_date_bounds_info(options, self.date_scope)
+        date_from, date_to = self.report_line_id.report_id._get_date_bounds_info(options, self.date_scope)
 
         return {
             'type': 'ir.actions.act_window',
