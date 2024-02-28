@@ -1385,7 +1385,7 @@ export function isUnbreakable(node) {
         return true;
     }
     return (
-        isUnremovable(node) || // An unremovable node is always unbreakable.
+        isUnremovable(node, false) || // An unremovable node is always unbreakable.
         ['THEAD', 'TBODY', 'TFOOT', 'TR', 'TH', 'TD', 'SECTION', 'DIV'].includes(node.tagName) ||
         node.hasAttribute('t') ||
         (node.nodeType === Node.ELEMENT_NODE &&
@@ -1398,16 +1398,19 @@ export function isUnbreakable(node) {
                 node.getAttribute('t-value') ||
                 node.getAttribute('t-out') ||
                 node.getAttribute('t-raw'))) ||
-        node.classList.contains('oe_unbreakable')
+        node.classList.contains('oe_unbreakable' ||
+        node.getAttribute('contenteditable') === false
+        )
     );
 }
 
-export function isUnremovable(node) {
+export function isUnremovable(node, checkEditable = false) {
     return (
         (node.nodeType !== Node.ELEMENT_NODE && node.nodeType !== Node.TEXT_NODE) ||
         node.oid === 'root' ||
         (node.nodeType === Node.ELEMENT_NODE &&
             (node.classList.contains('o_editable') || node.getAttribute('t-set') || node.getAttribute('t-call'))) ||
+        (checkEditable && node.parentElement && node.parentElement.matches("[contenteditable='false']:not([data-oe-field='arch'])")) ||
         (node.classList && node.classList.contains('oe_unremovable')) ||
         (node.nodeName === 'SPAN' && node.parentElement && node.parentElement.getAttribute('data-oe-type') === 'monetary') ||
         (node.ownerDocument && node.ownerDocument.defaultWindow && !ancestors(node).find(ancestor => ancestor.oid === 'root')) // Node is in DOM but not in editable.
@@ -1452,11 +1455,11 @@ export function isVoidElement(node) {
     return isMediaElement(node) || node.tagName === 'HR';
 }
 
-export function containsUnremovable(node) {
+export function containsUnremovable(node, checkEditable=false) {
     if (!node) {
         return false;
     }
-    return isUnremovable(node) || containsUnremovable(node.firstChild);
+    return isUnremovable(node, checkEditable) || containsUnremovable(node.firstChild, false);
 }
 
 export function getInSelection(document, selector) {

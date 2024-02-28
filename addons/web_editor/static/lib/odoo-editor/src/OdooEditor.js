@@ -552,15 +552,18 @@ export class OdooEditor extends EventTarget {
         // B so when serializing node A, we strip node B from the node A tree to
         // avoid the duplication of node A.
         const mutatedNodes = new Set();
+        const oids = new Set();
         for (const record of records) {
             if (record.type === 'childList') {
                 for (const node of record.addedNodes) {
                     this.idSet(node, this._checkStepUnbreakable);
                     mutatedNodes.add(node.oid);
+                    oids.add(node.oid);
                 }
                 for (const node of record.removedNodes) {
                     this.idSet(node, this._checkStepUnbreakable);
                     mutatedNodes.delete(node.oid);
+                    oids.add(node.oid);
                 }
             }
         }
@@ -587,7 +590,7 @@ export class OdooEditor extends EventTarget {
                 }
                 case 'childList': {
                     record.addedNodes.forEach(added => {
-                        if (!this._toRollback && containsUnremovable(added)) {
+                        if (!this._toRollback && containsUnremovable(added, !oids.has(added.ouid))) {
                             this._toRollback = UNREMOVABLE_ROLLBACK_CODE;
                         }
                         const mutation = {
@@ -609,7 +612,7 @@ export class OdooEditor extends EventTarget {
                         this._currentStep.mutations.push(mutation);
                     });
                     record.removedNodes.forEach(removed => {
-                        if (!this._toRollback && containsUnremovable(removed)) {
+                        if (!this._toRollback && containsUnremovable(removed, !oids.has(removed.ouid))) {
                             this._toRollback = UNREMOVABLE_ROLLBACK_CODE;
                         }
                         this._currentStep.mutations.push({
@@ -1479,7 +1482,7 @@ export class OdooEditor extends EventTarget {
         }
         range = getDeepRange(this.editable, { sel });
         // Restore unremovables removed by extractContents.
-        [...contents.querySelectorAll('*')].filter(isUnremovable).forEach(n => {
+        [...contents.querySelectorAll('*')].filter((node)=>isUnremovable(node)).forEach(n => {
             closestBlock(range.endContainer).after(n);
             n.textContent = '';
         });
