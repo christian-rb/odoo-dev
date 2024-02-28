@@ -4,16 +4,19 @@ import re
 import base64
 import io
 
-from PyPDF2 import PdfFileReader, PdfFileMerger, PdfFileWriter
+from PyPDF2 import PdfFileReader, PdfFileWriter
 from reportlab.platypus import Frame, Paragraph, KeepInFrame
 from reportlab.lib.units import mm
 from reportlab.lib.pagesizes import A4
-from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen.canvas import Canvas
 
 from odoo import fields, models, api, _
 from odoo.addons.iap.tools import iap_tools
 from odoo.exceptions import AccessError, UserError
+from odoo.modules.module import get_module_resource
 from odoo.tools.safe_eval import safe_eval
 
 DEFAULT_ENDPOINT = 'https://iap-snailmail.odoo.com'
@@ -450,6 +453,7 @@ class SnailmailLetter(models.Model):
         return all(record[key] for key in required_keys)
 
     def _append_cover_page(self, invoice_bin: bytes):
+        out_writer = PdfFileWriter()
         address_split = self.partner_id.with_context(show_address=True, lang='en_US')._get_name().split('\n')
         address_split[0] = self.partner_id.name or self.partner_id.parent_id and self.partner_id.parent_id.name or address_split[0]
         address = '<br/>'.join(address_split)
@@ -460,25 +464,33 @@ class SnailmailLetter(models.Model):
 
         cover_buf = io.BytesIO()
         canvas = Canvas(cover_buf, pagesize=A4)
+        font_path = get_module_resource('web', 'static/fonts/lato/Lato-Reg-webfont.ttf')
+        pdfmetrics.registerFont(TTFont("Lato", font_path))
         styles = getSampleStyleSheet()
+        addressStyle = ParagraphStyle(
+            'address',
+            parent=styles["Normal"],
+            fontName="Lato"
+        )
 
         frame = Frame(address_x, A4[1] - address_y - frame_height, frame_width, frame_height)
-        story = [Paragraph(address, styles['Normal'])]
+        story = [Paragraph(address.encode("utf-8"), addressStyle)]
         address_inframe = KeepInFrame(0, 0, story)
         frame.addFromList([address_inframe], canvas)
         canvas.save()
         cover_buf.seek(0)
+        cover_file = PdfFileReader(io.BytesIO(cover_buf.getvalue()))
+        out_writer.appendPagesFromReader(cover_file)
+
+        # Add a blank buffer page to avoid printing behind the cover page
+        if self.duplex:
+            out_writer.addBlankPage()
 
         invoice = PdfFileReader(io.BytesIO(invoice_bin))
-        cover_bin = io.BytesIO(cover_buf.getvalue())
-        cover_file = PdfFileReader(cover_bin)
-        merger = PdfFileMerger()
-
-        merger.append(cover_file, import_bookmarks=False)
-        merger.append(invoice, import_bookmarks=False)
+        out_writer.appendPagesFromReader(invoice)
 
         out_buff = io.BytesIO()
-        merger.write(out_buff)
+        out_writer.write(out_buff)
         return out_buff.getvalue()
 
     def _overwrite_margins(self, invoice_bin: bytes):
