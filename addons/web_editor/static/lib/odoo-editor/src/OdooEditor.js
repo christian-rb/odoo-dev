@@ -65,6 +65,8 @@ import {
     ZERO_WIDTH_CHARS_REGEX,
     getAdjacentCharacter,
     setCursorStart,
+    paragraphRelatedElements,
+    isUnbreakable,
 } from './utils/utils.js';
 import { editorCommands } from './commands/commands.js';
 import { Powerbox } from './powerbox/Powerbox.js';
@@ -1528,7 +1530,11 @@ export class OdooEditor extends EventTarget {
             const parent = end.parentNode;
             end.remove();
             end = parent;
-            if (end.nodeName === 'TD' && !shouldRemoveEndTr) {
+            if (
+                (end.nodeName === 'TD' && !shouldRemoveEndTr) ||
+                (paragraphRelatedElements.includes(end.nodeName) &&
+                    end.previousSibling && isUnbreakable(end.previousSibling))
+            ) {
                 fillEmpty(end);
             }
         }
