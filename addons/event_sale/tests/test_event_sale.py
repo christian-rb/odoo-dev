@@ -462,8 +462,6 @@ class TestEventSale(TestEventSaleCommon):
             'product_tmpl_id': event_product.id,
         })
 
-        pricelist.discount_policy = 'without_discount'
-
         so = self.env['sale.order'].create({
             'partner_id': self.env.user.partner_id.id,
             'pricelist_id': pricelist.id,

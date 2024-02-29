@@ -190,7 +190,6 @@ class TestWebsiteSaleCart(BaseUsersCommon, ProductAttributesCommon, WebsiteSaleC
 
         # Add discount of 50% for pricelist
         pricelist.write({
-            'discount_policy': 'without_discount',
             'item_ids': [
                 Command.create({
                     'base': "list_price",
