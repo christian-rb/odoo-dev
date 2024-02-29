@@ -150,7 +150,7 @@
                           </div>
 
                           <div t-if="order.user_id">
-                              <h6><small class="text-muted">Purchase Representative</small></h6>
+                              <h6 class="small text-muted">Purchase Representative</h6>
                               <div class="o_portal_contact_details d-flex flex-column gap-2">
                                 <div class="d-flex justify-content-start align-items-center gap-2">
                                     <img class="o_avatar o_portal_contact_img rounded" t-att-src="image_data_uri(order.user_id.avatar_128)" alt="Contact"/>
@@ -242,9 +242,9 @@
                                       </a>
                                       <div class="small d-lg-inline-block">Date: <span class="text-muted" t-field="i.invoice_date"/></div>
                                   </div>
-                                  <span t-if="i.payment_state in ('paid', 'in_payment')" class="badge text-bg-success small"><i class="fa fa-fw fa-check"/>Paid</span>
-                                  <span t-elif="i.payment_state == 'reversed'" class="badge text-bg-success small"><i class="fa fa-fw fa-check"/>Reversed</span>
-                                  <span t-else="" class="small badge text-bg-primary"><i class="fa fa-fw fa-clock-o"/>Waiting Payment</span>
+                                  <span t-if="i.payment_state in ('paid', 'in_payment')" class="badge rounded-pill text-bg-success small"><i class="fa fa-fw fa-check"/>Paid</span>
+                                  <span t-elif="i.payment_state == 'reversed'" class="badge rounded-pill text-bg-success small"><i class="fa fa-fw fa-check"/>Reversed</span>
+                                  <span t-else="" class="small badge rounded-pill text-bg-primary"><i class="fa fa-fw fa-clock-o"/>Waiting Payment</span>
                               </div>
                           </t>
                       </ul>

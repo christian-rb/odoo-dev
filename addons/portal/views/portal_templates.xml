@@ -334,7 +334,7 @@
                     <div t-if="searchbar_sortings">
                         <span class="small me-1 navbar-text">Sort By:</span>
                         <div class="btn-group">
-                            <button id="portal_searchbar_sortby" data-bs-toggle="dropdown" class="btn btn-secondary dropdown-toggle">
+                            <button id="portal_searchbar_sortby" data-bs-toggle="dropdown" class="btn btn-light dropdown-toggle">
                                 <t t-esc="searchbar_sortings[sortby].get('label', 'Newest')"/>
                             </button>
                             <div class="dropdown-menu dropdown-menu-end" aria-labelledby="portal_searchbar_sortby">
@@ -350,7 +350,7 @@
                     <div t-if="searchbar_filters" class="ms-lg-2">
                         <span class="small me-1 navbar-text">Filter By:</span>
                         <div class="btn-group">
-                            <button id="portal_searchbar_filters" data-bs-toggle="dropdown" class="btn btn-secondary dropdown-toggle">
+                            <button id="portal_searchbar_filters" data-bs-toggle="dropdown" class="btn btn-light dropdown-toggle">
                                 <t t-esc="searchbar_filters.get(filterby,searchbar_filters.get('all')).get('label', 'All')"/>
                             </button>
                             <div class="dropdown-menu dropdown-menu-end" aria-labelledby="portal_searchbar_filters">
@@ -366,7 +366,7 @@
                     <div t-if="searchbar_groupby" class="ms-lg-2">
                         <span class="small me-1 navbar-text">Group By:</span>
                         <div class="btn-group">
-                            <button id="portal_searchbar_groupby" data-bs-toggle="dropdown" class="btn btn-secondary dropdown-toggle">
+                            <button id="portal_searchbar_groupby" data-bs-toggle="dropdown" class="btn btn-light dropdown-toggle">
                                 <t t-esc="searchbar_groupby[groupby].get('label', 'None')"/>
                             </button>
                             <div class="dropdown-menu dropdown-menu-end" aria-labelledby="portal_searchbar_groupby">
@@ -383,7 +383,7 @@
                 </div>
                 <form t-if="searchbar_inputs" class="o_portal_search_panel col-md-5 col-xl-4 ms-lg-2">
                     <div class="input-group w-100">
-                        <button type="button" class="btn btn-secondary border-end dropdown-toggle" data-bs-toggle="dropdown"/>
+                        <button type="button" class="btn btn-light border-end dropdown-toggle" data-bs-toggle="dropdown"/>
                         <div class="dropdown-menu dropdown-menu-end" role="menu">
                             <t t-foreach='searchbar_inputs' t-as='input'>
                                 <a t-att-href="'#' + input_value['input']"
@@ -393,7 +393,7 @@
                             </t>
                         </div>
                         <input type="text" class="form-control" placeholder="Search" t-att-value='search' name="search"/>
-                        <button class="btn btn-secondary" type="submit">
+                        <button class="btn btn-light" type="submit">
                             <span class="oi oi-search"/>
                         </button>
                     </div>
