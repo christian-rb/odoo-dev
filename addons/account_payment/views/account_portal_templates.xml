@@ -67,7 +67,7 @@
         <xpath expr="//t[@t-call='portal.portal_record_sidebar']//div[hasclass('o_download_pdf')]" position="before">
             <a t-if="invoice._has_to_be_paid()"
                 href="#"
-                class="btn btn-primary d-block mb-2"
+                class="btn btn-primary"
                 data-bs-toggle="modal"
                 data-bs-target="#pay_with">
                 <i class="fa fa-fw fa-arrow-circle-right"/> Pay Now

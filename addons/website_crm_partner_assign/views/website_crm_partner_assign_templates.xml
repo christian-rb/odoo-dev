@@ -436,12 +436,10 @@
     <template id="portal_my_lead" name="My Lead">
         <t t-call="portal.portal_layout">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h4>
-                    Lead - <span t-field="lead.name"/>
-                </h4>
+                <h4>Lead - <span t-field="lead.name"/></h4>
                 <span title="Rating" role="img" t-attf-aria-label="Rating: #{lead.priority} on 3">
                     <t t-foreach="range(1, 4)" t-as="i">
-                        <span t-attf-class="fa fa-lg fa-star#{'' if i &lt;= int(lead.priority) else '-o'}"/>
+                        <span t-attf-class="fa fa-lg fa-star#{' text-warning' if i &lt;= int(lead.priority) else '-o'}"/>
                     </t>
                 </span>
             </div>
@@ -512,8 +510,8 @@
                 </div>
             </div>
             <div class='d-flex justify-content-center gap-2 mt-3'>
-                <a role="button" href="#" class="btn btn-primary btn" data-bs-toggle="modal" data-bs-target=".modal_partner_assign_interested"><i class="fa fa-file-text-o"/> I'm interested</a>
-                <a role="button" href="#" class="btn btn-primary btn" data-bs-toggle="modal" data-bs-target=".modal_partner_assign_desinterested"><i class="fa fa-fw fa-times"/> I'm not interested</a>
+                <a role="button" title="I'm interested" href="#" class="btn btn-primary btn" data-bs-toggle="modal" data-bs-target=".modal_partner_assign_interested"><i class="fa fa-file-text-o"/> I'm interested</a>
+                <a role="button" title="I'm not interested" href="#" class="btn btn-primary btn" data-bs-toggle="modal" data-bs-target=".modal_partner_assign_desinterested"><i class="fa fa-fw fa-times"/> I'm not interested</a>
                 <div class="modal fade modal_partner_assign_interested" role="form">
                     <div class="modal-dialog">
                         <form method="POST" class="js_accept_json modal-content js_website_submit_form interested_partner_assign_form">

@@ -137,14 +137,14 @@
           <div class="row o_portal_purchase_sidebar">
               <!-- Sidebar -->
               <t t-call="portal.portal_record_sidebar">
-                  <t t-set="classes" t-value="'d-print-none col-lg-4 col-xl-3'"/>
+                  <t t-set="classes" t-value="'col-lg-4 col-xxl-3 d-print-none'"/>
 
                   <t t-set="title">
                       <h2 t-field="order.amount_total" data-id="total_amount"/>
                   </t>
                   <t t-set="entries">
                       <div class="d-flex flex-column gap-4">
-                        <a class="btn btn-secondary o_print_btn o_portal_invoice_print" t-att-href="order.get_portal_url(report_type='pdf')" id="print_invoice_report" title="View Details" role="button" target="_blank"><i class="fa fa-print me-1"/> Print</a>
+                        <a class="btn btn-secondary o_print_btn o_portal_invoice_print" t-att-href="order.get_portal_url(report_type='pdf')" id="print_invoice_report" title="View Details" role="button" target="_blank"><i class="fa fa-print me-1"/> View Details</a>
                           <div class="navspy flex-grow-1 ps-0" t-ignore="true" role="complementary">
                               <ul class="nav flex-column bs-sidenav"></ul>
                           </div>
@@ -167,7 +167,7 @@
               </t>
 
               <!-- Page content -->
-              <div id="quote_content" class="o_portal_content col-12 col-lg-8 col-xl-9 ps-xl-4">
+              <div id="quote_content" class="o_portal_content col-12 col-lg-8 col-xxl-9 ps-xl-4">
 
                   <!-- status messages -->
                   <div t-if="order.state == 'cancel'" class="alert alert-danger alert-dismissable d-print-none" role="alert">

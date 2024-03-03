@@ -111,7 +111,7 @@
             <div class="row o_portal_invoice_sidebar">
                 <!-- Sidebar -->
                 <t t-call="portal.portal_record_sidebar">
-                    <t t-set="classes" t-value="'d-print-none col-lg-4 col-xl-3'"/>
+                    <t t-set="classes" t-value="'col-lg-4 col-xxl-3 d-print-none'"/>
                     <t t-set="title">
                         <h2>
                             <span t-if="invoice.amount_residual > 0" t-field="invoice.amount_residual"/>
@@ -122,9 +122,9 @@
 
                     <t t-set="entries">
                         <div class="d-flex flex-column gap-4">
-                            <div>
+                            <div class="d-flex flex-column gap-2">
                                 <div class="o_download_pdf d-flex flex-lg-column flex-xl-row flex-wrap gap-2">
-                                    <a class="btn btn-secondary flex-grow-1 o_print_btn o_portal_invoice_print" t-att-href="invoice.get_portal_url(report_type='pdf')" id="print_invoice_report" title="Print" target="_blank"><i class="fa fa-print me-1"/> Print</a>
+                                    <a class="btn btn-secondary flex-grow-1 o_print_btn o_portal_invoice_print" t-att-href="invoice.get_portal_url(report_type='pdf')" id="print_invoice_report" title="Print" role="button" target="_blank"><i class="fa fa-print me-1"/> Print</a>
                                 </div>
                             </div>
                             <div t-if="invoice.invoice_user_id" class="flex-grow-1">
@@ -156,7 +156,7 @@
                 </t>
 
                 <!-- Page Content -->
-                <div id="invoice_content" class="o_portal_content col-12 col-lg-8 col-xl-9 ps-xl-4">
+                <div id="invoice_content" class="o_portal_content col-12 col-lg-8 col-xxl-9 ps-xl-4">
                     <t t-if="error or warning" t-call="account.portal_invoice_error"/>
                     <t t-if="success and (not error and not warning)" t-call="account.portal_invoice_success"/>
 
