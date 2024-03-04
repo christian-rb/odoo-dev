@@ -3383,6 +3383,19 @@ export class Wysiwyg extends Component {
             delete el.dataset.bgSrc;
         } else {
             el.setAttribute('src', newAttachmentSrc);
+            // Also update carousel thumbnail.
+            const carouselEl = el.closest(".carousel");
+            if (carouselEl) {
+                const carouselInnerEl = el.closest(".carousel-inner");
+                const carouselItemEl = el.closest(".carousel-item");
+                if (carouselInnerEl && carouselItemEl) {
+                    const imageIndex = [...carouselInnerEl.children].indexOf(carouselItemEl);
+                    const miniatureEl = carouselEl.querySelector(`.carousel-indicators [data-bs-slide-to="${imageIndex}"]`);
+                    if (miniatureEl) {
+                        miniatureEl.style.backgroundImage = `url(${newAttachmentSrc})`;
+                    }
+                }
+            }
         }
     }
 
