@@ -459,7 +459,7 @@ test("basic chatter rendering", async () => {
                 <sheet>
                     <field name="name"/>
                 </sheet>
-                <div class="oe_chatter"></div>
+                <div class="oe_chatter"/>
             </form>`,
     };
     await start({ serverData: { views } });
@@ -476,9 +476,7 @@ test('chatter just contains "creating a new record" message during the creation 
                     <sheet>
                         <field name="name"/>
                     </sheet>
-                    <div class="oe_chatter">
-                        <field name="message_ids"/>
-                    </div>
+                    <div class="oe_chatter"/>
                 </form>`,
     };
     await start({ serverData: { views } });
@@ -538,56 +536,6 @@ test("should not display subject when subject is the same as the thread name wit
     });
 });
 
-test("basic chatter rendering without followers", async () => {
-    const pyEnv = await startServer();
-    const partnerId = pyEnv["res.partner"].create({ display_name: "second partner" });
-    const views = {
-        "res.partner,false,form": `
-            <form string="Partners">
-                <sheet>
-                    <field name="name"/>
-                </sheet>
-                <div class="oe_chatter">
-                    <field name="message_ids"/>
-                    <!-- no message_follower_ids field -->
-                </div>
-            </form>`,
-    };
-    await start({ serverData: { views } });
-    await openFormView("res.partner", partnerId);
-    await contains(".o-mail-Chatter");
-    await contains(".o-mail-Chatter-topbar");
-    await contains("button[aria-label='Attach files']");
-    await contains("button", { text: "Activities" });
-    await contains(".o-mail-Chatter .o-mail-Thread");
-    await contains(".o-mail-Followers", { count: 0 });
-});
-
-test("basic chatter rendering without messages", async () => {
-    const pyEnv = await startServer();
-    const partnerId = pyEnv["res.partner"].create({ display_name: "second partner" });
-    const views = {
-        "res.partner,false,form": `
-            <form string="Partners">
-                <sheet>
-                    <field name="name"/>
-                </sheet>
-                <div class="oe_chatter">
-                    <field name="message_follower_ids"/>
-                    <!-- no message_ids field -->
-                </div>
-            </form>`,
-    };
-    await start({ serverData: { views } });
-    await openFormView("res.partner", partnerId);
-    await contains(".o-mail-Chatter");
-    await contains(".o-mail-Chatter-topbar");
-    await contains("button[aria-label='Attach files']");
-    await contains("button", { text: "Activities" });
-    await contains(".o-mail-Followers");
-    await contains(".o-mail-Chatter .o-mail-Thread", { count: 0 });
-});
-
 test("chatter updating", async () => {
     const pyEnv = await startServer();
     const [partnerId_1, partnerId_2] = pyEnv["res.partner"].create([
@@ -605,9 +553,7 @@ test("chatter updating", async () => {
                 <sheet>
                     <field name="name"/>
                 </sheet>
-                <div class="oe_chatter">
-                    <field name="message_ids"/>
-                </div>
+                <div class="oe_chatter"/>
             </form>`,
     };
     await start({ serverData: { views } });
@@ -625,9 +571,7 @@ test("post message on draft record", async () => {
                 <sheet>
                     <field name="name"/>
                 </sheet>
-                <div class="oe_chatter">
-                    <field name="message_ids"/>
-                </div>
+                <div class="oe_chatter"/>
             </form>`,
     };
     await start({ serverData: { views } });
@@ -679,9 +623,7 @@ test("upload attachment on draft record", async () => {
                 <sheet>
                     <field name="name"/>
                 </sheet>
-                <div class="oe_chatter">
-                    <field name="message_ids"/>
-                </div>
+                <div class="oe_chatter"/>
             </form>`,
     };
     await start({ serverData: { views } });
@@ -718,9 +660,7 @@ test("Mentions in composer should still work when using pager", async () => {
                 <sheet>
                     <field name="name"/>
                 </sheet>
-                <div class="oe_chatter">
-                    <field name="message_ids"/>
-                </div>
+                <div class="oe_chatter"/>
             </form>`,
     };
     patchUiSize({ size: SIZES.LG });

@@ -252,10 +252,7 @@
                     </div>
                 </sheet>
                 <div class="o_attachment_preview o_center_attachment"/>
-                <div class="oe_chatter">
-                    <field name="message_follower_ids"/>
-                    <field name="message_ids"/>
-                </div>
+                <div class="oe_chatter"/>
                 </form>
             </field>
         </record>
@@ -936,10 +933,7 @@
                      </notebook>
                 </sheet>
                 <div class="o_attachment_preview o_center_attachment"/>
-                <div class="oe_chatter">
-                    <field name="message_follower_ids"/>
-                    <field name="message_ids"/>
-                </div>
+                <div class="oe_chatter"/>
                 </form>
             </field>
         </record>

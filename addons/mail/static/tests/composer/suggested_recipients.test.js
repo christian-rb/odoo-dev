@@ -12,10 +12,7 @@ const views = {
     "res.fake,false,form": `
         <form string="Fake">
             <sheet></sheet>
-            <div class="oe_chatter">
-                <field name="message_ids"/>
-                <field name="message_follower_ids"/>
-            </div>
+            <div class="oe_chatter"/>
         </form>`,
     "res.partner,false,form": `
         <form string="Partner">
