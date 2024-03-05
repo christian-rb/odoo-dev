@@ -202,6 +202,17 @@ const wSnippetMenu = weSnippetEditor.SnippetsMenu.extend({
             )[0];
             element.remove();
         });
+
+        // TODO remove in master: should be simply replaced by a
+        // `data-text-selector` attribute to mark text options.
+        const AnimationOptionEl = $html.find('[data-js="WebsiteAnimate"]')[0];
+        const HighlightOptionEl = $html.find('[data-js="TextHighlight"]')[0];
+        if (AnimationOptionEl) {
+            AnimationOptionEl.dataset.textSelector = ".o_animated_text";
+        }
+        if (HighlightOptionEl) {
+            HighlightOptionEl.dataset.textSelector = HighlightOptionEl.dataset.selector;
+        }
     },
     /**
      * Depending of the demand, reconfigure they gmap key or configure it
@@ -481,6 +492,9 @@ const wSnippetMenu = weSnippetEditor.SnippetsMenu.extend({
             this._disableTextOptions(targetEl);
             this.options.wysiwyg.odooEditor.historyStep(true);
             restoreCursor();
+            if (this.options.enableTranslation) {
+                $(selectedTextParent).trigger("content_changed");
+            }
         } else {
             if (sel.getRangeAt(0).collapsed) {
                 return;
@@ -763,20 +777,6 @@ weSnippetEditor.SnippetEditor.include({
         return this._super(...arguments);
     },
     /**
-     * @override
-     * @returns {Promise}
-     */
-    async updateOptionsUIVisibility() {
-        await this._super(...arguments);
-        // TODO improve this: some website text options (like text animations,
-        // text highlights...) are moved to the toolbar, which leads to an empty
-        // "options section". The goal of this override is to hide options
-        // sections with no option elements.
-        if (!this.$optionsSection[0].querySelector(":scope > we-customizeblock-option")) {
-            this.$optionsSection[0].classList.add("d-none");
-        }
-    },
-    /**
      * Changes some behaviors before the drag and drop.
      *
      * @private
@@ -836,9 +836,6 @@ wSnippetMenu.include({
      */
     start() {
         const _super = this._super(...arguments);
-        if (this.options.enableTranslation) {
-            return _super;
-        }
         if (this.$body[0].ownerDocument !== this.ownerDocument) {
             this.$body.on('click.snippets_menu', '*', this._onClick);
         }
