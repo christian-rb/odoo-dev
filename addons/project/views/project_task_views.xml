@@ -977,7 +977,7 @@
         </record>
 
         <record id="action_view_all_task" model="ir.actions.act_window">
-            <field name="name">All Tasks</field>
+            <field name="name">Tasks in Conflict</field>
             <field name="res_model">project.task</field>
             <field name="view_mode">tree,kanban,form,calendar,pivot,graph,activity</field>
             <field name="domain">[('display_in_project', '=', True)]</field>
