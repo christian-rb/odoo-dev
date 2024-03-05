@@ -171,6 +171,7 @@ class StockPicking(models.Model):
                     'picking_ids': [Command.link(self.id), Command.link(picking.id)],
                     'company_id': self.company_id.id if self.company_id else False,
                     'picking_type_id': self.picking_type_id.id,
+                    'description': self._get_new_batch_description()
                 })
                 if picking.picking_type_id.batch_auto_confirm:
                     new_batch.action_confirm()
@@ -236,6 +237,20 @@ class StockPicking(models.Model):
         if batch_pack:
             return super(StockPicking, self.batch_id.picking_ids if self.batch_id else self)._package_move_lines(batch_pack)
         return super()._package_move_lines(batch_pack)
+
+    def _get_new_batch_description(self):
+        """ Get the description of the newly created batch based on the grouped pickings and grouping criteria """
+        self.ensure_one()
+        description_items = []
+        if self.picking_type_id.batch_group_by_partner and self.partner_id:
+            description_items.append(self.partner_id.name)
+        if self.picking_type_id.batch_group_by_destination and self.partner_id.country_id:
+            description_items.append(self.partner_id.country_id.name)
+        if self.picking_type_id.batch_group_by_src_loc and self.location_id:
+            description_items.append(self.location_id.display_name)
+        if self.picking_type_id.batch_group_by_dest_loc and self.location_dest_id:
+            description_items.append(self.location_dest_id.display_name)
+        return ', '.join(description_items)
 
     def assign_batch_user(self, user_id):
         if not user_id:
