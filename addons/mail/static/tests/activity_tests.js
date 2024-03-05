@@ -532,6 +532,51 @@ QUnit.test("Activity view: discard an activity creation dialog", async function 
     assert.containsNone($, ".modal.o_technical_modal", "Activity Modal should be closed");
 });
 
+QUnit.test("Activity view: multiple clicks on activity cell", async function (assert) {
+    serverData.actions = {
+        1: {
+            id: 1,
+            name: "Task Action",
+            res_model: "task",
+            type: "ir.actions.act_window",
+            views: [[false, "activity"]],
+        },
+    };
+
+    serverData.views = {
+        "task,false,activity": `
+        <activity string="Task">
+            <templates>
+                <div t-name="activity-box">
+                    <field name="foo"/>
+                </div>
+            </templates>
+        </activity>`,
+        "task,false,search": "<search></search>",
+        "mail.activity,false,form": `
+        <form>
+            <field name="display_name"/>
+            <footer>
+                <button string="Discard" class="btn-secondary" special="cancel"/>
+            </footer>
+        </form>`,
+    };
+
+    const webClient = await createWebClient({ serverData, legacyParams: { withLegacyMockServer: true } });
+    await doAction(webClient, 1);
+
+    const activityCell = document.querySelector(".o_activity_view .o_data_row .o_activity_empty_cell");
+
+    testUtils.dom.click(activityCell);
+    await new Promise(resolve => setTimeout(resolve));
+
+    testUtils.dom.click(activityCell);
+    await new Promise(resolve => setTimeout(resolve));
+
+    await legacyExtraNextTick();
+    assert.equal($('.modal.o_technical_modal').length, 1, "Modal should open only once");
+});
+
 QUnit.test('Activity view: many2one_avatar_user widget in activity view', async function (assert) {
     assert.expect(3);
 
