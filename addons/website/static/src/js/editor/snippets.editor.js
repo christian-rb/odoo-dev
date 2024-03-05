@@ -222,8 +222,111 @@ export class WebsiteSnippetsMenu extends weSnippetEditor.SnippetsMenu {
         const toFind = $html.find("we-fontfamilypicker[data-variable]").toArray();
         const fontVariables = toFind.map((el) => el.dataset.variable);
         FontFamilyPickerUserValueWidget.prototype.fontVariables = fontVariables;
+<<<<<<< HEAD
         return super._computeSnippetTemplates(html);
     }
+||||||| parent of 4595ca4640bd (temp)
+        return this._super(...arguments);
+    },
+    /**
+     * @override
+     */
+    _patchForComputeSnippetTemplates($html) {
+        this._super(...arguments);
+
+        // TODO adapt in master: as a stable fix we corrected the behavior of
+        // the logo button that led to an error when switching from Text to
+        // Logo. Remove me in master.
+        const logoViewName = 'website.option_header_brand_logo';
+        const logoButtonEl = $html.find(`[data-customize-website-views="${logoViewName}"]`)[0];
+        if (logoButtonEl) {
+            logoButtonEl.dataset.customizeWebsiteViews = `|website.option_header_brand_name|${logoViewName}`;
+            logoButtonEl.dataset.resetViewArch = "true";
+        }
+        const brandSelectorEl = $html.find('[data-name="option_header_brand_none"]')[0]
+            ?.closest("[data-selector]");
+        if (brandSelectorEl) {
+            brandSelectorEl.dataset.selector = brandSelectorEl.dataset.selector
+                .replace('.navbar-brand.logo', '.navbar-brand');
+        }
+
+        // TODO adapt in master: as a stable imp we added a preview for the
+        // "Effect" option of the "On Hover" animation option.
+        const hoverEffectSelectEl = $html.find('[data-set-img-shape-hover-effect]')[0];
+        delete hoverEffectSelectEl.dataset.noPreview;
+
+        // TODO remove in master: as a stable fix we exclude the form fields
+        // from the grid cell's Padding (Y, X) option.
+        const gridColumnsEl = $html.find('[data-js="GridColumns"]')[0];
+        if (gridColumnsEl) {
+            gridColumnsEl.dataset.selector = ".row:not(.s_col_no_resize) > div";
+        }
+
+        // Remove the input-border-width-sm and input-border-width-lg from the input-border-width
+        ['input-border-width-sm', 'input-border-width-lg'].forEach(variable => {
+            const element = $html.find(
+                `[data-selector='theme-input'] we-input[data-customize-website-variable][data-variable='${variable}']`
+            )[0];
+            element.remove();
+        });
+    },
+=======
+        return this._super(...arguments);
+    },
+    /**
+     * @override
+     */
+    _patchForComputeSnippetTemplates($html) {
+        this._super(...arguments);
+
+        // TODO adapt in master: as a stable fix we corrected the behavior of
+        // the logo button that led to an error when switching from Text to
+        // Logo. Remove me in master.
+        const logoViewName = 'website.option_header_brand_logo';
+        const logoButtonEl = $html.find(`[data-customize-website-views="${logoViewName}"]`)[0];
+        if (logoButtonEl) {
+            logoButtonEl.dataset.customizeWebsiteViews = `|website.option_header_brand_name|${logoViewName}`;
+            logoButtonEl.dataset.resetViewArch = "true";
+        }
+        const brandSelectorEl = $html.find('[data-name="option_header_brand_none"]')[0]
+            ?.closest("[data-selector]");
+        if (brandSelectorEl) {
+            brandSelectorEl.dataset.selector = brandSelectorEl.dataset.selector
+                .replace('.navbar-brand.logo', '.navbar-brand');
+        }
+
+        // TODO adapt in master: as a stable imp we added a preview for the
+        // "Effect" option of the "On Hover" animation option.
+        const hoverEffectSelectEl = $html.find('[data-set-img-shape-hover-effect]')[0];
+        delete hoverEffectSelectEl.dataset.noPreview;
+
+        // TODO remove in master: as a stable fix we exclude the form fields
+        // from the grid cell's Padding (Y, X) option.
+        const gridColumnsEl = $html.find('[data-js="GridColumns"]')[0];
+        if (gridColumnsEl) {
+            gridColumnsEl.dataset.selector = ".row:not(.s_col_no_resize) > div";
+        }
+
+        // Remove the input-border-width-sm and input-border-width-lg from the input-border-width
+        ['input-border-width-sm', 'input-border-width-lg'].forEach(variable => {
+            const element = $html.find(
+                `[data-selector='theme-input'] we-input[data-customize-website-variable][data-variable='${variable}']`
+            )[0];
+            element.remove();
+        });
+
+        // TODO remove in master: should be simply replaced by a
+        // `data-text-selector` attribute to mark text options.
+        const AnimationOptionEl = $html.find('[data-js="WebsiteAnimate"]')[0];
+        const HighlightOptionEl = $html.find('[data-js="TextHighlight"]')[0];
+        if (AnimationOptionEl) {
+            AnimationOptionEl.dataset.textSelector = ".o_animated_text";
+        }
+        if (HighlightOptionEl) {
+            HighlightOptionEl.dataset.textSelector = HighlightOptionEl.dataset.selector;
+        }
+    },
+>>>>>>> 4595ca4640bd (temp)
     /**
      * Depending of the demand, reconfigure they gmap key or configure it
      * if not already defined.
@@ -467,7 +570,14 @@ export class WebsiteSnippetsMenu extends weSnippetEditor.SnippetsMenu {
             this.options.wysiwyg.odooEditor.historyResetLatestComputedSelection();
             this.options.wysiwyg.odooEditor.historyStep(true);
             restoreCursor();
+<<<<<<< HEAD
             return false;
+||||||| parent of 4595ca4640bd (temp)
+=======
+            if (this.options.enableTranslation) {
+                $(selectedTextParent).trigger("content_changed");
+            }
+>>>>>>> 4595ca4640bd (temp)
         } else {
             if (sel.getRangeAt(0).collapsed) {
                 return;
@@ -712,20 +822,6 @@ weSnippetEditor.SnippetEditor.include({
         return this._super(...arguments);
     },
     /**
-     * @override
-     * @returns {Promise}
-     */
-    async updateOptionsUIVisibility() {
-        await this._super(...arguments);
-        // TODO improve this: some website text options (like text animations,
-        // text highlights...) are moved to the toolbar, which leads to an empty
-        // "options section". The goal of this override is to hide options
-        // sections with no option elements.
-        if (!this.$optionsSection[0].querySelector(":scope > we-customizeblock-option")) {
-            this.$optionsSection[0].classList.add("d-none");
-        }
-    },
-    /**
      * Changes some behaviors before the drag and drop.
      *
      * @private
@@ -748,6 +844,217 @@ weSnippetEditor.SnippetEditor.include({
         }
         return restore;
     },
+<<<<<<< HEAD
+||||||| parent of 4595ca4640bd (temp)
+    /**
+     * TODO: Remove in master (left in stable for compatibility)
+     *
+     * @private
+     */
+    _highlightResizeObserve() {
+        // The callback of `this.editorResizeObserver` will fire automatically
+        // when observation starts, which triggers a useless highlight
+        // adjustment. We use `this.observerLock` to prevent it.
+        this.observerLock = true;
+        this.editorResizeObserver.observe(this.$target[0]);
+    },
+    /**
+     * TODO: Remove in master (left in stable for compatibility)
+     *
+     * @private
+     */
+    _adaptOnOptionResize() {
+        [...this.$target[0].querySelectorAll(".o_text_highlight")].forEach(textEl => {
+            switchTextHighlight(textEl);
+        });
+    },
+});
+
+wSnippetMenu.include({
+    /**
+     * @override
+     */
+    init: function () {
+        this._super(...arguments);
+        this._notActivableElementsSelector += ', .o_mega_menu_toggle';
+    },
+    /**
+     * @override
+     */
+    start() {
+        const _super = this._super(...arguments);
+        if (this.options.enableTranslation) {
+            return _super;
+        }
+        if (this.$body[0].ownerDocument !== this.ownerDocument) {
+            this.$body.on('click.snippets_menu', '*', this._onClick);
+        }
+        return _super;
+    },
+    /**
+    * @override
+    */
+    destroy() {
+        if (this.$body[0].ownerDocument !== this.ownerDocument) {
+            this.$body.off('.snippets_menu');
+        }
+        return this._super(...arguments);
+    },
+
+    //--------------------------------------------------------------------------
+    // Public
+    //--------------------------------------------------------------------------
+
+    /**
+     * @override
+     */
+    async cleanForSave() {
+        this.textHighlightObserver.disconnect();
+        const getFromEditable = selector => this.options.editable[0].querySelectorAll(selector);
+        // Clean unstyled translations
+        return this._super(...arguments).then(() => {
+            for (const el of getFromEditable('.o_translation_without_style')) {
+                el.classList.remove('o_translation_without_style');
+                if (el.dataset.oeTranslationSaveSha) {
+                    el.dataset.oeTranslationInitialSha = el.dataset.oeTranslationSaveSha;
+                    delete el.dataset.oeTranslationSaveSha;
+                }
+            }
+            // Adapt translation values for `select` > `options`s and remove all
+            // temporary `.o_translation_select` elements.
+            for (const optionsEl of getFromEditable('.o_translation_select')) {
+                const selectEl = optionsEl.nextElementSibling;
+                const translatedOptions = optionsEl.children;
+                const selectOptions = selectEl.tagName === 'SELECT' ? [...selectEl.options] : [];
+                if (selectOptions.length === translatedOptions.length) {
+                    selectOptions.map((option, i) => {
+                        option.text = translatedOptions[i].textContent;
+                    });
+                }
+                optionsEl.remove();
+            }
+        });
+    },
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * @override
+     */
+    _insertDropzone: function ($hook) {
+        var $hookParent = $hook.parent();
+        var $dropzone = this._super(...arguments);
+        $dropzone.attr('data-editor-message-default', $hookParent.attr('data-editor-message-default'));
+        $dropzone.attr('data-editor-message', $hookParent.attr('data-editor-message'));
+        $dropzone.attr('data-editor-sub-message', $hookParent.attr('data-editor-sub-message'));
+        return $dropzone;
+    },
+=======
+    /**
+     * TODO: Remove in master (left in stable for compatibility)
+     *
+     * @private
+     */
+    _highlightResizeObserve() {
+        // The callback of `this.editorResizeObserver` will fire automatically
+        // when observation starts, which triggers a useless highlight
+        // adjustment. We use `this.observerLock` to prevent it.
+        this.observerLock = true;
+        this.editorResizeObserver.observe(this.$target[0]);
+    },
+    /**
+     * TODO: Remove in master (left in stable for compatibility)
+     *
+     * @private
+     */
+    _adaptOnOptionResize() {
+        [...this.$target[0].querySelectorAll(".o_text_highlight")].forEach(textEl => {
+            switchTextHighlight(textEl);
+        });
+    },
+});
+
+wSnippetMenu.include({
+    /**
+     * @override
+     */
+    init: function () {
+        this._super(...arguments);
+        this._notActivableElementsSelector += ', .o_mega_menu_toggle';
+    },
+    /**
+     * @override
+     */
+    start() {
+        const _super = this._super(...arguments);
+        if (this.$body[0].ownerDocument !== this.ownerDocument) {
+            this.$body.on('click.snippets_menu', '*', this._onClick);
+        }
+        return _super;
+    },
+    /**
+    * @override
+    */
+    destroy() {
+        if (this.$body[0].ownerDocument !== this.ownerDocument) {
+            this.$body.off('.snippets_menu');
+        }
+        return this._super(...arguments);
+    },
+
+    //--------------------------------------------------------------------------
+    // Public
+    //--------------------------------------------------------------------------
+
+    /**
+     * @override
+     */
+    async cleanForSave() {
+        this.textHighlightObserver.disconnect();
+        const getFromEditable = selector => this.options.editable[0].querySelectorAll(selector);
+        // Clean unstyled translations
+        return this._super(...arguments).then(() => {
+            for (const el of getFromEditable('.o_translation_without_style')) {
+                el.classList.remove('o_translation_without_style');
+                if (el.dataset.oeTranslationSaveSha) {
+                    el.dataset.oeTranslationInitialSha = el.dataset.oeTranslationSaveSha;
+                    delete el.dataset.oeTranslationSaveSha;
+                }
+            }
+            // Adapt translation values for `select` > `options`s and remove all
+            // temporary `.o_translation_select` elements.
+            for (const optionsEl of getFromEditable('.o_translation_select')) {
+                const selectEl = optionsEl.nextElementSibling;
+                const translatedOptions = optionsEl.children;
+                const selectOptions = selectEl.tagName === 'SELECT' ? [...selectEl.options] : [];
+                if (selectOptions.length === translatedOptions.length) {
+                    selectOptions.map((option, i) => {
+                        option.text = translatedOptions[i].textContent;
+                    });
+                }
+                optionsEl.remove();
+            }
+        });
+    },
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * @override
+     */
+    _insertDropzone: function ($hook) {
+        var $hookParent = $hook.parent();
+        var $dropzone = this._super(...arguments);
+        $dropzone.attr('data-editor-message-default', $hookParent.attr('data-editor-message-default'));
+        $dropzone.attr('data-editor-message', $hookParent.attr('data-editor-message'));
+        $dropzone.attr('data-editor-sub-message', $hookParent.attr('data-editor-sub-message'));
+        return $dropzone;
+    },
+>>>>>>> 4595ca4640bd (temp)
 });
 
 export default {

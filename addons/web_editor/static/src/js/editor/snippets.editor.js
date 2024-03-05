@@ -586,14 +586,15 @@ var SnippetEditor = Widget.extend({
             await focusOrBlur(editor, styles);
         }
         await Promise.all(editorUIsToUpdate.map(editor => editor.updateOptionsUI()));
-        await Promise.all(editorUIsToUpdate.map(editor => editor.updateOptionsUIVisibility()));
-
-        // As the 'd-none' class is added to option sections that have no visible
-        // options with 'updateOptionsUIVisibility', if no option section is
-        // visible, we prevent the activation of the options.
-        const optionsSectionVisible = editorUIsToUpdate.some(
-             editor => !editor.$optionsSection[0].classList.contains('d-none')
-        );
+        // A `d-none` class is added to option sections that have no visible
+        // options with `updateOptionsUIVisibility`. If no option section is
+        // visible (including the options moved to the toolbar), we prevent
+        // the activation of the options.
+        const optionsSectionVisible = await Promise.all(
+            editorUIsToUpdate.map((editor) => editor.updateOptionsUIVisibility())
+        ).then(editorVisibilityValues => {
+            return editorVisibilityValues.some(editorVisibilityValue => editorVisibilityValue)
+        });
         if (editorUIsToUpdate.length > 0 && !optionsSectionVisible) {
             return null;
         }
@@ -654,7 +655,22 @@ var SnippetEditor = Widget.extend({
         // because some options can be located in the overlay.
         const $visibleOptions = this.$optionsSection.find('we-top-button-group, we-customizeblock-option')
                 .children(':not(.d-none)');
-        this.$optionsSection.toggleClass('d-none', !$visibleOptions.length);
+        // Some options (e.g., text highlights / animations) may have a special
+        // way to be displayed in the editor: We add the options in the toolbar
+        // `onFocus()` and set them back `onBlur()`. Which means that the
+        // options section will be empty and should be hidden, while editor's
+        // visible options should be displayed in the toolbar DOM. We need to
+        // take this scenario into consideration too.
+        const optionsSectionEmpty = !this.$optionsSection[0].querySelector(":scope > we-customizeblock-option");
+        const optionsSectionVisible = $visibleOptions.length && !optionsSectionEmpty;
+        // At this level, we can hide the options section.
+        this.$optionsSection.toggleClass("d-none", !optionsSectionVisible);
+        // Even with a hidden options section, the editor is still considered
+        // visible" if it has visible toolbar options.
+        const visibleToolbarOptions = Object.values(this.styles).some(
+            (option) => option.el.closest(".oe-toolbar") && !option.el.classList.contains("d-none")
+        );
+        return optionsSectionVisible || visibleToolbarOptions;
     },
     /**
      * Clones the current snippet.
@@ -2011,6 +2027,7 @@ class SnippetsMenu extends Component {
             },
         });
 
+<<<<<<< HEAD
         if (this.options.enableTranslation) {
             // Load the sidebar with the style tab only.
             await this._loadSnippetsTemplates();
@@ -2035,6 +2052,36 @@ class SnippetsMenu extends Component {
             await this._updateInvisibleDOM();
         })());
 
+||||||| parent of 4595ca4640bd (temp)
+        if (this.options.enableTranslation) {
+            // Load the sidebar with the style tab only.
+            await this._loadSnippetsTemplates();
+            defs.push(this._updateInvisibleDOM());
+            this.$el.find('.o_we_website_top_actions').removeClass('d-none');
+            this.$('.o_snippet_search_filter').addClass('d-none');
+            this.$('#o_scroll').addClass('d-none');
+            this.$('button[data-action="mobilePreview"]').addClass('d-none');
+            this.$('#snippets_menu button').removeClass('active').prop('disabled', true);
+            this.$('.o_we_customize_snippet_btn').addClass('active').prop('disabled', false);
+            this.$('o_we_ui_loading').addClass('d-none');
+            $(this.customizePanel).removeClass('d-none');
+            this.$('#o_we_editor_toolbar_container').hide();
+            this.$('#o-we-editor-table-container').addClass('d-none');
+            return Promise.all(defs);
+        }
+
+        this.emptyOptionsTabContent = document.createElement('div');
+        this.emptyOptionsTabContent.classList.add('text-center', 'pt-5');
+        this.emptyOptionsTabContent.append(_t("Select a block on your page to style it."));
+
+        // Fetch snippet templates and compute it
+        defs.push((async () => {
+            await this._loadSnippetsTemplates(this.options.invalidateSnippetCache);
+            await this._updateInvisibleDOM();
+        })());
+
+=======
+>>>>>>> 4595ca4640bd (temp)
         // Active snippet editor on click in the page
         this.$document.on('click.snippets_menu', '*', this._onClick);
         // Needed as bootstrap stop the propagation of click events for dropdowns
@@ -2100,6 +2147,33 @@ class SnippetsMenu extends Component {
         // for events that otherwise don’t support it. (e.g. useful when
         // scrolling a modal)
         this.$scrollingTarget[0].addEventListener('scroll', this._onScrollingElementScroll, {capture: true});
+
+        if (this.options.enableTranslation) {
+            // Load the sidebar with the style tab only.
+            await this._loadSnippetsTemplates();
+            defs.push(this._updateInvisibleDOM());
+            this.$el.find('.o_we_website_top_actions').removeClass('d-none');
+            this.$('.o_snippet_search_filter').addClass('d-none');
+            this.$('#o_scroll').addClass('d-none');
+            this.$('button[data-action="mobilePreview"]').addClass('d-none');
+            this.$('#snippets_menu button').removeClass('active').prop('disabled', true);
+            this.$('.o_we_customize_snippet_btn').addClass('active').prop('disabled', false);
+            this.$('o_we_ui_loading').addClass('d-none');
+            $(this.customizePanel).removeClass('d-none');
+            this.$('#o_we_editor_toolbar_container').hide();
+            this.$('#o-we-editor-table-container').addClass('d-none');
+            return Promise.all(defs).then(() => {});
+        }
+
+        this.emptyOptionsTabContent = document.createElement('div');
+        this.emptyOptionsTabContent.classList.add('text-center', 'pt-5');
+        this.emptyOptionsTabContent.append(_t("Select a block on your page to style it."));
+
+        // Fetch snippet templates and compute it
+        defs.push((async () => {
+            await this._loadSnippetsTemplates(this.options.invalidateSnippetCache);
+            await this._updateInvisibleDOM();
+        })());
 
         // Auto-selects text elements with a specific class and remove this
         // on text changes
@@ -2333,8 +2407,27 @@ class SnippetsMenu extends Component {
             this._mutex.exec(() => this._destroyEditor(snippetEditor));
         }
         this._mutex.exec(() => {
+<<<<<<< HEAD
             if (this.state.currentTab === this.tabs.OPTIONS && !this.snippetEditors.length) {
                 this._activateEmptyOptionsTab();
+||||||| parent of 4595ca4640bd (temp)
+            if (this._currentTab === this.tabs.OPTIONS && !this.snippetEditors.length) {
+                this._activateEmptyOptionsTab();
+=======
+            if (this._currentTab === this.tabs.OPTIONS && !this.snippetEditors.length) {
+                const selection = this.$body[0].ownerDocument.getSelection();
+                const range = selection?.rangeCount && selection.getRangeAt(0);
+                const currentlySelectedNode = range?.commonAncestorContainer;
+                // In some cases (e.g. in translation mode) it's possible to have
+                // all snippet editors destroyed after disabling text options.
+                // We still want to keep the toolbar available in this case.
+                const isEditableTextElementSelected =
+                    currentlySelectedNode?.nodeType === Node.TEXT_NODE &&
+                    !!currentlySelectedNode?.parentNode?.isContentEditable;
+                if (!isEditableTextElementSelected) {
+                    this._activateEmptyOptionsTab();
+                }
+>>>>>>> 4595ca4640bd (temp)
             }
         });
     }
@@ -2714,6 +2807,7 @@ class SnippetsMenu extends Component {
      * @returns {Promise<SnippetEditor>}
      *          (might be async when an editor must be created)
      */
+<<<<<<< HEAD
     async _activateSnippet($snippet, previewMode, ifInactiveOptions) {
         if (this.options.enableTranslation) {
             // In translate mode, do not activate the snippet when enabling its
@@ -2721,6 +2815,17 @@ class SnippetsMenu extends Component {
             // only want to toggle its visibility.
             return;
         }
+||||||| parent of 4595ca4640bd (temp)
+    _activateSnippet: async function ($snippet, previewMode, ifInactiveOptions) {
+        if (this.options.enableTranslation) {
+            // In translate mode, do not activate the snippet when enabling its
+            // corresponding invisible element. Indeed, in translate mode, we
+            // only want to toggle its visibility.
+            return;
+        }
+=======
+    _activateSnippet: async function ($snippet, previewMode, ifInactiveOptions) {
+>>>>>>> 4595ca4640bd (temp)
         if (this._blockPreviewOverlays && previewMode) {
             return;
         }
@@ -3103,9 +3208,9 @@ class SnippetsMenu extends Component {
             }
             return $target;
         };
-        globalSelector.is = function ($from) {
+        globalSelector.is = function ($from, options = {}) {
             for (var i = 0, len = selectors.length; i < len; i++) {
-                if (selectors[i].is($from)) {
+                if (options.onlyTextOptions ? $from.is(self.templateOptions[i].data.textSelector) : selectors[i].is($from)) {
                     return true;
                 }
             }
@@ -3184,6 +3289,12 @@ class SnippetsMenu extends Component {
         var snippetEditor = $snippet.data('snippet-editor');
         if (snippetEditor) {
             return snippetEditor.__isStarted;
+        }
+
+        // In translate mode, only allow creating the editor if the target is a
+        // text option snippet.
+        if (this.options.enableTranslation && !this._allowInTranslationMode($snippet)) {
+            return Promise.resolve(null);
         }
 
         var def;
@@ -3605,7 +3716,18 @@ class SnippetsMenu extends Component {
         this._hideTooltips();
         this._closeWidgets();
 
+<<<<<<< HEAD
         this.state.currentTab = tab || SnippetsMenu.tabs.BLOCKS;
+||||||| parent of 4595ca4640bd (temp)
+        this._currentTab = tab || this.tabs.BLOCKS;
+=======
+        // In translation mode, only the options tab is available.
+        if (this.options.enableTranslation) {
+            tab = this.tabs.OPTIONS;
+        }
+
+        this._currentTab = tab || this.tabs.BLOCKS;
+>>>>>>> 4595ca4640bd (temp)
 
         if (this._$toolbarContainer) {
             this._$toolbarContainer[0].remove();
@@ -3776,6 +3898,7 @@ class SnippetsMenu extends Component {
      * @private
      */
     _allowParentsEditors($snippet) {
+<<<<<<< HEAD
         return !this.options.enableTranslation;
     }
     /**
@@ -3812,6 +3935,21 @@ class SnippetsMenu extends Component {
             this._activateSnippet(editors[0].$target);
         }
     }
+||||||| parent of 4595ca4640bd (temp)
+        return !this.options.enableTranslation
+            && !$snippet[0].classList.contains("o_no_parent_editor");
+    },
+=======
+        return !this.options.enableTranslation
+            && !$snippet[0].classList.contains("o_no_parent_editor");
+    },
+    /**
+     * @private
+     */
+    _allowInTranslationMode($snippet) {
+        return globalSelector.is($snippet, { onlyTextOptions: true });
+    },
+>>>>>>> 4595ca4640bd (temp)
 
     //--------------------------------------------------------------------------
     // Handlers
