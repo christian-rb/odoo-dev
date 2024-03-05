@@ -1,0 +1,525 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo auto_sequence="1">
+    <record id="l10n_au_tax_report_section_2" model="account.report">
+        <field name="name">Additional BAS Info</field>
+        <field name="sequence">2</field>
+        <field name="country_id" ref="base.au"/>
+        <field name="availability_condition">country</field>
+        <field name="column_ids">
+            <!-- <record id="tax_report_ato" model="account.report.column">
+                <field name="name">ATO</field>
+                <field name="expression_label">ato</field>
+            </record> -->
+            <record id="tax_report_section_2_balance" model="account.report.column">
+                <field name="name">Balance</field>
+                <field name="expression_label">balance</field>
+            </record>
+        </field>
+        <field name="line_ids">
+            <record id="account_tax_report_additional_gst" model="account.report.line">
+                <field name="name">Goods and Service Tax</field>
+                <field name="hierarchy_level">0</field>
+                <field name="children_ids">
+                    <record id="account_tax_report_additional_gst_commissioner" model="account.report.line">
+                        <field name="name">GST Commissioner Chosen</field>
+                        <field name="code">GSTCC</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="children_ids">
+                            <record id="account_tax_report_additional_gst_g21" model="account.report.line">
+                                <field name="name">G21 - ATO instalment amount</field>
+                                <field name="code">G21</field>
+                                <field name="expression_ids">
+                                    <record id="account_tax_report_additional_gst_g21_balance" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <!-- <field name="date_scope">normal</field> -->
+                                        <field name="subformula">rounding=2</field>
+                                    </record>
+                                </field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="account_tax_report_additional_gst_estimation" model="account.report.line">
+                        <field name="name">GST Business Estimation</field>
+                        <field name="code">GSTBE</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="children_ids">
+                            <record id="account_tax_report_additional_gst_g22" model="account.report.line">
+                                <field name="name">G22 - Estimated net GST for the year</field>
+                                <field name="code">G22</field>
+                                <field name="expression_ids">
+                                    <record id="account_tax_report_additional_gst_g22_balance" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <!-- <field name="date_scope">normal</field> -->
+                                        <field name="subformula">editable;rounding=2</field>
+                                    </record>
+                                </field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="account_tax_report_additional_gst_variation" model="account.report.line">
+                        <field name="name">GST Business Variation</field>
+                        <field name="code">GSTBV</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="children_ids">
+                            <record id="account_tax_report_additional_gst_g23" model="account.report.line">
+                                <field name="name">G23 - Varied GST amount for the quarter</field>
+                                <field name="code">G23</field>
+                                <field name="expression_ids">
+                                    <record id="account_tax_report_additional_gst_g23_balance" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <!-- <field name="date_scope">normal</field> -->
+                                        <field name="subformula">editable;rounding=2</field>
+                                    </record>
+                                </field>
+                            </record>
+                            <record id="account_tax_report_additional_gst_g24" model="account.report.line">
+                                <field name="name">G24 - Reason code for GST variation</field>
+                                <field name="code">G24</field>
+                                <field name="expression_ids">
+                                    <record id="account_tax_report_additional_gst_g24_balance" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <!-- <field name="date_scope">normal</field> -->
+                                        <field name="subformula">editable;rounding=2</field>
+                                    </record>
+                                </field>
+                            </record>
+                        </field>
+                    </record>
+                </field>
+            </record>
+            <record id="account_tax_report_additional_fbt" model="account.report.line">
+                <field name="name">Fringe Benefits Tax</field>
+                <field name="hierarchy_level">0</field>
+                <field name="children_ids">
+                    <record id="account_tax_report_additional_ftb_commissioner" model="account.report.line">
+                        <field name="name">FBT Commissioner Chosen</field>
+                        <field name="code">FTBCC</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="children_ids">
+                            <record id="account_tax_report_additional_ftb_f1" model="account.report.line">
+                                <field name="name">F1 - Tax Office FBT instalment amount</field>
+                                <field name="code">F1</field>
+                                <field name="expression_ids">
+                                    <record id="account_tax_report_additional_ftb_f1_balance" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <!-- <field name="date_scope">normal</field> -->
+                                        <field name="subformula">rounding=2</field>
+                                    </record>
+                                </field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="account_tax_report_additional_ftb_estimation" model="account.report.line">
+                        <field name="name">FBT Business Estimation</field>
+                        <field name="code">FTBBE</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="children_ids">
+                            <record id="account_tax_report_additional_ftb_f2" model="account.report.line">
+                                <field name="name">F2 - Estimated FBT for the year</field>
+                                <field name="code">F2</field>
+                                <field name="expression_ids">
+                                    <record id="account_tax_report_additional_ftb_f2_balance" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <!-- <field name="date_scope">normal</field> -->
+                                        <field name="subformula">editable;rounding=2</field>
+                                    </record>
+                                </field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="account_tax_report_additional_ftb_variation" model="account.report.line">
+                        <field name="name">FBT Business Variation</field>
+                        <field name="code">FTBBV</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="children_ids">
+                            <record id="account_tax_report_additional_ftb_f3" model="account.report.line">
+                                <field name="name">F3 - Varied FBT amount for the quarter</field>
+                                <field name="code">F3</field>
+                                <field name="expression_ids">
+                                    <record id="account_tax_report_additional_ftb_f3_balance" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <!-- <field name="date_scope">normal</field> -->
+                                        <field name="subformula">editable;rounding=2</field>
+                                    </record>
+                                </field>
+                            </record>
+                        </field>
+                    </record>
+                </field>
+            </record>
+            <record id="account_tax_report_additional_paygi" model="account.report.line">
+                <field name="name">PAYG Income Tax Instalment</field>
+                <field name="hierarchy_level">0</field>
+                <field name="children_ids">
+                    <record id="account_tax_report_additional_paygi_paygi" model="account.report.line">
+                        <field name="name">PAYGI</field>
+                        <field name="code">PAYGI</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="children_ids">
+                            <record id="account_tax_report_additional_paygi_t1" model="account.report.line">
+                                <field name="name">T1 - PAYG instalment income</field>
+                                <field name="code">T1</field>
+                                <field name="expression_ids">
+                                    <record id="account_tax_report_additional_paygi_t1_balance" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <!-- <field name="date_scope">normal</field> -->
+                                        <field name="subformula">editable;rounding=2</field>
+                                    </record>
+                                </field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="account_tax_report_additional_paygi_commissioner" model="account.report.line">
+                        <field name="name">Commissioner Chosen</field>
+                        <field name="code">PAYGICC</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="children_ids">
+                            <record id="account_tax_report_additional_paygi_t5" model="account.report.line">
+                                <field name="name">T5/ T7 - Tax Office PAYG income tax instalment amount</field>
+                                <field name="code">T5</field>
+                                <field name="expression_ids">
+                                    <record id="account_tax_report_additional_paygi_t5_balance" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <!-- <field name="date_scope">normal</field> -->
+                                        <field name="subformula">rounding=2</field>
+                                    </record>
+                                </field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="account_tax_report_additional_paygi_estimation" model="account.report.line">
+                        <field name="name">Business Estimation</field>
+                        <field name="code">PAYGIBE</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="children_ids">
+                            <record id="account_tax_report_additional_paygi_t8" model="account.report.line">
+                                <field name="name">T8 - Estimated PAYG income tax for the year</field>
+                                <field name="code">T8</field>
+                                <field name="expression_ids">
+                                    <record id="account_tax_report_additional_paygi_t8_balance" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <!-- <field name="date_scope">normal</field> -->
+                                        <field name="subformula">editable;rounding=2</field>
+                                    </record>
+                                </field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="account_tax_report_additional_paygi_variation" model="account.report.line">
+                        <field name="name">Business Variation</field>
+                        <field name="code">PAYGIBV</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="children_ids">
+                            <record id="account_tax_report_additional_paygi_t6" model="account.report.line">
+                                <field name="name">T6/T9 - Varied PAYG income tax instalment amount</field>
+                                <field name="code">T6</field>
+                                <field name="expression_ids">
+                                    <record id="account_tax_report_additional_paygi_t6_balance" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <!-- <field name="date_scope">normal</field> -->
+                                        <field name="subformula">editable;rounding=2</field>
+                                    </record>
+                                </field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="account_tax_report_additional_paygi_paygi_commissioner" model="account.report.line">
+                        <field name="name">PAYG Instalment Commissioner Chosen</field>
+                        <field name="code">PAYGIPAYGICC</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="children_ids">
+                            <record id="account_tax_report_additional_paygi_t2" model="account.report.line">
+                                <field name="name">T2 - Commissioner Chosen - Instalment rate</field>
+                                <field name="code">T2</field>
+                                <field name="expression_ids">
+                                    <record id="account_tax_report_additional_paygi_t2_balance" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <!-- <field name="date_scope">normal</field> -->
+                                        <field name="subformula">rounding=2</field>
+                                    </record>
+                                </field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="account_tax_report_additional_paygi_paygi_variation" model="account.report.line">
+                        <field name="name">PAYG Instalment Business Variation</field>
+                        <field name="code">PAYGIPAYGIBV</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="children_ids">
+                            <record id="account_tax_report_additional_paygi_t3" model="account.report.line">
+                                <field name="name">T3 - Business Variation - New varied rate</field>
+                                <field name="code">T3</field>
+                                <field name="expression_ids">
+                                    <record id="account_tax_report_additional_paygi_t3_balance" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <!-- <field name="date_scope">normal</field> -->
+                                        <field name="subformula">editable;rounding=2</field>
+                                    </record>
+                                </field>
+                            </record>
+                        </field>
+                    </record>
+                </field>
+            </record>
+            <record id="account_tax_report_additional_summary" model="account.report.line">
+                <field name="name">Summary</field>
+                <field name="hierarchy_level">0</field>
+                <field name="children_ids">
+                    <record id="account_tax_report_additional_summary_owed_to" model="account.report.line">
+                        <field name="name">Amounts you owe the ATO</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="children_ids">
+                            <record id="account_tax_report_additional_summary_1c" model="account.report.line">
+                                <field name="name">1C - Wine equalisation tax</field>
+                                <field name="code">1C</field>
+                                <field name="expression_ids">
+                                    <record id="account_tax_report_additional_summary_1c_balance" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <!-- <field name="date_scope">normal</field> -->
+                                        <field name="subformula">editable;rounding=2</field>
+                                    </record>
+                                </field>
+                            </record>
+                            <record id="account_tax_report_additional_summary_1e" model="account.report.line">
+                                <field name="name">1E - Luxury car tax</field>
+                                <field name="code">1E</field>
+                                <field name="expression_ids">
+                                    <record id="account_tax_report_additional_summary_1e_balance" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <!-- <field name="date_scope">normal</field> -->
+                                        <field name="subformula">editable;rounding=2</field>
+                                    </record>
+                                </field>
+                            </record>
+                            <record id="account_tax_report_additional_summary_5a" model="account.report.line">
+                                <field name="name">5A - PAYG Income tax instalment</field>
+                                <field name="code">5A</field>
+                                <field name="expression_ids">
+                                    <record id="account_tax_report_additional_summary_5a_balance" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <!-- <field name="date_scope">normal</field> -->
+                                        <field name="subformula">editable;rounding=2</field>
+                                    </record>
+                                </field>
+                            </record>
+                            <record id="account_tax_report_additional_summary_6a" model="account.report.line">
+                                <field name="name">6A - FBT instalment</field>
+                                <field name="code">6A</field>
+                                <!-- <field name="aggregation_formula">F3.balance or F1.balance</field> -->
+                                <field name="expression_ids">
+                                    <record id="account_tax_report_additional_summary_6a_criterium" model="account.report.expression">
+                                        <field name="label">test_crit</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">F1.balance</field>
+                                        <field name="subformula">if_other_expr_equals(F3.balance, AUD(0))</field>
+                                    </record>
+                                    <record id="account_tax_report_additional_summary_6a_balance" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">F3.balance + 6A.test_crit</field>
+                                    </record>
+                                </field>
+                            </record>
+                            <record id="account_tax_report_additional_summary_7" model="account.report.line">
+                                <field name="name">7 - Deferred company/fund instalment</field>
+                                <field name="code">7</field>
+                                <field name="expression_ids">
+                                    <record id="account_tax_report_additional_summary_7_balance" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <!-- <field name="date_scope">normal</field> -->
+                                        <field name="subformula">editable;rounding=2</field>
+                                    </record>
+                                </field>
+                            </record>
+                            <record id="account_tax_report_additional_summary_7a" model="account.report.line"> <!-- TODO Check with task about deferred-->
+                                <field name="name">7A - Deferred GST on imported goods</field>
+                                <field name="code">7A</field>
+                                <field name="expression_ids">
+                                    <record id="account_tax_report_additional_summary_7a_balance" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <!-- <field name="date_scope">normal</field> -->
+                                        <field name="subformula">editable;rounding=2</field>
+                                    </record>
+                                </field>
+                            </record>
+                            <record id="account_tax_report_additional_summary_7c" model="account.report.line">
+                                <field name="name">7C - Fuel tax credit over claim</field>
+                                <field name="code">7C</field>
+                                <field name="expression_ids">
+                                    <record id="account_tax_report_additional_summary_7c_balance" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <!-- <field name="date_scope">normal</field> -->
+                                        <field name="subformula">editable;rounding=2</field>
+                                    </record>
+                                </field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="account_tax_report_additional_summary_owed_by" model="account.report.line">
+                        <field name="name">Amounts the ATO owes you</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="children_ids">
+                            <record id="account_tax_report_additional_summary_1d" model="account.report.line">
+                                <field name="name">1D - Wine equalisation tax refundable</field>
+                                <field name="code">1D</field>
+                                <field name="expression_ids">
+                                    <record id="account_tax_report_additional_summary_1d_balance" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <!-- <field name="date_scope">normal</field> -->
+                                        <field name="subformula">editable;rounding=2</field>
+                                    </record>
+                                </field>
+                            </record>
+                            <record id="account_tax_report_additional_summary_1f" model="account.report.line">
+                                <field name="name">1F - Luxury car tax refundable</field>
+                                <field name="code">1F</field>
+                                <field name="expression_ids">
+                                    <record id="account_tax_report_additional_summary_1f_balance" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <!-- <field name="date_scope">normal</field> -->
+                                        <field name="subformula">editable;rounding=2</field>
+                                    </record>
+                                </field>
+                            </record>
+                            <record id="account_tax_report_additional_summary_1h" model="account.report.line">
+                                <field name="name">1H - GST instalments</field>
+                                <field name="code">1H</field>
+                                <!-- <field name="aggregation_formula">G23.balance or G21.balance</field> -->
+                                <field name="expression_ids">
+                                    <record id="account_tax_report_additional_summary_1h_criterium" model="account.report.expression">
+                                        <field name="label">tax_criterium</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">G21.balance</field>
+                                        <field name="subformula">if_other_expr_equals(G23.balance, AUD(0))</field>
+                                    </record>
+                                    <record id="account_tax_report_additional_summary_1h_balance" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">G23.balance + 1H.tax_criterium</field>
+                                    </record>
+                                </field>
+                            </record>
+                            <record id="account_tax_report_additional_summary_5b" model="account.report.line">
+                                <field name="name">5B - Credit from PAYG income tax instalment variation</field>
+                                <field name="code">5B</field>
+                                <field name="expression_ids">
+                                    <record id="account_tax_report_additional_summary_5b_balance" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <!-- <field name="date_scope">normal</field> -->
+                                        <field name="subformula">editable;rounding=2</field>
+                                    </record>
+                                </field>
+                            </record>
+                            <record id="account_tax_report_additional_summary_6b" model="account.report.line">
+                                <field name="name">6B - Credit from FBT instalment variation</field>
+                                <field name="code">6B</field>
+                                <field name="expression_ids">
+                                    <record id="account_tax_report_additional_summary_6b_balance" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <!-- <field name="date_scope">normal</field> -->
+                                        <field name="subformula">editable;rounding=2</field>
+                                    </record>
+                                </field>
+                            </record>
+                            <record id="account_tax_report_additional_summary_7d" model="account.report.line">
+                                <field name="name">7D - Fuel tax credit</field>
+                                <field name="code">7D</field>
+                                <field name="expression_ids">
+                                    <record id="account_tax_report_additional_summary_7d_balance" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <!-- <field name="date_scope">normal</field> -->
+                                        <field name="subformula">editable;rounding=2</field>
+                                    </record>
+                                </field>
+                            </record>
+                            <record id="account_tax_report_additional_summary_8a" model="account.report.line"> <!-- TODO Check with task about deferred-->
+                                <field name="name">8A/ 2A/ P1 - Amount you owe the Tax Office</field>
+                                <field name="code">8A</field>
+                                <field name="expression_ids">
+                                    <record id="account_tax_report_additional_summary_8a_cross_balance" model="account.report.expression">
+                                        <field name="label">cross_balance</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">1A.balance + 4.balance</field>
+                                        <field name="subformula">cross_report</field>
+                                    </record>
+                                    <record id="account_tax_report_additional_summary_8a_balance" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">8A.cross_balance + 1C.balance + 1E.balance + 5A.balance + 6A.balance + 7.balance + 7A.balance + 7C.balance</field>
+                                    </record>
+                                </field>
+                                <!-- <field name="aggregation_formula">1A.balance + 1C.balance + 1E.balance + 4.balance + 5A.balance + 6A.balance + 7.balance + 7A.balance + 7C.balance</field> -->
+                            </record>
+                            <record id="account_tax_report_additional_summary_8b" model="account.report.line"> <!-- TODO Check with task about deferred-->
+                                <field name="name">8B/ 2B - Amount the Tax Office owes you</field>
+                                <field name="code">8B</field>
+                                <field name="expression_ids">
+                                    <record id="account_tax_report_additional_summary_8b_cross_balance" model="account.report.expression">
+                                        <field name="label">cross_balance</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">1B.balance</field>
+                                        <field name="subformula">cross_report</field>
+                                    </record>
+                                    <record id="account_tax_report_additional_summary_8b_balance" model="account.report.expression">
+                                        <field name="label">balance</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">8B.cross_balance + 1D.balance + 1F.balance + 5B.balance + 6B.balance + 7D.balance</field>
+                                    </record>
+                                </field>
+                                <!-- <field name="aggregation_formula">1B.balance + 1D.balance + 1F.balance + 5B.balance + 6B.balance + 7D.balance</field> -->
+                            </record>
+                        </field>
+                    </record>
+                </field>
+            </record>
+        </field>
+    </record>
+</odoo>
