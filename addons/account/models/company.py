@@ -10,6 +10,7 @@ from odoo.tools.mail import is_html_empty
 from odoo.tools.misc import format_date
 from odoo.tools.float_utils import float_round, float_is_zero
 from odoo.addons.account.models.account_move import MAX_HASH_VERSION
+from odoo.addons.account.models.chart_template import SYSCOHADA_LIST
 
 
 MONTH_SELECTION = [
@@ -636,6 +637,29 @@ class ResCompany(models.Model):
                 "Please go to Account Configuration and select or install a fiscal localization.")
             raise RedirectWarning(msg, action.id, _("Go to the configuration panel"))
         return account
+
+    def install_l10n_modules(self):
+        if res := super().install_l10n_modules():
+            chart_template_values = self.env['account.chart.template']._get_chart_template_mapping().items()
+            for company in self.filtered(lambda c: c.country_id and not c.chart_template):
+                filtered_chart_template = dict(
+                    filter(
+                        lambda pair_coa_val: (
+                            (
+                                pair_coa_val[1].get('country_id')
+                                and pair_coa_val[1].get('country_id') == company.country_id.id
+                            )
+                            or (
+                                    company.country_id.code in SYSCOHADA_LIST
+                                    and pair_coa_val[0] == 'syscohada'
+                                )
+                        ),
+                        chart_template_values
+                    )
+                )
+                if template_code := filtered_chart_template and next(iter(filtered_chart_template)):
+                    self.env['account.chart.template'].try_loading(template_code=template_code, company=company)
+        return res
 
     def _existing_accounting(self) -> bool:
         """Return True iff some accounting entries have already been made for the current company."""

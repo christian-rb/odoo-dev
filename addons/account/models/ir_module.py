@@ -2,7 +2,7 @@ from importlib import import_module
 from inspect import getmembers, ismodule, isclass, isfunction
 
 from odoo import api, models, fields
-from odoo.tools import get_flag
+from odoo.tools import get_flag, config
 
 
 def templ(env, code, name=None, country='', **kwargs):
@@ -62,7 +62,7 @@ class IrModule(models.Model):
         was_installed = len(self) == 1 and self.state in ('installed', 'to upgrade', 'to remove')
         res = super().write(vals)
         is_installed = len(self) == 1 and self.state == 'installed'
-        if not was_installed and is_installed and not self.env.company.chart_template and self.account_templates:
+        if not was_installed and is_installed and not self.env.company.chart_template and self.account_templates and (self.name != 'account' or config['test_enable']):
             def try_loading(env):
                 env['account.chart.template'].try_loading(
                     next(iter(self.account_templates)),
