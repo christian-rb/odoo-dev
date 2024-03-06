@@ -314,7 +314,7 @@ _BUILTINS = {
     'zip': zip,
     'Exception': Exception,
 }
-def safe_eval(expr, globals_dict=None, locals_dict=None, mode="eval", nocopy=False, locals_builtins=False, filename=None):
+def safe_eval(expr, globals_dict=None, locals_dict=None, mode="eval", nocopy=False, globals_builtins=True, locals_builtins=False, filename=None):
     """safe_eval(expression[, globals[, locals[, mode[, nocopy]]]]) -> result
 
     System-restricted Python expression evaluation
@@ -357,7 +357,8 @@ def safe_eval(expr, globals_dict=None, locals_dict=None, mode="eval", nocopy=Fal
     if globals_dict is None:
         globals_dict = {}
 
-    globals_dict['__builtins__'] = _BUILTINS
+    if globals_builtins:
+        globals_dict['__builtins__'] = _BUILTINS
     if locals_builtins:
         if locals_dict is None:
             locals_dict = {}
