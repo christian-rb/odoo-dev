@@ -160,10 +160,28 @@ export class ImageSelector extends FileSelector {
         await this.uploadService.uploadFiles(files, { resModel: this.props.resModel, resId: this.props.resId, isImage: true }, (attachment) => this.onUploaded(attachment));
     }
 
-    validateUrl(...args) {
+    async validateUrl(...args) {
         const { isValidUrl, path } = super.validateUrl(...args);
-        const isValidFileFormat = IMAGE_EXTENSIONS.some(format => path.endsWith(format));
-        return { isValidFileFormat, isValidUrl };
+        const isValidFileFormat = isValidUrl && await new Promise(resolve => {
+            // Validate that the URL is an image.
+            fetch(path, { method: 'HEAD' })
+            .then(response => {
+                const contentType = response.headers.get('content-type');
+                resolve(contentType && IMAGE_MIMETYPES.includes(contentType));
+            })
+            .catch(() => {
+                // If the server hosting the image doesn't allow cross-origin
+                // requests, the fetch request will fail due to the browser's
+                // same-origin policy, even if the image URL is valid and the
+                // image exists. In that case we trade-off the check by creating
+                // an Image object and checking its onload and onerror events.
+                const img = new Image();
+                img.src = path;
+                img.onload = () => resolve(true);
+                img.onerror = () => resolve(false);
+            });
+        });
+        return { isValidUrl, isValidFileFormat };
     }
 
     isInitialMedia(attachment) {
