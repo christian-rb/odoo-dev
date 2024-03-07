@@ -1,0 +1,28 @@
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
+
+from . import models
+from odoo.exceptions import UserError
+
+
+def uninstall_hook(env):
+    cr = env.cr
+    cr.execute(
+        """
+            SELECT 1
+            FROM ir_attachment
+            WHERE type = 'cloud_storage'
+            AND url LIKE 'https://%.blob.core.windows.net/%'
+            LIMIT 1
+        """,
+    )
+    if cr.fetchone():
+        raise UserError('Some Azure attachments are in use, please migrate their cloud storages before uninstall this module')
+
+    env['ir.config_parameter'].set_param('cloud_storage_provider', False)
+    env['ir.config_parameter'].search_fetch([('key', 'in', (
+        'cloud_storage_azure_container_name',
+        'cloud_storage_azure_account_name',
+        'cloud_storage_azure_tenant_id',
+        'cloud_storage_azure_client_id',
+        'cloud_storage_azure_client_secret',
+    ))], []).unlink()

@@ -542,6 +542,14 @@ class Stream:
             self.last_modified = attachment.write_date
             self.size = len(self.data)
 
+        elif attachment.type == 'cloud_storage' and attachment.env['cloud.storage.provider']._get_configuration():
+            self.type = 'url'
+            info = attachment.env['cloud.storage.provider']._generate_download_info(attachment)
+            self.url = info['url']
+            if 'time_to_expiry' in info:
+                # cache the redirection until 10 seconds before the expiry
+                self.max_age = max(info['time_to_expiry'] - 10, 0)
+
         elif attachment.url:
             # When the URL targets a file located in an addon, assume it
             # is a path to the resource. It saves an indirection and
@@ -605,6 +613,10 @@ class Stream:
         assert getattr(self, self.type) is not None, "There is nothing to stream, missing {self.type!r} attribute."
 
         if self.type == 'url':
+            if self.max_age is not None:
+                res = request.redirect(self.url, code=302, local=False)
+                res.headers['Cache-Control'] = f'max-age={self.max_age}'
+                return res
             return request.redirect(self.url, code=301, local=False)
 
         if as_attachment is None:
