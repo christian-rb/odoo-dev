@@ -1,6 +1,6 @@
 import { before, destroy, expect, getFixture, test } from "@odoo/hoot";
 import { queryOne, scroll } from "@odoo/hoot-dom";
-import { Deferred, animationFrame } from "@odoo/hoot-mock";
+import { Deferred, animationFrame, runAllTimers } from "@odoo/hoot-mock";
 import { Component, xml, useRef, onMounted } from "@odoo/owl";
 import { defineParams, mountWithCleanup } from "@web/../tests/web_test_helpers";
 import { usePosition } from "@web/core/position/position_hook";
@@ -649,6 +649,7 @@ test("batch update call", async () => {
     position.unlock();
     position.unlock();
     position.unlock();
+    await runAllTimers();
     await animationFrame();
     expect(["positioned"]).toVerifySteps();
 });

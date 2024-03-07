@@ -26,7 +26,6 @@ const { customElements, document, getSelection, HTMLElement } = globalThis;
 // Internal
 //-----------------------------------------------------------------------------
 
-const FIXTURE_OFFSET = -10_000; // In pixels
 const FIXTURE_COMMON_STYLE = ["display: block", "height: 100vh", "position: fixed", "width: 100vw"];
 const FIXTURE_DEBUG_STYLE = [
     ...FIXTURE_COMMON_STYLE,
@@ -39,9 +38,10 @@ const FIXTURE_DEBUG_STYLE = [
 ].join(";");
 const FIXTURE_STYLE = [
     ...FIXTURE_COMMON_STYLE,
-    `left: ${FIXTURE_OFFSET}px`,
+    "left: 50%",
+    "top: 50%",
+    "transform: translate(-50%, -50%)",
     "opacity: 0",
-    `top: ${FIXTURE_OFFSET}px`,
 ].join(";");
 
 const destroyed = new WeakSet();
