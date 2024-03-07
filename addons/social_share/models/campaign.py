@@ -37,7 +37,7 @@ class Campaign(models.Model):
 
     element_ids = fields.One2many('snshare.campaign.element', inverse_name='campaign_id')
 
-    image = fields.Image(compute='_compute_image', store=True)
+    image = fields.Image(compute='_compute_image', readonly=True, store=True, attachment=False)
     link_tracker_id = fields.Many2one('link.tracker', ondelete="restrict")
 
     target_url_click_count = fields.Integer(compute='_compute_target_url_click_count')
@@ -46,6 +46,7 @@ class Campaign(models.Model):
     share_url_share_count = fields.Integer(compute='_compute_share_url_share_count')
 
     mail_template_id = fields.Many2one('mail.template')
+
     def default_get(self, vals):
         default_vals = super().default_get(vals)
         if 'element_ids' in vals:
