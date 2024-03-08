@@ -14,9 +14,14 @@ class StockPickingBatch(models.Model):
     _description = "Batch Transfer"
     _order = "name desc"
 
+    def _get_default_name(self):
+        if self.is_wave:
+            return self.env['ir.sequence'].next_by_code('picking.wave') or '/'
+        return self.env['ir.sequence'].next_by_code('picking.batch') or '/'
+
     name = fields.Char(
-        string='Batch Transfer', default='New',
-        copy=False, required=True, readonly=True)
+        string='Batch Transfer', default=_get_default_name,
+        copy=False, required=True)
     description = fields.Char("Description", size=35)
     user_id = fields.Many2one(
         'res.users', string='Responsible', tracking=True, check_company=True)
