@@ -14,7 +14,7 @@ class TestAllocations(TestHrHolidaysCommon):
             'name': 'Time Off with no validation for approval',
             'time_type': 'leave',
             'requires_allocation': 'yes',
-            'allocation_validation_type': 'no',
+            'allocation_validation_type': 'no_validation',
         })
         cls.department = cls.env['hr.department'].create({
             'name': 'Test Department',
@@ -93,7 +93,7 @@ class TestAllocations(TestHrHolidaysCommon):
     def test_allocation_request(self):
         self.leave_type.write({
             'name': 'Custom Time Off Test',
-            'allocation_validation_type': 'officer'
+            'allocation_validation_type': 'hr'
         })
 
         employee_allocation = self.env['hr.leave.allocation'].create({

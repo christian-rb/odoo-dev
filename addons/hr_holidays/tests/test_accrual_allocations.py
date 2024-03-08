@@ -19,13 +19,13 @@ class TestAccrualAllocations(TestHrHolidaysCommon):
             'name': 'Paid Time Off',
             'time_type': 'leave',
             'requires_allocation': 'yes',
-            'allocation_validation_type': 'officer',
+            'allocation_validation_type': 'hr',
         })
         cls.leave_type_hour = cls.env['hr.leave.type'].create({
             'name': 'Paid Time Off',
             'time_type': 'leave',
             'requires_allocation': 'yes',
-            'allocation_validation_type': 'officer',
+            'allocation_validation_type': 'hr',
             'request_unit': 'hour',
         })
 
@@ -1452,7 +1452,7 @@ class TestAccrualAllocations(TestHrHolidaysCommon):
             'name': 'Test Leave Type',
             'time_type': 'leave',
             'requires_allocation': 'yes',
-            'allocation_validation_type': 'no',
+            'allocation_validation_type': 'no_validation',
             'request_unit': 'hour',
         })
         with freeze_time("2023-12-31"):
