@@ -114,7 +114,10 @@ class Attendee(models.Model):
                 event_id = attendee.event_id.id
                 ics_file = ics_files.get(event_id)
 
-                attachment_ids = mail_template.attachment_ids.ids
+                if mail_template.attachment_ids:
+                    attachment_ids = mail_template.attachment_ids.copy({'res_id': 0, 'res_model': 'mail.compose.message'}).ids
+                else:
+                    attachment_ids = mail_template.attachment_ids.ids
                 if ics_file:
                     context = {
                         **clean_context(self.env.context),
@@ -124,9 +127,9 @@ class Attendee(models.Model):
                         'datas': base64.b64encode(ics_file),
                         'description': 'invitation.ics',
                         'mimetype': 'text/calendar',
-                        'res_id': event_id,
-                        'res_model': 'calendar.event',
                         'name': 'invitation.ics',
+                        'res_id': 0,
+                        'res_model': 'mail.compose.message',
                     }).ids
 
                 body = mail_template._render_field(

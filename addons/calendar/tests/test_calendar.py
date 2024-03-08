@@ -381,6 +381,16 @@ class TestCalendar(SavepointCaseWithUserDemo):
         # no more email should be sent
         _test_one_mail_per_attendee(self, partners)
 
+        # Check for attachment when public user creates an event ( simulates scheduling appointment from an incognito window)
+        dummy_partner = self.env['res.partner'].create({'name': 'Dummy User', 'email': 'Dummy@user.com'})
+        self.CalendarEvent.with_user(self.env.ref('base.public_user')).sudo().create({
+            'name': "publicUserEvent",
+            'partner_ids': [(6, False, dummy_partner.ids)],
+            'start': "2023-10-06 12:00:00",
+            'stop': "2023-10-06 13:00:00",
+        })
+        _test_emails_has_attachment(self, [dummy_partner])
+
     def test_event_creation_internal_user_invitation_ics(self):
         """ Check that internal user can read invitation.ics attachment """
         internal_user = new_test_user(self.env, login='internal_user', groups='base.group_user')
