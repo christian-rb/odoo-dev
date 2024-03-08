@@ -1116,7 +1116,13 @@ class TestLeaveRequests(TestHrHolidaysCommon):
     def test_undefined_working_hours(self):
         """ Ensure time-off can also be allocated without ResourceCalendar. """
         employee = self.employee_emp
-        employee.resource_calendar_id = False
+        # set a flexible working schedule
+        calendar = self.env['resource.calendar'].create({
+            'name': 'Flexible 40h/week',
+            'hours_per_day': 8.0,
+            'flexible_hours': True,
+        })
+        employee.resource_calendar_id = calendar
         self.env['hr.leave.allocation'].create({
             'name': 'Annual Time Off',
             'employee_id': employee.id,
