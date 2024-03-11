@@ -131,8 +131,8 @@ class PaymentMethod(models.Model):
                     'warning': {
                         'title': _("Warning"),
                         'message': _(
-                            "This action will also archive %s tokens that are registered with this "
-                            "payment method. Archiving tokens is irreversible.", len(related_tokens)
+                            "Are you sure that you want to archive this record? It will also archive the %s tokens linked to this payment method."
+                            , len(related_tokens)
                         )
                     }
                 }
