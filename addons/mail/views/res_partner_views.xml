@@ -19,7 +19,7 @@
                     </div>
                 </xpath>
                 <xpath expr="//sheet" position="after">
-                    <div class="oe_chatter"/>
+                    <chatter/>
                 </xpath>
             </field>
         </record>

@@ -40,7 +40,7 @@ function compileAttachmentPreview(node, params) {
 }
 
 registry.category("form_compilers").add("chatter_compiler", {
-    selector: "div.oe_chatter",
+    selector: "chatter",
     fn: compileChatter,
 });
 

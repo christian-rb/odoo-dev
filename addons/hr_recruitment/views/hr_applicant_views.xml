@@ -171,8 +171,7 @@
                 </notebook>
             </sheet>
             <div class="o_attachment_preview" groups="hr_recruitment.group_applicant_cv_display"/>
-            <div class="oe_chatter" options="{'open_attachments': True}">
-            </div>
+            <chatter options="{'open_attachments': True}"/>
           </form>
         </field>
     </record>

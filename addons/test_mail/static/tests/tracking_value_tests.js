@@ -32,7 +32,7 @@ QUnit.module("tracking value", {
                         <field name="selection_field"/>
                         <field name="text_field"/>
                     </sheet>
-                    <div class="oe_chatter"/>
+                    <chatter/>
                 </form>`,
         };
         this.start = async ({ res_id }) => {

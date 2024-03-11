@@ -123,7 +123,7 @@
                         </page>
                     </notebook>
                 </sheet>
-                <div class="oe_chatter"/>
+                <chatter/>
             </form>
         </field>
     </record>

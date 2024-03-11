@@ -29,7 +29,7 @@ export class FormArchParser {
                     activeActions.addPropertyFieldValue = true;
                 }
                 return false;
-            } else if (node.tagName === "div" && node.classList.contains("oe_chatter")) {
+            } else if (node.tagName === "chatter") {
                 // remove this when chatter fields are declared as attributes on the root node
                 return false;
             } else if (node.tagName === "widget") {

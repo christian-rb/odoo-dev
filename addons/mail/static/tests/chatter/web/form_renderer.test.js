@@ -37,7 +37,7 @@ test("Form view not scrolled when switching record", async () => {
                     <field name="name"/>
                     <field name="description"/>
                 </sheet>
-                <div class="oe_chatter"/>
+                <chatter/>
             </form>`,
     };
     patchUiSize({ size: SIZES.LG });
@@ -84,7 +84,7 @@ test("Attachments that have been unlinked from server should be visually unlinke
                     <sheet>
                         <field name="name"/>
                     </sheet>
-                    <div class="oe_chatter"/>
+                    <chatter/>
                 </form>`,
     };
     await start({ serverData: { views } });
@@ -131,7 +131,7 @@ test("read more/less links are not duplicated when switching from read to edit m
                     <sheet>
                         <field name="name"/>
                     </sheet>
-                    <div class="oe_chatter"/>
+                    <chatter/>
                 </form>`,
     };
     await start({ serverData: { views } });
@@ -169,7 +169,7 @@ test("read more links becomes read less after being clicked", async () => {
                 <sheet>
                     <field name="name"/>
                 </sheet>
-                <div class="oe_chatter"/>
+                <chatter/>
             </form>`,
     };
     await start({ serverData: { views } });
@@ -217,7 +217,7 @@ test("[TECHNICAL] unfolded read more/less links should not fold on message click
                     <sheet>
                         <field name="name"/>
                     </sheet>
-                    <div class="oe_chatter"/>
+                    <chatter/>
                 </form>`,
     };
     await start({ serverData: { views } });
@@ -258,7 +258,7 @@ test("read more/less links on message of type notification", async () => {
                 <sheet>
                     <field name="name"/>
                 </sheet>
-                <div class="oe_chatter"/>
+                <chatter/>
             </form>`,
     };
     await start({ serverData: { views } });

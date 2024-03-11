@@ -46,7 +46,7 @@ test('Click on "follow" button should save draft record', async () => {
                 <sheet>
                     <field name="name" required="1"/>
                 </sheet>
-                <div class="oe_chatter"/>
+                <chatter/>
             </form>`,
     };
     await start({ serverData: { views } });

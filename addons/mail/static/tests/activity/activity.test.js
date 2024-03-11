@@ -20,7 +20,7 @@ const views = {
     "res.fake,false,form": `
         <form string="Fake">
             <sheet></sheet>
-            <div class="oe_chatter"/>
+            <chatter/>
         </form>`,
 };
 

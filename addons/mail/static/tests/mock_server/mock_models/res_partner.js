@@ -16,7 +16,7 @@ export class ResPartner extends webModels.ResPartner {
                 <sheet>
                     <field name="name"/>
                 </sheet>
-                <div class="oe_chatter"/>
+                <chatter/>
             </form>`,
     };
 

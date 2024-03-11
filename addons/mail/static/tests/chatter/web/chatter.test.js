@@ -459,7 +459,7 @@ test("basic chatter rendering", async () => {
                 <sheet>
                     <field name="name"/>
                 </sheet>
-                <div class="oe_chatter"/>
+                <chatter/>
             </form>`,
     };
     await start({ serverData: { views } });
@@ -476,7 +476,7 @@ test('chatter just contains "creating a new record" message during the creation 
                     <sheet>
                         <field name="name"/>
                     </sheet>
-                    <div class="oe_chatter"/>
+                    <chatter/>
                 </form>`,
     };
     await start({ serverData: { views } });
@@ -553,7 +553,7 @@ test("chatter updating", async () => {
                 <sheet>
                     <field name="name"/>
                 </sheet>
-                <div class="oe_chatter"/>
+                <chatter/>
             </form>`,
     };
     await start({ serverData: { views } });
@@ -571,7 +571,7 @@ test("post message on draft record", async () => {
                 <sheet>
                     <field name="name"/>
                 </sheet>
-                <div class="oe_chatter"/>
+                <chatter/>
             </form>`,
     };
     await start({ serverData: { views } });
@@ -590,7 +590,7 @@ test("schedule activities on draft record should prompt with scheduling an activ
                     <sheet>
                         <field name="name"/>
                     </sheet>
-                    <div class="oe_chatter"/>
+                    <chatter/>
                 </form>`,
     };
     const { env } = await start({ serverData: { views } });
@@ -623,7 +623,7 @@ test("upload attachment on draft record", async () => {
                 <sheet>
                     <field name="name"/>
                 </sheet>
-                <div class="oe_chatter"/>
+                <chatter/>
             </form>`,
     };
     await start({ serverData: { views } });
@@ -660,7 +660,7 @@ test("Mentions in composer should still work when using pager", async () => {
                 <sheet>
                     <field name="name"/>
                 </sheet>
-                <div class="oe_chatter"/>
+                <chatter/>
             </form>`,
     };
     patchUiSize({ size: SIZES.LG });

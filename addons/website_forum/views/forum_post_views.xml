@@ -59,7 +59,7 @@
                     </field>
                 </group>
             </sheet>
-            <div class="oe_chatter"/>
+            <chatter/>
         </form>
     </field>
 </record>

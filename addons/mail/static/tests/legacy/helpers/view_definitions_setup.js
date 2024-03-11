@@ -9,6 +9,6 @@ registry
         "res.fake",
         `<form>
             <sheet/>
-            <div class="oe_chatter"/>
+            <chatter/>
         </form>`
     );

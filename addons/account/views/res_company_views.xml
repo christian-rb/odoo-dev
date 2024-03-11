@@ -9,7 +9,7 @@
                 <field name="account_enabled_tax_country_ids" invisible="1"/>
             </xpath>
             <xpath expr="//sheet" position="after">
-                <div class="oe_chatter"/>
+                <chatter/>
             </xpath>
         </field>
     </record>

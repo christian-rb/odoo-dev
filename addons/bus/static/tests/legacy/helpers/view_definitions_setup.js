@@ -21,6 +21,6 @@ formArchsRegistry.add(
         <sheet>
             <field name="name"/>
         </sheet>
-        <div class="oe_chatter"/>
+        <chatter/>
     </form>`
 );

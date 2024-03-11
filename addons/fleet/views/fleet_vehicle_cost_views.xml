@@ -57,7 +57,7 @@
                     <separator string="Terms and Conditions"/>
                     <field name="notes" nolabel="1" placeholder="Write here all other information relative to this contract" />
                 </sheet>
-                <div class="oe_chatter"/>
+                <chatter/>
             </form>
         </field>
     </record>
@@ -243,7 +243,7 @@
                     <separator string="Notes"/>
                     <field nolabel="1" name="notes" placeholder="Write here any other information related to the service completed."/>
                 </sheet>
-                <div class="oe_chatter"/>
+                <chatter/>
             </form>
         </field>
     </record>

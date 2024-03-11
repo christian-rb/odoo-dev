@@ -252,7 +252,7 @@
                     </div>
                 </sheet>
                 <div class="o_attachment_preview o_center_attachment"/>
-                <div class="oe_chatter"/>
+                <chatter/>
                 </form>
             </field>
         </record>
@@ -933,7 +933,7 @@
                      </notebook>
                 </sheet>
                 <div class="o_attachment_preview o_center_attachment"/>
-                <div class="oe_chatter"/>
+                <chatter/>
                 </form>
             </field>
         </record>

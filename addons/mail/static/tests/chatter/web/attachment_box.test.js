@@ -31,7 +31,7 @@ test("base non-empty rendering", async () => {
         "res.partner,false,form": `
             <form>
                 <sheet></sheet>
-                <div class="oe_chatter" options="{'open_attachments': True}"/>
+                <chatter options="{'open_attachments': True}"/>
             </form>
         `,
     };
@@ -56,7 +56,7 @@ test("remove attachment should ask for confirmation", async () => {
         "res.partner,false,form": `
             <form>
                 <sheet></sheet>
-                <div class="oe_chatter" options="{'open_attachments': True}"/>
+                <chatter options="{'open_attachments': True}"/>
             </form>
         `,
     };
@@ -93,7 +93,7 @@ test("view attachments", async () => {
     const views = {
         "res.partner,false,form": `<form>
             <sheet></sheet>
-            <div class="oe_chatter" options="{'open_attachments': True}"/>
+            <chatter options="{'open_attachments': True}"/>
         </form>`,
     };
     await start({ serverData: { views } });
@@ -157,7 +157,7 @@ test("do not auto-scroll to attachment box when initially open", async () => {
         "res.partner,false,form": `
             <form>
                 ${`<sheet><field name="name"/></sheet>`.repeat(100)}
-                <div class="oe_chatter" options="{'open_attachments': True}"/>
+                <chatter options="{'open_attachments': True}"/>
             </form>
         `,
     };
@@ -204,7 +204,7 @@ test("attachment box auto-closed on switch to record wih no attachments", async 
         "res.partner,false,form": `
             <form>
                 <sheet></sheet>
-                <div class="oe_chatter" options="{'open_attachments': True}"/>
+                <chatter options="{'open_attachments': True}"/>
             </form>
         `,
     };

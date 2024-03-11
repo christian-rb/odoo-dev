@@ -83,8 +83,7 @@
                     </group>
                     <field name="registration_properties" columns="2"/>
                 </sheet>
-                <div class="oe_chatter" options="{'reload_on_post': True}">
-                </div>
+                <chatter options="{'reload_on_post': True}"/>
             </form>
         </field>
     </record>

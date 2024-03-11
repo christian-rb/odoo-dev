@@ -147,7 +147,7 @@
                         </page>
                     </notebook>
                 </sheet>
-                <div class="oe_chatter"/>
+                <chatter/>
             </form>
         </field>
     </record>
@@ -468,7 +468,7 @@
                         </page>
                     </notebook>
                 </sheet>
-                <div class="oe_chatter"/>
+                <chatter/>
             </form>
         </field>
     </record>
@@ -674,7 +674,7 @@
                     <field name="note"/>
                 </group>
                 </sheet>
-                <div class="oe_chatter"/>
+                <chatter/>
             </form>
         </field>
     </record>

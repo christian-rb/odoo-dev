@@ -158,7 +158,7 @@ test("remove a follower in a dirty form view", async (assert) => {
             <form>
                 <field name="name"/>
                 <field name="channel_ids" widget="many2many_tags"/>
-                <div class="oe_chatter"/>
+                <chatter/>
             </form>`,
     };
     await start({ serverData: { views } });

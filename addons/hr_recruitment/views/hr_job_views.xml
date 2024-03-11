@@ -245,7 +245,7 @@
             </div>
 
             <xpath expr="//sheet" position="after">
-                <div class="oe_chatter" options="{'open_attachments': True}"/>
+                <chatter options="{'open_attachments': True}"/>
             </xpath>
         </field>
     </record>

@@ -37,7 +37,7 @@ QUnit.module("Views", {}, function () {
                         </notebook>
                     </sheet>
                     <div class="o_attachment_preview"/>
-                    <div class="oe_chatter"/>
+                    <chatter/>
                 </form>`,
         };
         patchUiSize({ size: size });

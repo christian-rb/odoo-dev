@@ -331,8 +331,7 @@
                             </page>
                         </notebook>
                     </sheet>
-                    <div class="oe_chatter" options="{'reload_on_post': True}">
-                    </div>
+                    <chatter options="{'reload_on_post': True}"/>
                 </form>
             </field>
         </record>

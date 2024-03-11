@@ -13,7 +13,7 @@ export class ResFake extends models.Model {
                 <sheet>
                     <field name="name"/>
                 </sheet>
-                <div class="oe_chatter"/>
+                <chatter/>
             </form>`,
     };
 
