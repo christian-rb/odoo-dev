@@ -251,7 +251,7 @@
 
     <template id="portal_docs_entry" name="My Portal Docs Entry">
         <div t-att-class="'o_portal_index_card ' +  ('' if config_card else 'd-none ') + ('col-12 order-0' if show_count else 'col-md-6 order-2')">
-            <a t-att-href="url" t-att-title="title" t-attf-class="d-flex gap-2 gap-md-3 py-3 pe-2 px-md-3 h-100 rounded text-decoration-none #{bg_color if bg_color else 'text-bg-light'}">
+            <a t-att-href="url" t-att-title="title" t-attf-class="d-flex gap-2 gap-md-3 py-3 pe-2 px-md-3 h-100 rounded text-decoration-none #{bg_color if bg_color else 'bg-100'}">
                 <div t-if="icon" class="o_portal_icon align-self-start">
                     <img t-attf-src="#{icon}"/>
                 </div>
@@ -407,7 +407,7 @@
             <h5>Your contact</h5>
             <hr class="mt-1"/>
             <h6 t-esc="sales_user.name"/>
-            <div class="d-flex align-items-center mb-1">
+            <div class="d-flex mb-1">
                 <i class="fa fa-envelope fa-fw me-1 text-600"/>
                 <a t-att-href="'mailto:'+sales_user.email" t-esc="sales_user.email"/>
             </div>
@@ -517,7 +517,7 @@
                             <input type="hidden" name="redirect" t-att-value="redirect"/>
                         </div>
                         <div class="clearfix text-end mb-5">
-                            <a href="/my/" class="btn btn-secondary me-2">
+                            <a href="/my/" class="btn btn-light me-2">
                                 Discard
                             </a>
                             <button type="submit" class="btn btn-primary float-end">
@@ -580,13 +580,13 @@
                             <t t-esc="get_error(errors, 'password.new2')"/>
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-secondary">Change Password</button>
+                    <button type="submit" class="btn btn-light">Change Password</button>
                 </form>
             </section>
             <section name="portal_revoke_all_devices_popup">
             <h4>Revoke All Sessions</h4>
                 <t t-set="path"/>
-                    <button type="button" class="btn btn-secondary" id="portal_revoke_all_sessions_popup">
+                    <button type="button" class="btn btn-light" id="portal_revoke_all_sessions_popup">
                         Log out from all devices
                     </button>
             </section>
@@ -622,13 +622,13 @@
                     </table>
                 </div>
                 <div>
-                    <button type="submit" class="btn btn-secondary o_portal_new_api_key">New API Key</button>
+                    <button type="submit" class="btn btn-light o_portal_new_api_key">New API Key</button>
                 </div>
             </section>
             <section name="portal_deactivate_account" groups="base.group_portal">
                 <h4>Delete Account</h4>
                 <t t-set="deactivate_error" t-value="get_error(errors, 'deactivate')"/>
-                <button class="btn btn-secondary" data-bs-toggle="modal"
+                <button class="btn btn-light" data-bs-toggle="modal"
                     data-bs-target="#portal_deactivate_account_modal">
                     Delete Account
                 </button>
@@ -801,7 +801,7 @@
             <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"/>
         </div>
         <div t-attf-class="{{'offcanvas-body' if isOffcanvas else 'mt-3'}}">
-            <div class="d-flex justify-content-start align-items-center gap-3 mb-4">
+            <div class="d-flex justify-content-start align-items-start gap-3 mb-4">
                 <img class="o_portal_contact_img rounded o_object_fit_cover" t-att-src="image_data_uri(user_id.partner_id.avatar_128)" alt="Contact" width="50"/>
                 <div class="d-flex flex-column justify-content-center">
                     <h5 class="mb-0" t-out="user_id.name"/>
