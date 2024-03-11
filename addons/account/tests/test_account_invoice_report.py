@@ -10,14 +10,14 @@ class TestAccountInvoiceReport(AccountTestInvoicingCommon):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.currency_data = cls.setup_other_currency('EUR')
+        cls.other_currency = cls.setup_other_currency('EUR')
 
         cls.invoices = cls.env['account.move'].create([
             {
                 'move_type': 'out_invoice',
                 'partner_id': cls.partner_a.id,
                 'invoice_date': fields.Date.from_string('2016-01-01'),
-                'currency_id': cls.currency_data['currency'].id,
+                'currency_id': cls.other_currency.id,
                 'invoice_line_ids': [
                     (0, None, {
                         'product_id': cls.product_a.id,
@@ -34,7 +34,7 @@ class TestAccountInvoiceReport(AccountTestInvoicingCommon):
             {
                 'move_type': 'out_receipt',
                 'invoice_date': fields.Date.from_string('2016-01-01'),
-                'currency_id': cls.currency_data['currency'].id,
+                'currency_id': cls.other_currency.id,
                 'invoice_line_ids': [
                     (0, None, {
                         'product_id': cls.product_a.id,
@@ -47,7 +47,7 @@ class TestAccountInvoiceReport(AccountTestInvoicingCommon):
                 'move_type': 'out_refund',
                 'partner_id': cls.partner_a.id,
                 'invoice_date': fields.Date.from_string('2017-01-01'),
-                'currency_id': cls.currency_data['currency'].id,
+                'currency_id': cls.other_currency.id,
                 'invoice_line_ids': [
                     (0, None, {
                         'product_id': cls.product_a.id,
@@ -60,7 +60,7 @@ class TestAccountInvoiceReport(AccountTestInvoicingCommon):
                 'move_type': 'in_invoice',
                 'partner_id': cls.partner_a.id,
                 'invoice_date': fields.Date.from_string('2016-01-01'),
-                'currency_id': cls.currency_data['currency'].id,
+                'currency_id': cls.other_currency.id,
                 'invoice_line_ids': [
                     (0, None, {
                         'product_id': cls.product_a.id,
@@ -73,7 +73,7 @@ class TestAccountInvoiceReport(AccountTestInvoicingCommon):
                 'move_type': 'in_receipt',
                 'partner_id': cls.partner_a.id,
                 'invoice_date': fields.Date.from_string('2016-01-01'),
-                'currency_id': cls.currency_data['currency'].id,
+                'currency_id': cls.other_currency.id,
                 'invoice_line_ids': [
                     (0, None, {
                         'product_id': cls.product_a.id,
@@ -86,7 +86,7 @@ class TestAccountInvoiceReport(AccountTestInvoicingCommon):
                 'move_type': 'in_refund',
                 'partner_id': cls.partner_a.id,
                 'invoice_date': fields.Date.from_string('2017-01-01'),
-                'currency_id': cls.currency_data['currency'].id,
+                'currency_id': cls.other_currency.id,
                 'invoice_line_ids': [
                     (0, None, {
                         'product_id': cls.product_a.id,

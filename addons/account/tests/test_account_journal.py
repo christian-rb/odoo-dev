@@ -16,7 +16,7 @@ class TestAccountJournal(AccountTestInvoicingCommon):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.currency_data = cls.setup_other_currency('EUR')
+        cls.other_currency = cls.setup_other_currency('EUR')
         cls.company_data_2 = cls.setup_other_company()
 
     def test_constraint_currency_consistency_with_accounts(self):
@@ -24,7 +24,7 @@ class TestAccountJournal(AccountTestInvoicingCommon):
         if specified.
         '''
         journal_bank = self.company_data['default_journal_bank']
-        journal_bank.currency_id = self.currency_data['currency']
+        journal_bank.currency_id = self.other_currency
 
         # Try to set a different currency on the 'debit' account.
         with self.assertRaises(ValidationError), self.cr.savepoint():

@@ -459,16 +459,16 @@ class TestCIIFR(TestUBLCommon):
         subfolder = "tests/test_files/from_odoo"
         self._assert_imported_invoice_from_file(
             subfolder=subfolder, filename='facturx_ecotaxes_case1.xml', amount_total=121, amount_tax=22,
-            list_line_subtotals=[99], currency_id=self.currency_data['currency'].id, list_line_price_unit=[99],
+            list_line_subtotals=[99], currency_id=self.other_currency.id, list_line_price_unit=[99],
             list_line_discount=[0], list_line_taxes=[self.tax_21+self.recupel], move_type='out_invoice',
         )
         self._assert_imported_invoice_from_file(
             subfolder=subfolder, filename='facturx_ecotaxes_case2.xml', amount_total=121, amount_tax=23,
-            list_line_subtotals=[98], currency_id=self.currency_data['currency'].id, list_line_price_unit=[98],
+            list_line_subtotals=[98], currency_id=self.other_currency.id, list_line_price_unit=[98],
             list_line_discount=[0], list_line_taxes=[self.tax_21+self.recupel+self.auvibel], move_type='out_invoice',
         )
         self._assert_imported_invoice_from_file(
             subfolder=subfolder, filename='facturx_ecotaxes_case3.xml', amount_total=121, amount_tax=22,
-            list_line_subtotals=[99], currency_id=self.currency_data['currency'].id, list_line_price_unit=[99],
+            list_line_subtotals=[99], currency_id=self.other_currency.id, list_line_price_unit=[99],
             list_line_discount=[0], list_line_taxes=[self.tax_21+self.recupel], move_type='out_invoice',
         )

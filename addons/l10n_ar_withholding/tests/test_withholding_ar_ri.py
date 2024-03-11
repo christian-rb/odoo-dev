@@ -36,7 +36,7 @@ class TestL10nArWithholdingArRi(TestAr):
 
         cls.tax_21 = cls.env.ref('account.%s_ri_tax_vat_21_ventas' % cls.env.company.id)
 
-        cls.currency_data = cls.setup_other_currency('USD', rounding=0.001, rates=[('2023-01-01', 1/100), ('2023-05-01', 1/200)])
+        cls.other_currency = cls.setup_other_currency('USD', rounding=0.001, rates=[('2023-01-01', 1/100), ('2023-05-01', 1/200)])
 
     def in_invoice_wht(self, l10n_latam_document_number):
         in_invoice_wht = self.env['account.move'].create({
@@ -159,7 +159,7 @@ class TestL10nArWithholdingArRi(TestAr):
         moves = self.in_invoice_2_wht('2-4')
         taxes = [{'id': self.tax_wth_test_1.id, 'base_amount': 5}, {'id': self.tax_wth_test_2.id, 'base_amount': 6.05}]
         wizard = self.new_payment_register(moves, [])
-        wizard.currency_id = self.currency_data['currency'].id
+        wizard.currency_id = self.other_currency.id
         wizard.amount = 6.05
         wizard.l10n_ar_withholding_ids = [Command.clear()] + [Command.create({'tax_id': x['id'], 'base_amount': x['base_amount'], 'amount': 0}) for x in taxes]
         wizard.l10n_ar_withholding_ids._compute_amount()

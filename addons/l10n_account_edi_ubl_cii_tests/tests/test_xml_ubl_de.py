@@ -187,7 +187,7 @@ class TestUBLDE(TestUBLCommon):
     def test_import_invoice_xml(self):
         self._assert_imported_invoice_from_file(subfolder='tests/test_files/from_odoo',
             filename='xrechnung_ubl_out_invoice.xml', amount_total=3083.58, amount_tax=401.58,
-            list_line_subtotals=[1782, 1000, -100], currency_id=self.currency_data['currency'].id)
+                                                list_line_subtotals=[1782, 1000, -100], currency_id=self.other_currency.id)
 
     def test_import_export_invoice_xml(self):
         """

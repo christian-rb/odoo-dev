@@ -438,7 +438,7 @@ class TestChartTemplate(BaseCommon):
 
         with patch.object(AccountChartTemplate, '_get_chart_template_data', side_effect=local_get_data, autospec=True):
             # We don't change anything
-            self.env['account.chart.template'].try_loading('test', company=self.company_1, install_demo=False)
+            self.env['account.chart.template'].try_loading('test', company=self.company, install_demo=False)
 
         self.assertEqual(parent_tax.name, 'Tax with children', "The parent tax created before should not have changed")
 

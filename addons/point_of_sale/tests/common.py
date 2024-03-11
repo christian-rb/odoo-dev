@@ -186,8 +186,7 @@ class TestPoSCommon(ValuationReconciliationTestCommon):
         cls.company_currency = cls.company.currency_id
         # other_currency is a currency different from the company_currency
         # sometimes company_currency is different from USD, so handle appropriately.
-        cls.currency_data = cls.setup_other_currency("EUR")
-        cls.other_currency = cls.currency_data['currency']
+        cls.other_currency = cls.setup_other_currency("EUR")
 
         cls.currency_pricelist = cls.env['product.pricelist'].create({
             'name': 'Public Pricelist',

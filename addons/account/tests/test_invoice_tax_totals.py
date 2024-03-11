@@ -11,7 +11,7 @@ class TestTaxTotals(AccountTestInvoicingCommon):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.currency_data = cls.setup_other_currency('EUR')
+        cls.other_currency = cls.setup_other_currency('EUR')
         cls.maxDiff = None
 
         cls.tax_group1 = cls.env['account.tax.group'].create({
@@ -678,7 +678,7 @@ class TestTaxTotals(AccountTestInvoicingCommon):
         self.env['res.currency.rate'].create({
             'name': '2018-01-01',
             'rate': 0.2,
-            'currency_id': self.currency_data['currency'].id,
+            'currency_id': self.other_currency.id,
             'company_id': self.env.company.id,
         })
 
@@ -700,7 +700,7 @@ class TestTaxTotals(AccountTestInvoicingCommon):
             'move_type': 'out_invoice',
             'partner_id': self.partner_a.id,
             'invoice_date': '2019-01-01',
-            'currency_id': self.currency_data['currency'].id,
+            'currency_id': self.other_currency.id,
         })
 
         lines_data = [(100, tax_10), (300, tax_20)]
@@ -861,7 +861,7 @@ class TestTaxTotals(AccountTestInvoicingCommon):
         self.env['res.currency.rate'].create({
             'name': '2023-01-01',
             'rate': 0.2,
-            'currency_id': self.currency_data['currency'].id,
+            'currency_id': self.other_currency.id,
             'company_id': self.env.company.id,
         })
         for move_type in ['out_invoice', 'in_invoice']:
@@ -869,7 +869,7 @@ class TestTaxTotals(AccountTestInvoicingCommon):
                 'move_type': move_type,
                 'partner_id': self.partner_a.id,
                 'invoice_date': '2023-01-01',
-                'currency_id': self.currency_data['currency'].id,
+                'currency_id': self.other_currency.id,
                 'invoice_line_ids': [
                     Command.create({
                         'name': 'line',

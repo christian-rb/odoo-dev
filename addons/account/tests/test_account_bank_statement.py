@@ -13,20 +13,17 @@ class TestAccountBankStatementLine(AccountTestInvoicingCommon):
     def setUpClass(cls):
         super().setUpClass()
 
+        cls.currency_1 = cls.company_data['currency']
         # We need a third currency as you could have a company's currency != journal's currency !=
-        cls.currency_data = cls.setup_other_currency('EUR')
-        cls.currency_data_2 = cls.setup_other_currency('CAD', rates=[('2016-01-01', 6.0), ('2017-01-01', 4.0)])
-        cls.currency_data_3 = cls.setup_other_currency('XAF', rates=[('2016-01-01', 12.0), ('2017-01-01', 8.0)])
+        cls.currency_2 = cls.setup_other_currency('EUR')
+        cls.currency_3 = cls.setup_other_currency('CAD', rates=[('2016-01-01', 6.0), ('2017-01-01', 4.0)])
+        cls.currency_4 = cls.setup_other_currency('GBP', rates=[('2016-01-01', 12.0), ('2017-01-01', 8.0)])
 
         cls.company_data_2 = cls.setup_other_company()
 
         cls.bank_journal_1 = cls.company_data['default_journal_bank']
         cls.bank_journal_2 = cls.bank_journal_1.copy()
         cls.bank_journal_3 = cls.bank_journal_2.copy()
-        cls.currency_1 = cls.company_data['currency']
-        cls.currency_2 = cls.currency_data['currency']
-        cls.currency_3 = cls.currency_data_2['currency']
-        cls.currency_4 = cls.currency_data_3['currency']
 
         cls.statement = cls.env['account.bank.statement'].create({
             'name': 'test_statement',

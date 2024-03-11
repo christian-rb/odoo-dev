@@ -1586,18 +1586,18 @@ class TestPointOfSaleFlow(TestPointOfSaleCommon):
             'payment_method_ids': [(4, self.customer_account_payment_method.id, 0)],
         })
         # change the currency of PoS config
-        (self.currency_data['currency'].rate_ids | self.company.currency_id.rate_ids).unlink()
+        (self.other_currency.rate_ids | self.company.currency_id.rate_ids).unlink()
         self.env['res.currency.rate'].create({
             'rate': 0.5,
-            'currency_id': self.currency_data['currency'].id,
+            'currency_id': self.other_currency.id,
             'name': datetime.today().date(),
         })
         self.pos_config.journal_id.write({
-            'currency_id': self.currency_data['currency'].id
+            'currency_id': self.other_currency.id
         })
         other_pricelist = self.env['product.pricelist'].create({
             'name': 'Public Pricelist Other',
-            'currency_id': self.currency_data['currency'].id,
+            'currency_id': self.other_currency.id,
         })
         self.pos_config.write({
             'pricelist_id': other_pricelist.id,

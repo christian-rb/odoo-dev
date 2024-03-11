@@ -18,7 +18,7 @@ class TestUBLCommon(AccountTestInvoicingCommon):
     def setUpClass(cls):
         super().setUpClass()
 
-        cls.currency_data = cls.setup_other_currency('USD')
+        cls.other_currency = cls.setup_other_currency('USD')
 
         # Required for `product_uom_id` to be visible in the form views
         cls.env.user.groups_id += cls.env.ref('uom.group_uom')
@@ -194,7 +194,7 @@ class TestUBLCommon(AccountTestInvoicingCommon):
             'invoice_payment_term_id': self.pay_terms_b.id,
             'invoice_date': '2017-01-01',
             'date': '2017-01-01',
-            'currency_id': self.currency_data['currency'].id,
+            'currency_id': self.other_currency.id,
             'narration': 'test narration',
             'ref': 'ref_move',
             **invoice_kwargs,

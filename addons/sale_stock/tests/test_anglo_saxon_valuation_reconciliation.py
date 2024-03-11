@@ -9,7 +9,7 @@ class TestValuationReconciliationCommon(ValuationReconciliationTestCommon):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.currency_data = cls.setup_other_currency('EUR')
+        cls.other_currency = cls.setup_other_currency('EUR')
 
         # Set the invoice_policy to delivery to have an accurate COGS entry.
         cls.test_product_delivery.invoice_policy = 'delivery'
@@ -17,7 +17,7 @@ class TestValuationReconciliationCommon(ValuationReconciliationTestCommon):
     def _create_sale(self, product, date, quantity=1.0):
         rslt = self.env['sale.order'].create({
             'partner_id': self.partner_a.id,
-            'currency_id': self.currency_data['currency'].id,
+            'currency_id': self.other_currency.id,
             'order_line': [
                 (0, 0, {
                     'name': product.name,
@@ -34,7 +34,7 @@ class TestValuationReconciliationCommon(ValuationReconciliationTestCommon):
     def _create_invoice_for_so(self, sale_order, product, date, quantity=1.0):
         rslt = self.env['account.move'].create({
             'partner_id': self.partner_a.id,
-            'currency_id': self.currency_data['currency'].id,
+            'currency_id': self.other_currency.id,
             'move_type': 'out_invoice',
             'invoice_date': date,
             'invoice_line_ids': [(0, 0, {

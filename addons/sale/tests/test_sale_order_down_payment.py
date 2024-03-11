@@ -12,7 +12,7 @@ class TestSaleOrderDownPayment(TestSaleCommon):
     def setUpClass(cls):
         super().setUpClass()
 
-        cls.currency_data = cls.setup_other_currency('EUR')
+        cls.other_currency = cls.setup_other_currency('EUR')
 
         SaleOrder = cls.env['sale.order']
 
@@ -133,7 +133,7 @@ class TestSaleOrderDownPayment(TestSaleCommon):
         self._assert_invoice_lines_values(invoice.line_ids, expected)
 
     def test_tax_breakdown_other_currency(self):
-        self.sale_order.currency_id = self.currency_data['currency']  # rate = 2.0
+        self.sale_order.currency_id = self.other_currency  # rate = 2.0
         self.sale_order.order_line[0].tax_id = self.tax_15 + self.tax_10
         self.sale_order.order_line[1].tax_id = self.tax_10
         self.sale_order.order_line[2].tax_id = self.tax_10

@@ -12,7 +12,7 @@ class TestAccountJournalDashboard(AccountTestInvoicingCommon):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.currency_data = cls.setup_other_currency('EUR')
+        cls.other_currency = cls.setup_other_currency('EUR')
 
     @freeze_time("2019-01-22")
     def test_customer_invoice_dashboard(self):
@@ -102,7 +102,7 @@ class TestAccountJournalDashboard(AccountTestInvoicingCommon):
         self.assertIn('78.42', dashboard_data['sum_late'])
 
     def test_sale_purchase_journal_for_multi_currency_purchase(self):
-        currency = self.currency_data['currency']
+        currency = self.other_currency
         company_currency = self.company_data['currency']
 
         invoice = self.env['account.move'].create({
@@ -137,7 +137,7 @@ class TestAccountJournalDashboard(AccountTestInvoicingCommon):
         self.assertEqual(format_amount(self.env, 55, company_currency), dashboard_data['sum_late'])
 
     def test_sale_purchase_journal_for_multi_currency_sale(self):
-        currency = self.currency_data['currency']
+        currency = self.other_currency
         company_currency = self.company_data['currency']
 
         invoice = self.env['account.move'].create({

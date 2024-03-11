@@ -57,7 +57,6 @@ class BaseCommon(TransactionCase):
     def setup_other_currency(cls, code, **kwargs):
         rates = kwargs.pop('rates', [])
         currency = cls.env['res.currency'].with_context(active_test=False).search([('name', '=', code)], limit=1)
-        currency.active = True
         currency.rate_ids.unlink()
         currency.write({
             'active': True,
@@ -70,10 +69,7 @@ class BaseCommon(TransactionCase):
             ) for rate_date, rate in rates],
             **kwargs,
         })
-        return {
-            'currency': currency,
-            'rates': currency.rate_ids,
-        }
+        return currency
 
     @classmethod
     def setup_independent_company(cls, **kwargs):
@@ -86,7 +82,6 @@ class BaseCommon(TransactionCase):
 
     @classmethod
     def get_default_groups(cls):
-        # cls.env['ir.config_parameter'].sudo().set_param("base_setup.default_user_rights", True)
         return cls.env['res.users']._default_groups()
 
     @classmethod

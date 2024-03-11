@@ -325,35 +325,9 @@ class TestExpenses(TestExpenseCommon):
         and that extreme rounding cases do not end up with non-consistend data
         """
         # pylint: disable=bad-whitespace
-        foreign_currency_1 = self.currency_data['currency']
-        foreign_currency_2, foreign_currency_3 = self.env['res.currency'].create([{
-                'name': 'Ex1',
-                'symbol': ' ',
-                'rounding': 0.01,
-                'position': 'after',
-                'currency_unit_label': 'Nothing',
-                'currency_subunit_label': 'Smaller Nothing',
-            }, {
-                'name': 'Ex2',
-                'symbol': '  ',
-                'rounding': 0.01,
-                'position': 'after',
-                'currency_unit_label': 'Nothing 2',
-                'currency_subunit_label': 'Smaller Nothing 2',
-            },
-        ])
-        self.env['res.currency.rate'].create({
-            'name': '2016-01-01',
-            'rate': 1 / 1.52,
-            'currency_id': foreign_currency_2.id,
-            'company_id': self.company_data['company'].id,
-        })
-        self.env['res.currency.rate'].create({
-            'name': '2016-01-01',
-            'rate': 1 / 0.148431,
-            'currency_id': foreign_currency_3.id,
-            'company_id': self.company_data['company'].id,
-        })
+        foreign_currency_1 = self.other_currency
+        foreign_currency_2 = self.setup_other_currency('GBP', rounding=0.01, rates=([('2016-01-01', 1 / 1.52)]))
+        foreign_currency_3 = self.setup_other_currency('CAD', rounding=0.01, rates=([('2016-01-01', 1 / 0.148431)]))
         foreign_sale_journal = self.company_data['default_journal_sale'].copy()
         foreign_sale_journal.currency_id = foreign_currency_2.id
         expense_sheet_currency_mix_1 = self.create_expense_report({

@@ -14,14 +14,15 @@ class TestWebsiteSaleProductAttributeValueConfig(TestSaleProductAttributeValueCo
         super().setUpClass()
         # Use the testing environment.
         cls.env['website'].get_current_website().company_id = cls.env.company
+        cls.computer.company_id = cls.env.company
+        cls.computer = cls.computer.with_env(cls.env)
 
     def test_get_combination_info(self):
         # Setup pricelist: make sure the pricelist has a 10% discount
         self.env['product.pricelist'].search([]).action_archive()
-        foreign_currency = self.setup_other_currency('EUR')['currency']
         pricelist = self.env['product.pricelist'].create({
             'name': "test_get_combination_info",
-            'currency_id': foreign_currency.id,
+            'currency_id': self.other_currency.id,
             'discount_policy': 'with_discount',
             'company_id': self.env.company.id,
             'item_ids': [Command.create({

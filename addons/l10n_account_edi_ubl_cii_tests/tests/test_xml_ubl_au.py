@@ -174,5 +174,5 @@ class TestUBLAU(TestUBLCommon):
             amount_total=2950.2,
             amount_tax=268.2,
             list_line_subtotals=[1782, 1000, -100],
-            currency_id=self.currency_data['currency'].id
+            currency_id=self.other_currency.id
         )

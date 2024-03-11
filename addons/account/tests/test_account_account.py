@@ -15,7 +15,7 @@ class TestAccountAccount(AccountTestInvoicingCommon):
         super().setUpClass()
 
         cls.company_data_2 = cls.setup_other_company()
-        cls.currency_data = cls.setup_other_currency('EUR')
+        cls.other_currency = cls.setup_other_currency('EUR')
 
     def test_changing_account_company(self):
         ''' Ensure you can't change the company of an account.account if there are some journal entries '''
@@ -48,14 +48,14 @@ class TestAccountAccount(AccountTestInvoicingCommon):
             'line_ids': [
                 (0, 0, {
                     'account_id': account.id,
-                    'currency_id': self.currency_data['currency'].id,
+                    'currency_id': self.other_currency.id,
                     'debit': 100.0,
                     'credit': 0.0,
                     'amount_currency': 200.0,
                 }),
                 (0, 0, {
                     'account_id': account.id,
-                    'currency_id': self.currency_data['currency'].id,
+                    'currency_id': self.other_currency.id,
                     'debit': 0.0,
                     'credit': 100.0,
                     'amount_currency': -200.0,
@@ -105,21 +105,21 @@ class TestAccountAccount(AccountTestInvoicingCommon):
             'line_ids': [
                 (0, 0, {
                     'account_id': account.id,
-                    'currency_id': self.currency_data['currency'].id,
+                    'currency_id': self.other_currency.id,
                     'debit': 100.0,
                     'credit': 0.0,
                     'amount_currency': 200.0,
                 }),
                 (0, 0, {
                     'account_id': account.id,
-                    'currency_id': self.currency_data['currency'].id,
+                    'currency_id': self.other_currency.id,
                     'debit': 0.0,
                     'credit': 50.0,
                     'amount_currency': -100.0,
                 }),
                 (0, 0, {
                     'account_id': self.company_data['default_account_expense'].id,
-                    'currency_id': self.currency_data['currency'].id,
+                    'currency_id': self.other_currency.id,
                     'debit': 0.0,
                     'credit': 50.0,
                     'amount_currency': -100.0,

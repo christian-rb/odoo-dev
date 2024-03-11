@@ -16,7 +16,7 @@ class TestCompanyBranch(AccountTestInvoicingCommon):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.currency_data = cls.setup_other_currency('EUR')
+        cls.other_currency = cls.setup_other_currency('EUR')
 
         cls.company_data['company'].write({
             'child_ids': [
@@ -90,7 +90,7 @@ class TestCompanyBranch(AccountTestInvoicingCommon):
             'move_type': 'out_invoice',
             'invoice_date': '2016-01-01',
             'company_id': self.branch_a.id,
-            'currency_id': self.currency_data['currency'].id,
+            'currency_id': self.other_currency.id,
             'partner_id': self.partner_a.id,
             'invoice_line_ids': [
                 Command.create({
@@ -104,7 +104,7 @@ class TestCompanyBranch(AccountTestInvoicingCommon):
             'move_type': 'out_refund',
             'invoice_date': '2017-01-01',
             'company_id': self.root_company.id,
-            'currency_id': self.currency_data['currency'].id,
+            'currency_id': self.other_currency.id,
             'partner_id': self.partner_a.id,
             'invoice_line_ids': [
                 Command.create({
@@ -212,7 +212,7 @@ class TestCompanyBranch(AccountTestInvoicingCommon):
         test_country = self.env['res.country'].create({
             'name': 'Gold Country',
             'code': 'zz',
-            'currency_id': self.currency_data['currency'].id
+            'currency_id': self.other_currency.id
         })
         root_company = self.env['res.company'].create({
             'name': 'Gold Company',
