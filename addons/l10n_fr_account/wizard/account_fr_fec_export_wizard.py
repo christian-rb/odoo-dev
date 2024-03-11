@@ -43,7 +43,7 @@ class FecExportWizard(models.TransientModel):
         """
         query = self.env['account.move.line']._search(self._get_base_domain() + [
             ('date', '<', self.date_from),
-            ('account_id.include_initial_balance', '=', False),
+            ('account_id.internal_group', 'in', ['income', 'expense']),
         ])
         sql_query = query.select(SQL(
             """
@@ -140,7 +140,7 @@ class FecExportWizard(models.TransientModel):
 
         query = self.env['account.move.line']._search(self._get_base_domain() + [
             ('date', '<', self.date_from),
-            ('account_id.include_initial_balance', '=', True),
+            ('account_id.internal_group', 'not in', ['income', 'expense']),
             ('account_id.account_type', 'not in', ['asset_receivable', 'liability_payable']),
         ])
         sql_query = query.select(SQL(
@@ -210,7 +210,7 @@ class FecExportWizard(models.TransientModel):
         # INITIAL BALANCE - receivable/payable
         query = self.env['account.move.line']._search(self._get_base_domain() + [
             ('date', '<', self.date_from),
-            ('account_id.include_initial_balance', '=', True),
+            ('account_id.internal_group', 'not in', ['income', 'expense']),
             ('account_id.account_type', 'in', ['asset_receivable', 'liability_payable']),
         ])
         query.left_join('account_move_line', 'partner_id', 'res_partner', 'id', 'partner_id')

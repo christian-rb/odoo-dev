@@ -160,7 +160,7 @@ class SpreadsheetAccountingFunctionsTest(AccountTestInvoicingCommon):
                             "name": "line_credit_c1",
                             "account_id": self.account_expense_c1.id,
                             # not taken into account because the account
-                            # has include_initial_balance=False
+                            # has internal_group='expense'
                             "credit": 555,
                         },
                     ),
@@ -943,11 +943,11 @@ class SpreadsheetAccountingFunctionsTest(AccountTestInvoicingCommon):
                     ("account_id", "in", [self.account_revenue_c1.id]),
                     "|",
                     "&",
-                    ("account_id.include_initial_balance", "=", True),
+                    ("account_id.internal_group", "not in", ["income", "expense"]),
                     ("date", "<=", date(2022, 12, 31)),
                     "&",
                     "&",
-                    ("account_id.include_initial_balance", "=", False),
+                    ("account_id.internal_group", "in", ["income", "expense"]),
                     ("date", ">=", date(2022, 1, 1)),
                     ("date", "<=", date(2022, 12, 31)),
                     ("company_id", "=", self.account_revenue_c1.company_id.id),

@@ -75,11 +75,6 @@ class AccountAccount(models.Model):
         compute='_compute_account_type', store=True, readonly=False, precompute=True, index=True,
         help="Account Type is used for information purpose, to generate country-specific legal reports, and set the rules to close a fiscal year and generate opening entries."
     )
-    include_initial_balance = fields.Boolean(string="Bring Accounts Balance Forward",
-        help="Used in reports to know if we should consider journal items from the beginning of time instead of from the fiscal year only. Account types that should be reset to zero at each new fiscal year (like expenses, revenue..) should not have this option set.",
-        compute="_compute_include_initial_balance",
-        search="_search_include_initial_balance",
-    )
     internal_group = fields.Selection(
         selection=[
             ('equity', 'Equity'),
@@ -507,18 +502,6 @@ class AccountAccount(models.Model):
             codes_list = list(accounts_with_codes[account.company_id.id].keys())
             closest_index = bisect_left(codes_list, account.code) - 1
             account[field_name] = accounts_with_codes[account.company_id.id][codes_list[closest_index]] if closest_index != -1 else default_value
-
-    @api.depends('account_type')
-    def _compute_include_initial_balance(self):
-        for account in self:
-            account.include_initial_balance = account.account_type not in EXCLUDE_INITIAL_BALANCE_TYPES
-
-    def _search_include_initial_balance(self, operator, value):
-        if operator not in ['=', '!='] or not isinstance(value, bool):
-            raise UserError(_('Operation not supported'))
-        if operator != '=':
-            value = not value
-        return [('account_type', 'not in' if value else 'in', EXCLUDE_INITIAL_BALANCE_TYPES)]
 
     def _get_internal_group(self, account_type):
         return account_type.split('_', maxsplit=1)[0]

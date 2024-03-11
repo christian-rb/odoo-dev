@@ -52,11 +52,11 @@ class AccountMove(models.Model):
             formula_params["date_range"], company
         )
         balance_domain = [
-            ("account_id.include_initial_balance", "=", True),
+            ("account_id.internal_group", "not in", ["income", "expense"]),
             ("date", "<=", end),
         ]
         pnl_domain = [
-            ("account_id.include_initial_balance", "=", False),
+            ("account_id.internal_group", "in", ["income", "expense"]),
             ("date", ">=", start),
             ("date", "<=", end),
         ]
