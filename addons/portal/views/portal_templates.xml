@@ -158,7 +158,7 @@
             <t t-set="is_portal" t-value="True"/>
 
             <div t-if="not no_breadcrumbs and not my_details and not breadcrumbs_searchbar" class="o_portal container mt-3">
-                <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex justify-content-between align-items-center flex-wrap">
                     <t t-call="portal.portal_breadcrumbs"/>
                     <t t-if="prev_record or next_record" t-call='portal.record_pager'/>
                 </div>
