@@ -164,6 +164,8 @@ export class Rtc {
             sourceCameraStream: null,
             sourceScreenStream: null,
         });
+        this.sharedState = reactive({ selfSession: {} });
+        this.multiTab.broadcast("discuss.rtc/askSharedState");
         this.blurManager = undefined;
         onChange(this.store.settings, "useBlur", () => {
             if (this.state.sendCamera) {
@@ -258,12 +260,33 @@ export class Rtc {
                 id: detail.channelId,
             });
             if (
+                channel &&
                 this.multiTab.isOnMainTab() &&
                 !this.state.channel &&
                 Object.keys(channel.rtcSessions).length > 1
             ) {
                 await this.joinCall(channel, { video: detail.video });
             }
+        });
+        this.multiTab.bus.addEventListener("discuss.rtc/toggle", async ({ detail }) => {
+            if (this.state.selfSession) {
+                await this.callActionByType(detail.type);
+            }
+        });
+
+        this.multiTab.bus.addEventListener("discuss.rtc/leaveCall", async ({ detail }) => {
+            const channel = this.store.Thread.insert(detail);
+            if (channel.eq(this.state.channel)) {
+                await this.leaveCall(this.state.channel);
+            }
+        });
+
+        this.multiTab.bus.addEventListener("discuss.rtc/updateSharedState", ({ detail }) => {
+            this.updateSharedState(detail);
+        });
+
+        this.multiTab.bus.addEventListener("discuss.rtc/askSharedState", () => {
+            this.broadcastInternaldState();
         });
     }
 
@@ -353,6 +376,7 @@ export class Rtc {
         await this.rpcLeaveCall(channel);
         this.endCall(channel);
         this.state.hasPendingRequest = false;
+        this.multiTab.broadcast("discuss.rtc/updateSharedState", {});
     }
 
     disconnectFromSfu() {
@@ -1039,6 +1063,7 @@ export class Rtc {
             });
             await this.sendNotifications();
         }
+        this.broadcastInternaldState();
     }
 
     async rpcLeaveCall(channel) {
@@ -1839,6 +1864,60 @@ export class Rtc {
             this.soundEffectsService.play("channel-join");
         } else if (channel.rtcSessions.length < oldCount) {
             this.soundEffectsService.play("member-leave");
+        }
+    }
+
+    async callActionByType(type) {
+        switch (type) {
+            case "microphone":
+                await this.toggleMicrophone();
+                break;
+
+            case "deaf":
+                if (this.state.selfSession.isDeaf) {
+                    await this.undeafen();
+                } else {
+                    await this.deafen();
+                }
+                break;
+
+            case "camera":
+                await this.toggleVideo("camera");
+                break;
+
+            case "screen":
+                await this.toggleVideo("screen");
+                break;
+
+            case "raiseHand":
+                await this.raiseHand(!this.state.selfSession.raisingHand);
+                break;
+        }
+    }
+
+    updateSharedState(data) {
+        Object.assign(this.sharedState, {
+            selfSession: {
+                isMute: data.isMute,
+                isDeaf: data.isDeaf,
+                raisingHand: data.raisingHand,
+            },
+            channelId: data.channelId,
+            sendCamera: data.sendCamera,
+            sendScreen: data.sendScreen,
+        });
+    }
+
+    broadcastInternaldState() {
+        if (this.state.selfSession) {
+            this.multiTab.broadcast("discuss.rtc/updateSharedState", {
+                isMute: this.state.selfSession.isMute,
+                isDeaf: this.state.selfSession.isDeaf,
+                raisingHand: this.state.selfSession.raisingHand,
+                channelId: this.state.channel.id,
+                sendCamera: this.state.sendCamera,
+                sendScreen: this.state.sendScreen,
+            });
         }
     }
 }
