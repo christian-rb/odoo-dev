@@ -100,16 +100,19 @@ class PosConfig(models.Model):
                 ('module_pos_restaurant', '=', True),
             ])
             if not pos_configs:
-                pos_configs = self.env['pos.config'].with_company(company).create({
-                'name': _('Bar'),
-                'company_id': company.id,
-                'module_pos_restaurant': True,
-                'iface_splitbill': True,
-                'iface_printbill': True,
-                'iface_orderline_notes': True,
-
-            })
-            pos_configs.setup_defaults(company)
+                self = self.with_company(company)
+                if picking_type_id := self._default_picking_type_id():
+                    pos_configs = self.env['pos.config'].create({
+                        'name': _('Bar'),
+                        'company_id': company.id,
+                        'module_pos_restaurant': True,
+                        'iface_splitbill': True,
+                        'iface_printbill': True,
+                        'iface_orderline_notes': True,
+                        'picking_type_id': picking_type_id,
+                    })
+            if pos_configs:
+                pos_configs.setup_defaults(company)
 
     def setup_defaults(self, company):
         main_restaurant = self.env.ref('pos_restaurant.pos_config_main_restaurant', raise_if_not_found=False)

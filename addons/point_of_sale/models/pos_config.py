@@ -643,12 +643,15 @@ class PosConfig(models.Model):
             pos_configs = self.search(domain)
             if not pos_configs:
                 self = self.with_company(company)
-                pos_configs = self.env['pos.config'].create({
-                'name': _('Shop'),
-                'company_id': company.id,
-                'module_pos_restaurant': False,
-            })
-            pos_configs.setup_defaults(company)
+                if picking_type_id := self._default_picking_type_id():
+                    pos_configs = self.env['pos.config'].create({
+                        'name': _('Shop'),
+                        'company_id': company.id,
+                        'module_pos_restaurant': False,
+                        'picking_type_id': picking_type_id
+                    })
+            if pos_configs:
+                pos_configs.setup_defaults(company)
 
     def setup_defaults(self, company):
         """Extend this method to customize the existing pos.config of the company during the installation
