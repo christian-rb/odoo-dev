@@ -16,6 +16,7 @@ class TestWebsiteSaleProductAttributeValueConfig(TestSaleProductAttributeValueCo
         cls.env['website'].get_current_website().company_id = cls.env.company
         cls.computer.company_id = cls.env.company
         cls.computer = cls.computer.with_env(cls.env)
+        cls.other_currency = cls.setup_other_currency('GBP')
 
     def test_get_combination_info(self):
         # Setup pricelist: make sure the pricelist has a 10% discount

@@ -200,7 +200,7 @@ class AccountTestInvoicingCommon(ProductCommon):
         company = super()._create_company(**create_values)
         cls._use_chart_template(company, chart_template_ref)
         if create_values.get('currency_id'):
-            company.currency_id = create_values.get('currency_id')
+            company.currency_id = create_values['currency_id']
         return company
 
     @classmethod

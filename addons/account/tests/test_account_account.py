@@ -460,7 +460,7 @@ class TestAccountAccount(AccountTestInvoicingCommon):
         self.cr.precommit.run()
         self.assertFalse(company.account_opening_move_id.line_ids)
 
-        account.currency_id = self.currency_data['currency']
+        account.currency_id = self.other_currency
         account.opening_debit = 100
         self.cr.precommit.run()
         self.assertRecordValues(company.account_opening_move_id.line_ids.sorted(), [

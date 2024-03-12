@@ -6,7 +6,7 @@ from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 from odoo.tests.common import tagged
 
 
-class TestProjectHrExpenseProfitabilityCommon(TestExpenseCommon, AccountTestInvoicingCommon):
+class TestProjectHrExpenseProfitabilityCommon(TestExpenseCommon):
     def check_project_profitability_before_creating_and_approving_expense_sheet(self, expense, project, project_profitability_items_empty):
         self.assertDictEqual(
             project._get_profitability_items(False),
@@ -38,8 +38,6 @@ class TestProjectHrExpenseProfitability(TestProjectProfitabilityCommon, TestProj
     def test_project_profitability(self):
         self.project.company_id = False
         # Create a new company with the foreign currency.
-
-        self.company_data_2 = self.setup_other_company()
         foreign_company = self.company_data_2['company']
         foreign_company.currency_id = self.foreign_currency
         foreign_employee = self.env['hr.employee'].create({

@@ -7,7 +7,7 @@ from odoo.tests import tagged
 class InvoiceGetReferenceTest(AccountTestInvoicingCommon):
 
     @classmethod
-    @AccountTestInvoicingCommon.sequence('fi')
+    @AccountTestInvoicingCommon.setup_country('fi')
     def setUpClass(cls):
         super().setUpClass()
 

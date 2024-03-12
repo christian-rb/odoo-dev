@@ -17,7 +17,7 @@ class TestAccountMove(AccountTestInvoicingCommon):
         cls.env = cls.env(context=cls.default_context())
 
         cls.company_data_2 = cls.setup_other_company()
-        cls.other_currency = cls.setup_other_currency('EUR')
+        cls.other_currency = cls.setup_other_currency('GBP')
 
         tax_repartition_line = cls.company_data['default_tax_sale'].refund_repartition_line_ids\
             .filtered(lambda line: line.repartition_type == 'tax')

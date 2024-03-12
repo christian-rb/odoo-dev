@@ -14,6 +14,8 @@ class TestSalePurchase(TestCommonSalePurchaseNoChart):
     def setUpClass(cls, ):
         super().setUpClass()
 
+        cls.company_data_2 = cls.setup_other_company()
+
         # create a generic Sale Order with 2 classical products and a purchase service
         SaleOrder = cls.env['sale.order']
         cls.analytic_plan = cls.env['account.analytic.plan'].create({'name': 'Plan Test'})

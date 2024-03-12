@@ -13,11 +13,6 @@ class TestProduct(ProductCommon):
         self.assertEqual(self.product.type, 'consu')
         self.assertEqual(self.service_product.type, 'service')
 
-        account_module = self.env['ir.module.module']._get('account')
-        if account_module.state == 'installed':
-            self.assertFalse(self.product.taxes_id)
-            self.assertFalse(self.service_product.taxes_id)
-
         self.assertFalse(self.pricelist.item_ids)
         self.assertEqual(
             self.env['product.pricelist'].search([]),
