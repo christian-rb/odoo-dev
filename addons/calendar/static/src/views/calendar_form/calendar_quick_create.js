@@ -15,7 +15,8 @@ const QUICK_CREATE_CALENDAR_EVENT_FIELDS = {
     allday: { type: "boolean" },
     partner_ids: { type: "many2many" },
     videocall_location: { type: "string" },
-    description: { type: "string" }
+    description: { type: "string" },
+    duration: { type: "Number" },
 };
 
 function getDefaultValuesFromRecord(data) {

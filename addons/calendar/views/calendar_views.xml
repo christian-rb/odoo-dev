@@ -313,6 +313,7 @@
                         <field name="stop_date" string="To" attrs="{'required': [('allday','=',True)],'invisible': [('allday','=',False)]}"/>
                         <field name="start" string="From" attrs="{'required': [('allday','=',False)], 'invisible': [('allday','=',True)]}" options="{'block': True, 'icon': 'fa fa-users'}"/>
                         <field name="stop" string="To" attrs="{'invisible': [('allday','=',True)]}"/>
+                        <field name="duration" string="duration" attrs="{'invisible': True}"/>
                     </group>
                     <group>
                         <field name="allday"/>
