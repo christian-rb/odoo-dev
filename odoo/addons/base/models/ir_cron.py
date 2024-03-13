@@ -107,12 +107,12 @@ class ir_cron(models.Model):
         self.ensure_one()
         self.check_access_rights('write')
         self._try_lock()
-        _logger.info('Manually starting job `%s`.', self.name)
+        _logger.info('Job `%s` (%s): Started manually.', self.name, self.id)
         self = self.with_user(self.user_id).with_context({'lastcall': self.lastcall})._add_progress()
         self.ir_actions_server_id.run()
         self.lastcall = fields.Datetime.now()
         self.env.flush_all()
-        _logger.info('Job `%s` done.', self.name)
+        _logger.info('Job `%s` (%s): Done.', self.name, self.id)
         return True
 
     @classmethod
@@ -397,8 +397,8 @@ class ir_cron(models.Model):
                     progress.timed_out_counter = 0
                     timed_out_counter = 0
                     job_cr.commit()
-                _logger.info('Job `%s`: %s records processed and %s records remaining.',
-                             job['cron_name'], progress.done, progress.remaining)
+                _logger.info('Job `%s` (%s): Processed %s records, %s records remaining.',
+                             job['cron_name'], job['id'], progress.done, progress.remaining)
                 if status in ['FULLY_DONE', 'FAILED']:
                     break
 
@@ -452,7 +452,7 @@ class ir_cron(models.Model):
         while nextcall <= now:
             nextcall += interval
 
-        _logger.info('Job `%s` (%s): .',
+        _logger.info('Job `%s` (%s): Completed.',
                      job['cron_name'], job['id'])
         cr.execute("""
             UPDATE ir_cron
@@ -483,20 +483,20 @@ class ir_cron(models.Model):
                 self = self.env()[self._name]
 
             log_depth = (None if _logger.isEnabledFor(logging.DEBUG) else 1)
-            odoo.netsvc.log(_logger, logging.DEBUG, 'cron.object.execute', (self._cr.dbname, self._uid, '*', cron_name, server_action_id), depth=log_depth)
-            _logger.info('Starting job `%s`.', cron_name)
+            odoo.netsvc.log(_logger, logging.DEBUG, 'cron.object.execute', (self.env.cr.dbname, self._uid, '*', cron_name, server_action_id), depth=log_depth)
+            _logger.info('Job `%s` (%s): Starting.', cron_name, self.id)
             start_time = time.time()
             self.env['ir.actions.server'].browse(server_action_id).run()
             self.env.flush_all()
             end_time = time.time()
-            _logger.info('Job done: `%s` (%.3fs).', cron_name, end_time - start_time)
+            _logger.info('Job `%s` (%s): Done in (%.3fs).', cron_name, self.id, end_time - start_time)
             if start_time and _logger.isEnabledFor(logging.DEBUG):
-                _logger.debug('%.3fs (cron %s, server action %d with uid %d)', end_time - start_time, cron_name, server_action_id, self.env.uid)
+                _logger.debug('Job `%s` (%s): Server action #%d with uid %d executed in (%.3fs).',
+                              cron_name, self.id, server_action_id, self.env.uid, end_time - start_time)
             self.pool.signal_changes()
         except Exception:
             self.pool.reset_changes()
-            _logger.exception("Call from cron %s for server action #%s failed in Job #%s",
-                              cron_name, server_action_id, job_id)
+            _logger.exception('Job `%s` (%s): Server action #%s failed.', cron_name, self.id, server_action_id)
             self.env.cr.rollback()
             raise
 
@@ -614,7 +614,7 @@ class ir_cron(models.Model):
         ])
         if _logger.isEnabledFor(logging.DEBUG):
             ats = ', '.join(map(str, at_list))
-            _logger.debug("will execute '%s' at %s", self.sudo().name, ats)
+            _logger.debug('Job `%s` (%s): Will execute at %s.', self.sudo().name, self.id, ats)
 
         if min(at_list) <= now or os.getenv('ODOO_NOTIFY_CRON_CHANGES'):
             self._cr.postcommit.add(self._notifydb)
