@@ -84,3 +84,19 @@ class IrAttachment(models.Model):
         - Non admin user uploading an unsplash image (bypass binary/url check)
         """
         return False
+
+    def write(self, vals):
+        res = super().write(vals)
+        new_checksum = self.checksum
+        image_data = self.env['web_editor.image.data'].search([
+            ['res_model', '=', self.res_model],
+            ['res_id', '=', self.res_id],
+            ['res_field', '=', self.res_field],
+        ])
+        if image_data and new_checksum != image_data.image_checksum:
+            # If an image field is being replaced and the
+            # `web_editor.image.data` record does not contain the correct data,
+            # unlink it as it is obsolete. E.g an image is modified with the
+            # editor and then the image is replaced from the backend.
+            image_data.unlink()
+        return res
