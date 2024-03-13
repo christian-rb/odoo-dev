@@ -526,8 +526,8 @@
                 </tbody>
             </table>
             <div class='d-flex justify-content-center gap-2 mt-3'>
-                <a role="button" title="I'm interested" href="#" class="btn btn-primary" data-bs-toggle="modal" data-bs-target=".modal_partner_assign_interested"><i class="fa fa-file-text-o"/> I'm interested</a>
-                <a role="button" title="I'm not interested" href="#" class="btn btn-primary" data-bs-toggle="modal" data-bs-target=".modal_partner_assign_desinterested"><i class="fa fa-fw fa-times"/> I'm not interested</a>
+                <a role="button" title="I'm interested" href="#" class="btn btn-primary" data-bs-toggle="modal" data-bs-target=".modal_partner_assign_interested">I'm interested</a>
+                <a role="button" title="I'm not interested" href="#" class="btn btn-primary" data-bs-toggle="modal" data-bs-target=".modal_partner_assign_desinterested"> I'm not interested</a>
                 <div class="modal fade modal_partner_assign_interested" role="form">
                     <div class="modal-dialog">
                         <form method="POST" class="js_accept_json modal-content js_website_submit_form interested_partner_assign_form">
