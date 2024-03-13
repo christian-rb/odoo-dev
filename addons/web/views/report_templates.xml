@@ -67,10 +67,6 @@
                         right:50px;
                         font-size: 0.8rem
                     }
-                    /** Avoid image overflowing and creating a scrollbar **/
-                    .o_background_header {
-                        min-width: initial !important;
-                    }
 
                     /** This rule is overridden in web/report.scss to hack around whtml2pdf
                         Simply set it to its default value so it works properly in preview **/
@@ -306,7 +302,7 @@
     </template>
 
     <template id="external_layout_striped">
-        <div id="external_layout_striped_id" t-attf-class="o_company_#{company.id}_layout o_background_header header #{'o_snail_mail' if company.is_snail_mail_installed else ''}" t-att-style="report_header_style">
+        <div id="external_layout_striped_id" t-attf-class="o_company_#{company.id}_layout header #{'o_snail_mail' if company.is_snail_mail_installed else ''}" t-att-style="report_header_style">
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <img t-if="company.logo" class="o_company_logo" t-att-src="image_data_uri(company.logo)" alt="Logo"/>
                 <div t-if="company.report_header" t-field="company.report_header" class="o_company_tagline mw-50 fw-bold">Company tagline</div>
