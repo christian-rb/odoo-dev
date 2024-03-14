@@ -4389,7 +4389,7 @@ class AccountMove(models.Model):
             raise UserError(_("You can only send sales documents"))
 
         return {
-            'name': _("Send"),
+            'name': _("Print & Send"),
             'type': 'ir.actions.act_window',
             'view_type': 'form',
             'view_mode': 'form',
@@ -4413,6 +4413,13 @@ class AccountMove(models.Model):
             report_action['context']['default_from_invoice'] = self.move_type == 'out_invoice'
 
         return report_action
+
+    def action_invoice_download_pdf(self):
+        return {
+            'type': 'ir.actions.act_url',
+            'url': f'account/export_invoice_documents/{",".join(map(str, self.ids))}?only_pdf=True',
+            'target': 'download',
+        }
 
     def preview_invoice(self):
         self.ensure_one()
@@ -4862,20 +4869,28 @@ class AccountMove(models.Model):
         composer = self.env['account.move.send'].create(composer_vals)
         return composer.action_send_and_print(force_synchronous=force_synchronous, allow_fallback_pdf=allow_fallback_pdf, bypass_download=bypass_download)
 
-    def _get_invoice_legal_documents(self):
-        """ Return existing attachments or a temporary Pro Forma pdf. """
-        self.ensure_one()
-        if self.invoice_pdf_report_id:
-            attachments = self.env['account.move.send']._get_invoice_extra_attachments(self)
+    def _get_invoice_legal_documents(self, only_pdf=False, fallback_template='account.account_invoices'):
+        """ Return existing attachments or a fallback proforma PDF for invoices in self if no legal docs are generated yet.
+        :param bool only_pdf: If True, returns only invoice PDF attachments (ignore possible XML/other documents)
+        :param char fallback_template: the xmlid of the template to use to generate the fallback proforma document.
+        """
+        attachments = self.env['ir.attachment']
+        invoices_with_pdf = self.filtered('invoice_pdf_report_id')
+        if only_pdf:
+            attachments += invoices_with_pdf.invoice_pdf_report_id
         else:
-            content, _ = self.env['ir.actions.report']._render('account.account_invoices', self.ids, data={'proforma': True})
-            attachments = self.env['ir.attachment'].new({
-                'raw': content,
-                'name': self._get_invoice_proforma_pdf_report_filename(),
-                'mimetype': 'application/pdf',
-                'res_model': self._name,
-                'res_id': self.id,
-            })
+            for invoice_with_pdf in invoices_with_pdf:
+                attachments += self.env['account.move.send']._get_invoice_extra_attachments(invoice_with_pdf)
+        if invoices_without_pdf := self - invoices_with_pdf:
+            for invoice_without_pdf in invoices_without_pdf:
+                content, _ = self.env['ir.actions.report']._render(fallback_template, invoice_without_pdf.ids, data={'proforma': True})
+                attachments += self.env['ir.attachment'].new({
+                    'raw': content,
+                    'name': invoice_without_pdf._get_invoice_proforma_pdf_report_filename(),
+                    'mimetype': 'application/pdf',
+                    'res_model': self._name,
+                    'res_id': invoice_without_pdf.id,
+                })
         return attachments
 
     def get_invoice_pdf_report_attachment(self):

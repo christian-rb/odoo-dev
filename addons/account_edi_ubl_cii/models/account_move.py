@@ -59,3 +59,14 @@ class AccountMove(models.Model):
             and not self.ubl_cii_xml_id \
             and self.is_sale_document() \
             and bool(self.partner_id.ubl_cii_format)
+
+    def action_invoice_download_ubl(self):
+        invoice_with_ubl = self.filtered(lambda inv: inv.ubl_cii_xml_id)
+        filename = 'ubl.zip' if len(invoice_with_ubl) > 1 else invoice_with_ubl.ubl_cii_xml_id.name
+        return {
+            'type': 'ir.actions.act_url',
+            'url': f'account/export_invoice_documents/{",".join(map(str, invoice_with_ubl.ids))}'
+                   f'?attachment_ids={",".join(map(str, invoice_with_ubl.ubl_cii_xml_id.ids))}'
+                   f'&filename={filename}',
+            'target': 'download',
+        }

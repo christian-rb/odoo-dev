@@ -31,6 +31,11 @@ Pro rules and show the errors.
         'views/res_partner_views.xml',
         'wizard/account_move_send_views.xml',
     ],
+    'assets': {
+        'web.assets_backend': [
+            'account_edi_ubl_cii/static/src/components/**/*',
+        ],
+    },
     'installable': True,
     'auto_install': True,
     'license': 'LGPL-3',

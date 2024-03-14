@@ -12,7 +12,7 @@
                     <t t-set-slot="content">
                         <t t-if="printItems.length">
                             <Dropdown t-if="printItems.length > 1">
-                                <button>
+                                <button id="cog_print_button">
                                     <i class="fa fa-print me-1"/> Print
                                 </button>
                                 <t t-set-slot="content">

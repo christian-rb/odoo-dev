@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="account.ActionMenus" t-inherit="web.ActionMenus" t-inherit-mode="extension">
+        <xpath expr="//span[@id='action_menu_print_span']" position="replace">
+            <t t-if="props.resModel === 'account.move'">
+                <span class="o_dropdown_title">Download</span>
+            </t>
+            <t t-else="">
+                <span class="o_dropdown_title">Print</span>
+            </t>
+        </xpath>
+    </t>
+
+    <t t-name="account.CogMenu" t-inherit="web.CogMenu" t-inherit-mode="extension">
+        <xpath expr="//button[@id='cog_print_button']" position="replace">
+            <t t-if="props.resModel === 'account.move'">
+                <button>
+                    <i class="fa fa-print me-1"/> Download
+                </button>
+            </t>
+            <t t-else="">
+                <button>
+                    <i class="fa fa-print me-1"/> Print
+                </button>
+            </t>
+        </xpath>
+    </t>
+
+</templates>
