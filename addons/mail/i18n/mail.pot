@@ -10594,8 +10594,22 @@ msgid ""
 msgstr ""
 
 #. module: mail
+<<<<<<< HEAD
 #. odoo-python
 #: code:addons/mail/models/mail_template.py:0
+||||||| parent of b669727f90aa (temp)
+#. odoo-javascript
+#: code:addons/mail/static/src/models/messaging_notification_handler.js:0
+=======
+#: code:addons/mail/models/ir_attachment.py:0
+#, python-format
+msgid "You may not unlink attachments from other people's messages"
+msgstr ""
+
+#. module: mail
+#. odoo-javascript
+#: code:addons/mail/static/src/models/messaging_notification_handler.js:0
+>>>>>>> b669727f90aa (temp)
 #, python-format
 msgid "You may not define a template on an abstract model: %s"
 msgstr ""
