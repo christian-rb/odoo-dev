@@ -3,7 +3,9 @@ access_purchase_order,purchase.order,model_purchase_order,group_purchase_user,1,
 access_purchase_order_manager,purchase.order,model_purchase_order,group_purchase_manager,1,1,1,1
 access_purchase_order_invoicing_payments_readonly,purchase.order,model_purchase_order,account.group_account_readonly,1,0,0,0
 access_purchase_order_invoicing_payments,purchase.order,model_purchase_order,account.group_account_invoice,1,1,0,0
-access_purchase_order_portal,purchase.order.portal,purchase.model_purchase_order,base.group_portal,1,0,0,0
+access_purchase_order_portal,purchase.order.portal,purchase.model_purchase_order,base.group_portal,1,1,0,0
+access_portal_mail_activity_type,portal.mail.activity.type,mail.model_mail_activity_type,base.group_portal,1,1,0,0
+access_portal_mail_activity,portal.mail.activity,mail.model_mail_activity,base.group_portal,1,1,1,0
 access_purchase_order_line,purchase.order.line user,model_purchase_order_line,group_purchase_user,1,1,1,1
 access_purchase_order_line_manager,purchase.order.line,model_purchase_order_line,group_purchase_manager,1,1,1,1
 access_purchase_order_line_invoicing_payments_readonly,purchase.order.line,model_purchase_order_line,account.group_account_readonly,1,0,0,0

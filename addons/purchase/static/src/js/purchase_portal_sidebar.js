@@ -6,6 +6,10 @@ import { uniqueId } from "@web/core/utils/functions";
 
 publicWidget.registry.PurchasePortalSidebar = PortalSidebar.extend({
     selector: ".o_portal_purchase_sidebar",
+    events: {
+        'click .o_portal_decline': '_onDecline',
+        'click .o_portal_accept': '_onAccept',
+    },
 
     /**
      * @constructor
@@ -14,6 +18,7 @@ publicWidget.registry.PurchasePortalSidebar = PortalSidebar.extend({
         this._super.apply(this, arguments);
         this.authorizedTextTag = ["em", "b", "i", "u"];
         this.spyWatched = $('body[data-target=".navspy"]');
+        this.orm = this.bindService("orm");
     },
     /**
      * @override
@@ -134,4 +139,12 @@ publicWidget.registry.PurchasePortalSidebar = PortalSidebar.extend({
         });
         return rawText.join(" ");
     },
+    _onDecline: function(ev){
+        let orderId = parseInt(ev.currentTarget.dataset.orderId)
+        this.orm.call("purchase.order","decline",[orderId])
+    },
+    _onAccept: function(ev){
+        let orderId = parseInt(ev.currentTarget.dataset.orderId)
+        this.orm.call("purchase.order","accept",[orderId])
+    }
 });
