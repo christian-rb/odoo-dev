@@ -46,20 +46,20 @@ class ProductCommon(
         ]).action_archive()
 
     @classmethod
-    def _create_pricelist(self, **create_vals):
-        return self.env['product.pricelist'].create({
+    def _create_pricelist(cls, **create_vals):
+        return cls.env['product.pricelist'].create({
             'name': "Test Pricelist",
             **create_vals,
         })
 
     @classmethod
-    def _create_product(self, **create_vals):
-        return self.env['product.product'].create({
+    def _create_product(cls, **create_vals):
+        return cls.env['product.product'].create({
             'name': "Test Product",
             'type': 'consu',
             'list_price': 100.0,
             'standard_price': 50.0,
-            'categ_id': self.product_category.id,
+            'categ_id': cls.product_category.id,
             **create_vals,
         })
 

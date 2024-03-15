@@ -128,7 +128,7 @@ class TestWebsiteSaleCart(WebsiteSaleCommon):
             'lst_price': 1000.0,
             'standard_price': 800.0,
         })
-        portal_user = self._create_portal_user()
+        portal_user = self._create_new_portal_user()
         website = self.website.with_user(portal_user)
 
         SaleOrderLine = self.env['sale.order.line']

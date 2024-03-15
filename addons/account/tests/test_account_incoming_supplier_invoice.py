@@ -14,11 +14,7 @@ class TestAccountIncomingSupplierInvoice(AccountTestInvoicingCommon):
         super().setUpClass()
         cls.env = cls.env(context=cls.default_context())
 
-        cls.internal_user = cls.env['res.users'].create({
-            'name': 'Internal User',
-            'login': 'internal.user@test.odoo.com',
-            'email': 'internal.user@test.odoo.com',
-        })
+        cls.internal_user = cls._create_new_internal_user(login='internal.user@test.odoo.com')
 
         cls.supplier_partner = cls.env['res.partner'].create({
             'name': 'Your Supplier',

@@ -13,8 +13,8 @@ class TestAccessRights(SaleCommon):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.user_portal = cls._create_portal_user()
-        cls.user_internal = cls._create_internal_user()
+        cls.user_portal = cls._create_new_portal_user()
+        cls.user_internal = cls._create_new_internal_user()
 
         cls.sale_user2 = cls.env['res.users'].create({
             'name': 'salesman_2',

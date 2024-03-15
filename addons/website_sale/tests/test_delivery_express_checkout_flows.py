@@ -65,7 +65,7 @@ class TestWebsiteSaleDeliveryExpressCheckoutFlows(WebsiteSaleCommon, HttpCase):
             'state': 'AL',
         }
 
-        cls.user_demo = cls._create_internal_user()
+        cls.user_demo = cls._create_new_internal_user()
 
         cls.express_checkout_demo_shipping_values = {
             'name': cls.user_demo.partner_id.name,

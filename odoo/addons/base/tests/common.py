@@ -139,23 +139,27 @@ class BaseCommon(TransactionCase):
         return company
 
     @classmethod
-    def _create_internal_user(cls, **kwargs):
+    def _create_new_internal_user(cls, **kwargs):
         return cls._create_user(
             groups=cls.group_user,
-            login='internal_user',
-            password='internal_user',
-            email='internal_user@test.com',
-            **kwargs
+            **{
+                'login': 'internal_user',
+                'password': 'internal_user',
+                'email': 'internal_user@test.com',
+                **kwargs,
+            },
         )
 
     @classmethod
-    def _create_portal_user(cls, **kwargs):
+    def _create_new_portal_user(cls, **kwargs):
         return cls._create_user(
             groups=cls.group_portal,
-            login='portal_user',
-            password='portal_user',
-            email='portal_user@test.com',
-            **kwargs
+            **{
+                'login': 'portal_user',
+                'password': 'portal_user',
+                'email': 'portal_user@test.com',
+                **kwargs,
+            },
         )
 
 

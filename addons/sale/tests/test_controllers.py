@@ -13,7 +13,7 @@ class TestAccessRightsControllers(HttpCase, SaleCommon):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.user_portal = cls._create_portal_user()
+        cls.user_portal = cls._create_new_portal_user()
 
     @mute_logger('odoo.addons.base.models.ir_model', 'odoo.addons.base.models.ir_rule')
     def test_access_controller(self):

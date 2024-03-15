@@ -16,7 +16,7 @@ class TestItEdi(AccountTestInvoicingCommon):
         super().setUpClass()
 
         # Company data ------
-        cls.company_data_2 =cls.setup_other_company(
+        cls.company_data_2 = cls.setup_other_company(
             **{
                 'name': 'company_2_data',
                 'vat': 'IT01234560157',

@@ -52,6 +52,7 @@ class AccountTestInvoicingCommon(ProductCommon):
         })
         # TODO LAS: check if necessary
         cls.cr = cls.env.cr  # NOTE: LAS confusing and unnecessary variable, should not be in the BaseCommon
+        cls.user = cls.env.user
 
         cls.company_data = cls.collect_company_accounting_data(cls.env.company)
 
@@ -212,14 +213,21 @@ class AccountTestInvoicingCommon(ProductCommon):
         return super()._create_product(**create_values)
 
     @classmethod
+    def get_default_groups(cls):
+        groups = super().get_default_groups()
+        return groups + cls.env.ref('account.group_account_manager') + cls.env.ref('account.group_account_user')
+
+    @classmethod
     def _create_user(cls, groups, **create_values):
         return super()._create_user(
-            groups + cls.env.ref('account.group_account_manager') + cls.env.ref('account.group_account_user'),
-            name='Because I am accountman!',
-            login='accountman',
-            password='accountman',
-            email='accountman@test.com',
-            **create_values,
+            groups,
+            **{
+                'name': 'Because I am accountman!',
+                'login': 'accountman',
+                'password': 'accountman',
+                'email': 'accountman@test.com',
+                **create_values,
+            },
         )
 
     @classmethod

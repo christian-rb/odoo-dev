@@ -1,6 +1,3 @@
-from odoo import Command, fields
-from odoo.tests import Form, HttpCase
-
 from odoo.addons.base.tests.common import BaseCommon
 
 
