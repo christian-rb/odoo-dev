@@ -72,6 +72,10 @@ export class Activity extends Component {
         return computeDelay(this.props.data.date_deadline);
     }
 
+    get onUpdate() {
+        return this.props.onUpdate();
+    }
+
     toggleDetails() {
         this.state.showDetails = !this.state.showDetails;
     }
@@ -91,20 +95,20 @@ export class Activity extends Component {
     async onFileUploaded(data) {
         const { id: attachmentId } = await this.attachmentUploader.uploadData(data);
         await this.activityService.markAsDone(this.props.data, [attachmentId]);
-        this.props.onUpdate();
+        this.onUpdate();
         await this.threadService.fetchNewMessages(this.thread);
     }
 
     async edit() {
         const { id, res_model, res_id } = this.props.data;
         await this.env.services["mail.activity"].schedule(res_model, res_id, id);
-        this.props.onUpdate();
+        this.onUpdate();
     }
 
     async unlink() {
         this.activityService.delete(this.props.data);
         await this.env.services.orm.unlink("mail.activity", [this.props.data.id]);
-        this.props.onUpdate();
+        this.onUpdate();
     }
 
     get thread() {
