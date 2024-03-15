@@ -1659,9 +1659,14 @@ registry.ImageShapeHoverEffet = publicWidget.Widget.extend({
      */
     destroy() {
         this._super(...arguments);
-        if (this.originalImgSrc && (this.lastImgSrc === this.el.getAttribute('src'))) {
-            this.el.src = this.originalImgSrc;
-        }
+        if (this.originalImgSrc &&
+            (this.lastImgSrc === this.el.getAttribute('src')
+            || (this.editableMode && !this.el.classList.contains("o_modified_image_to_save")))) {
+                // If the last operation was an onhover or if the image was not
+                // modified, replace the image src by its original one.
+                this.el.src = this.originalImgSrc;
+            }
+        delete this.el.dataset.srcBeforeHover;
     },
 
     //--------------------------------------------------------------------------
@@ -1722,7 +1727,7 @@ registry.ImageShapeHoverEffet = publicWidget.Widget.extend({
                     animateTransformEl.setAttribute("values", valuesValue);
                 });
             }
-            this._setImgSrc(this.svgOutEl, resolve);
+            this._setImgSrc(this.svgOutEl, resolve, false);
         }));
     },
 
@@ -1736,7 +1741,7 @@ registry.ImageShapeHoverEffet = publicWidget.Widget.extend({
 ￼    * @private
      * @param {HTMLElement} svg
 ￼    */
-    _setImgSrc(svg, resolve) {
+    _setImgSrc(svg, resolve, onMouseEnter = true) {
         // Add random class to prevent browser from caching image. Otherwise the
         // animations do not trigger more than once.
         const previousRandomClass = [...svg.classList].find(cl => cl.startsWith("o_shape_anim_random_"));
@@ -1758,7 +1763,13 @@ registry.ImageShapeHoverEffet = publicWidget.Widget.extend({
                 return;
             }
             this.options.wysiwyg && this.options.wysiwyg.odooEditor.observerUnactive("setImgHoverEffectSrc");
+            if (this.editableMode && onMouseEnter) {
+                // Keep a reference of the source of the image before the hover
+                // effect applied. Needed to find the image options.
+                this.el.dataset.srcBeforeHover = this.originalImgSrc;
+            }
             this.el.src = preloadedImg.getAttribute('src');
+            this.el.dispatchEvent(new Event("src_image_changed"));
             this.options.wysiwyg && this.options.wysiwyg.odooEditor.observerActive("setImgHoverEffectSrc");
             this.lastImgSrc = preloadedImg.getAttribute('src');
             this.el.onload = () => {

@@ -191,7 +191,7 @@ export class MediaDialog extends Component {
                     // have to be kept from the old image.
                     registry.category("pre.image.data").add(element.getAttribute("src"), newImageData, {force: true});
                     // Update the new image src entry of the "image.data"
-                    // registry with an empty dictionary to mark the image as a
+                    // registry with an empty object to mark the image as a
                     // replaced one.
                     registry.category("image.data").add(element.getAttribute("src"), {}, {force: true});
                 }
