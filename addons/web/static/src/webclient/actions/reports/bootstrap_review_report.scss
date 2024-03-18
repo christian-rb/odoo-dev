@@ -139,3 +139,7 @@ $report-extended-theme-colors: map-merge(
         -webkit-box-flex-group: 1;
     }
 }
+
+.font-monospace {
+    font-family: 'Fira_Mono' !important;
+}
