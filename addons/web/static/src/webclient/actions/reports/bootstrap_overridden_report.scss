@@ -1,5 +1,18 @@
 $link-decoration: none !default;
 $container-padding-x: 15px; // Like in BS4
 
+// Fonts
+$enable-rfs: false;
+$font-size-base: 1rem !default;
+
+// Set hx font-sizes
+$h1-font-size: $font-size-base * 2.5 !default;
+$h2-font-size: $font-size-base * 2 !default;
+$h3-font-size: $font-size-base * 1.75 !default;
+$h4-font-size: $font-size-base * 1.5 !default;
+$h5-font-size: $font-size-base * 1.25 !default;
+
+$headings-margin-bottom: .75rem !default;
+
 // remove Emoji fonts
 $font-family-sans-serif: o-add-unicode-support-font(("Lucida Grande", Helvetica, Verdana, Arial, sans-serif), 1);
