@@ -92,3 +92,50 @@ $report-extended-theme-colors: map-merge(
         border-top-style: none;
     }
 }
+
+// Fix flex utilites for compatibility with wkhtmltopdf 12.6
+.flex-column {
+    -webkit-box-orient: vertical;
+}
+
+.justify-content {
+    &-center {
+        -webkit-box-pack: center;
+    }
+    &-between {
+        -webkit-box-pack: justify;
+    }
+}
+
+.align-items {
+    &-start {
+        -webkit-box-align: start;
+    }
+    &-center {
+      -webkit-box-align: center;
+    }
+    &-between {
+      -webkit-box-align: justify;
+    }
+    &-end {
+        -webkit-box-align: end;
+    }
+}
+
+.flex-grow {
+    &-0{
+        -webkit-box-flex: 0;
+    }
+    &-1{
+        -webkit-box-flex: 1;
+    }
+}
+
+.flex-shrink {
+    &-0 {
+        -webkit-box-flex-group: 0;
+    }
+    &-1 {
+        -webkit-box-flex-group: 1;
+    }
+}
