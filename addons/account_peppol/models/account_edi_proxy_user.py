@@ -3,7 +3,7 @@
 
 import logging
 
-from odoo import _, fields, models, modules, tools
+from odoo import _, api, fields, models, modules, tools
 from odoo.addons.account_edi_proxy_client.models.account_edi_proxy_user import AccountEdiProxyError
 from odoo.addons.account_peppol.tools.demo_utils import handle_demo
 from odoo.exceptions import UserError
@@ -52,17 +52,49 @@ class AccountEdiProxyClientUser(models.Model):
         }
         return urls
 
+    def _call_peppol_proxy(self, endpoint, params=None):
+        self.ensure_one()
+
+        errors = {
+            'code_incorrect': _('The verification code is not correct'),
+            'code_expired': _('This verification code has expired. Please request a new one.'),
+            'too_many_attempts': _('Too many attempts to request an SMS code. Please try again later.'),
+        }
+
+        params = params or {}
+        try:
+            response = self._make_request(
+                f"{self._get_server_url()}{endpoint}",
+                params=params,
+            )
+        except AccountEdiProxyError as e:
+            raise UserError(e.message)
+
+        if 'error' in response:
+            error_code = response['error'].get('code')
+            error_message = response['error'].get('message') or response['error'].get('data', {}).get('message')
+            raise UserError(errors.get(error_code) or error_message or _('Connection error, please try again later.'))
+        return response
+
+    @api.model
+    def _get_can_send_domain(self):
+        return ('sender', 'smp_registration', 'receiver')
+
     # -------------------------------------------------------------------------
     # CRONS
     # -------------------------------------------------------------------------
 
     def _cron_peppol_get_new_documents(self):
-        edi_users = self.search([('company_id.account_peppol_proxy_state', '=', 'active')])
+        edi_users = self.search([('company_id.account_peppol_proxy_state', '=', 'receiver')])
         edi_users._peppol_get_new_documents()
 
     def _cron_peppol_get_message_status(self):
-        edi_users = self.search([('company_id.account_peppol_proxy_state', '=', 'active')])
+        edi_users = self.search([('company_id.account_peppol_proxy_state', 'in', self._get_can_send_domain())])
         edi_users._peppol_get_message_status()
+
+    def _cron_peppol_get_participant_status(self):
+        edi_users = self.search([('company_id.account_peppol_proxy_state', '=', 'smp_registration')])
+        edi_users._peppol_get_participant_status()
 
     # -------------------------------------------------------------------------
     # BUSINESS ACTIONS
@@ -215,10 +247,6 @@ class AccountEdiProxyClientUser(models.Model):
                     {'message_uuids': list(message_uuids.keys())},
                 )
 
-    def _cron_peppol_get_participant_status(self):
-        edi_users = self.search([('company_id.account_peppol_proxy_state', '=', 'pending')])
-        edi_users._peppol_get_participant_status()
-
     def _peppol_get_participant_status(self):
         for edi_user in self:
             try:
@@ -228,5 +256,5 @@ class AccountEdiProxyClientUser(models.Model):
                 _logger.error('Error while updating Peppol participant status: %s', e)
                 continue
 
-            if proxy_user['peppol_state'] in {'active', 'rejected', 'canceled'}:
+            if proxy_user['peppol_state'] in ('receiver', 'rejected'):
                 edi_user.company_id.account_peppol_proxy_state = proxy_user['peppol_state']

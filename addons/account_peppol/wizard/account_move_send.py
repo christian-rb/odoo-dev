@@ -17,8 +17,8 @@ class AccountMoveSend(models.TransientModel):
     )
     enable_peppol = fields.Boolean(compute='_compute_enable_peppol')
     # technical field needed for computing a warning text about the peppol configuration
-    peppol_warning = fields.Char(
-        string="Warning",
+    peppol_warning = fields.Json(
+        string="Peppol warning",
         compute="_compute_peppol_warning",
     )
     account_peppol_edi_mode_info = fields.Char(compute='_compute_account_peppol_edi_mode_info')
@@ -68,21 +68,23 @@ class AccountMoveSend(models.TransientModel):
             if not invalid_partners:
                 wizard.peppol_warning = False
             else:
-                names = ', '.join(invalid_partners[:5].mapped('display_name'))
-                wizard.peppol_warning = _("The following partners are not correctly configured to receive Peppol documents. "
-                                        "Please check and verify their Peppol endpoint and the Electronic Invoicing format: "
-                                        "%s", names)
+                wizard.peppol_warning = {
+                    'partner_peppol_warning': {
+                            'message': _("The following partners are not correctly configured to receive Peppol documents. "
+                                        "Please check their Peppol endpoint and the Electronic Invoicing format"),
+                            'action_text': _("View Partner(s)"),
+                            'action': invalid_partners._get_records_action(name=_("Check Partner(s)"))
+                        }
+                    }
 
     @api.depends('enable_ubl_cii_xml')
     def _compute_enable_peppol(self):
         for wizard in self:
             # show peppol option if either the ubl option is available or any move already has a ubl file generated
             # and moves are not processing/done and if partners have an edi format set to one that works for peppol
-            invalid_partners = wizard.move_ids.partner_id.commercial_partner_id.filtered(
-                lambda partner: partner.ubl_cii_format in {False, 'facturx', 'oioubl_201'})
+            invalid_partners = wizard.move_ids.partner_id.commercial_partner_id.filtered(lambda p: not p.is_peppol_edi_format)
             wizard.enable_peppol = (
-                wizard.company_id.account_peppol_proxy_state == 'active' \
-                and (
+                (
                     wizard.enable_ubl_cii_xml
                     or any(m.ubl_cii_xml_id and m.peppol_move_state not in ('processing', 'done') for m in wizard.move_ids)
                 )
@@ -117,6 +119,10 @@ class AccountMoveSend(models.TransientModel):
         # Extends 'account' to force ubl xml checkbox if sending via peppol
         self.ensure_one()
 
+        can_send = self.env['account_edi_proxy_client.user']._get_can_send_domain()
+        if self.checkbox_send_peppol and self.company_id.account_peppol_proxy_state not in can_send:
+            return self.env['peppol.registration'].with_company(self.company_id)._action_open_peppol_form(reopen=False)
+
         if all([self.checkbox_send_peppol, self.enable_peppol, self.enable_ubl_cii_xml, not self.checkbox_ubl_cii_xml]):
             self.checkbox_ubl_cii_xml = True
         if self.checkbox_send_peppol and self.enable_peppol:
@@ -138,7 +144,7 @@ class AccountMoveSend(models.TransientModel):
                 if invoice_data.get('ubl_cii_xml_attachment_values'):
                     xml_file = invoice_data['ubl_cii_xml_attachment_values']['raw']
                     filename = invoice_data['ubl_cii_xml_attachment_values']['name']
-                elif invoice.ubl_cii_xml_id and invoice.peppol_move_state not in ('processing', 'canceled', 'done'):
+                elif invoice.ubl_cii_xml_id and invoice.peppol_move_state not in ('processing', 'done'):
                     xml_file = invoice.ubl_cii_xml_id.raw
                     filename = invoice.ubl_cii_xml_id.name
                 else:

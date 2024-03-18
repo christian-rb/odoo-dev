@@ -79,10 +79,22 @@ def _mock_button_verify_partner_endpoint(func, self, *args, **kwargs):
 def _mock_user_creation(func, self, *args, **kwargs):
     func(self, *args, **kwargs)
     self.write({
-        'account_peppol_proxy_state': 'active',
+        'account_peppol_proxy_state': 'sender',
     })
     self.account_peppol_edi_user.write({
         'private_key': b64encode(file_open(DEMO_PRIVATE_KEY, 'rb').read()),
+    })
+    return {
+        'view_mode': 'form',
+        'res_model': 'peppol.registration',
+        'res_id': self.id,
+        'type': 'ir.actions.act_window',
+        'target': 'new',
+    }
+
+def _mock_receiver_registration(func, self, *args, **kwargs):
+    self.write({
+        'account_peppol_proxy_state': 'receiver',
     })
 
 def _mock_deregister_participant(func, self, *args, **kwargs):
@@ -109,8 +121,8 @@ def _mock_deregister_participant(func, self, *args, **kwargs):
     mode_constraint = self.env['ir.config_parameter'].get_param('account_peppol.mode_constraint')
     self.account_peppol_edi_user.unlink()
     self.account_peppol_proxy_state = 'not_registered'
-    self.account_peppol_edi_mode = mode_constraint
-
+    if 'account_peppol_edi_mode' in self._fields:
+        self.account_peppol_edi_mode = mode_constraint
 
 def _mock_update_user_data(func, self, *args, **kwargs):
     pass
@@ -121,10 +133,11 @@ def _mock_migrate_participant(func, self, *args, **kwargs):
 _demo_behaviour = {
     '_make_request': _mock_make_request,
     'button_account_peppol_check_partner_endpoint': _mock_button_verify_partner_endpoint,
-    'button_create_peppol_proxy_user': _mock_user_creation,
+    'button_peppol_sender_registration': _mock_user_creation,
     'button_deregister_peppol_participant': _mock_deregister_participant,
     'button_migrate_peppol_registration': _mock_migrate_participant,
     'button_update_peppol_user_data': _mock_update_user_data,
+    'button_peppol_smp_registration': _mock_receiver_registration,
 }
 
 # -------------------------------------------------------------------------
@@ -152,7 +165,7 @@ def handle_demo(func, self, *args, **kwargs):
     def get_demo_mode_res_config_settings(self, args, kwargs):
         if self.account_peppol_edi_user:
             return self.account_peppol_edi_user.edi_mode == 'demo'
-        return self.account_peppol_edi_mode == 'demo'
+        return self.env['ir.config_parameter'].get_param('account_peppol.edi.mode') == 'demo'
 
     def get_demo_mode_res_partner(self, args, kwargs):
         peppol_user = self.env.company.account_edi_proxy_client_ids.filtered(lambda user: user.proxy_type == 'peppol')
@@ -164,6 +177,7 @@ def handle_demo(func, self, *args, **kwargs):
         'account_edi_proxy_client.user': get_demo_mode_account_edi_proxy_client_user,
         'res.config.settings': get_demo_mode_res_config_settings,
         'res.partner': get_demo_mode_res_partner,
+        'peppol.registration': get_demo_mode_res_config_settings,
     }
     demo_mode = get_demo_mode.get(self._name) and get_demo_mode[self._name](self, args, kwargs) or False
 

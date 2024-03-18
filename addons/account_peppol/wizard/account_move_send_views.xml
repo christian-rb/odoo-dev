@@ -11,7 +11,7 @@
                     <div class="alert alert-warning" role="alert" invisible="not checkbox_send_peppol or not peppol_warning or ubl_partner_warning">
                         <!-- hiding the warning if we're already showing one through the
                         UBL module to avoid showing basically the same errors at the same time -->
-                        <field name="peppol_warning"/>
+                        <field name="peppol_warning" class="o_field_html" widget="actionable_errors"/>
                     </div>
                 </xpath>
                 <xpath expr="//div[@name='option_send_mail']" position='after'>

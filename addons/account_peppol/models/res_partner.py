@@ -36,6 +36,11 @@ class ResPartner(models.Model):
         compute='_compute_account_peppol_verification_label',
         copy=False,
     ) # field to compute the label to show for partner endpoint
+    is_peppol_edi_format = fields.Boolean(compute='_compute_is_peppol_edi_format')
+
+    # -------------------------------------------------------------------------
+    # COMPUTE METHODS
+    # -------------------------------------------------------------------------
 
     @api.depends('peppol_eas', 'peppol_endpoint', 'ubl_cii_format')
     def _compute_account_peppol_is_endpoint_valid(self):
@@ -51,6 +56,14 @@ class ResPartner(models.Model):
                 partner.account_peppol_verification_label = 'valid'
             else:
                 partner.account_peppol_verification_label = 'not_valid'
+
+    def _compute_is_peppol_edi_format(self):
+        for partner in self:
+            partner.is_peppol_edi_format = partner.ubl_cii_format not in (False, 'facturx', 'oioubl_201')
+
+    # -------------------------------------------------------------------------
+    # BUSINESS ACTIONS
+    # -------------------------------------------------------------------------
 
     @api.model
     def _check_peppol_participant_exists(self, edi_identification):
@@ -90,7 +103,7 @@ class ResPartner(models.Model):
         """
         self.ensure_one()
 
-        if not (self.peppol_eas and self.peppol_endpoint) or self.ubl_cii_format in (False, 'facturx', 'oioubl_201'):
+        if not (self.peppol_eas and self.peppol_endpoint) or not self.is_peppol_edi_format:
             self.account_peppol_is_endpoint_valid = False
         else:
             edi_identification = f'{self.peppol_eas}:{self.peppol_endpoint}'.lower()

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="peppol_registration_form" model="ir.ui.view">
+        <field name="name">peppol.registration.form</field>
+        <field name="model">peppol.registration</field>
+        <field name="groups_id" eval="[Command.link(ref('account.group_account_manager'))]"/>
+        <field name="arch" type="xml">
+            <form>
+                <field name="company_id" invisible="1"/>
+                <header>
+                    <field name="account_peppol_proxy_state"
+                           widget="statusbar"
+                           statusbar_visible="not_registered,in_verification,sender,smp_registration"
+                           groups="base.group_no_one"/>
+                </header>
+
+                <div class="m-0" name="warnings">
+                    <field name="peppol_warnings" class="o_field_html" widget="actionable_errors"/>
+                </div>
+
+                <!-- Step one. The participant is not registered as an EDI user -->
+                <group name="step_not_registered" invisible="account_peppol_proxy_state != 'not_registered'">
+                    <div colspan="2" class="text-muted mt-3 mb-3">
+                        Start sending documents via Peppol as soon as your verification is complete.
+                        You can also register to receive documents via Peppol by selecting "Register as a receiver" option.
+                    </div>
+
+                    <!-- business fields -->
+                    <field name="peppol_eas"/>
+                    <field name="peppol_endpoint"/>
+                    <field name="account_peppol_phone_number" required="1"/>
+                    <field name="account_peppol_contact_email"/>
+
+                    <!-- edi mode selection -->
+                    <field name="account_peppol_edi_mode"
+                           widget="account_peppol_radio_field"
+                           class="o_field_radio"
+                           readonly_items="account_peppol_mode_constraint != 'prod' and ['prod'] or []"
+                           hidden_items="account_peppol_mode_constraint != 'test' and ['test'] or []"
+                           options="{'horizontal': true }"/>
+                    <field name="account_peppol_mode_constraint" invisible="1"/>
+                    <div colspan="2" class="mt-3 mb-3" invisible="account_peppol_edi_mode != 'prod'">
+                        By clicking the button below I accept that Odoo may process my e-invoices.
+                    </div>
+                    <div colspan="2" class="mt-3 mb-3" invisible="account_peppol_edi_mode != 'test'">
+                        Test mode allows sending e-invoices through the test Peppol network.
+                        By clicking the button below I accept that Odoo may process my e-invoices.
+                    </div>
+                    <div colspan="2" class="mt-3 mb-3" invisible="account_peppol_edi_mode != 'demo'">
+                        In demo mode sending invoices is simulated.
+                        There will be no communication with the Peppol network.
+                    </div>
+                </group>
+
+                <!-- Step two. The participant needs to fill in the SMS code they received -->
+                <group name="step_verification" invisible="account_peppol_proxy_state != 'in_verification'">
+                    <field name="account_peppol_phone_number" required="1"/>
+                    <field name="account_peppol_contact_email" required="1"/>
+                    <div colspan="2" class="text-muted mt-3">
+                        We sent a verification code to
+                        <field name="account_peppol_phone_number"
+                               class="oe_inline"
+                               nolabel="1"
+                               readonly="account_peppol_proxy_state == 'in_verification'"/>.
+                    </div>
+                    <div colspan="2" class="mt-1 ps-3 w-50">
+                        <field name="account_peppol_verification_code" widget="verification_code"/>
+                    </div>
+                </group>
+
+                <!-- Final sender step. The participant is now a sender. Deregister button is visible in the footer -->
+                <group name="step_sender" invisible="account_peppol_proxy_state != 'sender'">
+                    <p colspan="2" class="mt-3">
+                        You can now send e-invoices via Peppol.
+                        Use the Send &amp; Print button to send your invoices.
+                    </p>
+                </group>
+
+                <!-- Optional step: receiver registration fields -->
+                <group name="step_register_receiver" invisible="account_peppol_proxy_state not in ('not_registered', 'sender')">
+                    <field colspan="2" name="smp_registration"/>
+                    <p colspan="2" class="mb-2" invisible="not smp_registration">
+                        I want to migrate my existing Peppol connection to Odoo (optional):
+                    </p>
+                    <field name="account_peppol_migration_key" invisible="not smp_registration"/>
+                </group>
+
+                <!-- Final receiver step. The participant is now waiting to become a receiver.
+                Deregister button is visible in the footer -->
+                <group name="step_smp_registration" invisible="account_peppol_proxy_state != 'smp_registration'">
+                    <div colspan="2">
+                        It is possible to further configure how Peppol documents are received in Settings, if necessary.
+                        <p class="mt-4">
+                            Your registration on Peppol network should be activated within a day.
+                            The updated status will be visible in Settings. You can now close this window.
+                        </p>
+                    </div>
+                </group>
+
+                <footer>
+                    <widget name="peppol_settings_buttons"
+                            invisible="account_peppol_proxy_state in ('rejected', False)"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

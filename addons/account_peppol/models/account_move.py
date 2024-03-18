@@ -15,7 +15,6 @@ class AccountMove(models.Model):
             ('to_send', 'Queued'),
             ('skipped', 'Skipped'),
             ('processing', 'Pending Reception'),
-            ('canceled', 'Cancelled'),
             ('done', 'Done'),
             ('error', 'Error'),
         ],
@@ -23,7 +22,6 @@ class AccountMove(models.Model):
         string='PEPPOL status',
         copy=False,
     )
-    peppol_is_demo_uuid = fields.Boolean(compute="_compute_peppol_is_demo_uuid")
 
     @api.model
     def fields_get(self, allfields=None, attributes=None):
@@ -41,22 +39,18 @@ class AccountMove(models.Model):
     def action_cancel_peppol_documents(self):
         # if the peppol_move_state is processing/done
         # then it means it has been already sent to peppol proxy and we can't cancel
-        if any(move.peppol_move_state in {'processing', 'done'} for move in self):
+        if any(move.peppol_move_state in ('processing', 'done') for move in self):
             raise UserError(_("Cannot cancel an entry that has already been sent to PEPPOL"))
-        self.peppol_move_state = 'canceled'
+        self.peppol_move_state = False
         self.send_and_print_values = False
-
-    @api.depends('peppol_message_uuid')
-    def _compute_peppol_is_demo_uuid(self):
-        for move in self:
-            move.peppol_is_demo_uuid = (move.peppol_message_uuid or '').startswith('demo_')
 
     @api.depends('state')
     def _compute_peppol_move_state(self):
+        can_send = self.env['account_edi_proxy_client.user']._get_can_send_domain()
         for move in self:
             if all([
-                move.company_id.account_peppol_proxy_state == 'active',
-                move.partner_id.account_peppol_is_endpoint_valid,
+                move.company_id.account_peppol_proxy_state in can_send,
+                move.partner_id.commercial_partner_id.account_peppol_is_endpoint_valid,
                 move.state == 'posted',
                 move.move_type in ('out_invoice', 'out_refund', 'out_receipt'),
                 not move.peppol_move_state,

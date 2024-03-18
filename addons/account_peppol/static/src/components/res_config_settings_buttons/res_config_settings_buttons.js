@@ -22,9 +22,13 @@ class PeppolSettingsButtons extends Component {
         super.setup();
         this.dialogService = useService("dialog");
         this.notification = useService("notification");
+        // we have to pass this via context from python
+        // because the wizard has to be reopened whenever a button is clicked
         this.state = useState({
-            isSmsButtonDisabled: false,
+            isSmsButtonDisabled: this.props.record.context.disable_sms_verification || false,
         });
+        // enable Send Again button after some time
+        setTimeout(() => this.state.isSmsButtonDisabled = false, waitTime);
     }
 
     get proxyState() {
@@ -32,7 +36,7 @@ class PeppolSettingsButtons extends Component {
     }
 
     get migrationPrepared() {
-        return this.props.record.data.account_peppol_proxy_state === "active" && Boolean(this.props.record.data.account_peppol_migration_key);
+        return this.props.record.data.account_peppol_proxy_state === "receiver" && Boolean(this.props.record.data.account_peppol_migration_key);
     }
 
     get ediMode() {
@@ -43,20 +47,27 @@ class PeppolSettingsButtons extends Component {
         return this.props.record.data.account_peppol_mode_constraint;
     }
 
-    get createUserButtonLabel() {
+    get smpRegistration() {
+        return this.props.record.data.smp_registration;
+    }
+
+    get createButtonLabel() {
         const modes = {
-            demo: _t("Validate registration (Demo)"),
-            test: _t("Validate registration (Test)"),
-            prod: _t("Validate registration"),
+            demo: _t("Register (Demo)"),
+            test: _t("Register (Test)"),
+            prod: _t("Register"),
         }
-        return modes[this.ediMode] || _t("Validate registration");
+        return modes[this.ediMode] || _t("Register");
     }
 
     get deregisterUserButtonLabel() {
         const modes = {
             demo: _t("Switch to Live"),
         }
-        return this.modeConstraint !== "demo" && modes[this.ediMode] || _t("Deregister from Peppol");
+        if (this.props.record.data.account_peppol_proxy_state === 'in_verification') {
+            return _t("Cancel");
+        }
+        return this.modeConstraint !== "demo" && modes[this.ediMode] || _t("Deregister");
     }
 
     async _callConfigMethod(methodName, save = false) {
@@ -130,14 +141,15 @@ class PeppolSettingsButtons extends Component {
     }
 
     async sendCode() {
-        this.state.isSmsButtonDisabled = true;
-        // don't allow spamming the button
-        setTimeout(() => this.state.isSmsButtonDisabled = false, waitTime);
         await this._callConfigMethod("button_send_peppol_verification_code", true);
     }
 
-    async createUser() {
-        await this._callConfigMethod("button_create_peppol_proxy_user", true);
+    async createSender() {
+        await this._callConfigMethod("button_peppol_sender_registration", true);
+    }
+
+    async createReceiver() {
+        await this._callConfigMethod("button_peppol_smp_registration", true);
     }
 }
 
