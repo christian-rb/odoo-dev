@@ -179,11 +179,11 @@
                                 <field name="kanban_state"
                                     class="d-flex align-items-center"
                                     groups="!hr_contract.group_hr_contract_manager"
-                                    widget="state_selection" readonly="1"/>
+                                    widget="contract_state_selection" readonly="1"/>
                                 <field name="kanban_state"
                                     class="d-flex align-items-center"
                                     groups="hr_contract.group_hr_contract_manager"
-                                    widget="state_selection" readonly="0"/>
+                                    widget="contract_state_selection" readonly="0"/>
                             </h1>
                             <h2>
                                 <field name="company_id" groups="base.group_multi_company" invisible="1"/>
@@ -325,7 +325,7 @@
                                         <field name="employee_id" widget="many2one_avatar_employee"/>
                                     </span>
                                     <span class="float-end mr4">
-                                        <field name="kanban_state" widget="state_selection"/>
+                                        <field name="kanban_state" widget="contract_state_selection"/>
                                     </span>
                                 </div>
                                 <div class="oe_kanban_bottom_left">

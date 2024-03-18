@@ -63,6 +63,7 @@ class Contract(models.Model):
     """
     kanban_state = fields.Selection([
         ('normal', 'Grey'),
+        ('waiting', 'Blue'),
         ('done', 'Green'),
         ('blocked', 'Red')
     ], string='Kanban State', default='normal', tracking=True, copy=False)
@@ -215,9 +216,14 @@ class Contract(models.Model):
         if contracts_to_close:
             contracts_to_close._safe_write_for_cron({'state': 'close'}, from_cron)
 
+        waiting_contracts = self.search([('state', '=', 'open'), ('kanban_state', '=', 'waiting'), ('date_start', '<=', fields.Date.to_string(date.today()))])
+
+        if waiting_contracts:
+            waiting_contracts._safe_write_for_cron({'kanban_state': 'normal'}, from_cron)
+
         contracts_to_open = self.search([('state', '=', 'draft'), ('kanban_state', '=', 'done'), ('date_start', '<=', fields.Date.to_string(date.today())),])
 
-        if contracts_to_open:
+        if contracts_to_open and not waiting_contracts:
             contracts_to_open._safe_write_for_cron({'state': 'open'}, from_cron)
 
         contract_ids = self.search([('date_end', '=', False), ('state', '=', 'close'), ('employee_id', '!=', False)])
@@ -258,6 +264,9 @@ class Contract(models.Model):
 
     def _assign_open_contract(self):
         for contract in self:
+            if contract.employee_id.contract_id.state == 'open':
+                contract.kanban_state = "waiting"
+                continue
             contract.employee_id.sudo().write({'contract_id': contract.id})
 
     @api.depends('wage')
@@ -279,6 +288,8 @@ class Contract(models.Model):
         old_state = {c.id: c.state for c in self}
         res = super(Contract, self).write(vals)
         new_state = {c.id: c.state for c in self}
+        if 'state' in vals and 'kanban_state' not in vals:
+            self.write({'kanban_state': 'normal'})
         if vals.get('state') == 'open':
             self._assign_open_contract()
         today = fields.Date.today()
@@ -308,10 +319,6 @@ class Contract(models.Model):
             ).mapped('employee_id').filtered(
                 lambda e: e.resource_calendar_id
             ).write({'resource_calendar_id': calendar})
-
-        if 'state' in vals and 'kanban_state' not in vals:
-            self.write({'kanban_state': 'normal'})
-
         return res
 
     @api.model_create_multi
