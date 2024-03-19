@@ -68,18 +68,18 @@
                             <div class="oe_structure"></div>
                             <h2 t-field="o.name">WH/OUT/00001</h2>
                             <div class="oe_structure"></div>
-                            <div class="row mb-2">
-                                <div t-if="o.origin" class="col-auto" name="div_origin">
+                            <div id="informations" class="row mb-4">
+                                <div t-if="o.origin" class="col-auto col-3 mw-100" name="div_origin">
                                     <strong>Order</strong>
-                                    <p t-field="o.origin">S0001</p>
+                                    <div t-field="o.origin">S0001</div>
                                 </div>
-                                <div class="col-auto" name="div_state">
+                                <div class="col-auto col-3 mw-100" name="div_state">
                                     <strong>Status</strong>
-                                    <p t-field="o.state">Draft</p>
+                                    <div t-field="o.state">Draft</div>
                                 </div>
-                                <div t-if="o.scheduled_date" class="col-auto" name="div_sched_date">
+                                <div t-if="o.scheduled_date" class="col-auto col-3 mw-100" name="div_sched_date">
                                     <strong>Scheduled Date</strong>
-                                    <p t-field="o.scheduled_date">2023-09-24</p>
+                                    <div t-field="o.scheduled_date">2023-09-24</div>
                                 </div>
                             </div>
                             <table class="o_main_table table table-sm table-borderless" t-if="o.move_line_ids and o.move_ids_without_package">

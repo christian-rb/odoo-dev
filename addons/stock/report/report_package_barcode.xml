@@ -33,7 +33,7 @@
                         </div>
                     </div>
                     <div class="oe_structure"></div>
-                    <div class="row mt32 mb32">
+                    <div class="row mt32 mb-4">
                         <div t-if="o.pack_date" class="col-auto">
                             <strong>Pack Date:</strong>
                             <span t-field="o.pack_date">2021-9-01</span>
@@ -46,7 +46,7 @@
                     <div class="oe_structure"></div>
                     <t t-set="has_serial_number" t-value="o.quant_ids.mapped('lot_id')" />
                     <t t-set="has_ean_barcode" t-value="any(valid_ean for valid_ean in o.quant_ids.product_id.mapped('valid_ean'))" />
-                    <table class="table table-sm table-striped">
+                    <table class="o_main_table table table-sm table-borderless">
                         <thead>
                             <tr>
                                 <th>Product</th>
@@ -61,7 +61,7 @@
                                 <td>
                                    <span t-field="l.product_id.name">Customizable Desk</span>
                                 </td>
-                                <td class="text-end">
+                                <td class="text-end font-monospace">
                                     <span t-field="l.quantity">3.00</span>
                                 </td>
                                 <td groups="uom.group_uom">
