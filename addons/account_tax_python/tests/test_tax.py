@@ -6,11 +6,12 @@ from odoo.tests import tagged
 @tagged('post_install', '-at_install')
 class TestTaxPython(TestTaxCommon):
 
-    def python_tax(self, python_compute, **kwargs):
-        self.number += 1
-        return self.env['account.tax'].create({
+    @classmethod
+    def python_tax(cls, python_compute, **kwargs):
+        cls.number += 1
+        return cls.env['account.tax'].create({
             **kwargs,
-            'name': f"code_({self.number})",
+            'name': f"code_({cls.number})",
             'amount_type': 'code',
             'amount': 0.0,
             'python_compute': python_compute,

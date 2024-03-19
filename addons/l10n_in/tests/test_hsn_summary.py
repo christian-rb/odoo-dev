@@ -46,7 +46,6 @@ class TestHSNsummary(TestTaxCommon):
             {k: len(v) if k == 'items' else v for k, v in results.items()},
             {k: len(v) if k == 'items' else v for k, v in expected_values.items()},
         )
-        self.assertEqual(len(results['items']), len(expected_values['items']))
         for item, expected_item in zip(results['items'], expected_values['items']):
             self.assertDictEqual(item, expected_item)
 

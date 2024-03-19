@@ -47,7 +47,8 @@ export const getTaxesValues = (
             precision_rounding: currency.rounding,
         }
     );
-    return accountTaxHelpers.computeSingleLineTaxes(taxes, evalContext);
+    const taxesComputation = accountTaxHelpers.prepare_taxes_computation(taxes);
+    return accountTaxHelpers.eval_taxes_computation(taxesComputation, evalContext);
 };
 
 export const getTaxesAfterFiscalPosition = (taxes, fiscalPosition, models) => {
