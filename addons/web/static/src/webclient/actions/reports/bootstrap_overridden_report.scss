@@ -2,7 +2,7 @@ $link-decoration: none !default;
 $container-padding-x: 15px; // Like in BS4
 
 // Fonts
-$enable-rfs: false;
+$enable-rfs: false !default;
 $font-size-base: 1rem !default;
 
 // Set hx font-sizes

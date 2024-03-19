@@ -251,9 +251,13 @@ This module provides the core of the Odoo Web Client.
             ('remove', 'web/static/src/legacy/js/public/lazyloader.js'),
         ],
         'web.report_assets_common': [
-            ('include', 'web._assets_helpers'),
+            'web/static/src/scss/functions.scss',
+            'web/static/src/scss/utils.scss',
+            ('include', 'web._assets_primary_variables'),
+            ('include', 'web._assets_secondary_variables'),
 
             'web/static/src/webclient/actions/reports/bootstrap_overridden_report.scss',
+            ('include', 'web._assets_helpers'),
             'web/static/src/scss/pre_variables.scss',
             'web/static/lib/bootstrap/scss/_variables.scss',
             'web/static/lib/bootstrap/scss/_variables-dark.scss',
