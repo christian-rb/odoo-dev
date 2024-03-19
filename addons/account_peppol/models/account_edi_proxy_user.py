@@ -316,8 +316,8 @@ class AccountEdiProxyClientUser(models.Model):
         """Register services on a particular user on the IAP."""
         self.ensure_one()
         if services and self.company_id.account_peppol_proxy_state == 'receiver':
-            return self._make_request(
-                f"{self._get_server_url()}/api/peppol/2/create_services",
+            return self._call_peppol_proxy(
+                "/api/peppol/2/create_services",
                 {'services': services},
             )
         return {}
@@ -325,14 +325,14 @@ class AccountEdiProxyClientUser(models.Model):
     def _peppol_get_services(self):
         """Get information from the IAP regarding the Peppol services."""
         self.ensure_one()
-        return self._make_request(f"{self._get_server_url()}/api/peppol/2/get_services")
+        return self._call_peppol_proxy("/api/peppol/2/get_services")
 
     def _peppol_update_services(self, services=None):
         """Update the IAP with information representing the available services on a user."""
         self.ensure_one()
         if services and self.company_id.account_peppol_proxy_state == 'receiver':
-            return self._make_request(
-                f"{self._get_server_url()}/api/peppol/2/update_services",
+            return self._call_peppol_proxy(
+                "/api/peppol/2/update_services",
                 {'services': services}
             )
         return {}
@@ -341,8 +341,8 @@ class AccountEdiProxyClientUser(models.Model):
         """Delete services from a user on the IAP"""
         self.ensure_one()
         if services and self.company_id.account_peppol_proxy_state == 'receiver':
-            return self._make_request(
-                f"{self._get_server_url()}/api/peppol/2/delete_services",
+            return self._call_peppol_proxy(
+                "/api/peppol/2/delete_services",
                 {'services': services}
             )
         return {}

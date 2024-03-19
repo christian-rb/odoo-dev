@@ -213,3 +213,22 @@ class ResCompany(models.Model):
         for company in self:
             vals = self._sanitize_peppol_endpoint(vals, company.peppol_eas, company.peppol_endpoint)
         return super().write(vals)
+
+    # -------------------------------------------------------------------------
+    # PEPPOL PARTICIPANT MANAGEMENT
+    # -------------------------------------------------------------------------
+
+    def _peppol_get_supported_document_types(self):
+        """Override this function to add supported document types as modules are installed.
+
+        :returns: dictionary of the form: {module_name: [(document identifier, document_name)]}
+        """
+        return {
+            "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2::Invoice##urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0::2.1": "Peppol BIS Billing UBL Invoice V3",
+            "urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0::2.1": "Peppol BIS Billing UBL CreditNote V3",
+            "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2::Invoice##urn:cen.eu:en16931:2017#compliant#urn:fdc:nen.nl:nlcius:v1.0::2.1": "SI-UBL 2.0 Invoice",
+            "urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:cen.eu:en16931:2017#compliant#urn:fdc:nen.nl:nlcius:v1.0::2.1": "SI-UBL 2.0 CreditNote",
+            "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2::Invoice##urn:cen.eu:en16931:2017#conformant#urn:fdc:peppol.eu:2017:poacc:billing:international:sg:3.0::2.1": "SG Peppol BIS Billing 3.0 Invoice",
+            "urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:cen.eu:en16931:2017#conformant#urn:fdc:peppol.eu:2017:poacc:billing:international:sg:3.0::2.1": "SG Peppol BIS Billing 3.0 Credit Note",
+            "urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100::CrossIndustryInvoice##urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0::D16B": "Peppol BIS Billing CII Invoice V3",
+        }

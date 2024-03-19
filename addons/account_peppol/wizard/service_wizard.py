@@ -2,6 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import logging
+from markupsafe import Markup
 
 from odoo import api, Command, fields, models, _
 from odoo.addons.account_edi_proxy_client.models.account_edi_proxy_user import AccountEdiProxyError
@@ -27,11 +28,32 @@ class PeppolServiceConfig(models.TransientModel):
 
     edi_user_id = fields.Many2one('account_edi_proxy_client.user', string='EDI user')
     service_json = fields.Json(help="JSON representation of peppol services as retrieved from the peppol server.")
+    service_info = fields.Html(compute='_compute_service_info')
     service_ids = fields.One2many(
         comodel_name='account_peppol.service',
         inverse_name='wizard_id',
         readonly=False,
     )
+
+    # -------------------------------------------------------------------------
+    # COMPUTES
+    # -------------------------------------------------------------------------
+
+    def _compute_service_info(self):
+
+        for wizard in self:
+            message = ''
+            if (non_configurable := [
+                service for service in (wizard.service_json or {}).values()
+                if service['configurable'] is False
+            ]):
+                message = Markup('%s<ul>%s</ul>') % (_(
+                    "The following services are listed on your participant but cannot be configured here. "
+                    "If you wish to configure them differently, please contact support."),
+                    Markup().join(Markup('<li>%s</li>') % (service['document_name']) for service in non_configurable),
+                )
+            wizard.service_info = message
+
 
     # -------------------------------------------------------------------------
     # OVERRIDES
@@ -45,21 +67,19 @@ class PeppolServiceConfig(models.TransientModel):
         the IAP, add the relevant services.
         """
         wizards = super().create(vals_list)
+        supported_document_types = {
+            identifier: {'document_name': name, 'enabled': False, 'configurable': True}
+            for identifier, name
+            in self.env['res.company']._peppol_get_supported_document_types().items()
+        }
         for wizard in wizards:
-            supported_document_types = set()
-            ubl = self.env['account.edi.xml.ubl_20']
-            for doctypes in ubl._peppol_get_supported_document_types().values():
-                supported_document_types.update(doctypes)
-            used_document_types = set(  # Document types in use on the IAP side
-                (identifier, service['document_name'])
-                for identifier, service in (wizard.service_json or {}).items()
-            )
+            services = {**supported_document_types, **(wizard.service_json or {})}
             wizard.service_ids.create([{
                 'document_identifier': identifier,
-                'document_name': name,
-                'enabled': wizard.service_json.get(identifier, {}).get('enabled', False),
+                'document_name': service['document_name'],
+                'enabled': service['enabled'],
                 'wizard_id': wizard.id,
-            } for identifier, name in supported_document_types.union(used_document_types)])
+            } for identifier, service  in services.items() if service['configurable']])
         return wizards
 
     def write(self, vals):

@@ -208,6 +208,7 @@ class PeppolRegistration(models.TransientModel):
             endpoint='/api/peppol/2/register_participant',
             params={
                 'migration_key': self.account_peppol_migration_key,
+                'supported_identifiers': list(self.company_id._peppol_get_supported_document_types().keys()),
             },
         )
         # once we sent the migration key over, we don't need it
@@ -268,7 +269,7 @@ class PeppolRegistration(models.TransientModel):
             raise ValidationError(_("The verification code should contain six digits."))
 
         self.account_peppol_edi_user._call_peppol_proxy(
-            endpoint='/api/peppol/1/verify_phone_number',
+            endpoint='/api/peppol/2/verify_phone_number',
             params={'verification_code': self.account_peppol_verification_code},
         )
         self.account_peppol_proxy_state = 'sender'
