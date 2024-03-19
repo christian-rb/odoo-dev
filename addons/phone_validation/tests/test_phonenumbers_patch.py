@@ -48,6 +48,17 @@ class TestPhonenumbersPatch(BaseCase):
         self.assertEqual(parsed_phonenumber_2.national_number, 22522586, "The national part of the phonenumber should be 22522586")
         self.assertEqual(parsed_phonenumber_2.country_code, 225, "The country code of Ivory Coast is 225")
 
+    def test_region_MA_monkey_patch(self):
+        """Makes sure that patch for Morocco phone numbers work"""
+        parse_test_lines_MA = (
+            self.PhoneInputOutputLine("+212 6 23 24 56 28"),
+            self.PhoneInputOutputLine("+212603190852"),
+            self.PhoneInputOutputLine("+212780137429"),
+            self.PhoneInputOutputLine("+212546547649"),
+            self.PhoneInputOutputLine("+212690979618"),
+        )
+        self._assert_parsing_phonenumbers(parse_test_lines_MA)
+
     def test_region_MU_monkey_patch(self):
         """Makes sure that patch for Mauritius phone numbers work"""
         if not phonenumbers:

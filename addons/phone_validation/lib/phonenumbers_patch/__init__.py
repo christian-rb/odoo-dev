@@ -30,7 +30,17 @@ try:
         # loading updated region_CI.py from current directory
         # https://github.com/daviddrysdale/python-phonenumbers/blob/v8.12.32/python/phonenumbers/data/region_CI.py
         phonenumbers.phonemetadata.PhoneMetadata.register_region_loader('CI', _local_load_region)
+<<<<<<< HEAD
     # MONKEY PATCHING phonemetadata of Mauritius if phonenumbers is too old
+||||||| parent of f896852e061c (temp)
+
+=======
+
+    if parse_version(phonenumbers.__version__) < parse_version('8.13.32'):
+        # https://github.com/daviddrysdale/python-phonenumbers/blob/v8.13.32/python/phonenumbers/data/region_MA.py
+        phonenumbers.phonemetadata.PhoneMetadata.register_region_loader('MA', _local_load_region)
+
+>>>>>>> f896852e061c (temp)
     if parse_version(phonenumbers.__version__) < parse_version('8.12.13'):
         # loading updated region_MU.py from current directory
         # https://github.com/daviddrysdale/python-phonenumbers/blob/v8.13.31/python/phonenumbers/data/region_MU.py
