@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 {
-    'name' : 'Invoicing',
+    'name': 'Invoicing Base',
     'version' : '1.2',
     'summary': 'Invoices & Payments',
     'sequence': 10,
@@ -82,7 +82,6 @@ You could use this simplified accounting in case you work with an (external) acc
         'demo/account_demo.xml',
     ],
     'installable': True,
-    'application': True,
     'post_init_hook': '_account_post_init',
     'assets': {
         'web._assets_primary_variables': [

@@ -890,7 +890,7 @@ stepUtils.mobileModifier(stepUtils.autoExpandMoreButtons('.o_control_panel .o_br
     position: 'bottom',
 }, {
     edition: "enterprise",
-    trigger: '.o_app[data-menu-xmlid="account_accountant.menu_accounting"]',
+    trigger: '.o_app[data-menu-xmlid="accounting.menu_accounting"]',
     content: _t('Go to Accounting'),
     position: 'bottom',
 }, {
@@ -966,7 +966,7 @@ stepUtils.mobileModifier(stepUtils.autoExpandMoreButtons('.o_control_panel .o_br
     auto: true,
 },
 {
-    trigger: `.o_app[data-menu-xmlid="account_accountant.menu_accounting"]`,
+    trigger: `.o_app[data-menu-xmlid="accounting.menu_accounting"]`,
     edition: 'enterprise',
     mobile: false,
     auto: true,

@@ -12,6 +12,11 @@
         group_account_readonly ⇨ group_account_user      (those two are only visible through a server action)
         ```
 
+        Invoicing Enterprise:
+        ```
+        group_account_invoice ⇨ group_account_basic ⇨ group_account_manager (basic features activated)
+        ```
+
         Invoicing + Accounting:
         ```
          group_account_invoice ⬂
@@ -22,6 +27,7 @@
 
         `group_account_invoice` can create/edit invoices, refunds, payments, etc but cannot see accounting related stuff (journal entries, reports, reconciliation,...)
         `group_account_readonly` can see (and only see) everything, including the journal entries, advanced configuration, reports
+        `group_account_basic` can do bank recon and taxes, but not journal entries
         `group_account_user`  is the accountant: he can do everything except advanced config (accounting periods for instance)
         `group_account_manager` can edit some config that `group_account_user` cannot do
 
@@ -50,10 +56,16 @@
         <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
     </record>
 
+    <record id="group_account_basic" model="res.groups">
+        <field name="name">Basic</field>
+        <field name="category_id" ref="base.module_category_hidden"/>
+        <field name="implied_ids" eval="[(4, ref('group_account_invoice'))]"/>
+    </record>
+
     <record id="group_account_user" model="res.groups">
         <field name="name">Show Full Accounting Features</field>
         <field name="category_id" ref="base.module_category_hidden"/>
-        <field name="implied_ids" eval="[(4, ref('group_account_invoice')), (4, ref('group_account_readonly'))]"/>
+        <field name="implied_ids" eval="[(4, ref('group_account_basic')), (4, ref('group_account_readonly'))]"/>
     </record>
 
     <record id="group_account_manager" model="res.groups">
