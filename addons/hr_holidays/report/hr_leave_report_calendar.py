@@ -50,7 +50,7 @@ class LeaveReportCalendar(models.Model):
             em.company_id AS company_id,
             em.job_id AS job_id,
             COALESCE(
-                CASE WHEN hl.holiday_type = 'employee' THEN COALESCE(rr.tz, rc.tz) END,
+                COALESCE(rr.tz, rc.tz),
                 cc.tz,
                 'UTC'
             ) AS tz,
