@@ -2,7 +2,8 @@
 <templates xml:space="preserve">
 
     <t t-name="web.DomainSelector.AutoCompleteWithSources" owl="1" >
-        <AutoComplete
+        <div class="o_field_many2many_selection d-inline-flex flex-grow-1">
+            <AutoComplete
             value="props.value"
             autoSelect="true"
             resetOnSelect="props.multiSelect"
@@ -10,7 +11,9 @@
             sources="sources"
             onSelect.bind="onSelect"
             onChange.bind="onChange"
-        />
+            />
+            <span class="o_dropdown_button"/>
+        </div>
     </t>
 
     <t t-name="web.DomainSelector.DomainSelectorAutocomplete" owl="1" >
