@@ -156,7 +156,10 @@ export function constructDateDomain(
         selectedOptions = getSelectedOptions(referenceMoment, searchItem, selectedOptionIds);
     }
     if ("domain" in selectedOptions) {
-        return selectedOptions.domain[0];
+        return {
+            description: selectedOptions.domain[0].description,
+            domain: Domain.and([selectedOptions.domain[0].domain, searchItem.domain]),
+        };
     }
     const yearOptions = selectedOptions.year;
     const otherOptions = [...(selectedOptions.quarter || []), ...(selectedOptions.month || [])];
@@ -192,10 +195,11 @@ export function constructDateDomain(
             ranges.push(range);
         }
     }
-    const domain = Domain.combine(
+    let domain = Domain.combine(
         ranges.map((range) => range.domain),
         "OR"
     );
+    domain = Domain.and([domain, searchItem.domain]);
     const description = ranges.map((range) => range.description).join("/");
     return { domain, description };
 }
