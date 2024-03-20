@@ -38,7 +38,7 @@ export const cartHandlerMixin = {
         if (data.cart_quantity && (data.cart_quantity !== parseInt($(".my_cart_quantity").text()))) {
             updateCartNavBar(data);
         };
-        showCartNotification(this.call.bind(this), data.notification_info);
+        this.call("website_sale", "addToCart", data)
         return data;
     },
 };
