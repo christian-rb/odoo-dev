@@ -24,7 +24,11 @@
                         </group>
                         <group>
                             <group>
-                                <field name="smtp_authentication" widget="radio"/>
+                                <field name="smtp_authentication" widget="radio_selection_with_filter"
+                                    context="{'allowed_selection':
+                                        ['login', 'cli']
+                                        + ([] if smtp_encryption == 'none' else ['certificate'])
+                                    }"/>
                             </group>
                             <group>
                                 <div class="text-muted fst-italic" role="alert" colspan="2"
@@ -38,7 +42,11 @@
                             <page name="connection" string="Connection">
                                 <group>
                                     <group>
-                                        <field name="smtp_encryption" widget="radio"/>
+                                        <field name="smtp_encryption" widget="radio_selection_with_filter"
+                                            context="{'allowed_selection':
+                                                ['starttls', 'ssl']
+                                                + ([] if smtp_authentication == 'certificate' else ['none'])
+                                            }"/>
                                         <field name="smtp_debug" groups="base.group_no_one"/>
                                         <field name="smtp_host"
                                             required="smtp_authentication != 'cli'"/>

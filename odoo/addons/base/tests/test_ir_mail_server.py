@@ -6,6 +6,8 @@ import email.policy
 
 from unittest.mock import patch
 
+import psycopg2.errors
+
 from odoo import tools
 from odoo.addons.base.tests import test_mail_examples
 from odoo.addons.base.tests.common import MockSmtplibCase
@@ -135,6 +137,17 @@ class TestIrMailServer(TransactionCase, MockSmtplibCase):
                     # remove ending new lines as it just adds noise
                     body_alternative = body_alternative.strip('\n')
             self.assertEqual(body_alternative, expected)
+
+    @mute_logger('odoo.sql_db')
+    def test_mail_server_auth_cert_requires_tls(self):
+        with self.assertRaises(psycopg2.errors.CheckViolation) as capture:
+            self.env['ir.mail_server'].create({
+                'name': 'test',
+                'smtp_host': 'smtp_host',
+                'smtp_encryption': 'none',
+                'smtp_authentication': 'certificate',
+            })
+        self.assertIn('ir_mail_server_certificate_requires_tls', capture.exception.args[0])
 
     @users('admin')
     def test_mail_server_get_test_email_from(self):
