@@ -1478,7 +1478,6 @@ class TestAccrualAllocations(TestHrHolidaysCommon):
                 'holiday_status_id': leave_type.id,
                 'number_of_days': 0.125,
                 'allocation_type': 'accrual',
-                'holiday_type': 'employee',
             })
             allocation.action_validate()
             allocation_data = leave_type.get_allocation_data(self.employee_emp, datetime.date(2024, 2, 1))
