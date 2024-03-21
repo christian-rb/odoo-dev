@@ -18,7 +18,6 @@ class TestAr(AccountTestInvoicingCommon):
 
         # ==== Company ====
         cls.company_data['company'].write({
-            # 'currency_id': cls.env.ref('base.ARS').id,
             'name': '(AR) Responsable Inscripto (Unit Tests)',
             "l10n_ar_afip_start_date": time.strftime('%Y-01-01'),
             'l10n_ar_gross_income_type': 'local',

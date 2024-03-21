@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-from odoo import Command
 
 from odoo.tests import tagged
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
@@ -63,11 +62,11 @@ class TestKeMoveExport(AccountTestInvoicingCommon):
             'move_type': 'out_invoice',
             'partner_id': self.partner_a.id,
             'invoice_line_ids': [
-                Command.create({
+                (0, 0, {
                     'product_id': self.product_a.id,
                     'quantity': 10,
                     'price_unit': 1234.56,
-                    'tax_ids': [Command.set([self.spaceship_tax.id])],
+                    'tax_ids': [(6, 0, [self.spaceship_tax.id])],
                     'discount': 25,
                 }),
             ],
@@ -129,18 +128,18 @@ class TestKeMoveExport(AccountTestInvoicingCommon):
             'move_type': 'out_invoice',
             'partner_id': self.partner_a.id,
             'invoice_line_ids': [
-                Command.create({
+                (0, 0, {
                     'product_id': self.product_a.id,
                     'quantity': 10,
                     'price_unit': 10,
-                    'tax_ids': [Command.set([self.company_data['company'].account_sale_tax_id.id])],
+                    'tax_ids': [(6, 0, [self.company_data['company'].account_sale_tax_id.id])],
                     'discount': 10
                 }),
-                Command.create({
+                (0, 0, {
                     'name': "don't panic",
                     'quantity': 1,
                     'price_unit': -10,
-                    'tax_ids': [Command.set([self.company_data['company'].account_sale_tax_id.id])],
+                    'tax_ids': [(6, 0, [self.company_data['company'].account_sale_tax_id.id])],
                 }),
             ],
         })
@@ -168,18 +167,18 @@ class TestKeMoveExport(AccountTestInvoicingCommon):
             'move_type': 'out_invoice',
             'partner_id': self.partner_a.id,
             'invoice_line_ids': [
-                Command.create({
+                (0, 0, {
                     'product_id': self.product_a.id,
                     'quantity': -10,
                     'price_unit': -10,
-                    'tax_ids': [Command.set([self.company_data['company'].account_sale_tax_id.id])],
+                    'tax_ids': [(6, 0, [self.company_data['company'].account_sale_tax_id.id])],
                     'discount': 10
                 }),
-                Command.create({
+                (0, 0, {
                     'name': "don't panic",
                     'quantity': 1,
                     'price_unit': -10,
-                    'tax_ids': [Command.set([self.company_data['company'].account_sale_tax_id.id])],
+                    'tax_ids': [(6, 0, [self.company_data['company'].account_sale_tax_id.id])],
                 }),
             ],
         })
@@ -205,12 +204,12 @@ class TestKeMoveExport(AccountTestInvoicingCommon):
             'move_type': 'out_invoice',
             'partner_id': self.partner_a.id,
             'invoice_line_ids': [
-                Command.create({
+                (0, 0, {
                     'product_id': self.product_a.id,
                     'quantity': 10,
                     'price_unit': 1000,
                     'tax_ids': [
-                        Command.set([
+                        (6, 0, [
                             self.company_data['company'].account_sale_tax_id.id,
                             tourism_levy.id,
                         ]),

@@ -10,7 +10,6 @@ class TestAngloSaxonAccounting(TestValuationReconciliationCommon):
         Reproduce the flow of creating an invoice from a sale order with company A
         and posting the invoice with both companies selected and company B as the main.
         """
-
         company_a_data = self.company_data
         company_b_data = self.setup_other_company()
         companies_with_b_first = company_b_data['company'] + company_a_data['company']

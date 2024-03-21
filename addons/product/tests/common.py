@@ -37,7 +37,7 @@ class ProductCommon(
     @classmethod
     def get_default_groups(cls):
         groups = super().get_default_groups()
-        return groups + cls.env.ref('base.group_system')  # For the management/creation of products
+        return groups | cls.env.ref('base.group_system')  # For the management/creation of products
 
     @classmethod
     def _archive_other_pricelists(cls):

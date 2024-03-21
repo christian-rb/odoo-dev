@@ -2,8 +2,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import time
 
-from odoo import Command
-
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 from odoo.tests import tagged
 from odoo.tools.misc import mod10r
@@ -207,7 +205,7 @@ class TestSwissQR(AccountTestInvoicingCommon):
             'name': "S00001",
             'partner_id': self.env['res.partner'].search([("name", '=', 'Partner')])[0].id,
             'order_line': [
-                Command.create({'product_id': self.product_a.id, 'price_unit': 100}),
+                (0, 0, {'product_id': self.product_a.id, 'price_unit': 100}),
             ],
         })
         payment_transaction = self.env['payment.transaction'].create({

@@ -11,6 +11,7 @@ class TestAccountInvoiceReport(AccountTestInvoicingCommon):
     def setUpClass(cls):
         super().setUpClass()
         cls.other_currency = cls.setup_other_currency('EUR')
+        cls.company_data_2 = cls.setup_other_company()
 
         cls.invoices = cls.env['account.move'].create([
             {

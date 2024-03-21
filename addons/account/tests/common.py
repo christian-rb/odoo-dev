@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 from odoo import fields, Command
-from odoo.addons.product.tests.common import ProductCommon
 from odoo.tests import Form, TransactionCase, HttpCase
 from odoo.tools.float_utils import float_round
+
+from odoo.addons.product.tests.common import ProductCommon
 
 import json
 import base64
@@ -50,9 +51,6 @@ class AccountTestInvoicingCommon(ProductCommon):
             **cls.env.context,
             **cls.default_context(),
         })
-        # TODO LAS: check if necessary
-        cls.cr = cls.env.cr  # NOTE: LAS confusing and unnecessary variable, should not be in the BaseCommon
-        cls.user = cls.env.user
 
         cls.company_data = cls.collect_company_accounting_data(cls.env.company)
 
@@ -215,7 +213,7 @@ class AccountTestInvoicingCommon(ProductCommon):
     @classmethod
     def get_default_groups(cls):
         groups = super().get_default_groups()
-        return groups + cls.env.ref('account.group_account_manager') + cls.env.ref('account.group_account_user')
+        return groups | cls.env.ref('account.group_account_manager') | cls.env.ref('account.group_account_user')
 
     @classmethod
     def _create_user(cls, groups, **create_values):

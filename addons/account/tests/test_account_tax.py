@@ -11,7 +11,7 @@ class TestAccountTax(AccountTestInvoicingCommon):
 
     @classmethod
     def default_context(cls):
-        """ Adding logs for the tax created """
+        """ Adding logs for the tax created in setUpClass """
         context = super().default_context()
         return {
             **context,

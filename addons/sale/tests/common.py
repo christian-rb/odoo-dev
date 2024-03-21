@@ -23,7 +23,7 @@ class SaleCommon(
         cls.group_discount_per_so_line = cls.env.ref('sale.group_discount_per_so_line')
 
         (cls.product + cls.service_product).write({
-                'taxes_id': [(6, 0, [])],
+                'taxes_id': [Command.clear()],
         })
 
         cls.empty_order = cls.env['sale.order'].create({

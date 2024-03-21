@@ -37,6 +37,7 @@ class BaseCommon(TransactionCase):
             independent_user = cls.setup_independent_user()
             if independent_user:
                 cls.env = cls.env(user=independent_user)
+                cls.user = cls.env.user
         else:
             cls.setup_main_company()
 

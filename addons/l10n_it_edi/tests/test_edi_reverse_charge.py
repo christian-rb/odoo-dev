@@ -26,7 +26,7 @@ class TestItEdiReverseCharge(TestItEdi):
         RepartitionLine = namedtuple('Line', 'factor_percent repartition_type tag_ids')
         def repartition_lines(*lines):
             """ Helper function to define repartition lines in taxes """
-            return [Command.clear()] + [Command.create({**line._asdict(), 'tag_ids': get_tag_ids(line[2])}) for line in lines]
+            return [(5, 0, 0)] + [(0, 0, {**line._asdict(), 'tag_ids': get_tag_ids(line[2])}) for line in lines]
 
         # Company -----------
         cls.company.partner_id.l10n_it_pa_index = "0803HR0"
