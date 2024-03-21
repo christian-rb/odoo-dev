@@ -452,13 +452,21 @@ registry.slider = publicWidget.Widget.extend({
         // Initialize carousel and pause if in edit mode.
         this.$target.carousel(this.editableMode ? 'pause' : undefined);
         $(window).on('resize.slider', _.debounce(() => this._computeHeights(), 250));
-        if (this.editableMode) {
-            // Prevent carousel slide to be an history step.
-            this.$target.on('slide.bs.carousel.slider', () => {
-                this.options.wysiwyg.odooEditor.observerUnactive();
-            });
-            this.$target.on('slid.bs.carousel.slider', () => {
-                this.options.wysiwyg.odooEditor.observerActive();
+
+        if (this.editableMode && this.$target[0].matches("section > .carousel")) {
+            this.controlEls = this.$target[0].querySelectorAll(".carousel-control-prev, .carousel-control-next");
+            const indicatorEls = this.$target[0].querySelectorAll(".carousel-indicators > li");
+            // Deactivate the carousel controls to handle the slides manually in
+            // edit mode (by the options).
+            this.options.wysiwyg.odooEditor.observerUnactive("disable_controls");
+            this.controlEls.forEach(controlEl => controlEl.removeAttribute("data-slide"));
+            indicatorEls.forEach(indicatorEl => indicatorEl.removeAttribute("data-slide-to"));
+            this.options.wysiwyg.odooEditor.observerActive("disable_controls");
+            // Redirect the clicks on the active slide, in order to start the
+            // carousel options.
+            this.__onControlClick = this._onControlClick.bind(this);
+            [...this.controlEls, ...indicatorEls].forEach(controlEl => {
+                controlEl.addEventListener("mousedown", this.__onControlClick);
             });
         }
         return this._super.apply(this, arguments);
@@ -471,11 +479,29 @@ registry.slider = publicWidget.Widget.extend({
         this.$('img').off('.slider');
         this.$target.carousel('pause');
         this.$target.removeData('bs.carousel');
+        this.options.wysiwyg && this.options.wysiwyg.odooEditor.observerUnactive("destroy");
         _.each(this.$('.carousel-item'), function (el) {
             $(el).css('min-height', '');
         });
+        this.options.wysiwyg && this.options.wysiwyg.odooEditor.observerActive("destroy");
         $(window).off('.slider');
         this.$target.off('.slider');
+
+        if (this.editableMode && this.$target[0].matches("section > .carousel")) {
+            // Restore the carousel controls.
+            const indicatorEls = this.$target[0].querySelectorAll(".carousel-indicators > li");
+            this.options.wysiwyg.odooEditor.observerUnactive("restore_controls");
+            this.controlEls.forEach(controlEl => {
+                const direction = controlEl.classList.contains("carousel-control-prev") ?
+                    "prev" : "next";
+                controlEl.setAttribute("data-slide", direction);
+            });
+            indicatorEls.forEach((indicatorEl, i) => indicatorEl.setAttribute("data-slide-to", i));
+            this.options.wysiwyg.odooEditor.observerActive("restore_controls");
+            [...this.controlEls, ...indicatorEls].forEach(controlEl => {
+                controlEl.removeEventListener("mousedown", this.__onControlClick);
+            });
+        }
     },
 
     //--------------------------------------------------------------------------
@@ -488,22 +514,20 @@ registry.slider = publicWidget.Widget.extend({
     _computeHeights: function () {
         var maxHeight = 0;
         var $items = this.$('.carousel-item');
+        this.options.wysiwyg && this.options.wysiwyg.odooEditor.observerUnactive("_computeHeights");
         $items.css('min-height', '');
         _.each($items, el => {
             var $item = $(el);
             var isActive = $item.hasClass('active');
-            this.options.wysiwyg && this.options.wysiwyg.odooEditor.observerUnactive('_computeHeights');
             $item.addClass('active');
-            this.options.wysiwyg && this.options.wysiwyg.odooEditor.observerActive('_computeHeights');
             var height = $item.outerHeight();
             if (height > maxHeight) {
                 maxHeight = height;
             }
-            this.options.wysiwyg && this.options.wysiwyg.odooEditor.observerUnactive('_computeHeights');
             $item.toggleClass('active', isActive);
-            this.options.wysiwyg && this.options.wysiwyg.odooEditor.observerActive('_computeHeights');
         });
         $items.css('min-height', maxHeight);
+        this.options.wysiwyg && this.options.wysiwyg.odooEditor.observerActive("_computeHeights");
     },
 
     //--------------------------------------------------------------------------
@@ -515,6 +539,14 @@ registry.slider = publicWidget.Widget.extend({
      */
     _onContentChanged: function (ev) {
         this._computeHeights();
+    },
+    /**
+     * Redirects a carousel control click on the active slide.
+     *
+     * @private
+     */
+    _onControlClick() {
+        this.$target[0].querySelector(".carousel-item.active").click();
     },
 });
 
