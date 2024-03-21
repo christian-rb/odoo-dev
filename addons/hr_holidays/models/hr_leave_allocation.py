@@ -130,7 +130,6 @@ class HolidaysAllocation(models.Model):
         domain="['|', ('time_off_type_id', '=', False), ('time_off_type_id', '=', holiday_status_id)]")
     max_leaves = fields.Float(compute='_compute_leaves')
     leaves_taken = fields.Float(compute='_compute_leaves', string='Time off Taken')
-    has_accrual_plan = fields.Boolean(compute='_compute_has_accrual_plan', string='Accrual Plan Available')
 
     _sql_constraints = [
         ('type_value',
@@ -194,10 +193,6 @@ class HolidaysAllocation(models.Model):
 
         allocations = self.sudo().search(domain)
         return [('id', 'in', allocations.ids)]
-
-    @api.depends('accrual_plan_id')
-    def _compute_has_accrual_plan(self):
-        self.has_accrual_plan = bool(self.env['hr.leave.accrual.plan'].sudo().search_count([('active', '=', True)]))
 
     @api.depends('name', 'date_from', 'date_to')
     def _compute_description_validity(self):
