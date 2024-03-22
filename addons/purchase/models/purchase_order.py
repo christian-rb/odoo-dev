@@ -13,6 +13,7 @@ from odoo.osv import expression
 from odoo.tools import format_amount, format_date, formatLang, groupby
 from odoo.tools.float_utils import float_is_zero
 from odoo.exceptions import UserError, ValidationError
+from collections import Counter
 
 
 class PurchaseOrder(models.Model):
@@ -633,6 +634,79 @@ class PurchaseOrder(models.Model):
         moves.filtered(lambda m: m.currency_id.round(m.amount_total) < 0).action_switch_move_type()
 
         return self.action_view_invoice(moves)
+
+    def action_merge(self):
+        if len(self) < 2:
+            raise UserError(_("Please select at least two purchase orders to merge."))
+
+        origin = []
+        partner_ref = []
+        # Group purchase orders based on specified criteria
+        grouped_data = self._read_group([('id', 'in', self.ids), ('state', 'in', ['draft', 'sent'])], self._get_group_by())
+        filtered_states = self.filtered(lambda order: order.state not in ['draft', 'sent'])
+
+        if filtered_states:
+            raise UserError(_("Selected purchase orders must be in 'RFQ' or 'RFQ Sent' state."))
+
+        for group in grouped_data:
+            domain = self._prepare_domain(group)
+            purchase_orders = self.env['purchase.order'].search(domain)
+            counts = self._prepare_counts()
+            # Count the occurrences of each vendor, currency, deliver to and dropship address name among the selected purchase orders
+            for counter in counts:
+                if any(value == 1 for value in counter.values()):
+                    raise UserError(_("Vendor, currency, destination and dropship address must be same of selected purchase order to merge."))
+
+            # Get the oldest record from the filtered purchase orders
+            oldest_record = purchase_orders.filtered(lambda o: o.date_order == min(purchase_orders.mapped('date_order')))[0]
+            for purchase_order in purchase_orders:
+                if purchase_order not in oldest_record:
+                    if purchase_order.origin:
+                        origin.append(purchase_order.origin)
+                    if purchase_order.partner_ref:
+                        partner_ref.append(purchase_order.partner_ref)
+
+                    # Merge order lines of the current purchase order with the oldest record
+                    for order_line in purchase_order.order_line:
+                        corresponding_line = oldest_record.order_line.filtered(
+                            lambda x: x.product_id == order_line.product_id
+                            and x.product_uom == order_line.product_uom
+                            and x.analytic_distribution == order_line.analytic_distribution
+                            and x.product_packaging_id == order_line.product_packaging_id
+                            and (x.date_planned - order_line.date_planned).total_seconds() <= 86400  # 24 hours in seconds
+                        )
+
+                        if corresponding_line:
+                            corresponding_line.product_qty += order_line.product_qty
+                        else:
+                            oldest_record.order_line += order_line
+
+                        if self.env['ir.module.module'].search([('name', '=', 'purchase_requisition'), ('state', '=', 'installed')]) and purchase_order.alternative_po_ids:
+                            oldest_record.alternative_po_ids += (purchase_order.alternative_po_ids)
+                    purchase_order.state = 'cancel'
+
+            oldest_record.origin = ', '.join(filter(None, [oldest_record.origin, *origin]))
+            oldest_record.partner_ref = ', '.join(filter(None, [oldest_record.partner_ref, *partner_ref]))
+            if self.env['ir.module.module'].search([('name', '=', 'purchase_requisition'), ('state', '=', 'installed')]) and purchase_order.alternative_po_ids:
+                cancelled_records = purchase_orders.alternative_po_ids.filtered(lambda po: po.state == 'cancel')
+                cancelled_records.unlink()
+
+    def _prepare_counts(self):
+        counts = [
+            Counter(po.partner_id.name for po in self),
+            Counter(po.currency_id.id for po in self),
+            Counter(po.dest_address_id.id for po in self)
+        ]
+        return counts
+
+    def _prepare_domain(self, group):
+        currency_id = group[0].id if group[0] else False
+        partner_id = group[1].id if group[1] else False
+        dest_address_id = group[2].id if group[2] else False
+        return [('id', 'in', self.ids), ('currency_id', '=', currency_id), ('partner_id', '=', partner_id), ('dest_address_id', '=', dest_address_id)]
+
+    def _get_group_by(self):
+        return ['currency_id', 'partner_id', 'dest_address_id']
 
     def _prepare_invoice(self):
         """Prepare the dict of values to create the new invoice for a purchase order.
