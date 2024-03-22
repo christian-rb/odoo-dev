@@ -25,6 +25,7 @@ export class ActivityController extends Component {
     static template = "mail.ActivityController";
 
     setup() {
+<<<<<<< HEAD:addons/mail/static/src/views/web/activity/activity_controller.js
         const { archInfo, resModel } = this.props;
         const { activeFields, fields } = extractFieldsFromArchInfo(archInfo, this.props.fields);
         const modelParams = {
@@ -35,6 +36,26 @@ export class ActivityController extends Component {
             },
         };
         this.model = useState(useModel(this.props.Model, modelParams));
+||||||| parent of 91f5934c2b5b (temp):addons/mail/static/src/views/activity/activity_controller.js
+        const { rootState } = this.props.state || {};
+        this.model = useModel(
+            this.props.Model,
+            {
+                activeFields: this.props.archInfo.activeFields,
+                resModel: this.props.resModel,
+                fields: this.props.fields,
+                viewMode: "activity",
+                rootState,
+            },
+            { ignoreUseSampleModel: true }
+        );
+=======
+        this.model = useModel(
+            this.props.Model,
+            this.modelParams,
+            { ignoreUseSampleModel: true }
+        );
+>>>>>>> 91f5934c2b5b (temp):addons/mail/static/src/views/activity/activity_controller.js
 
         this.dialog = useService("dialog");
         this.action = useService("action");
@@ -57,6 +78,17 @@ export class ActivityController extends Component {
     getSearchProps() {
         const { comparision, context, domain, groupBy, orderBy } = this.env.searchModel;
         return { comparision, context, domain, groupBy, orderBy };
+    }
+    
+    get modelParams() {
+        const { rootState } = this.props.state || {};
+        return {
+            activeFields: this.props.archInfo.activeFields,
+            resModel: this.props.resModel,
+            fields: this.props.fields,
+            viewMode: "activity",
+            rootState,
+        };
     }
 
     scheduleActivity() {
