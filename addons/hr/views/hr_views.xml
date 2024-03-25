@@ -75,13 +75,13 @@
                 action="hr_department_tree_action"
                 parent="menu_config_employee"
                 sequence="4"
-                groups="group_hr_user"/>
+                groups="group_hr_user,base.group_user"/>
 
             <menuitem
                 id="menu_hr_department_kanban"
                 action="hr_department_kanban_action"
                 parent="menu_hr_root"
-                groups="group_hr_user"/>
+                groups="group_hr_user,base.group_user"/>
 
             <menuitem
                 id="menu_hr_work_location_tree"
