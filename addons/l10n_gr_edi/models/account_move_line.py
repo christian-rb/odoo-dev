@@ -46,7 +46,8 @@ class AccountMoveLine(models.Model):
         preferred_classification = self.env['l10n_gr_edi.preferred_classification'].search([
             ('product_template_id', '=', self.product_id.product_tmpl_id.id),
             ('l10n_gr_edi_inv_type', '=', self.move_id.l10n_gr_edi_inv_type),
-            ('l10n_gr_edi_cls_category', 'in', self.l10n_gr_edi_available_cls_category.split(',')),
+            ('l10n_gr_edi_cls_category', 'in', self.l10n_gr_edi_available_cls_category and
+             self.l10n_gr_edi_available_cls_category.split(',') or ()),
         ], limit=1)
         self.l10n_gr_edi_cls_category = preferred_classification.l10n_gr_edi_cls_category
         self.l10n_gr_edi_cls_type = preferred_classification.l10n_gr_edi_cls_type

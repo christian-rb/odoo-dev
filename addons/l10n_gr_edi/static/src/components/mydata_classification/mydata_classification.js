@@ -1,14 +1,19 @@
 /** @odoo-module **/
 
 import { registry } from "@web/core/registry";
-
 import { SelectionField, selectionField } from "@web/views/fields/selection/selection_field";
+import { standardFieldProps } from "@web/views/fields/standard_field_props";
 
 export class DynamicSelectionField extends SelectionField {
 
+    static props = {
+        ...standardFieldProps,
+        available_field: {type: String},
+    }
+
     /** To be overridden **/
     get availableOptions() {
-        return [];
+        return this.props.record.data[this.props.available_field]?.split(",") || [];
     }
 
     /** Override **/
@@ -19,47 +24,35 @@ export class DynamicSelectionField extends SelectionField {
 
 }
 
-export class GreeceInvoiceType extends DynamicSelectionField {
-    /** Override **/
-    get availableOptions() {
-        return this.props.record.data.l10n_gr_edi_available_inv_type.split(",");
-    }
-}
-
-export class GreeceClassificationCategory extends DynamicSelectionField {
-    /** Override **/
-    get availableOptions() {
-        return this.props.record.data.l10n_gr_edi_available_cls_category.split(",");
-    }
-}
-
-export class GreeceClassificationType extends DynamicSelectionField {
-    /** Override **/
-    get availableOptions() {
-        return this.props.record.data.l10n_gr_edi_available_cls_type.split(",");
-    }
-}
-
-export class GreeceClassificationVat extends DynamicSelectionField {
-    /** Override **/
-    get availableOptions() {
-        return this.props.record.data.l10n_gr_edi_available_cls_vat.split(",");
-    }
-}
-
 registry.category("fields").add("selection_l10n_gr_edi_inv_type", {
     ...selectionField,
-    component: GreeceInvoiceType,
+    component: DynamicSelectionField,
+    extractProps: (fieldInfo, dynamicInfo) => ({
+        // ...selectionField.extractProps(fieldInfo, dynamicInfo),
+        available_field: "l10n_gr_edi_available_inv_type",
+    }),
 });
 registry.category("fields").add("selection_l10n_gr_edi_cls_category", {
     ...selectionField,
-    component: GreeceClassificationCategory,
+    component: DynamicSelectionField,
+    extractProps: (fieldInfo, dynamicInfo) => ({
+        // ...selectionField.extractProps(fieldInfo, dynamicInfo),
+        available_field: "l10n_gr_edi_available_cls_category",
+    }),
 });
 registry.category("fields").add("selection_l10n_gr_edi_cls_type", {
     ...selectionField,
-    component: GreeceClassificationType,
+    component: DynamicSelectionField,
+    extractProps: (fieldInfo, dynamicInfo) => ({
+        // ...selectionField.extractProps(fieldInfo, dynamicInfo),
+        available_field: "l10n_gr_edi_available_cls_type",
+    }),
 });
 registry.category("fields").add("selection_l10n_gr_edi_cls_vat", {
     ...selectionField,
-    component: GreeceClassificationVat,
+    component: DynamicSelectionField,
+    extractProps: (fieldInfo, dynamicInfo) => ({
+        // ...selectionField.extractProps(fieldInfo, dynamicInfo),
+        available_field: "l10n_gr_edi_available_cls_vat",
+    }),
 });

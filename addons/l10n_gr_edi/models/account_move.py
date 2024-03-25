@@ -61,15 +61,14 @@ class AccountMove(models.Model):
         self.ensure_one()
         errors = []
 
-        if not self.company_id.l10n_gr_edi_test_env and not self.company_id.vat:
-            errors.append(_('Missing VAT on Company %s', self.company_id.name))
-        if not self.company_id.l10n_gr_edi_test_env and not self.partner_id.vat:
-            errors.append(_('Missing VAT on Partner %s', self.partner_id.name))
-        if not self.company_id.l10n_gr_edi_test_env and (not self.company_id.l10n_gr_aade_user_id or
-                                                         not self.company_id.l10n_gr_subscription_key):
-            errors.append(_('You need to set AADE User ID and Subscription Key in the settings.'))
+        if not self.company_id.l10n_gr_edi_aade_id or not self.company_id.l10n_gr_edi_aade_key:
+            errors.append(_('You need to set AADE ID and Key in the company settings.'))
         if not self.l10n_gr_edi_inv_type:
             errors.append(_('Missing MyDATA Invoice Type'))
+        if not self.partner_id.vat:
+            errors.append(_('Missing VAT on partner %s', self.partner_id.name))
+        if not self.company_id.vat:
+            errors.append(_('Missing VAT on company %s', self.company_id.name))
 
         for line in self.invoice_line_ids:
             if not line.l10n_gr_edi_cls_category and line.l10n_gr_edi_available_cls_category:
@@ -100,27 +99,21 @@ class AccountMove(models.Model):
 
     @staticmethod
     def _get_mydata_issuer_counterpart_vals(move):
-        if move.company_id.l10n_gr_edi_test_env:
-            issuer_vat = move.company_id.l10n_gr_edi_test_vat
-            counterpart_company = move.env['res.company'].search([('partner_id', '=', move.partner_id.id)], limit=1)
-            counterpart_vat = counterpart_company.l10n_gr_edi_test_vat or move.partner_id.vat
-        else:
-            issuer_vat = move.company_id.vat
-            counterpart_vat = move.partner_id.vat
-
         party_vals = {
-            'issuer_vat': issuer_vat,
+            'issuer_vat': move.company_id.vat,
             'issuer_country': move.company_id.country_code,
             'issuer_branch': len(move.company_id.parent_ids - move.company_id),
         }
 
-        if move.country_code != 'GR':  # issuer not from Greece (requires name & address)
+        if move.country_code != 'GR':  # issuer not from Greece requires name & address
             party_vals.update({
                 'issuer_name': move.company_id.name.encode('utf-8'),
                 'issuer_postal_code': move.company_id.zip,
                 'issuer_city': move.company_id.city.encode('utf-8'),
             })
+
         if move.l10n_gr_edi_inv_type not in TYPES_WITH_FORBIDDEN_COUNTERPART:  # some inv_type disallow counterpart
+            counterpart_vat = move.partner_id.vat
             party_vals.update({
                 'counterpart_vat': counterpart_vat,
                 'counterpart_country': move.partner_id.country_code,
@@ -300,27 +293,3 @@ class AccountMove(models.Model):
         xml_vals = self._prepare_mydata_classification_xml_vals()
         document_ids = self.env['mydata.document'].create([{'move_id': move.id} for move in self])
         document_ids._send_mydata_expense_classifications_xml(xml_vals)
-
-    def mydata_save_classifications(self):
-        """ Capture the state of the invoice lines products with their classification and
-        save them as a preference on their respective l10n_gr_edi.preferred_classification model """
-        self.ensure_one()
-        if not self.l10n_gr_edi_inv_type:
-            return
-
-        for line in self.invoice_line_ids:
-            existing_preference = self.env['l10n_gr_edi.preferred_classification'].search([
-                ('product_template_id', '=', line.product_id.product_tmpl_id.id),
-                ('l10n_gr_edi_inv_type', '=', self.l10n_gr_edi_inv_type),
-                ('l10n_gr_edi_cls_category', '=', line.l10n_gr_edi_cls_category),
-                ('l10n_gr_edi_cls_type', '=', line.l10n_gr_edi_cls_type),
-            ], limit=1)
-            if line.product_id and line.l10n_gr_edi_cls_category and not existing_preference:
-                preferred_classification = self.env['l10n_gr_edi.preferred_classification'].create({
-                    'product_template_id': line.product_id.product_tmpl_id.id,
-                    'l10n_gr_edi_inv_type': self.l10n_gr_edi_inv_type,
-                    'l10n_gr_edi_cls_category': line.l10n_gr_edi_cls_category,
-                    'l10n_gr_edi_cls_type': line.l10n_gr_edi_cls_type,
-                    'priority': 0,  # Lower than default preference made manually from Product's view
-                })
-                line.product_id.l10n_gr_edi_preferred_classification_ids |= preferred_classification

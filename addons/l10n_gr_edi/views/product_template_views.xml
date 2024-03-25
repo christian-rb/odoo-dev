@@ -11,13 +11,13 @@
                     <group name="mydata" string="MyDATA">
                         <field name="l10n_gr_edi_preferred_classification_ids">
                             <tree editable="bottom">
+                                <field name="priority" widget="handle"/>
                                 <field name="l10n_gr_edi_available_inv_type" column_invisible="1"/>
                                 <field name="l10n_gr_edi_available_cls_category" column_invisible="1"/>
                                 <field name="l10n_gr_edi_available_cls_type" column_invisible="1"/>
                                 <field name="l10n_gr_edi_inv_type" widget="selection_l10n_gr_edi_inv_type"/>
                                 <field name="l10n_gr_edi_cls_category" widget="selection_l10n_gr_edi_cls_category"/>
                                 <field name="l10n_gr_edi_cls_type" widget="selection_l10n_gr_edi_cls_type"/>
-                                <field name="priority"/>
                             </tree>
                         </field>
                     </group>

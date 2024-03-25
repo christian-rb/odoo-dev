@@ -22,7 +22,7 @@
         'views/account_move_views.xml',
         'views/mydata_document_views.xml',
         'views/product_template_views.xml',
-        'views/res_config_settings_views.xml',
+        'views/res_company_views.xml',
         'wizard/account_move_send_views.xml',
     ],
     'installable': True,

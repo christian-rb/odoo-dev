@@ -12,24 +12,18 @@ ACCEPTED_ENDPOINTS = (
     'sendexpensesclassification',
     'requestdocs',
 )
-
 NAMESPACES = {"ns": "http://www.aade.gr/myDATA/invoice/v1.0"}
-
 DEFAULT_TEST_ID = 'odoodev'
-DEFAULT_TEST_VAT = '047747270'
 DEFAULT_TEST_KEY = '20ea658627fd8c7d90594fe4601d3327'
 
 
 class ResCompany(models.Model):
     _inherit = 'res.company'
 
-    l10n_gr_aade_user_id = fields.Char('AADE User ID')
-    l10n_gr_subscription_key = fields.Char('AADE Subscription Key')
-
-    l10n_gr_edi_test_env = fields.Boolean('Activate Test Environment', default=False)
-    l10n_gr_edi_test_id = fields.Char('AADE Test User ID', required=True, default=DEFAULT_TEST_ID)
-    l10n_gr_edi_test_vat = fields.Char('AADE Test User VAT', required=True, default=DEFAULT_TEST_VAT)
-    l10n_gr_edi_test_key = fields.Char('AADE Test Subscription Key', required=True, default=DEFAULT_TEST_KEY)
+    l10n_gr_edi_aade_id = fields.Char('AADE User ID', default=DEFAULT_TEST_ID)
+    l10n_gr_edi_aade_key = fields.Char('AADE Subscription Key', default=DEFAULT_TEST_KEY)
+    l10n_gr_edi_test_env = fields.Boolean('Test Environment', default=True, help="\
+        Enable test environments with credentials obtained from https://mydata-dev-register.azurewebsites.net/")
 
     def _l10n_gr_edi_get_mydata_url(self, endpoint):
         """ Gets URL to send request to MyDATA API """
@@ -41,21 +35,14 @@ class ResCompany(models.Model):
             return f"https://mydatapi.aade.gr/myDATA/{endpoint}"
 
     def _l10n_gr_edi_get_headers_credentials(self):
-        """ Returns required credentials for header of all requests to MyDATA.
-        To activate test credentials, set l10n_gr_edi_test_env=True """
-        if self.l10n_gr_edi_test_env:
-            return {
-                'aade-user-id': self.l10n_gr_edi_test_id,
-                'ocp-apim-subscription-key': self.l10n_gr_edi_test_key,
-            }
-
-        if not self.l10n_gr_aade_user_id or not self.l10n_gr_subscription_key:
+        """ Returns required credentials for header of all requests to MyDATA. """
+        if not self.l10n_gr_edi_aade_id or not self.l10n_gr_edi_aade_key:
             # Will not happen as we've checked from mydata_prepare_constraints check, but just in case
             raise UserError(_('MyDATA credentials not found on company %s', self.name))
 
         return {
-            'aade-user-id': self.l10n_gr_aade_user_id,
-            'ocp-apim-subscription-key': self.l10n_gr_subscription_key,
+            'aade-user-id': self.l10n_gr_edi_aade_id,
+            'ocp-apim-subscription-key': self.l10n_gr_edi_aade_key,
         }
 
     def cron_mydata_fetch_invoices(self):
@@ -63,8 +50,8 @@ class ResCompany(models.Model):
         gr_companies = self.env['res.company'].search([
             ('country_code', '=', 'GR'),
             '|', ('l10n_gr_edi_test_env', '=', True),  # uses test environment
-            '&', ('l10n_gr_aade_user_id', '!=', False),  # uses real credential
-                 ('l10n_gr_subscription_key', '!=', False)
+            '&', ('l10n_gr_edi_aade_id', '!=', False),  # uses real credential
+                 ('l10n_gr_edi_aade_key', '!=', False)
         ])
 
         for gr_company in gr_companies:
@@ -96,15 +83,17 @@ class ResCompany(models.Model):
                         detail_element.findtext('.//ns:vatCategory', namespaces=NAMESPACES)]
                     invoice_line_ids.append(Command.create({
                         'price_unit': float(detail_element.findtext('.//ns:netValue', namespaces=NAMESPACES)),
-                        'tax_ids': self.env['account.tax'].search([('amount', '=', tax_amount), ('company_id', '=', gr_company.id)], limit=1),
+                        'tax_ids': self.env['account.tax'].sudo().search([('amount', '=', tax_amount), ('company_id', '=', gr_company.id)], limit=1),
                     }))
+
+                issuer_vat = find_value('vatNumber')
 
                 # Create draft Vendor Bill
                 self.env['account.move'].sudo().create({
                     'state': 'draft',
                     'move_type': 'in_invoice',
                     'company_id': gr_company.id,
-                    'partner_id': self.env['res.partner'].search([('vat', '=', find_value('vatNumber'))], limit=1),
+                    'partner_id': self.env['res.partner'].search([('company_id', '=', gr_company.id), ('vat', '=', issuer_vat)], limit=1).id,
                     'date': fields.Date.to_date(find_value('issueDate')),
                     'invoice_date': fields.Date.to_date(find_value('issueDate')),
                     'l10n_gr_edi_mark': find_value('mark'),

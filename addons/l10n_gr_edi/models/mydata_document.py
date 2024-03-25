@@ -74,6 +74,7 @@ class MyDataDocument(models.Model):
             response = requests.post(
                 url=self.move_id.company_id._l10n_gr_edi_get_mydata_url(endpoint),
                 data=xml_content,
+                timeout=5,
                 headers=self.move_id.company_id._l10n_gr_edi_get_headers_credentials())
         except ConnectionError as err:
             # Handle any connection errors

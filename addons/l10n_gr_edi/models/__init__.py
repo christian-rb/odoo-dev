@@ -8,4 +8,3 @@ from . import mydata_document
 from . import preferred_classification
 from . import product_template
 from . import res_company
-from . import res_config_settings

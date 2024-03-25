@@ -15,19 +15,19 @@ class TestGreeceMyDATA(AccountTestInvoicingCommon):
         super().setUpClass(chart_template_ref=chart_template_ref)
         cls.env.company.write({
             'name': 'My Greece Company',
+            'vat': '047747270',
             'l10n_gr_edi_test_env': True,
-            'l10n_gr_edi_test_id': 'odoodev',
-            'l10n_gr_edi_test_vat': '047747270',
-            'l10n_gr_edi_test_key': '20ea658627fd8c7d90594fe4601d3327',
+            'l10n_gr_edi_aade_id': 'odoodev',
+            'l10n_gr_edi_aade_key': '20ea658627fd8c7d90594fe4601d3327',
         })
         cls.partner_a.write({
             'country_id': cls.env.ref('base.gr').id,
         })
         cls.env['res.company'].create({
             'name': 'Greece Partner A',
+            'vat': '047747210',
             'partner_id': cls.partner_a.id,
             'l10n_gr_edi_test_env': True,
-            'l10n_gr_edi_test_vat': '123456780',
         })
 
         cls.tax_24 = cls.env['account.tax'].create({
@@ -298,9 +298,8 @@ class TestGreeceMyDATA(AccountTestInvoicingCommon):
 
     def test_mydata_prepare_constraints_no_credentials_and_vat(self):
         self.company_data['company'].write({
-            'l10n_gr_edi_test_env': False,
-            'l10n_gr_aade_user_id': False,
-            'l10n_gr_subscription_key': False,
+            'l10n_gr_edi_aade_id': False,
+            'l10n_gr_edi_aade_key': False,
         })
         invoice = self._create_invoice()
         invoice.mydata_prepare_constraints()
