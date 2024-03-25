@@ -895,10 +895,9 @@ class Meeting(models.Model):
     def action_sendmail(self):
         email = self.env.user.email
         if email:
-            for meeting in self:
-                meeting.attendee_ids._send_mail_to_attendees(
-                    self.env.ref('calendar.calendar_template_meeting_invitation', raise_if_not_found=False)
-                )
+            self.attendee_ids._send_mail_to_attendees(
+                self.env.ref('calendar.calendar_template_meeting_invitation', raise_if_not_found=False),
+            )
         return True
 
     def action_open_composer(self):
@@ -974,6 +973,10 @@ class Meeting(models.Model):
     # ------------------------------------------------------------
     # MAILING
     # ------------------------------------------------------------
+
+    def _skip_send_mail_status_update(self):
+        """Overridable getter to identify whether to send invitation/cancelation emails."""
+        return False
 
     def _get_attendee_emails(self):
         """ Get comma-separated attendee email addresses. """
