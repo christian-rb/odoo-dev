@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, models
+from odoo import _, api, models
 from odoo.tools import float_compare, float_is_zero
+from odoo.exceptions import UserError
 
 
 class StockMoveLine(models.Model):
@@ -58,6 +59,12 @@ class StockMoveLine(models.Model):
         res = super().unlink()
         analytic_move_to_recompute._account_analytic_entry_move()
         return res
+
+    def _action_done(self):
+        for line in self:
+            if not line.lot_id and not line.lot_name and line.product_id.lot_valuated:
+                raise UserError(_("Lot/Serial number is mandatory for product valuated by lot"))
+        return super()._action_done()
 
     # -------------------------------------------------------------------------
     # SVL creation helpers
