@@ -1643,37 +1643,6 @@ test("create in grouped on char", async () => {
     expect(".o_kanban_group:first-child > .o_kanban_quick_create").toHaveCount(0);
 });
 
-test.todo("prevent deletion when grouped by many2many field", async () => {
-    Partner._records[0].category_ids = [6, 7];
-    Partner._records[3].category_ids = [7];
-
-    await mountView({
-        type: "kanban",
-        resModel: "partner",
-        arch: `
-            <kanban>
-                <card>
-                    <section>
-                        <field name="foo"/>
-                        <t t-if="widget.deletable"><span class="thisisdeletable">delete</span></t>
-                    </section>
-                </card>
-            </kanban>`,
-        searchViewArch: `
-            <search>
-                <filter name="group_by_foo" domain="[]" string="GroupBy Foo" context="{ 'group_by': 'foo' }"/>
-            </search>`,
-        groupBy: ["category_ids"],
-    });
-
-    expect(".thisisdeletable").toHaveCount(0, { message: "records should not be deletable" });
-
-    await toggleSearchBarMenu();
-    await toggleMenuItem("GroupBy Foo");
-
-    expect(".thisisdeletable").toHaveCount(4, { message: "records should be deletable" });
-});
-
 test.tags("desktop")("kanban grouped by many2one: false column is folded by default", async () => {
     Partner._records[0].product_id = false;
 
@@ -4455,7 +4424,7 @@ test.tags("desktop")("kanban with reference field", async () => {
     expect(queryAllTexts(".o_kanban_record span")).toEqual(["hello", "", "xmo", ""]);
 });
 
-test.todo.tags("desktop")("can drag and drop a record from one column to the next", async () => {
+test.tags("desktop")("can drag and drop a record from one column to the next", async () => {
     onRpc("/web/dataset/resequence", () => {
         expect.step("resequence");
     });
@@ -4469,9 +4438,6 @@ test.todo.tags("desktop")("can drag and drop a record from one column to the nex
                 <card>
                     <section>
                         <field name="foo"/>
-                        <t t-if="widget.editable">
-                            <span class="thisiseditable">edit</span>
-                        </t>
                     </section>
                 </card>
             </kanban>`,
@@ -4479,8 +4445,6 @@ test.todo.tags("desktop")("can drag and drop a record from one column to the nex
     });
     expect(".o_kanban_group:first-child .o_kanban_record").toHaveCount(2);
     expect(".o_kanban_group:nth-child(2) .o_kanban_record").toHaveCount(2);
-    expect(".thisiseditable").toHaveCount(4);
-
     expect([]).toVerifySteps();
 
     // first record of first column moved to the bottom of second column
@@ -4490,8 +4454,6 @@ test.todo.tags("desktop")("can drag and drop a record from one column to the nex
 
     expect(".o_kanban_group:first-child .o_kanban_record").toHaveCount(1);
     expect(".o_kanban_group:nth-child(2) .o_kanban_record").toHaveCount(3);
-    expect(".thisiseditable").toHaveCount(4);
-
     expect(["resequence"]).toVerifySteps();
 });
 
@@ -10802,7 +10764,7 @@ test("action/type attributes on kanban arch, type='action'", async () => {
     expect(["doActionButton type action name a1", "web_search_read"]).toVerifySteps();
 });
 
-test("Quick created record is rendered after load", async () => {
+test("quick created record is rendered after load", async () => {
     let def;
     onRpc("web_read", () => {
         expect.step("web_read");
@@ -10843,7 +10805,7 @@ test("Quick created record is rendered after load", async () => {
     expect(["name_create", "web_read"]).toVerifySteps();
 });
 
-test.todo("Allow use of 'editable'/'deletable' in ungrouped kanban", async () => {
+test("special button types in ungrouped kanban", async () => {
     await mountView({
         type: "kanban",
         resModel: "partner",
@@ -10851,19 +10813,123 @@ test.todo("Allow use of 'editable'/'deletable' in ungrouped kanban", async () =>
             <kanban on_create="quick_create">
                 <card>
                     <div>
-                        <button t-if="widget.editable">EDIT</button>
-                        <button t-if="widget.deletable">DELETE</button>
+                        <a type="edit">Edit</a>
+                        <a type="archive">Archive</a>
+                        <a type="unarchive">Unarchive</a>
+                        <a type="set_cover">Set Cover</a>
+                        <a type="delete">Delete</a>
                     </div>
                 </card>
             </kanban>`,
     });
 
     expect(getKanbanRecordTexts()).toEqual([
-        "EDITDELETE",
-        "EDITDELETE",
-        "EDITDELETE",
-        "EDITDELETE",
+        "EditArchiveUnarchiveSet CoverDelete",
+        "EditArchiveUnarchiveSet CoverDelete",
+        "EditArchiveUnarchiveSet CoverDelete",
+        "EditArchiveUnarchiveSet CoverDelete",
     ]);
+});
+
+test("special button types in ungrouped kanban (edit='0')", async () => {
+    await mountView({
+        type: "kanban",
+        resModel: "partner",
+        arch: `
+            <kanban on_create="quick_create" edit="0">
+                <card>
+                    <div>
+                        <a type="edit">Edit</a>
+                        <a type="archive">Archive</a>
+                        <a type="unarchive">Unarchive</a>
+                        <a type="set_cover">Set Cover</a>
+                        <a type="delete">Delete</a>
+                    </div>
+                </card>
+            </kanban>`,
+    });
+
+    expect(getKanbanRecordTexts()).toEqual(["Delete", "Delete", "Delete", "Delete"]);
+});
+
+test("special button types in ungrouped kanban (delete='0')", async () => {
+    await mountView({
+        type: "kanban",
+        resModel: "partner",
+        arch: `
+            <kanban on_create="quick_create" delete="0">
+                <card>
+                    <div>
+                        <a type="edit">Edit</a>
+                        <a type="archive">Archive</a>
+                        <a type="unarchive">Unarchive</a>
+                        <a type="set_cover">Set Cover</a>
+                        <a type="delete">Delete</a>
+                    </div>
+                </card>
+            </kanban>`,
+    });
+
+    expect(getKanbanRecordTexts()).toEqual([
+        "EditArchiveUnarchiveSet Cover",
+        "EditArchiveUnarchiveSet Cover",
+        "EditArchiveUnarchiveSet Cover",
+        "EditArchiveUnarchiveSet Cover",
+    ]);
+});
+
+test("special button types in ungrouped kanban (delete='0' and edit='0')", async () => {
+    await mountView({
+        type: "kanban",
+        resModel: "partner",
+        arch: `
+            <kanban on_create="quick_create" delete="0" edit="0">
+                <card>
+                    <div>
+                        <a type="edit">Edit</a>
+                        <a type="archive">Archive</a>
+                        <a type="unarchive">Unarchive</a>
+                        <a type="set_cover">Set Cover</a>
+                        <a type="delete">Delete</a>
+                    </div>
+                </card>
+            </kanban>`,
+    });
+
+    expect(getKanbanRecordTexts()).toEqual(["", "", "", ""]);
+});
+
+test("prevent deletion when grouped by many2many field", async () => {
+    Partner._records[0].category_ids = [6, 7];
+    Partner._records[3].category_ids = [7];
+
+    await mountView({
+        type: "kanban",
+        resModel: "partner",
+        arch: `
+            <kanban>
+                <card>
+                    <section>
+                        <field name="foo"/>
+                        <a class="delete" type="delete">Delete</a>
+                    </section>
+                </card>
+            </kanban>`,
+        searchViewArch: `
+            <search>
+                <filter name="group_by_foo" domain="[]" string="GroupBy Foo" context="{ 'group_by': 'foo' }"/>
+            </search>`,
+        groupBy: ["category_ids"],
+    });
+
+    expect(".o_kanban_record:not(.o_kanban_ghost)").toHaveCount(5);
+    expect("a.delete").toHaveCount(0);
+
+    await toggleSearchBarMenu();
+    await toggleMenuItem("GroupBy Foo");
+
+    expect(".o_kanban_record:not(.o_kanban_ghost)").toHaveCount(4);
+    expect("a.delete").toHaveCount(4);
 });
 
 test.tags("desktop")("folded groups kept when leaving/coming back", async () => {

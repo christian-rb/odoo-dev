@@ -88,6 +88,18 @@ export class KanbanRecord extends Component {
         this.rootRef = useRef("root");
     }
 
+    get canDelete() {
+        const { archInfo, list } = this.props;
+        return (
+            archInfo.activeActions.delete &&
+            (!list.groupByField || list.groupByField.type !== "many2many")
+        );
+    }
+
+    get canEdit() {
+        return this.props.archInfo.activeActions.edit;
+    }
+
     getFormattedValue(fieldId) {
         const { archInfo, record } = this.props;
         const { attrs, name } = archInfo.fieldNodes[fieldId];

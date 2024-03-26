@@ -103,6 +103,11 @@ export class KanbanCompiler extends ViewCompiler {
         for (const { name, value } of el.attributes) {
             compiled.setAttribute(name, value);
         }
+        if (type === "delete") {
+            compiled.setAttribute("t-if", "__comp__.canDelete");
+        } else {
+            compiled.setAttribute("t-if", "__comp__.canEdit");
+        }
         compiled.setAttribute("t-on-click", `(ev) => __comp__.triggerAction("${type}", ev)`);
         if (getTag(el, true) === "a" && !compiled.hasAttribute("href")) {
             compiled.setAttribute("href", "#");
