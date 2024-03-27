@@ -192,7 +192,7 @@ export class MailMessage extends models.ServerModel {
                 recipients: partners.map((p) => ({ id: p.id, name: p.name, type: "partner" })),
                 record_name:
                     thread && (thread.name !== undefined ? thread.name : thread.display_name),
-                starredPersonas: message.starred_partner_ids.map((id) => ({ id, type: "partner" })),
+                starred: message.starred_partner_ids?.includes(this.env.user?.partner_id) || false,
                 trackingValues: formattedTrackingValues,
                 pinned_at: message.pinned_at,
             };

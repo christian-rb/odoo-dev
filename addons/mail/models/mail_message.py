@@ -988,7 +988,7 @@ class Message(models.Model):
                 "pinned_at": message_sudo.pinned_at,
                 "record_name": record_sudo.display_name if record_sudo else False,
                 "needaction_partner_ids": notifs.filtered(lambda n: not n.is_read).res_partner_id.ids,
-                "starredPersonas": [{"id": partner_id, "type": "partner"} for partner_id in message_sudo.starred_partner_ids.ids],
+                "starred": message_sudo.starred,
                 "history_partner_ids": notifs.filtered("is_read").res_partner_id.ids,
                 "is_note": message_sudo.subtype_id.id == note_id,
                 "is_discussion": message_sudo.subtype_id.id == com_id,
