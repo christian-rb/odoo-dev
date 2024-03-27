@@ -2,6 +2,7 @@
 
 from . import mrp_bom
 from . import product
+from . import product_replenish_mixin
 from . import res_company
 from . import res_partner
 from . import stock_location

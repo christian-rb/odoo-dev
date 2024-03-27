@@ -3,6 +3,7 @@
 
 from . import barcode
 from . import ir_actions_report
+from . import product_replenish_mixin
 from . import product_strategy
 from . import res_company
 from . import res_partner
