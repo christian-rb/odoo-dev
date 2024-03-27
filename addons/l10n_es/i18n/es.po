@@ -44,24 +44,13 @@ msgstr ""
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_303_title_17
-msgid ""
-"Amount of sale of goods and services to which special regime of the cash "
-"criterion ha dbeen applied would have been accrued in accordance with the "
-"general accrual rule contained in art. 75 LIVA"
-msgstr ""
-"Importes de las entregas de bienes y prestaciones de servicios a las que "
-"habiéndoles sido aplicado el régimen especial del criterio de caja hubieran "
-"resultado devengadas conforme a la regla general de devengo contenida en el "
-"art. 75 LIVA"
+msgid "Amount of sale of goods and services to which special regime of the cash criterion ha dbeen applied would have been accrued in accordance with the general accrual rule contained in art. 75 LIVA"
+msgstr "Importes de las entregas de bienes y prestaciones de servicios a las que habiéndoles sido aplicado el régimen especial del criterio de caja hubieran resultado devengadas conforme a la regla general de devengo contenida en el art. 75 LIVA"
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_303_title_19
-msgid ""
-"Amount of the purchases of goods and services to which the special regime of "
-"cash criterion is applicable or affected"
-msgstr ""
-"Importes de las adquisiciones de bienes y servicios a las que sea de "
-"aplicación o afecte el régimen especial del criterio de caja"
+msgid "Amount of the purchases of goods and services to which the special regime of cash criterion is applicable or affected"
+msgstr "Importes de las adquisiciones de bienes y servicios a las que sea de aplicación o afecte el régimen especial del criterio de caja"
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_111_title_3
@@ -138,18 +127,12 @@ msgstr "Completo (2008)"
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_111_title_13
-msgid ""
-"Considerations for the assignment of image rights: income payments on "
-"account provided for article 92.8 of the Tax Law"
-msgstr ""
-"Contraprestaciones por la cesión de derechos de imagen: ingresos a cuenta "
-"previstos en el artículo 92.8 de la Ley del Impuesto"
+msgid "Considerations for the assignment of image rights: income payments on account provided for article 92.8 of the Tax Law"
+msgstr "Contraprestaciones por la cesión de derechos de imagen: ingresos a cuenta previstos en el artículo 92.8 de la Ley del Impuesto"
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_390_title_42
-msgid ""
-"Cuotas deducibles en virtud de resolución administrativa o sentencia firmes "
-"con tipos no vigentes"
+msgid "Cuotas deducibles en virtud de resolución administrativa o sentencia firmes con tipos no vigentes"
 msgstr ""
 
 #. module: l10n_es
@@ -179,10 +162,7 @@ msgstr "Rendimientos del trabajo"
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_390_title_53
-msgid ""
-"Exclusivamente para aquellos sujetos pasivos acogidos al régimen especial "
-"del criterio de caja y para aquéllos que sean destinatarios de operaciones "
-"afectadas por el mismo"
+msgid "Exclusivamente para aquellos sujetos pasivos acogidos al régimen especial del criterio de caja y para aquéllos que sean destinatarios de operaciones afectadas por el mismo"
 msgstr ""
 
 #. module: l10n_es
@@ -207,10 +187,8 @@ msgstr "Por cuotas soportadas en las importaciones de bienes corrientes"
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_303_title_10
-msgid ""
-"For contributions supported in internal operations with investment goods"
-msgstr ""
-"Por cuotas soportadas en operaciones interiores con bienes de inversión"
+msgid "For contributions supported in internal operations with investment goods"
+msgstr "Por cuotas soportadas en operaciones interiores con bienes de inversión"
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_303_title_9
@@ -286,8 +264,7 @@ msgstr ""
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_390_title_21
-msgid ""
-"IVA deducible en operaciones interiores de bienes y servicios corrientes"
+msgid "IVA deducible en operaciones interiores de bienes y servicios corrientes"
 msgstr ""
 
 #. module: l10n_es
@@ -297,8 +274,7 @@ msgstr ""
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_390_title_23
-msgid ""
-"IVA deducible en operaciones intragrupo de bienes y servicios corrientes"
+msgid "IVA deducible en operaciones intragrupo de bienes y servicios corrientes"
 msgstr ""
 
 #. module: l10n_es
@@ -339,19 +315,12 @@ msgstr ""
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_390_title_55
-msgid ""
-"Importe de las adquisiciones de bienes y servicios a las que sea de "
-"aplicación o afecte el régimen especial del criterio de caja conforme a la "
-"regla general de devengo contenida en el art. 75 LIVA"
+msgid "Importe de las adquisiciones de bienes y servicios a las que sea de aplicación o afecte el régimen especial del criterio de caja conforme a la regla general de devengo contenida en el art. 75 LIVA"
 msgstr ""
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_390_title_54
-msgid ""
-"Importes de las entregas de bienes y prestaciones de servicios a las que "
-"habiéndoles sido aplicado el régimen especial del criterio de caja hubieran "
-"resultado devengadas conforme a la regla general de devengo contenida en el "
-"art. 75 LIVA"
+msgid "Importes de las entregas de bienes y prestaciones de servicios a las que habiéndoles sido aplicado el régimen especial del criterio de caja hubieran resultado devengadas conforme a la regla general de devengo contenida en el art. 75 LIVA"
 msgstr ""
 
 #. module: l10n_es
@@ -403,9 +372,7 @@ msgstr ""
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_390_title_13
-msgid ""
-"Modificación de bases y cuotas por auto de declaración de concurso de "
-"acreedores"
+msgid "Modificación de bases y cuotas por auto de declaración de concurso de acreedores"
 msgstr ""
 
 #. module: l10n_es
@@ -415,9 +382,7 @@ msgstr ""
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_390_title_17
-msgid ""
-"Modificación recargo equivalencia por auto de declaraciónde concurso de "
-"acreedores"
+msgid "Modificación recargo equivalencia por auto de declaraciónde concurso de acreedores"
 msgstr ""
 
 #. module: l10n_es
@@ -497,8 +462,7 @@ msgstr ""
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_303_title_4
 msgid "Other operations with reverse charge (except intracom. adq.)"
-msgstr ""
-"Otras operaciones con inversión del sujeto pasivo (excepto adq. intracom.)"
+msgstr "Otras operaciones con inversión del sujeto pasivo (excepto adq. intracom.)"
 
 #. module: l10n_es
 #: model:ir.model.fields.selection,name:l10n_es.selection__account_tax__l10n_es_exempt_reason__e6
@@ -507,12 +471,8 @@ msgstr ""
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_111_title_10
-msgid ""
-"Patrimonial gains derived from the forest exploitation of the neighbors in "
-"public forests"
-msgstr ""
-"Ganancias patrimoniales derivadas de los aprovechamientos forestales de los "
-"vecinos en selvas públicos"
+msgid "Patrimonial gains derived from the forest exploitation of the neighbors in public forests"
+msgstr "Ganancias patrimoniales derivadas de los aprovechamientos forestales de los vecinos en selvas públicos"
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_111_title_12
@@ -585,9 +545,7 @@ msgstr ""
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_390_title_45
-msgid ""
-"Resultado liquidación anual (Sólo para sujetos pasivos que tributan "
-"exclusivamente en territorio común)"
+msgid "Resultado liquidación anual (Sólo para sujetos pasivos que tributan exclusivamente en territorio común)"
 msgstr ""
 
 #. module: l10n_es
@@ -602,9 +560,7 @@ msgstr ""
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_390_title_6
-msgid ""
-"Régimen especial de bienes usados, objetos de arte, antigüedades y objetos "
-"de colección"
+msgid "Régimen especial de bienes usados, objetos de arte, antigüedades y objetos de colección"
 msgstr ""
 
 #. module: l10n_es
@@ -675,65 +631,47 @@ msgstr "Tipo de impuesto (España)"
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_390_title_36
-msgid ""
-"Total bases imponibles y cuotas deducibles en adquisiciones "
-"intracomunitarias de bienes corrientes"
+msgid "Total bases imponibles y cuotas deducibles en adquisiciones intracomunitarias de bienes corrientes"
 msgstr ""
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_390_title_38
-msgid ""
-"Total bases imponibles y cuotas deducibles en adquisiciones "
-"intracomunitarias de bienes de inversión"
+msgid "Total bases imponibles y cuotas deducibles en adquisiciones intracomunitarias de bienes de inversión"
 msgstr ""
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_390_title_40
-msgid ""
-"Total bases imponibles y cuotas deducibles en adquisiciones "
-"intracomunitarias de servicios"
+msgid "Total bases imponibles y cuotas deducibles en adquisiciones intracomunitarias de servicios"
 msgstr ""
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_390_title_32
-msgid ""
-"Total bases imponibles y cuotas deducibles en importaciones de bienes "
-"corrientes"
+msgid "Total bases imponibles y cuotas deducibles en importaciones de bienes corrientes"
 msgstr ""
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_390_title_34
-msgid ""
-"Total bases imponibles y cuotas deducibles en importaciones de bienes de "
-"inversión"
+msgid "Total bases imponibles y cuotas deducibles en importaciones de bienes de inversión"
 msgstr ""
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_390_title_27
-msgid ""
-"Total bases imponibles y cuotas deducibles en operaciones interiores de "
-"bienes de inversión"
+msgid "Total bases imponibles y cuotas deducibles en operaciones interiores de bienes de inversión"
 msgstr ""
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_390_title_22
-msgid ""
-"Total bases imponibles y cuotas deducibles en operaciones interiores de "
-"bienes y servicios corrientes"
+msgid "Total bases imponibles y cuotas deducibles en operaciones interiores de bienes y servicios corrientes"
 msgstr ""
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_390_title_29
-msgid ""
-"Total bases imponibles y cuotas deducibles en operaciones intragrupo de "
-"bienes de inversión"
+msgid "Total bases imponibles y cuotas deducibles en operaciones intragrupo de bienes de inversión"
 msgstr ""
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_390_title_24
-msgid ""
-"Total bases imponibles y cuotas deducibles en operaciones intragrupo de "
-"bienes y servicios corrientes"
+msgid "Total bases imponibles y cuotas deducibles en operaciones intragrupo de bienes y servicios corrientes"
 msgstr ""
 
 #. module: l10n_es
@@ -921,15 +859,12 @@ msgstr ""
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_390_casilla_101
-msgid ""
-"[101] Operaciones en régimen especial de la agricultura, ganadería y pesca"
+msgid "[101] Operaciones en régimen especial de la agricultura, ganadería y pesca"
 msgstr ""
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_390_casilla_102
-msgid ""
-"[102] Operaciones realizadas por sujetos pasivos acogidos al régimen "
-"especial del recargo de equivalencia"
+msgid "[102] Operaciones realizadas por sujetos pasivos acogidos al régimen especial del recargo de equivalencia"
 msgstr ""
 
 #. module: l10n_es
@@ -949,9 +884,7 @@ msgstr ""
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_390_casilla_106
-msgid ""
-"[106] Entregas de bienes inmuebles, operaciones fi nancieras y relativas al "
-"oro de inversión no habituales"
+msgid "[106] Entregas de bienes inmuebles, operaciones fi nancieras y relativas al oro de inversión no habituales"
 msgstr ""
 
 #. module: l10n_es
@@ -971,14 +904,8 @@ msgstr ""
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_303_casilla_109
-msgid ""
-"[109] Refunds agreed by the Tax Agency as a consequence of the processing of "
-"previous self-assessments corresponding to the year and period of the self-"
-"assessment"
-msgstr ""
-"[109] Devoluciones acordadas por la Agencia Tributaria como consecuencia de "
-"la tramitación de anteriores autoliquidaciones correspondientes al ejercicio "
-"y periodo objeto de la autoliquidación"
+msgid "[109] Refunds agreed by the Tax Agency as a consequence of the processing of previous self-assessments corresponding to the year and period of the self-assessment"
+msgstr "[109] Devoluciones acordadas por la Agencia Tributaria como consecuencia de la tramitación de anteriores autoliquidaciones correspondientes al ejercicio y periodo objeto de la autoliquidación"
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_303_casilla_10
@@ -1002,23 +929,17 @@ msgstr "[110] Cuotas a compensar pendientes de periodos anteriores"
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_390_casilla_110
-msgid ""
-"[110] Operaciones no sujetas por reglas de localización o con inversión del "
-"sujeto pasivo"
+msgid "[110] Operaciones no sujetas por reglas de localización o con inversión del sujeto pasivo"
 msgstr ""
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_390_casilla_111
-msgid ""
-"[111] Operaciones sujetas y no exentas que originan el derecho a la "
-"devolución mensual"
+msgid "[111] Operaciones sujetas y no exentas que originan el derecho a la devolución mensual"
 msgstr ""
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_390_casilla_113
-msgid ""
-"[113] Entregas interiores de bienes devengadas por inversión del sujeto "
-"pasivo como consecuencia de operaciones triangulares"
+msgid "[113] Entregas interiores de bienes devengadas por inversión del sujeto pasivo como consecuencia de operaciones triangulares"
 msgstr ""
 
 #. module: l10n_es
@@ -1038,12 +959,8 @@ msgstr "[11] Valor percepciones en especie"
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_303_casilla_120
-msgid ""
-"[120] Operations not subject to location rules (excepted those included in "
-"box 123)"
-msgstr ""
-"[120] Operaciones no sujetas por reglas de localización (excepto las "
-"incluidas en la casilla 123)"
+msgid "[120] Operations not subject to location rules (excepted those included in box 123)"
+msgstr "[120] Operaciones no sujetas por reglas de localización (excepto las incluidas en la casilla 123)"
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_303_casilla_122
@@ -1052,20 +969,13 @@ msgstr "[122] Operaciones sujetas con inversión del sujeto pasivo"
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_303_casilla_123
-msgid ""
-"[123] Operation not subjected to rule of location covered by the special one-"
-"stop shop regime"
-msgstr ""
-"[123] Operaciones no sujetas por reglas de localización acogidas a los "
-"régimenes especiales de ventanilla única"
+msgid "[123] Operation not subjected to rule of location covered by the special one-stop shop regime"
+msgstr "[123] Operaciones no sujetas por reglas de localización acogidas a los régimenes especiales de ventanilla única"
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_303_casilla_124
-msgid ""
-"[124] Operations subjected and covered by special regime of one-stop shop"
-msgstr ""
-"[124] Operaciones sujetas y acogidas a los régimenes especiales de "
-"ventanilla única"
+msgid "[124] Operations subjected and covered by special regime of one-stop shop"
+msgstr "[124] Operaciones sujetas y acogidas a los régimenes especiales de ventanilla única"
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_390_casilla_125
@@ -1074,9 +984,7 @@ msgstr ""
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_390_casilla_126
-msgid ""
-"[126] OSS. Operaciones no sujetas por reglas de localización acogidas a la "
-"OSS"
+msgid "[126] OSS. Operaciones no sujetas por reglas de localización acogidas a la OSS"
 msgstr ""
 
 #. module: l10n_es
@@ -1086,9 +994,7 @@ msgstr ""
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_390_casilla_128
-msgid ""
-"[128] Operaciones intragrupo valoradas conforme a lo dispuesto en los arts. "
-"78 y 79 LIVA"
+msgid "[128] Operaciones intragrupo valoradas conforme a lo dispuesto en los arts. 78 y 79 LIVA"
 msgstr ""
 
 #. module: l10n_es
@@ -1548,9 +1454,7 @@ msgstr "[221] Cuota deducible 4 %"
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_390_casilla_227
-msgid ""
-"[227] Operaciones en Régimen especial de bienes usados, objetos de arte, "
-"antigüedades y objetos de colección"
+msgid "[227] Operaciones en Régimen especial de bienes usados, objetos de arte, antigüedades y objetos de colección"
 msgstr ""
 
 #. module: l10n_es
@@ -1820,10 +1724,8 @@ msgstr ""
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_303_casilla_44
-msgid ""
-"[44] Regularization by application of the definitive prorrata percentage"
-msgstr ""
-"[44] Regularización por aplicación del porcentaje definitivo de prorrata"
+msgid "[44] Regularization by application of the definitive prorrata percentage"
+msgstr "[44] Regularización por aplicación del porcentaje definitivo de prorrata"
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_390_casilla_45
@@ -1942,35 +1844,27 @@ msgstr ""
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_390_casilla_522
-msgid ""
-"[522] Regularización por aplicación porcentaje definitivo de prorrata: cuota "
-"deducible"
+msgid "[522] Regularización por aplicación porcentaje definitivo de prorrata: cuota deducible"
 msgstr ""
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_390_casilla_523
-msgid ""
-"[523] Servicios localizados en el territorio de aplicación del impuesto por "
-"inversión del sujeto pasivo"
+msgid "[523] Servicios localizados en el territorio de aplicación del impuesto por inversión del sujeto pasivo"
 msgstr ""
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_390_casilla_524
-msgid ""
-"[524] Total devoluciones solicitadas por cuotas soportadas en la adquisición "
-"de elementos de transporte (Art. 30 bis RIVA)"
+msgid "[524] Total devoluciones solicitadas por cuotas soportadas en la adquisición de elementos de transporte (Art. 30 bis RIVA)"
 msgstr ""
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_390_casilla_525
-msgid ""
-"[525] Total resultados positivos autoliquidaciones del ejercicio (modelo 322)"
+msgid "[525] Total resultados positivos autoliquidaciones del ejercicio (modelo 322)"
 msgstr ""
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_390_casilla_526
-msgid ""
-"[526] Total resultados negativos autoliquidaciones del ejercicio (modelo 322)"
+msgid "[526] Total resultados negativos autoliquidaciones del ejercicio (modelo 322)"
 msgstr ""
 
 #. module: l10n_es
@@ -2380,10 +2274,7 @@ msgstr ""
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_390_casilla_653
-msgid ""
-"[653] Operaciones a las que habiéndoles sido aplicado el régimen especial "
-"del criterio de caja hubieran resultado devengadas conforme a la regla "
-"general de devengo contenida en el art. 75 LIVA"
+msgid "[653] Operaciones a las que habiéndoles sido aplicado el régimen especial del criterio de caja hubieran resultado devengadas conforme a la regla general de devengo contenida en el art. 75 LIVA"
 msgstr ""
 
 #. module: l10n_es
@@ -2413,9 +2304,7 @@ msgstr ""
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_390_casilla_659
-msgid ""
-"[659] IVA a la importación liquidado por la Aduana (sólo sujetos pasivos con "
-"opción de diferimiento)"
+msgid "[659] IVA a la importación liquidado por la Aduana (sólo sujetos pasivos con opción de diferimiento)"
 msgstr ""
 
 #. module: l10n_es
@@ -2515,13 +2404,8 @@ msgstr "[709] Cuota 0 %"
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_303_casilla_70
-msgid ""
-"[70] Results to be paid from previous self-assessments or administrative "
-"liquidations corresponding to the year and period of self-assessment"
-msgstr ""
-"[70] Resultados a ingresar de anteriores autoliquidaciones o liquidaciones "
-"administrativas correspondientes al ejercicio y periodo objeto de la "
-"autoliquidación"
+msgid "[70] Results to be paid from previous self-assessments or administrative liquidations corresponding to the year and period of self-assessment"
+msgstr "[70] Resultados a ingresar de anteriores autoliquidaciones o liquidaciones administrativas correspondientes al ejercicio y periodo objeto de la autoliquidación"
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_390_casilla_710
@@ -2705,11 +2589,8 @@ msgstr "[77] IVA a la importación liquidado por la Aduana pendiente de ingreso"
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_303_casilla_78
-msgid ""
-"[78] Contributions to be compensated from previous periods applied in this "
-"period"
-msgstr ""
-"[78] Cuotas a compensar de periodos anteriores aplicadas en este periodo"
+msgid "[78] Contributions to be compensated from previous periods applied in this period"
+msgstr "[78] Cuotas a compensar de periodos anteriores aplicadas en este periodo"
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_390_casilla_84
@@ -2728,39 +2609,27 @@ msgstr ""
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_303_casilla_87
-msgid ""
-"[87] Contributions to be compensated from previous periods pending for "
-"subsequent periods"
-msgstr ""
-"[87] Cuotas a compensar de periodos previos pendientes para periodos "
-"posteriores"
+msgid "[87] Contributions to be compensated from previous periods pending for subsequent periods"
+msgstr "[87] Cuotas a compensar de periodos previos pendientes para periodos posteriores"
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_390_casilla_95
-msgid ""
-"[95] Total resultados a ingresar en las autoliquidaciones de IVA del "
-"ejercicio"
+msgid "[95] Total resultados a ingresar en las autoliquidaciones de IVA del ejercicio"
 msgstr ""
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_390_casilla_96
-msgid ""
-"[96] Total devoluciones mensuales de IVA solicitadas por sujetos pasivos "
-"inscritos en el Registro de devolución mensual"
+msgid "[96] Total devoluciones mensuales de IVA solicitadas por sujetos pasivos inscritos en el Registro de devolución mensual"
 msgstr ""
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_390_casilla_97
-msgid ""
-"[97] Si el resultado de la autoliquidación del último periodo es a compensar "
-"o a devolver consigne su importe: a compensar"
+msgid "[97] Si el resultado de la autoliquidación del último periodo es a compensar o a devolver consigne su importe: a compensar"
 msgstr ""
 
 #. module: l10n_es
 #: model:account.report.line,name:l10n_es.mod_390_casilla_98
-msgid ""
-"[98] Si el resultado de la autoliquidación del último periodo es a compensar "
-"o a devolver consigne su importe: a devolver"
+msgid "[98] Si el resultado de la autoliquidación del último periodo es a compensar o a devolver consigne su importe: a devolver"
 msgstr ""
 
 #. module: l10n_es

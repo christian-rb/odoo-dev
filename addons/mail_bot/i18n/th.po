@@ -3,15 +3,15 @@
 # 	* mail_bot
 #
 # Translators:
-# Wichanon Jamwutthipreecha, 2022
+# Wil Odoo, 2024
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 15.5alpha1\n"
+"Project-Id-Version: Odoo Server saas~17.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-16 13:49+0000\n"
-"PO-Revision-Date: 2022-09-22 05:53+0000\n"
-"Last-Translator: Wichanon Jamwutthipreecha, 2022\n"
+"POT-Creation-Date: 2024-03-26 15:05+0000\n"
+"PO-Revision-Date: 2024-01-17 11:21+0000\n"
+"Last-Translator: Wil Odoo, 2024\n"
 "Language-Team: Thai (https://app.transifex.com/odoo/teams/41243/th/)\n"
 "Language: th\n"
 "MIME-Version: 1.0\n"
@@ -23,7 +23,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 msgid "Aaaaaw that's really cute but, you know, bots don't work that way. You're too human for me! Let's keep it professional ❤️"
-msgstr ""
+msgstr "Awwww น่ารักจริงๆ แต่คุณรู้ไหม บอทไม่สามารถทำงานแบบนั้นได้ คุณเป็นมนุษย์มากเกินไปสำหรับฉัน! มีความเป็นมืออาชีพกันต่อไปนะ ❤️"
 
 #. module: mail_bot
 #: model:ir.model.fields.selection,name:mail_bot.selection__res_users__odoobot_state__disabled
@@ -44,7 +44,7 @@ msgstr "เธรดอีเมล"
 #. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 msgid "Great! 👍<br/>To access special commands, <b>start your sentence with</b> <span class=\"o_odoobot_command\">/</span>. Try getting help."
-msgstr ""
+msgstr "ยอดเยี่ยม! 👍 <br/> หากต้องการเข้าถึงคำสั่งพิเศษ <b>ให้ขึ้นต้นประโยคด้วย</b> <span class=\"o_odoobot_command\">/</span> ลองขอความช่วยเหลือ"
 
 #. module: mail_bot
 #: model:ir.model,name:mail_bot.model_ir_http
@@ -55,136 +55,136 @@ msgstr "การกำหนด HTTP"
 #. odoo-python
 #: code:addons/mail_bot/models/res_users.py:0
 msgid "Hello,"
-msgstr ""
+msgstr "สวัสดี"
 
 #. module: mail_bot
 #. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 msgid "Hmmm..."
-msgstr ""
+msgstr "อืมมมม..."
 
 #. module: mail_bot
 #. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 msgid "I am a simple bot, but if that's a dog, he is the cutest 😊 <br/>Congratulations, you finished this tour. You can now <b>close this chat window</b>. Enjoy discovering Odoo."
-msgstr ""
+msgstr "ฉันเป็นบอทธรรมดาๆ แต่ถ้าเป็นหมาล่ะก็ น่ารักที่สุดเลย 😊 <br/>ยินดีด้วย คุณได้จบทัวร์นี้แล้ว <b>ตอนนี้คุณสามารถปิดหน้าต่างแชทนี้ได้</b> เพลิดเพลินไปกับการเรียนรู้เพิ่มเติมเกี่ยวกับ Odoo"
 
 #. module: mail_bot
 #. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 msgid "I'm afraid I don't understand. Sorry!"
-msgstr ""
+msgstr "ฉันกลัวว่าฉันไม่เข้าใจ ขอโทษด้วย"
 
 #. module: mail_bot
 #. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 msgid "I'm not smart enough to answer your question.<br/>To follow my guide, ask: <span class=\"o_odoobot_command\">start the tour</span>."
-msgstr ""
+msgstr "ฉันยังไม่ฉลาดพอที่จะตอบคำถามของคุณ <br/>หากต้องการทำตามคำแนะนำของฉัน ให้ถาม: <span class=\"o_odoobot_command\">เริ่มทัวร์</span>"
 
 #. module: mail_bot
 #: model:ir.model.fields.selection,name:mail_bot.selection__res_users__odoobot_state__idle
 msgid "Idle"
-msgstr ""
+msgstr "ไม่ได้ใช้งาน"
 
 #. module: mail_bot
 #: model:ir.model,name:mail_bot.model_mail_bot
 msgid "Mail Bot"
-msgstr ""
+msgstr "เมลบอท"
 
 #. module: mail_bot
 #. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 msgid "Not exactly. To continue the tour, send an emoji: <b>type</b> <span class=\"o_odoobot_command\">:)</span> and press enter."
-msgstr ""
+msgstr "ไม่อย่างแน่นอน หากต้องการทัวร์ต่อ ให้ส่งอิโมจิ: <b>พิมพ์</b> <span class=\"o_odoobot_command\">:)</span> แล้วกด Enter"
 
 #. module: mail_bot
 #: model:ir.model.fields.selection,name:mail_bot.selection__res_users__odoobot_state__not_initialized
 msgid "Not initialized"
-msgstr ""
+msgstr "อ"
 
 #. module: mail_bot
 #. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 msgid "Not sure what you are doing. Please, type <span class=\"o_odoobot_command\">/</span> and wait for the propositions. Select <span class=\"o_odoobot_command\">help</span> and press enter"
-msgstr ""
+msgstr "ไม่แน่ใจว่าคุณกำลังทำอะไรอยู่ กรุณาพิมพ์ <span class=\"o_odoobot_command\">/</span> และรอข้อเสนอ เลือก <span class=\"o_odoobot_command\">ช่วยเหลือ</span> แล้วกด Enter"
 
 #. module: mail_bot
 #. odoo-python
 #: code:addons/mail_bot/models/res_users.py:0
 msgid "Odoo's chat helps employees collaborate efficiently. I'm here to help you discover its features."
-msgstr ""
+msgstr "แชทของ Odoo ช่วยให้พนักงานทำงานร่วมกันได้อย่างมีประสิทธิภาพ ฉันมาที่นี่เพื่อช่วยให้คุณค้นพบฟีเจอร์ต่างๆ ของมัน"
 
 #. module: mail_bot
 #: model:ir.model.fields,field_description:mail_bot.field_res_users__odoobot_state
 msgid "OdooBot Status"
-msgstr ""
+msgstr "สถานะ OdooBot"
 
 #. module: mail_bot
 #: model:ir.model.fields,field_description:mail_bot.field_res_users__odoobot_failed
 msgid "Odoobot Failed"
-msgstr ""
+msgstr "Odoobot ล้มเหลว"
 
 #. module: mail_bot
 #: model:ir.model.fields.selection,name:mail_bot.selection__res_users__odoobot_state__onboarding_attachement
 msgid "Onboarding attachment"
-msgstr ""
+msgstr "เอกสารแนบการเริ่มต้นใช้งาน"
 
 #. module: mail_bot
 #: model:ir.model.fields.selection,name:mail_bot.selection__res_users__odoobot_state__onboarding_command
 msgid "Onboarding command"
-msgstr ""
+msgstr "คำสั่งการเริ่มต้นใช้งาน"
 
 #. module: mail_bot
 #: model:ir.model.fields.selection,name:mail_bot.selection__res_users__odoobot_state__onboarding_emoji
 msgid "Onboarding emoji"
-msgstr ""
+msgstr "อีโมจิการเริ่มต้นใช้งาน"
 
 #. module: mail_bot
 #: model:ir.model.fields.selection,name:mail_bot.selection__res_users__odoobot_state__onboarding_ping
 msgid "Onboarding ping"
-msgstr ""
+msgstr "การเริ่มต้นใช้งาน ping"
 
 #. module: mail_bot
 #. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 msgid "Sorry I'm sleepy. Or not! Maybe I'm just trying to hide my unawareness of human language...<br/>I can show you features if you write: <span class=\"o_odoobot_command\">start the tour</span>."
-msgstr ""
+msgstr "ขออภัย ฉันง่วงนอน หรือไม่! บางทีฉันอาจแค่พยายามซ่อนความไม่รู้ในภาษาของมนุษย์...<br/>ฉันสามารถแสดงฟีเจอร์ต่างๆ ให้คุณได้ดู หากคุณเขียน: <span class=\"o_odoobot_command\">เริ่มทัวร์ </span>"
 
 #. module: mail_bot
 #. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 msgid "Sorry, I am not listening. To get someone's attention, <b>ping him</b>. Write <span class=\"o_odoobot_command\">@OdooBot</span> and select me."
-msgstr ""
+msgstr "ขออภัย ฉันฟังไม่ทัน หากต้องการเรียกใครสักคน <b>ให้ส่ง Ping ไปที่เขา</b> เขียน <span class=\"o_odoobot_command\">@OdooBot</span> และเลือกฉัน"
 
 #. module: mail_bot
 #. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 msgid "That's not nice! I'm a bot but I have feelings... 💔"
-msgstr ""
+msgstr "นั่นไม่ดีเลย! ฉันเป็นบอทแต่ก็มีความรู้สึกนะ... 💔"
 
 #. module: mail_bot
 #. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 msgid "To <b>send an attachment</b>, click on the <i class=\"fa fa-paperclip\" aria-hidden=\"true\"></i> icon and select a file."
-msgstr ""
+msgstr "หากต้องการ<b>ส่งไฟล์แนบ</b> ให้คลิกที่<i class=\"fa fa-paperclip\" aria-hidden=\"True\"></i>ไอคอนและเลือกไฟล์"
 
 #. module: mail_bot
 #. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 msgid "To start, try to send me an emoji :)"
-msgstr ""
+msgstr "ในการเริ่มต้น ให้ลองส่งอิโมจิมาหาฉัน :)"
 
 #. module: mail_bot
 #. odoo-python
 #: code:addons/mail_bot/models/res_users.py:0
 msgid "Try to send me an emoji"
-msgstr ""
+msgstr "ลองส่งอิโมจิมาให้ฉันสิ"
 
 #. module: mail_bot
 #. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 msgid "Unfortunately, I'm just a bot 😞 I don't understand! If you need help discovering our product, please check <a href=\"https://www.odoo.com/documentation\" target=\"_blank\">our documentation</a> or <a href=\"https://www.odoo.com/slides\" target=\"_blank\">our videos</a>."
-msgstr ""
+msgstr "น่าเสียดายที่ฉันเป็นแค่บอท 😞 เพราะว่าฉันไม่เข้าใจ! หากคุณต้องการความช่วยเหลือในการค้นหาผลิตภัณฑ์ของเรา <a href=\"https://www.odoo.com/documentation\" target=\"_blank\">โปรดตรวจสอบเอกสาร</a>หรือ<a href=\"https://www.odoo.com/slides\" target=\"_blank\">วิดีโอของเรา</a>"
 
 #. module: mail_bot
 #: model:ir.model,name:mail_bot.model_res_users
@@ -195,40 +195,40 @@ msgstr "ผู้ใช้"
 #. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 msgid "Wow you are a natural!<br/>Ping someone with @username to grab their attention. <b>Try to ping me using</b> <span class=\"o_odoobot_command\">@OdooBot</span> in a sentence."
-msgstr ""
+msgstr "ว้าว คุณเป็นธรรมชาติมาก! <br/>ส่ง Ping ไปยังใครบางคนด้วย @username เพื่อดึงดูดความสนใจของพวกเขา <b>ลองส่ง Ping มาหาฉันโดยใช้</b> <span class=\"o_odoobot_command\">@OdooBot</span> ในประโยค"
 
 #. module: mail_bot
 #. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 msgid "Yep, I am here! 🎉 <br/>Now, try <b>sending an attachment</b>, like a picture of your cute dog..."
-msgstr ""
+msgstr "ใช่แล้ว ฉันอยู่ที่นี่! 🎉 <br/>ตอนนี้ลอง<b>ส่งไฟล์แนบ</b> เช่น รูปสุนัขแสนน่ารักของคุณ..."
 
 #. module: mail_bot
 #. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 msgid "fuck"
-msgstr ""
+msgstr "เชี่ยเอ้ย"
 
 #. module: mail_bot
 #. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 msgid "help"
-msgstr ""
+msgstr "ช่วย"
 
 #. module: mail_bot
 #. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 msgid "i love you"
-msgstr ""
+msgstr "ฉันรักคุณ"
 
 #. module: mail_bot
 #. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 msgid "love"
-msgstr ""
+msgstr "รัก"
 
 #. module: mail_bot
 #. odoo-python
 #: code:addons/mail_bot/models/mail_bot.py:0
 msgid "start the tour"
-msgstr ""
+msgstr "เริ่มทัวร์"

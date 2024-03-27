@@ -3,15 +3,15 @@
 # 	* im_livechat_mail_bot
 #
 # Translators:
-# Wichanon Jamwutthipreecha, 2022
+# Wil Odoo, 2024
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 15.5alpha1\n"
+"Project-Id-Version: Odoo Server saas~17.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-16 13:49+0000\n"
-"PO-Revision-Date: 2022-09-22 05:53+0000\n"
-"Last-Translator: Wichanon Jamwutthipreecha, 2022\n"
+"POT-Creation-Date: 2024-03-26 15:05+0000\n"
+"PO-Revision-Date: 2024-01-17 11:21+0000\n"
+"Last-Translator: Wil Odoo, 2024\n"
 "Language-Team: Thai (https://app.transifex.com/odoo/teams/41243/th/)\n"
 "Language: th\n"
 "MIME-Version: 1.0\n"
@@ -23,34 +23,34 @@ msgstr ""
 #. odoo-python
 #: code:addons/im_livechat_mail_bot/models/mail_bot.py:0
 msgid "Good, you can customize canned responses in the live chat application.<br/><br/><b>It's the end of this overview</b>, enjoy discovering Odoo!"
-msgstr ""
+msgstr "ดีมาก คุณสามารถปรับแต่งการตอบกลับสำเร็จรูปได้ในแอปพลิเคชันไลฟ์แชท <br/><br/><b>ภาพรวมนี้ใกล้จะสิ้นสุดแล้ว</b> ขอให้สนุกกับการเรียนรู้เกี่ยวกับ Odoo!"
 
 #. module: im_livechat_mail_bot
 #: model:ir.model,name:im_livechat_mail_bot.model_mail_bot
 msgid "Mail Bot"
-msgstr ""
+msgstr "เมลบอท"
 
 #. module: im_livechat_mail_bot
 #. odoo-python
 #: code:addons/im_livechat_mail_bot/models/mail_bot.py:0
 msgid "Not sure what you are doing. Please, type %s and wait for the propositions. Select one of them and press enter."
-msgstr ""
+msgstr "ไม่แน่ใจว่าคุณกำลังทำอะไร กรุณาพิมพ์ %s และรอข้อเสนอ เลือกหนึ่งในนั้นแล้วกด Enter"
 
 #. module: im_livechat_mail_bot
 #: model:ir.model.fields,field_description:im_livechat_mail_bot.field_res_users__odoobot_state
 msgid "OdooBot Status"
-msgstr ""
+msgstr "สถานะ OdooBot"
 
 #. module: im_livechat_mail_bot
 #: model:ir.model.fields.selection,name:im_livechat_mail_bot.selection__res_users__odoobot_state__onboarding_canned
 msgid "Onboarding canned"
-msgstr ""
+msgstr "การเริ่มต้นใช้งานแบบสำเร็จรูป"
 
 #. module: im_livechat_mail_bot
 #. odoo-python
 #: code:addons/im_livechat_mail_bot/models/mail_bot.py:0
 msgid "That's me! 🎉<br/>Try typing %s to use canned responses."
-msgstr ""
+msgstr "นั่นคือฉันเอง! 🎉<br/>ลองพิมพ์ %s เพื่อใช้คำตอบสำเร็จรูป"
 
 #. module: im_livechat_mail_bot
 #: model:ir.model,name:im_livechat_mail_bot.model_res_users

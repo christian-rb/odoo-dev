@@ -3,16 +3,15 @@
 # 	* website_twitter
 #
 # Translators:
-# Martin Trigaux, 2022
-# Malaz Abuidris <msea@odoo.com>, 2023
+# Wil Odoo, 2024
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 15.5alpha1\n"
+"Project-Id-Version: Odoo Server saas~17.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-16 13:50+0000\n"
-"PO-Revision-Date: 2022-09-22 05:57+0000\n"
-"Last-Translator: Malaz Abuidris <msea@odoo.com>, 2023\n"
+"POT-Creation-Date: 2024-03-26 15:06+0000\n"
+"PO-Revision-Date: 2024-01-17 11:21+0000\n"
+"Last-Translator: Wil Odoo, 2024\n"
 "Language-Team: Arabic (https://app.transifex.com/odoo/teams/41243/ar/)\n"
 "Language: ar\n"
 "MIME-Version: 1.0\n"
@@ -28,7 +27,7 @@ msgstr "، <strong>أنشئ مشروعاً</strong> بالمعلومات الت�
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
 msgid ", click on <strong>Elevated</strong> then on <strong>Apply</strong> and finally complete the form."
-msgstr ""
+msgstr "، اضغط على <strong>إضافية</strong> ثم <strong>تطبيق</strong> ثم أكمل الاستمارة. "
 
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
@@ -36,6 +35,8 @@ msgid ""
 "<i class=\"oi oi-arrow-right\"/>\n"
 "                            Show me how to obtain the Twitter API key and Twitter API secret"
 msgstr ""
+"<i class=\"oi oi-arrow-right\"/>\n"
+"                            أرني كيفية الحصول على مفتاح الواجهة البرمجية لـ Twitter وسر الواجهة البرمجية لـ Twitter"
 
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
@@ -109,7 +110,7 @@ msgstr "المفضلات من"
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
 msgid "Get Elevated access by going to"
-msgstr ""
+msgstr "احصل على صلاحيات الوصول الإضافية عن طريق الذهاب إلى "
 
 #. module: website_twitter
 #: model:ir.model.fields,field_description:website_twitter.field_website__twitter_screen_name
@@ -286,7 +287,7 @@ msgstr "بوابة تويتر "
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
 msgid "Twitter Roller"
-msgstr ""
+msgstr "شريط تمرير Twitter "
 
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.website_twitter_snippet

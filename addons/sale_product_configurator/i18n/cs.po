@@ -3,17 +3,16 @@
 # 	* sale_product_configurator
 #
 # Translators:
-# karolína schusterová <karolina.schusterova@vdp.sk>, 2022
-# Martin Trigaux, 2022
-# Jiří Podhorecký, 2022
+# Wil Odoo, 2024
+# Katerina Horylova, 2024
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0beta\n"
+"Project-Id-Version: Odoo Server saas~17.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-16 13:49+0000\n"
-"PO-Revision-Date: 2022-09-22 05:55+0000\n"
-"Last-Translator: Jiří Podhorecký, 2022\n"
+"POT-Creation-Date: 2024-03-26 15:06+0000\n"
+"PO-Revision-Date: 2024-01-17 11:21+0000\n"
+"Last-Translator: Katerina Horylova, 2024\n"
 "Language-Team: Czech (https://app.transifex.com/odoo/teams/41243/cs/)\n"
 "Language: cs\n"
 "MIME-Version: 1.0\n"
@@ -24,13 +23,19 @@ msgstr ""
 #. module: sale_product_configurator
 #. odoo-javascript
 #: code:addons/sale_product_configurator/static/src/js/product/product.xml:0
+msgid "Add"
+msgstr "Přidat"
+
+#. module: sale_product_configurator
+#. odoo-javascript
+#: code:addons/sale_product_configurator/static/src/js/product/product.xml:0
 msgid "Add one"
 msgstr "Přidat jeden"
 
 #. module: sale_product_configurator
 #. odoo-javascript
-#: code:addons/sale_product_configurator/static/src/js/product/product.xml:0
-msgid "Add to cart"
+#: code:addons/sale_product_configurator/static/src/js/product_list/product_list.xml:0
+msgid "Add optional products"
 msgstr ""
 
 #. module: sale_product_configurator
@@ -40,15 +45,9 @@ msgstr "Hodnoty atributů"
 
 #. module: sale_product_configurator
 #. odoo-javascript
-#: code:addons/sale_product_configurator/static/src/js/product_list/product_list.xml:0
-msgid "Available Options:"
-msgstr "Dostupné možnosti:"
-
-#. module: sale_product_configurator
-#. odoo-javascript
 #: code:addons/sale_product_configurator/static/src/js/product_configurator_dialog/product_configurator_dialog.xml:0
-msgid "Back"
-msgstr "Zpět"
+msgid "Cancel"
+msgstr "Zrušit"
 
 #. module: sale_product_configurator
 #: model:product.template,name:sale_product_configurator.product_product_1_product_template
@@ -58,14 +57,20 @@ msgstr "Ochrana podlahy židle"
 #. module: sale_product_configurator
 #. odoo-javascript
 #: code:addons/sale_product_configurator/static/src/js/product_configurator_dialog/product_configurator_dialog.js:0
-msgid "Configure"
-msgstr "Konfigurovat"
+msgid "Configure your product"
+msgstr ""
 
 #. module: sale_product_configurator
 #. odoo-javascript
 #: code:addons/sale_product_configurator/static/src/js/product_configurator_dialog/product_configurator_dialog.xml:0
 msgid "Confirm"
 msgstr "Potvrdit"
+
+#. module: sale_product_configurator
+#. odoo-javascript
+#: code:addons/sale_product_configurator/static/src/js/product_template_attribute_line/product_template_attribute_line.xml:0
+msgid "Enter a customized value"
+msgstr ""
 
 #. module: sale_product_configurator
 #: model:ir.model.fields,field_description:sale_product_configurator.field_sale_order_line__is_configurable_product
@@ -76,12 +81,6 @@ msgstr "Je produkt konfigurovatelný?"
 #: model:product.template,description_sale:sale_product_configurator.product_product_1_product_template
 msgid "Office chairs can harm your floor: protect it."
 msgstr "Kancelářské židle mohou poškodit podlahu: chraňte ji."
-
-#. module: sale_product_configurator
-#. odoo-javascript
-#: code:addons/sale_product_configurator/static/src/js/product/product.xml:0
-msgid "Option not available"
-msgstr "Možnost není k dispozici"
 
 #. module: sale_product_configurator
 #: model:ir.model.fields,field_description:sale_product_configurator.field_product_product__optional_product_ids
@@ -112,12 +111,12 @@ msgstr "Produkt"
 #. odoo-javascript
 #: code:addons/sale_product_configurator/static/src/js/product/product.xml:0
 msgid "Product Image"
-msgstr "Obrázek produktu"
+msgstr "Produktový obrázek"
 
 #. module: sale_product_configurator
 #: model_terms:ir.ui.view,arch_db:sale_product_configurator.sale_order_view_form
 msgid "Product Variant"
-msgstr "Varianta výrobku"
+msgstr "Produktová varianta"
 
 #. module: sale_product_configurator
 #. odoo-javascript
@@ -128,7 +127,7 @@ msgstr "Množství"
 #. module: sale_product_configurator
 #: model_terms:ir.ui.view,arch_db:sale_product_configurator.product_template_view_form
 msgid "Recommend when 'Adding to Cart' or quotation"
-msgstr ""
+msgstr "Doporučujeme při \"Přidání do košíku\" nebo nabídce"
 
 #. module: sale_product_configurator
 #. odoo-javascript
@@ -137,18 +136,24 @@ msgid "Remove one"
 msgstr "Odebrat jeden"
 
 #. module: sale_product_configurator
+#. odoo-javascript
+#: code:addons/sale_product_configurator/static/src/js/product/product.xml:0
+msgid "Remove product"
+msgstr ""
+
+#. module: sale_product_configurator
 #: model:ir.model,name:sale_product_configurator.model_sale_order_line
 msgid "Sales Order Line"
-msgstr "Řádek zakázky"
+msgstr "Položka prodejní objednávky"
+
+#. module: sale_product_configurator
+#. odoo-javascript
+#: code:addons/sale_product_configurator/static/src/js/product/product.xml:0
+msgid "This option or combination of options is not available"
+msgstr ""
 
 #. module: sale_product_configurator
 #. odoo-javascript
 #: code:addons/sale_product_configurator/static/src/js/product_list/product_list.xml:0
 msgid "Total:"
-msgstr ""
-
-#. module: sale_product_configurator
-#. odoo-javascript
-#: code:addons/sale_product_configurator/static/src/js/product_template_attribute_line/product_template_attribute_line.xml:0
-msgid "custom"
-msgstr ""
+msgstr "Celkem:"

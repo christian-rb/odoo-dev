@@ -10,6 +10,7 @@ msgstr ""
 "PO-Revision-Date: 2024-01-26 08:10+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
@@ -67,16 +68,12 @@ msgstr "1e. Mit 0% besteuerte oder bei Ihnen nicht besteuerte Lieferungen/Dienst
 
 #. module: l10n_nl
 #: model:account.report.line,name:l10n_nl.tax_report_rub_2a
-msgid ""
-"2a. Supplies/services where the collection of turnover tax has been "
-"transferred to you (turnover)"
+msgid "2a. Supplies/services where the collection of turnover tax has been transferred to you (turnover)"
 msgstr "2a. Lieferungen/Leistungen, bei denen die Erhebung der Umsatzsteuer auf Sie übertragen wurde (Umsatz)"
 
 #. module: l10n_nl
 #: model:account.report.line,name:l10n_nl.tax_report_rub_btw_2a
-msgid ""
-"2a. Supplies/services where the levy of Sales Tax has been transferred to "
-"you (VAT)"
+msgid "2a. Supplies/services where the levy of Sales Tax has been transferred to you (VAT)"
 msgstr "2a. Lieferungen/Dienstleistungen, bei denen die Erhebung der Umsatzsteuer auf Sie übertragen wurde (VAT)"
 
 #. module: l10n_nl
@@ -86,9 +83,7 @@ msgstr "3a. Lieferungen in Länder außerhalb der EU (Exporte) (Umsatz)"
 
 #. module: l10n_nl
 #: model:account.report.line,name:l10n_nl.tax_report_rub_3b
-msgid ""
-"3b. Deliveries to/services in countries within the EU and A-B-C supply chain"
-" transactions (turnover)"
+msgid "3b. Deliveries to/services in countries within the EU and A-B-C supply chain transactions (turnover)"
 msgstr "3b. Lieferungen an/Dienstleistungen in Ländern innerhalb der EU und A-B-C-Lieferkettengeschäfte (Umsatz)"
 
 #. module: l10n_nl
@@ -113,8 +108,7 @@ msgstr "4a. Lieferungen/Dienstleistungen aus Ländern außerhalb der EU (MwSt.)"
 
 #. module: l10n_nl
 #: model:account.report.line,name:l10n_nl.tax_report_rub_4a
-msgid ""
-"4a. Supplies/services from countries outside the EU (imports) (turnover)"
+msgid "4a. Supplies/services from countries outside the EU (imports) (turnover)"
 msgstr "4a. Lieferungen/Dienstleistungen aus Ländern außerhalb der EU (Importe) (Umsatz)"
 
 #. module: l10n_nl

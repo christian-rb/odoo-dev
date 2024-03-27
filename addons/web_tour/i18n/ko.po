@@ -3,15 +3,15 @@
 # 	* web_tour
 #
 # Translators:
-# Martin Trigaux, 2022
+# Wil Odoo, 2024
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~14.5\n"
+"Project-Id-Version: Odoo Server saas~17.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-16 13:50+0000\n"
-"PO-Revision-Date: 2022-09-22 05:56+0000\n"
-"Last-Translator: Martin Trigaux, 2022\n"
+"POT-Creation-Date: 2024-03-26 15:06+0000\n"
+"PO-Revision-Date: 2024-01-17 11:21+0000\n"
+"Last-Translator: Wil Odoo, 2024\n"
 "Language-Team: Korean (https://app.transifex.com/odoo/teams/41243/ko/)\n"
 "Language: ko\n"
 "MIME-Version: 1.0\n"
@@ -30,6 +30,12 @@ msgstr "<strong><b>잘하셨습니다!</b>이번 여정의 모든 단계를 완�
 #: code:addons/web_tour/static/src/tour_service/tour_utils.js:0
 msgid "Click on the <i>Home icon</i> to navigate across apps."
 msgstr "<i>홈 아이콘</i>을 클릭하여 앱을 탐색합니다."
+
+#. module: web_tour
+#. odoo-javascript
+#: code:addons/web_tour/static/src/debug/tour_dialog_component.xml:0
+msgid "Close"
+msgstr "닫기"
 
 #. module: web_tour
 #: model:ir.model.fields,field_description:web_tour.field_web_tour_tour__user_id
@@ -72,13 +78,13 @@ msgstr "이름"
 #. odoo-javascript
 #: code:addons/web_tour/static/src/debug/tour_dialog_component.xml:0
 msgid "Onboarding tours"
-msgstr ""
+msgstr "온보딩 둘러보기"
 
 #. module: web_tour
 #. odoo-javascript
 #: code:addons/web_tour/static/src/tour_service/tour_utils.js:0
 msgid "Open bugger menu."
-msgstr ""
+msgstr "햄버거 버튼 메뉴 열기."
 
 #. module: web_tour
 #. odoo-javascript
@@ -90,13 +96,13 @@ msgstr "경로"
 #. odoo-javascript
 #: code:addons/web_tour/static/src/tour_service/tour_pointer_state.js:0
 msgid "Scroll down to reach the next step."
-msgstr ""
+msgstr "아래로 스크롤하여 다음 단계로 이동하세요."
 
 #. module: web_tour
 #. odoo-javascript
 #: code:addons/web_tour/static/src/tour_service/tour_pointer_state.js:0
 msgid "Scroll up to reach the next step."
-msgstr ""
+msgstr "위로 스크롤하여 다음 단계로 이동합니다."
 
 #. module: web_tour
 #. odoo-javascript
@@ -120,7 +126,7 @@ msgstr "둘러보기 시작"
 #. odoo-javascript
 #: code:addons/web_tour/static/src/debug/tour_dialog_component.xml:0
 msgid "Start tour"
-msgstr ""
+msgstr "둘러보기 시작"
 
 #. module: web_tour
 #. odoo-javascript
@@ -132,13 +138,13 @@ msgstr "테스트"
 #. odoo-javascript
 #: code:addons/web_tour/static/src/debug/tour_dialog_component.xml:0
 msgid "Test tour"
-msgstr ""
+msgstr "둘러보기 테스트"
 
 #. module: web_tour
 #. odoo-javascript
 #: code:addons/web_tour/static/src/debug/tour_dialog_component.xml:0
 msgid "Testing tours"
-msgstr ""
+msgstr "둘러보기 테스트 중"
 
 #. module: web_tour
 #: model_terms:ir.ui.view,arch_db:web_tour.edit_tour_search

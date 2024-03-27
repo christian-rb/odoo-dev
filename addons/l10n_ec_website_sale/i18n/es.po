@@ -6,10 +6,11 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 17.1alpha1+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-11-17 13:55+0000\n"
+"POT-Creation-Date: 2023-11-17 14:58+0000\n"
 "PO-Revision-Date: 2023-11-17 13:55+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
@@ -27,9 +28,7 @@ msgstr "<option value=\"\">Tipo de Identificación...</option>"
 
 #. module: l10n_ec_website_sale
 #: model_terms:ir.ui.view,arch_db:l10n_ec_website_sale.partner_info
-msgid ""
-"Changing Identification type is not allowed once document(s) have been "
-"issued for your account. Please contact us directly for this operation."
+msgid "Changing Identification type is not allowed once document(s) have been issued for your account. Please contact us directly for this operation."
 msgstr "Cambiar el Tipo de Identificación no esta permitido una vez que hayan factura(s) emitadas a tu cuenta. Por favor contactenos directamente para esta operación."
 
 #. module: l10n_ec_website_sale

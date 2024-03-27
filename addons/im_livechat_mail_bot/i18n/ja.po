@@ -3,15 +3,15 @@
 # 	* im_livechat_mail_bot
 #
 # Translators:
-# Martin Trigaux, 2022
+# Wil Odoo, 2024
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 15.5alpha1\n"
+"Project-Id-Version: Odoo Server saas~17.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-16 13:49+0000\n"
-"PO-Revision-Date: 2022-09-22 05:53+0000\n"
-"Last-Translator: Martin Trigaux, 2022\n"
+"POT-Creation-Date: 2024-03-26 15:05+0000\n"
+"PO-Revision-Date: 2024-01-17 11:21+0000\n"
+"Last-Translator: Wil Odoo, 2024\n"
 "Language-Team: Japanese (https://app.transifex.com/odoo/teams/41243/ja/)\n"
 "Language: ja\n"
 "MIME-Version: 1.0\n"
@@ -23,18 +23,18 @@ msgstr ""
 #. odoo-python
 #: code:addons/im_livechat_mail_bot/models/mail_bot.py:0
 msgid "Good, you can customize canned responses in the live chat application.<br/><br/><b>It's the end of this overview</b>, enjoy discovering Odoo!"
-msgstr ""
+msgstr "ライブチャットアプリケーションで定型応答をカスタマイズすることができます。<br/><br/><b>これで概要の説明を終わります</b>、Odooをお楽しみ下さい！"
 
 #. module: im_livechat_mail_bot
 #: model:ir.model,name:im_livechat_mail_bot.model_mail_bot
 msgid "Mail Bot"
-msgstr ""
+msgstr "メールボット"
 
 #. module: im_livechat_mail_bot
 #. odoo-python
 #: code:addons/im_livechat_mail_bot/models/mail_bot.py:0
 msgid "Not sure what you are doing. Please, type %s and wait for the propositions. Select one of them and press enter."
-msgstr ""
+msgstr "何をされているかが不明です。%sを入力して、提案をお待ち下さい。そこから1つを選択してエンターを押して下さい。"
 
 #. module: im_livechat_mail_bot
 #: model:ir.model.fields,field_description:im_livechat_mail_bot.field_res_users__odoobot_state
@@ -44,13 +44,13 @@ msgstr "OdooBotステータス"
 #. module: im_livechat_mail_bot
 #: model:ir.model.fields.selection,name:im_livechat_mail_bot.selection__res_users__odoobot_state__onboarding_canned
 msgid "Onboarding canned"
-msgstr ""
+msgstr "オンボーディング定型文"
 
 #. module: im_livechat_mail_bot
 #. odoo-python
 #: code:addons/im_livechat_mail_bot/models/mail_bot.py:0
 msgid "That's me! 🎉<br/>Try typing %s to use canned responses."
-msgstr ""
+msgstr "私です！ 🎉<br/>%sを入力して定型回答を使って下さい。"
 
 #. module: im_livechat_mail_bot
 #: model:ir.model,name:im_livechat_mail_bot.model_res_users

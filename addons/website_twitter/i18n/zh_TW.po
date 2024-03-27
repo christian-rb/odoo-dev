@@ -3,15 +3,16 @@
 # 	* website_twitter
 #
 # Translators:
-# Martin Trigaux, 2023
+# Wil Odoo, 2024
+# Tony Ng, 2024
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 15.5alpha1\n"
+"Project-Id-Version: Odoo Server saas~17.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-16 13:50+0000\n"
-"PO-Revision-Date: 2022-09-22 05:57+0000\n"
-"Last-Translator: Martin Trigaux, 2023\n"
+"POT-Creation-Date: 2024-03-26 15:06+0000\n"
+"PO-Revision-Date: 2024-01-17 11:21+0000\n"
+"Last-Translator: Tony Ng, 2024\n"
 "Language-Team: Chinese (Taiwan) (https://app.transifex.com/odoo/teams/41243/zh_TW/)\n"
 "Language: zh_TW\n"
 "MIME-Version: 1.0\n"
@@ -22,12 +23,12 @@ msgstr ""
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
 msgid ", <strong>create a project</strong> with the following information:"
-msgstr ""
+msgstr "，使用以下資料<strong>建立一個專案項目</strong>："
 
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
 msgid ", click on <strong>Elevated</strong> then on <strong>Apply</strong> and finally complete the form."
-msgstr ""
+msgstr "，按「<strong>提升</strong>」，然後按「<strong>套用</strong>」，最後完成填寫表格。"
 
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
@@ -35,11 +36,13 @@ msgid ""
 "<i class=\"oi oi-arrow-right\"/>\n"
 "                            Show me how to obtain the Twitter API key and Twitter API secret"
 msgstr ""
+"<i class=\"oi oi-arrow-right\"/>\n"
+"                            教我如何獲取 Twitter API 密鑰及 Twitter API 秘密"
 
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
 msgid "<strong>App Name: </strong> choose a unique name"
-msgstr ""
+msgstr "<strong>應用程式名稱：</strong>選擇一個獨一無二的名稱"
 
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
@@ -49,24 +52,24 @@ msgstr "<strong>描述：</strong> Odoo Twitter 整合"
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
 msgid "<strong>Name: </strong> Odoo Twitter Integration"
-msgstr "<strong>名稱：</strong> Odoo 推特整合"
+msgstr "<strong>名稱：</strong> Odoo Twitter 整合"
 
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
 msgid "<strong>Use Case: </strong> Embedding Tweets in a website"
-msgstr ""
+msgstr "<strong>使用案例：</strong>在網站中嵌入推文"
 
 #. module: website_twitter
 #: model:ir.model.fields,field_description:website_twitter.field_res_config_settings__twitter_api_key
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
 msgid "API Key"
-msgstr "API 金鑰"
+msgstr "API 密鑰"
 
 #. module: website_twitter
 #: model:ir.model.fields,field_description:website_twitter.field_res_config_settings__twitter_api_secret
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
 msgid "API secret"
-msgstr "API 密鑰"
+msgstr "API 秘密"
 
 #. module: website_twitter
 #. odoo-python
@@ -82,12 +85,12 @@ msgstr "配置設定"
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
 msgid "Copy/Paste the API Key and API Key Secret values into the above fields"
-msgstr ""
+msgstr "將 API 密鑰以及 API 密鑰秘密值，複製貼上至上述欄位"
 
 #. module: website_twitter
 #: model:ir.model.fields,field_description:website_twitter.field_website_twitter_tweet__create_uid
 msgid "Created by"
-msgstr "創立者"
+msgstr "建立人員"
 
 #. module: website_twitter
 #: model:ir.model.fields,field_description:website_twitter.field_website_twitter_tweet__create_date
@@ -108,7 +111,7 @@ msgstr "最愛來源"
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
 msgid "Get Elevated access by going to"
-msgstr ""
+msgstr "獲取提升的存取權限，請前往"
 
 #. module: website_twitter
 #: model:ir.model.fields,field_description:website_twitter.field_website__twitter_screen_name
@@ -129,7 +132,7 @@ msgstr "如何設定 Twitter API"
 #. module: website_twitter
 #: model:ir.model.fields,field_description:website_twitter.field_website_twitter_tweet__id
 msgid "ID"
-msgstr "ID"
+msgstr "識別號"
 
 #. module: website_twitter
 #. odoo-python
@@ -150,7 +153,7 @@ msgstr "最後更新於"
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
 msgid "Log in or create an account on"
-msgstr ""
+msgstr "登入或建立新帳戶在"
 
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
@@ -160,19 +163,19 @@ msgstr "於此"
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
 msgid "Once connected, and if not already done, complete the Twitter portal access process on"
-msgstr ""
+msgstr "成功連線後，若未曾做完，請完成 Twitter 門戶存取流程，在"
 
 #. module: website_twitter
 #. odoo-python
 #: code:addons/website_twitter/controllers/main.py:0
 msgid "Please set a Twitter screen name to load favorites from, in the Website Settings (it does not have to be yours)"
-msgstr "請為一個網站設定的推特螢幕名稱來上載您的喜好（它不必是您自己的）"
+msgstr "請在網站設定中，設定用以載入最愛資料的 Twitter 螢幕名稱（不一定是你自己的）"
 
 #. module: website_twitter
 #. odoo-python
 #: code:addons/website_twitter/controllers/main.py:0
 msgid "Please set the Twitter API Key and Secret in the Website Settings."
-msgstr "請在網站設定Twitter API密鑰和secret。"
+msgstr "請在網站設定內，設定 Twitter API 密鑰和秘密。"
 
 #. module: website_twitter
 #. odoo-javascript
@@ -194,7 +197,7 @@ msgstr "螢幕名稱"
 #. module: website_twitter
 #: model:ir.model.fields,help:website_twitter.field_res_config_settings__twitter_screen_name
 msgid "Screen Name of the Twitter Account from which you want to load favorites.It does not have to match the API Key/Secret."
-msgstr "您想從中上載的喜好推特帳號的螢幕名稱。它不必與 API 密鑰/secret相匹配。"
+msgstr "用以載入最愛資料的 Twitter 帳戶的螢幕名稱。此名稱無需與 API 密鑰/秘密相符。"
 
 #. module: website_twitter
 #. odoo-python
@@ -212,7 +215,7 @@ msgstr "Twiiter伺服器已運作，但是由於我們的棧中某些錯誤，�
 #. odoo-python
 #: code:addons/website_twitter/models/res_config_settings.py:0
 msgid "The request is understood, but it has been refused or access is not allowed. Please check your Twitter API Key and Secret."
-msgstr "該請求可以被理解，但是已被拒絕或者拒絕存取。請核查您的Twitter API密鑰和secret。"
+msgstr "明白該請求，但請求已被拒絕，或不允許存取。請檢查你的 Twitter API 密鑰及秘密。"
 
 #. module: website_twitter
 #. odoo-python
@@ -229,17 +232,17 @@ msgstr "沒有新資料可返回。"
 #. module: website_twitter
 #: model:ir.model.fields,field_description:website_twitter.field_website_twitter_tweet__tweet_id
 msgid "Tweet ID"
-msgstr "Tweet ID"
+msgstr "推文識別碼"
 
 #. module: website_twitter
 #: model:ir.model.fields,field_description:website_twitter.field_website_twitter_tweet__tweet
 msgid "Tweets"
-msgstr "Tweets"
+msgstr "推文"
 
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
 msgid "Twitter API Credentials"
-msgstr "Twitter API 憑證"
+msgstr "Twitter API 登入資訊"
 
 #. module: website_twitter
 #: model:ir.model.fields,help:website_twitter.field_website__twitter_api_key
@@ -249,7 +252,7 @@ msgstr "Twitter API 密鑰"
 #. module: website_twitter
 #: model:ir.model.fields,help:website_twitter.field_website__twitter_api_secret
 msgid "Twitter API Secret"
-msgstr "Twitter API secret"
+msgstr "Twitter API 秘密"
 
 #. module: website_twitter
 #: model:ir.model.fields,field_description:website_twitter.field_website__twitter_api_key
@@ -264,12 +267,12 @@ msgstr "您可以通過 https://apps.twitter.com/ 獲取 Twitter API 密鑰"
 #. module: website_twitter
 #: model:ir.model.fields,field_description:website_twitter.field_website__twitter_api_secret
 msgid "Twitter API secret"
-msgstr "Twitter API secret"
+msgstr "Twitter API 秘密"
 
 #. module: website_twitter
 #: model:ir.model.fields,help:website_twitter.field_res_config_settings__twitter_api_secret
 msgid "Twitter API secret you can get it from https://apps.twitter.com/"
-msgstr "您可以通過 https://apps.twitter.com/ 獲取 Twitter API secret"
+msgstr "Twitter API 秘密，可在 https://apps.twitter.com/ 取得。"
 
 #. module: website_twitter
 #. odoo-javascript
@@ -280,23 +283,23 @@ msgstr "Twitter 配置"
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
 msgid "Twitter Portal"
-msgstr ""
+msgstr "Twitter 門戶"
 
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
 msgid "Twitter Roller"
-msgstr ""
+msgstr "Twitter 捲動器"
 
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.website_twitter_snippet
 msgid "Twitter Scroller"
-msgstr "推特捲軸"
+msgstr "Twitter 捲軸"
 
 #. module: website_twitter
 #. odoo-python
 #: code:addons/website_twitter/models/res_config_settings.py:0
 msgid "Twitter authorization error! Please double-check your Twitter API Key and Secret!"
-msgstr "Twitter 授權錯誤！請檢查您的 Twitter API 密鑰和secret！"
+msgstr "Twitter 授權發生錯誤！請檢查你的 Twitter API 密鑰和秘密！"
 
 #. module: website_twitter
 #. odoo-python
@@ -324,18 +327,18 @@ msgstr "Twitter 設置教學"
 #. odoo-python
 #: code:addons/website_twitter/controllers/main.py:0
 msgid "Twitter user @%(username)s has less than 12 favorite tweets. Please add more or choose a different screen name."
-msgstr "推特使用者 @%(username)s少於12個的喜好推文。請加入更多或選擇一個不同的螢幕名稱。"
+msgstr "Twitter 使用者 @%(username)s 的最愛推文少於 12 條。請加入更多最愛推文，或選擇其他螢幕名稱。"
 
 #. module: website_twitter
 #. odoo-javascript
 #: code:addons/website_twitter/static/src/xml/website.twitter.xml:0
 msgid "Twitter's user"
-msgstr "推特使用者"
+msgstr "Twitter的使用者"
 
 #. module: website_twitter
 #: model:ir.actions.server,name:website_twitter.ir_cron_twitter_actions_ir_actions_server
 msgid "Twitter: Fetch new favorites"
-msgstr "推特：獲取新的最愛項目"
+msgstr "Twitter：獲取新的最愛項目"
 
 #. module: website_twitter
 #: model:ir.model,name:website_twitter.model_website
@@ -351,14 +354,14 @@ msgstr "網站 Twitter"
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
 msgid "https://developer.twitter.com/"
-msgstr ""
+msgstr "https://developer.twitter.com/"
 
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
 msgid "https://developer.twitter.com/en/portal/products"
-msgstr ""
+msgstr "https://developer.twitter.com/en/portal/products"
 
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
 msgid "https://developer.twitter.com/portal/"
-msgstr ""
+msgstr "https://developer.twitter.com/portal/"

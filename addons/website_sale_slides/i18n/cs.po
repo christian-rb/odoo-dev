@@ -3,17 +3,16 @@
 # 	* website_sale_slides
 #
 # Translators:
-# Rastislav Brencic <rastislav.brencic@azet.sk>, 2022
-# Martin Trigaux, 2022
-# Jiří Podhorecký, 2022
+# Wil Odoo, 2024
+# Aleš Fiala <f.ales1@seznam.cz>, 2024
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0beta\n"
+"Project-Id-Version: Odoo Server saas~17.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-16 13:50+0000\n"
-"PO-Revision-Date: 2022-09-22 05:57+0000\n"
-"Last-Translator: Jiří Podhorecký, 2022\n"
+"POT-Creation-Date: 2024-03-26 15:06+0000\n"
+"PO-Revision-Date: 2024-01-17 11:21+0000\n"
+"Last-Translator: Aleš Fiala <f.ales1@seznam.cz>, 2024\n"
 "Language-Team: Czech (https://app.transifex.com/odoo/teams/41243/cs/)\n"
 "Language: cs\n"
 "MIME-Version: 1.0\n"
@@ -52,7 +51,7 @@ msgstr ""
 #. module: website_sale_slides
 #: model:product.template,name:website_sale_slides.product_course_channel_5_product_template
 msgid "Basics of Furniture Creation"
-msgstr ""
+msgstr "Základy tvorby nábytku"
 
 #. module: website_sale_slides
 #: model_terms:ir.ui.view,arch_db:website_sale_slides.snippet_options
@@ -80,7 +79,7 @@ msgstr ""
 #: model:ir.model,name:website_sale_slides.model_slide_channel
 #: model:ir.model.fields.selection,name:website_sale_slides.selection__product_template__detailed_type__course
 msgid "Course"
-msgstr "Kurs"
+msgstr "Kurz"
 
 #. module: website_sale_slides
 #: model:product.template,name:website_sale_slides.default_product_course_product_template
@@ -142,7 +141,7 @@ msgstr "Opuštění kurzu a následná opětovná registrace znamená, že vám 
 #. module: website_sale_slides
 #: model_terms:ir.ui.view,arch_db:website_sale_slides.course_buy_course_button
 msgid "Log in"
-msgstr ""
+msgstr "Přihlásit se"
 
 #. module: website_sale_slides
 #: model_terms:ir.actions.act_window,help:website_sale_slides.sale_report_action_slides
@@ -184,7 +183,7 @@ msgstr "Typ výrobku"
 #. module: website_sale_slides
 #: model:ir.model,name:website_sale_slides.model_product_product
 msgid "Product Variant"
-msgstr "Varianta výrobku"
+msgstr "Produktová varianta"
 
 #. module: website_sale_slides
 #: model:ir.model.constraint,message:website_sale_slides.constraint_slide_channel_product_id_check
@@ -194,7 +193,7 @@ msgstr "U platebních kanálů je vyžadován produkt."
 #. module: website_sale_slides
 #: model:ir.ui.menu,name:website_sale_slides.website_slides_menu_report_revenues
 msgid "Revenues"
-msgstr "Příjmy"
+msgstr "Tržby"
 
 #. module: website_sale_slides
 #: model_terms:ir.ui.view,arch_db:website_sale_slides.slide_channel_view_form
@@ -222,7 +221,7 @@ msgstr "Přihlaste se a kupte si kurz, abyste mohli absolvovat kvíz"
 #. module: website_sale_slides
 #: model_terms:ir.ui.view,arch_db:website_sale_slides.course_buy_course_button
 msgid "Sign up"
-msgstr ""
+msgstr "Přihlásit se"
 
 #. module: website_sale_slides
 #: model_terms:ir.ui.view,arch_db:website_sale_slides.course_purchased_confirmation_message
@@ -237,7 +236,7 @@ msgstr "Kurz péče o stromy"
 #. module: website_sale_slides
 #: model_terms:ir.ui.view,arch_db:website_sale_slides.course_buy_course_button
 msgid "There are some"
-msgstr ""
+msgstr "Tam jsou nějací"
 
 #. module: website_sale_slides
 #: model_terms:ir.ui.view,arch_db:website_sale_slides.course_main
@@ -263,13 +262,13 @@ msgstr "Celkové příjmy"
 #. module: website_sale_slides
 #: model:ir.model,name:website_sale_slides.model_website
 msgid "Website"
-msgstr "Webstránka"
+msgstr "Webová stránka"
 
 #. module: website_sale_slides
 #. odoo-python
 #: code:addons/website_sale_slides/models/slide_channel.py:0
 msgid "You are not allowed to add members to this course. Please contact the course responsible or an administrator."
-msgstr ""
+msgstr "Nemáte povolení přidávat členy do tohoto kurzu. Obraťte se prosím na odpovědnou osobu kurzu nebo administrátora."
 
 #. module: website_sale_slides
 #. odoo-python

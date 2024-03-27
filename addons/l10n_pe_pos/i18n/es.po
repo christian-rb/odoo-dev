@@ -6,10 +6,11 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~17.1+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-31 01:59+0000\n"
+"POT-Creation-Date: 2024-01-31 01:57+0000\n"
 "PO-Revision-Date: 2024-01-31 01:59+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
@@ -17,21 +18,13 @@ msgstr ""
 
 #. module: l10n_pe_pos
 #: model_terms:ir.ui.view,arch_db:l10n_pe_pos.ticket_validation_screen
-msgid ""
-"<span class=\"text-danger\">* Please configure your Identification "
-"Number</span><br/>"
-msgstr ""
-"<span class=\"text-danger\">* Por favor configura tu número de "
-"identificación</span><br/>"
+msgid "<span class=\"text-danger\">* Please configure your Identification Number</span><br/>"
+msgstr "<span class=\"text-danger\">* Por favor configura tu número de identificación</span><br/>"
 
 #. module: l10n_pe_pos
 #: model_terms:ir.ui.view,arch_db:l10n_pe_pos.ticket_validation_screen
-msgid ""
-"<span class=\"text-danger\">* Please configure your Identification "
-"Type</span><br/>"
-msgstr ""
-"<span class=\"text-danger\">* Por favor configura tu tipo de "
-"identificación</span><br/>"
+msgid "<span class=\"text-danger\">* Please configure your Identification Type</span><br/>"
+msgstr "<span class=\"text-danger\">* Por favor configura tu tipo de identificación</span><br/>"
 
 #. module: l10n_pe_pos
 #. odoo-javascript
@@ -59,12 +52,8 @@ msgstr "País"
 #. module: l10n_pe_pos
 #. odoo-python
 #: code:addons/l10n_pe_pos/models/res_partner.py:0
-msgid ""
-"Deleting the partner %s is not allowed because it is required by the "
-"Peruvian point of sale."
-msgstr ""
-"No se permite borrar el contacto %s porque se requiere para el punto de "
-"venta peruano."
+msgid "Deleting the partner %s is not allowed because it is required by the Peruvian point of sale."
+msgstr "No se permite borrar el contacto %s porque se requiere para el punto de venta peruano."
 
 #. module: l10n_pe_pos
 #. odoo-javascript
@@ -99,7 +88,6 @@ msgstr "Campo Faltante"
 
 #. module: l10n_pe_pos
 #. odoo-javascript
-#: code:addons/l10n_pe_pos/static/src/overrides/components/partner_editor/partner_editor.xml:0
 #: code:addons/l10n_pe_pos/static/src/overrides/components/partner_editor/partner_editor.xml:0
 msgid "None"
 msgstr "Ninguno"
