@@ -108,7 +108,7 @@ class TestImLivechatMessage(HttpCase):
             'res_id': channel_livechat_1.id,
             'scheduledDatetime': False,
             'sms_ids': [],
-            'starredPersonas': [],
+            'starred': False,
             'subject': False,
             'subtype_description': False,
             'trackingValues': [],

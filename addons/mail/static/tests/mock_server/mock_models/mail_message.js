@@ -71,7 +71,7 @@ export class MailMessage extends models.ServerModel {
     }
 
     /** @param {number[]} ids */
-    _message_format(ids, for_current_user=false) {
+    _message_format(ids, for_current_user = false) {
         /** @type {import("mock_models").IrAttachment} */
         const IrAttachment = this.env["ir.attachment"];
         /** @type {import("mock_models").MailGuest} */
@@ -212,7 +212,9 @@ export class MailMessage extends models.ServerModel {
                     .filter((notification) => notification.is_read)
                     .map((notification) => notification.res_partner_id);
                 response["history_partner_ids"] = historyPartnerIds;
-                response["starredPersonas"] = message.starred_partner_ids.map((id) => ({ id, type: "partner" }));
+                response["starred"] = message.starred_partner_ids?.includes(
+                    this.env.user?.partner_id
+                );
                 const trackingValues = MailTrackingValue._filter([
                     ["id", "in", message.tracking_value_ids],
                 ]);
