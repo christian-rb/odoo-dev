@@ -1240,4 +1240,60 @@ QUnit.module("Fields", (hooks) => {
             assert.containsOnce(target, ".fa-long-arrow-right");
         }
     );
+
+    QUnit.test(
+        "date field should be highlighted if options of date_end is empty",
+        async (assert) => {
+            serverData.models.partner.fields.date_end = { string: "Date End", type: "date" };
+            serverData.models.partner.records[0].date_end = "2017-02-08";
+            await makeView({
+                type: "form",
+                resModel: "partner",
+                serverData,
+                arch: `
+                    <form>
+                        <label for="date" string="Daterange" />
+                        <field name="date" widget="daterange" options="{'end_date_field': 'date_end'}" string="Planned Date" required="date or date_end"/>
+                        <field name="date_end" invisible="1" required="date"/>
+                    </form>`,
+                resId: 1,
+            });
+            await editInput(target, "input[data-field=date_end]", "");
+            await click(target);
+            assert.hasClass(
+                target.querySelector(".o_field_daterange"),
+                "o_field_invalid",
+                "date field should be displayed as invalid"
+            );
+            await editInput(target, "input[data-field=date_end]", "2017-02-08");
+        }
+    );
+
+    QUnit.test(
+        "date field should be highlighted if options of date_start is empty",
+        async (assert) => {
+            serverData.models.partner.fields.date_end = { string: "Date End", type: "date" };
+            serverData.models.partner.records[0].date_end = "2017-02-08";
+            await makeView({
+                type: "form",
+                resModel: "partner",
+                serverData,
+                arch: `
+                    <form>
+                        <label for="date" string="Daterange" />
+                        <field name="date" widget="daterange" options="{'start_date_field': 'date_end'}" string="Planned Date" required="date or date_end"/>
+                        <field name="date_end" invisible="1" required="date"/>
+                    </form>`,
+                resId: 1,
+            });
+            await editInput(target, "input[data-field=date_end]", "");
+            await click(target);
+            assert.hasClass(
+                target.querySelector(".o_field_daterange"),
+                "o_field_invalid",
+                "date field should be displayed as invalid"
+            );
+            await editInput(target, "input[data-field=date_end]", "2017-02-08");
+        }
+    );
 });
