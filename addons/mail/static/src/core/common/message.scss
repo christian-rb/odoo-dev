@@ -28,6 +28,11 @@
     }
 }
 
+.o-mail-guest-user {
+    .o_mail_redirect {
+        cursor: default !important;
+    }
+}
 
 .o-mail-ChatWindow .o-mail-Message.o-selfAuthored {
     flex-direction: row-reverse;

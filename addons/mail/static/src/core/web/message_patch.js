@@ -15,16 +15,19 @@ import {
     formatMonetary,
     formatText,
 } from "@web/views/fields/formatters";
+import { user } from "@web/core/user";
 import { useService } from "@web/core/utils/hooks";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { patch } from "@web/core/utils/patch";
 import { AvatarCardPopover } from "@mail/discuss/web/avatar_card/avatar_card_popover";
+import { PartnerAvatarCardPopover } from "@mail/discuss/web/partner_avatar_card/partner_avatar_card_popover";
 
 patch(Message.prototype, {
     setup() {
         super.setup(...arguments);
         this.action = useService("action");
         this.avatarCard = usePopover(AvatarCardPopover);
+        this.partneravatarCard = usePopover(PartnerAvatarCardPopover);
     },
     get authorAvatarAttClass() {
         return {
@@ -48,6 +51,17 @@ patch(Message.prototype, {
                 });
             }
         }
+    },
+    onClick(ev) {
+        if (ev.target.closest(".o_mail_redirect")) {
+            ev.preventDefault();
+            const partnerId = Number(ev.target.dataset.oeId);
+            this.partneravatarCard.open(ev.target, {
+                id: partnerId,
+            });
+            return;
+        }
+        super.onClick(ev);
     },
     openRecord() {
         this.message.thread.open();

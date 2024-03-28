@@ -35,7 +35,6 @@ import { _t } from "@web/core/l10n/translation";
 import { usePopover } from "@web/core/popover/popover_hook";
 /** @type {ReturnType<import("@mail/utils/common/misc").rpcWithEnv>} */
 let rpc;
-import { user } from "@web/core/user";
 import { useService } from "@web/core/utils/hooks";
 import { url } from "@web/core/utils/urls";
 import { useMessageActions } from "./message_actions";
@@ -427,10 +426,6 @@ export class Message extends Component {
         }
         if (ev.target.closest(".o_mail_redirect")) {
             ev.preventDefault();
-            const partnerId = Number(ev.target.dataset.oeId);
-            if (user.partnerId !== partnerId) {
-                this.store.openChat({ partnerId });
-            }
             return;
         }
         if (ev.target.tagName === "A") {

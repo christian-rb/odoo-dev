@@ -11,12 +11,12 @@ export const patchAvatarCardPopover = {
         this.actionService = useService("action");
     },
     get fieldNames(){
-        let fields = super.fieldNames;
+        const fields = super.fieldNames;
         return fields.concat([
             "work_phone",
-            "work_email", 
-            "job_title", 
-            "department_id", 
+            "work_email",
+            "job_title",
+            "department_id",
             this.props.recordModel ? "employee_id" : "employee_ids",
         ]);
     },
@@ -26,11 +26,12 @@ export const patchAvatarCardPopover = {
     get phone(){
         return this.user.work_phone || this.user.phone;
     },
-    async onClickViewEmployee(){
-        const employeeId = this.user.employee_ids[0];
-        const action = await this.orm.call('hr.employee', 'get_formview_action', [employeeId]);
-        this.actionService.doAction(action); 
-    }
+    async onClickViewProfile() {
+        const id = this.user.employee_ids?.[0] ?? this.user.partner_id?.[0] ?? this.user.id;
+        const model = this.user.employee_ids?.length ? 'hr.employee' : 'res.partner';
+        const action = await this.orm.call(model, 'get_formview_action', [id]);
+        this.actionService.doAction(action);
+    },
 };
 
 export const unpatchAvatarCardPopover = patch(AvatarCardPopover.prototype, patchAvatarCardPopover);

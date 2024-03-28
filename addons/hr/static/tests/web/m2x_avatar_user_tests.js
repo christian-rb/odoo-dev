@@ -76,6 +76,7 @@ QUnit.module("M2XAvatarUser", ({ beforeEach }) => {
                     "phone",
                     "im_status",
                     "share",
+                    "partner_id",
                     "work_phone",
                     "work_email",
                     "job_title",
