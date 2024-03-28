@@ -10,6 +10,12 @@ import { deduceUrl, random5Chars, uuidv4, getOnNotified } from "@point_of_sale/u
 import { Reactive } from "@web/core/utils/reactive";
 import { HWPrinter } from "@point_of_sale/app/printer/hw_printer";
 import { memoize } from "@web/core/utils/functions";
+<<<<<<< HEAD
+||||||| parent of 5b8ba44e529a (temp)
+import { ConnectionLostError } from "@web/core/network/rpc";
+=======
+import { ConnectionLostError, RPCError } from "@web/core/network/rpc";
+>>>>>>> 5b8ba44e529a (temp)
 import { OrderReceipt } from "@point_of_sale/app/screens/receipt_screen/receipt/order_receipt";
 import { _t } from "@web/core/l10n/translation";
 import { CashOpeningPopup } from "@point_of_sale/app/store/cash_opening_popup/cash_opening_popup";
@@ -99,6 +105,16 @@ export class PosStore extends Reactive {
             pos_data,
         }
     ) {
+        if (pos_data instanceof Error) {
+            let message = _t("An error occurred while loading the Point of Sale: \n");
+            if (pos_data instanceof RPCError) {
+                message += pos_data.data.message;
+            } else {
+                message += pos_data.message;
+            }
+            window.alert(message);
+            window.location = "/web#action=point_of_sale.action_client_pos_menu";
+        }
         this.env = env;
         this.numberBuffer = number_buffer;
         this.barcodeReader = barcode_reader;
