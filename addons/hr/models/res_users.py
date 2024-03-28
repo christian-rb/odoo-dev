@@ -265,6 +265,10 @@ class User(models.Model):
                         ),
                         partner_ids=partner_ids,
                     )
+        company_ids = vals.get('company_ids', [])
+        remove_company_ids = [company[1] for company in company_ids if isinstance(company, list) and company[0] == 3]
+        if remove_company_ids and self.employee_id.company_id.id in remove_company_ids:
+            raise AccessError(_("You are not allowed to modify Allowed Companies as company is linked to employee"))
         result = super(User, self).write(vals)
 
         employee_values = {}
@@ -308,6 +312,8 @@ class User(models.Model):
 
     def action_create_employee(self):
         self.ensure_one()
+        if self.env.company not in self.company_ids:
+            raise AccessError(_("You are not allowed to create an employee because the user does not have access rights for %s", self.env.company.name))
         self.env['hr.employee'].create(dict(
             name=self.name,
             company_id=self.env.company.id,
