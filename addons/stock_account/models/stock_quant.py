@@ -19,6 +19,58 @@ class StockQuant(models.Model):
              " If empty, the inventory date will be used.")
     cost_method = fields.Selection(related="product_categ_id.property_cost_method")
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        valid_vals = [vals for vals in vals_list if 'lot_id' in vals]
+        all_product_ids = [vals['product_id'] for vals in valid_vals]
+        all_location_ids = [vals['location_id'] for vals in valid_vals]
+        all_lot_ids = [vals['lot_id'] for vals in valid_vals]
+        # get all the duplicate quants which will not create new quant rather will update existing one
+        duplicate_quants = []
+        if len(all_product_ids) > 0:
+            duplicate_quants = self.search([
+                ('product_id', 'in', all_product_ids),
+                ('location_id', 'in', all_location_ids),
+                ('lot_id', 'in', all_lot_ids)])
+        quants = super().create(vals_list)
+
+        duplicate_quants_ids = [q.id for q in duplicate_quants]
+        # filter out all duplicates since these will not create new quants, update existing one
+        quants_of_tracked_product = quants.filtered(lambda q: q.tracking in ['lot', 'serial'] and q.id not in duplicate_quants_ids)
+        product_ids = [q.product_id.id for q in quants_of_tracked_product]
+        location_ids = [q.location_id.id for q in quants_of_tracked_product]
+
+        nearest_date_quants = self.search([
+            ('product_id', 'in', product_ids),
+            ('location_id', 'in', location_ids),
+            ('accounting_date', '<', fields.Date().today())], order='accounting_date desc')
+        quant_groups = {}
+        for quant in nearest_date_quants:
+            key = (quant.product_id.id, quant.location_id.id)
+            if key not in quant_groups or quant.accounting_date > quant_groups[key].accounting_date:
+                quant_groups[key] = quant
+
+        for quant in quants_of_tracked_product:
+            # nearest_date == date which is closest from today in past
+            key = (quant.product_id.id, quant.location_id.id)
+            if key in quant_groups:
+                quant.accounting_date = quant_groups[key].accounting_date
+        return quants
+
+    def action_apply_inventory(self):
+        # set the accounting date for quants if all quants have same product and location and quant have tracking product
+        # first check all quants are similar(same product and location) and tracked
+        product_id = list({quant.product_id for quant in self})
+        location_id = list({quant.location_id for quant in self})
+        if len(product_id) == 1 and len(location_id) == 1 and product_id[0].tracking in ['lot', 'serial']:
+            nearest_date = self.search([
+                ('product_id', '=', product_id[0].id),
+                ('location_id', '=', location_id[0].id),
+                ('accounting_date', '<', fields.Date().today())], order='accounting_date desc', limit=1).accounting_date
+            if nearest_date:
+                self.write({"accounting_date": nearest_date})
+        return super().action_apply_inventory()
+
     @api.model
     def _should_exclude_for_valuation(self):
         """
