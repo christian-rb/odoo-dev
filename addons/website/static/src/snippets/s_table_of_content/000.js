@@ -63,8 +63,15 @@ const TableOfContent = publicWidget.Widget.extend({
     async start() {
         this._stripNavbarStyles();
         await this._super(...arguments);
+<<<<<<< HEAD
         this._scrollElement = this.$target.closest(".s_table_of_content").closestScrollable()[0];
         this._tocElement = this.el.querySelector('.s_table_of_content_navbar');
+||||||| parent of 1b171e04ead9 (temp)
+        this.$scrollingElement = this.$target.closest(".s_table_of_content").closestScrollable();
+=======
+        this.$scrollingElement = this.$target.closest(".s_table_of_content").closestScrollable();
+        this.$scrollingTarget = $().getScrollingTarget(this.$scrollingElement);
+>>>>>>> 1b171e04ead9 (temp)
         this.previousPosition = -1;
         this._updateTableOfContentNavbarPosition();
         this._updateTableOfContentNavbarPositionBound = this._updateTableOfContentNavbarPosition.bind(this);
@@ -121,9 +128,26 @@ const TableOfContent = publicWidget.Widget.extend({
         position += isHorizontalNavbar ? this.$el.outerHeight() : 0;
         this.$el.find('.s_table_of_content_navbar').css('maxHeight', isHorizontalNavbar ? '' : `calc(100vh - ${position + 40}px)`);
         if (this.previousPosition !== position) {
+<<<<<<< HEAD
             this._offset = position + 100;
             this._refresh();
             this._process();
+||||||| parent of 1b171e04ead9 (temp)
+            new ScrollSpy(this.$scrollingElement, {
+                target: this.$el.find('.s_table_of_content_navbar'),
+                method: 'offset',
+                offset: position + 100,
+                alwaysKeepFirstActive: true
+            });
+=======
+            const target = this.$scrollingTarget[0];
+            new ScrollSpy(target instanceof Window ? target.document.body : target, {
+                target: this.$el.find('.s_table_of_content_navbar'),
+                method: 'offset',
+                offset: position + 100,
+                alwaysKeepFirstActive: true
+            });
+>>>>>>> 1b171e04ead9 (temp)
             this.previousPosition = position;
         }
     },
