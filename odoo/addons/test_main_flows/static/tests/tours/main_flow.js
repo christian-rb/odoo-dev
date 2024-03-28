@@ -89,6 +89,19 @@ stepUtils.autoExpandMoreButtons('.o_form_saved'),
     content: _t("Let's create a new bill of material"),
     position: "bottom",
 }, {
+    trigger: 'th.o_list_actions_header i.o_optional_columns_dropdown_toggle',
+    content: _t("Let's make sure to display the variant column"),
+    position: "bottom",
+}, {
+    trigger: 'span.o-dropdown-item span:contains("Product Variant")',
+    run: (action) => {
+        action.click();
+        const e = $('input[type="checkbox"][name="product_id"]:not(:checked)');
+        if (e.length > 0) {
+            action.click(e);
+        }
+    },
+}, {
 // Add first component
     // FIXME in mobile replace list by kanban + form
     trigger: ".o_field_x2many_list_row_add > a",
@@ -97,7 +110,7 @@ stepUtils.autoExpandMoreButtons('.o_form_saved'),
     position: "bottom",
 }, {
     mobile: false,
-    trigger: ".o_selected_row .o_required_modifier[name=product_id] input",
+    trigger: ".o_selected_row [name=product_id] input",
     content: _t("Select a product, or create a new one on the fly."),
     position: "right",
     run: "edit the_flow.component1",
@@ -107,7 +120,7 @@ stepUtils.autoExpandMoreButtons('.o_form_saved'),
     auto: true,
 }, {
     mobile: true,
-    trigger: ".o_selected_row .o_required_modifier[name=product_id] input",
+    trigger: ".o_selected_row [name=product_id] input",
     content: _t("Click here to open kanban search mobile."),
     position: "bottom",
 }, {
@@ -202,7 +215,7 @@ stepUtils.autoExpandMoreButtons('.o_form_saved'),
 }, {
     mobile: true,
     trigger: ".modal-footer .btn-primary:contains('Save')",
-    extra_trigger: ".modal:not(.o_inactive_modal) .modal-title:contains('Component')",
+    extra_trigger: ".modal:not(.o_inactive_modal) .modal-title:contains('Product Variant')",
     content: _t('Save'),
     position: 'right',
 }, {
@@ -234,7 +247,7 @@ stepUtils.autoExpandMoreButtons('.o_form_saved'),
     position: "bottom",
 }, {
     mobile: true,
-    trigger: ".o_selected_row .o_required_modifier[name=product_id] input",
+    trigger: ".o_selected_row td[name=product_id] input",
     content: _t("Click here to open kanban search mobile."),
     position: "bottom",
 }, {
@@ -251,7 +264,7 @@ stepUtils.autoExpandMoreButtons('.o_form_saved'),
     run: "edit the_flow.component2",
 }, {
     mobile: false,
-    trigger: ".o_selected_row .o_required_modifier[name=product_id] input",
+    trigger: ".o_selected_row td[name=product_id] input",
     extra_trigger: '.o_field_widget[name=bom_line_ids] .o_data_row:nth-child(2).o_selected_row',
     content: _t("Select a product, or create a new one on the fly."),
     position: "right",
@@ -315,7 +328,7 @@ stepUtils.autoExpandMoreButtons('.o_form_saved'),
 }, {
     mobile: true,
     trigger: ".modal-footer .btn-primary:contains('Save')",
-    extra_trigger: ".modal:not(.o_inactive_modal) .modal-title:contains('Component')",
+    extra_trigger: ".modal:not(.o_inactive_modal) .modal-title:contains('Product Variant')",
     content: _t('Save'),
     position: 'right',
 }, {

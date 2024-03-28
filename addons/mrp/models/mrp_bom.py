@@ -102,7 +102,7 @@ class MrpBom(models.Model):
     )
     def _compute_possible_product_template_attribute_value_ids(self):
         for bom in self:
-            bom.possible_product_template_attribute_value_ids = bom.product_tmpl_id.valid_product_template_attribute_line_ids._without_no_variant_attributes().product_template_value_ids._only_active()
+            bom.possible_product_template_attribute_value_ids = bom.product_tmpl_id.valid_product_template_attribute_line_ids.product_template_value_ids._only_active()
 
     @api.onchange('product_id')
     def _onchange_product_id(self):
@@ -375,26 +375,30 @@ class MrpBom(models.Model):
 
         bom_lines = []
         for bom_line in self.bom_line_ids:
-            product_id = bom_line.product_id
-            bom_lines.append((bom_line, product, quantity, False))
-            product_ids.add(product_id.id)
+            if bom_line.product_id:
+                product_id = bom_line.product_id
+            else:
+                product_id = bom_line.get_product_variant(product)
+            if product_id:
+                bom_lines.append((bom_line, product, quantity, False, product_id))
+                product_ids.add(product_id.id)
         update_product_boms()
         product_ids.clear()
         while bom_lines:
-            current_line, current_product, current_qty, parent_line = bom_lines[0]
+            current_line, current_product, current_qty, parent_line, current_line_product_id = bom_lines[0]
             bom_lines = bom_lines[1:]
 
             if current_line._skip_bom_line(current_product):
                 continue
 
             line_quantity = current_qty * current_line.product_qty
-            if not current_line.product_id in product_boms:
+            if current_line_product_id not in product_boms:
                 update_product_boms()
                 product_ids.clear()
-            bom = product_boms.get(current_line.product_id)
+            bom = product_boms.get(current_line_product_id)
             if bom:
                 converted_line_quantity = current_line.product_uom_id._compute_quantity(line_quantity / bom.product_qty, bom.product_uom_id)
-                bom_lines += [(line, current_line.product_id, converted_line_quantity, current_line) for line in bom.bom_line_ids]
+                bom_lines += [(line, current_line_product_id, converted_line_quantity, current_line, line.product_id or line.get_product_variant(current_line_product_id)) for line in bom.bom_line_ids]
                 for bom_line in bom.bom_line_ids:
                     if not bom_line.product_id in product_boms:
                         product_ids.add(bom_line.product_id.id)
@@ -486,8 +490,8 @@ class MrpBomLine(models.Model):
     def _get_default_product_uom_id(self):
         return self.env['uom.uom'].search([], limit=1, order='id').id
 
-    product_id = fields.Many2one('product.product', 'Component', required=True, check_company=True)
-    product_tmpl_id = fields.Many2one('product.template', 'Product Template', related='product_id.product_tmpl_id', store=True, index=True)
+    product_id = fields.Many2one('product.product', 'Product Variant', check_company=True)
+    product_tmpl_id = fields.Many2one('product.template', 'Product', compute='_compute_product_tmpl_id', store=True, index=True, readonly=False)
     company_id = fields.Many2one(
         related='bom_id.company_id', store=True, index=True, readonly=True)
     product_qty = fields.Float(
@@ -506,7 +510,22 @@ class MrpBomLine(models.Model):
         'mrp.bom', 'Parent BoM',
         index=True, ondelete='cascade', required=True)
     parent_product_tmpl_id = fields.Many2one('product.template', 'Parent Product Template', related='bom_id.product_tmpl_id')
-    possible_bom_product_template_attribute_value_ids = fields.Many2many(related='bom_id.possible_product_template_attribute_value_ids')
+    possible_bom_product_template_attribute_value_ids = fields.Many2many(related='bom_id.possible_product_template_attribute_value_ids', string="Possible Bom Product Template Attribute Value")
+    # Stores the possible attribute values of the bom product template
+    possible_product_template_attribute_value_ids = fields.Many2many(
+        'product.template.attribute.value',
+        'mrp_bom_line_product_template_attribute_possible_value_rel',
+        'bom_line_id', 'product_template_attribute_value_id',
+        compute='_compute_possible_product_template_attribute_value_ids')
+    # Stores the selected attribute values of the component product templat
+    selected_product_template_attribute_value_ids = fields.Many2many(
+        'product.template.attribute.value',
+        'mrp_bom_line_product_template_attribute_selected_value_rel',
+        'bom_line_id', 'product_template_attribute_value_id',
+        string="Attribute", store=True, ondelete='restrict',
+        readonly=False,
+        compute="_compute_selected_attributes",
+        domain="[('id', 'in', possible_product_template_attribute_value_ids)]")
     bom_product_template_attribute_value_ids = fields.Many2many(
         'product.template.attribute.value', string="Apply on Variants", ondelete='restrict',
         domain="[('id', 'in', possible_bom_product_template_attribute_value_ids)]",
@@ -534,6 +553,21 @@ class MrpBomLine(models.Model):
             'Lines with 0 quantities can be used as optional lines. \n'
             'You should install the mrp_byproduct module if you want to manage extra products on BoMs!'),
     ]
+
+    @api.depends('product_id')
+    def _compute_product_tmpl_id(self):
+        for line in self:
+            line.product_tmpl_id = line.product_id.product_tmpl_id
+
+    @api.depends('product_id')
+    def _compute_selected_attributes(self):
+        for line in self:
+            line.selected_product_template_attribute_value_ids = line.product_id.product_template_attribute_value_ids
+
+    @api.depends('product_tmpl_id')
+    def _compute_possible_product_template_attribute_value_ids(self):
+        for line in self:
+            line.possible_product_template_attribute_value_ids = line.product_tmpl_id.valid_product_template_attribute_line_ids.product_template_value_ids._only_active()
 
     @api.depends('product_id', 'bom_id')
     def _compute_child_bom_id(self):
@@ -570,17 +604,47 @@ class MrpBomLine(models.Model):
             res['warning'] = {'title': _('Warning'), 'message': _('The Product Unit of Measure you chose has a different category than in the product form.')}
         return res
 
-    @api.onchange('product_id')
+    @api.onchange('product_id', 'product_tmpl_id')
     def onchange_product_id(self):
         if self.product_id:
             self.product_uom_id = self.product_id.uom_id.id
+        elif self.product_tmpl_id:
+            self.product_uom_id = self.product_tmpl_id.uom_id.id
 
     @api.model_create_multi
     def create(self, vals_list):
         for values in vals_list:
-            if 'product_id' in values and 'product_uom_id' not in values:
+            if 'product_id' in values and 'product_uom_id' not in values and "product_tmpl_id" not in values:
                 values['product_uom_id'] = self.env['product.product'].browse(values['product_id']).uom_id.id
-        return super(MrpBomLine, self).create(vals_list)
+            if 'product_id' in values and values.get('product_id'):
+                continue
+
+            # we might want to do a batch _check_create_values in the future as we are reading a lot of values potentially many times
+            product_tmpl_id = self.env["product.template"].browse(values["product_tmpl_id"])
+            if not product_tmpl_id:
+                raise UserError(_('You need to specify a product_tmpl_id'))
+
+            bom_id = self.env["mrp.bom"].browse(values.get("bom_id"))
+            possible_bom_ptavs = bom_id.possible_product_template_attribute_value_ids if bom_id else False
+            bom_ptav_ids = values.get('bom_product_template_attribute_value_ids', False) and [v[1] for v in values.get('bom_product_template_attribute_value_ids')]
+            bom_ptavs = self.env["product.template.attribute.value"].browse(bom_ptav_ids)
+            possible_ptavs = product_tmpl_id.valid_product_template_attribute_line_ids._without_no_variant_attributes().product_template_value_ids._only_active()
+            selected_ptavs_ids = values.get('selected_product_template_attribute_value_ids', False) and [v[1] for v in values.get('selected_product_template_attribute_value_ids')]
+            selected_ptavs = self.env["product.template.attribute.value"].browse(selected_ptavs_ids)
+
+            self._check_values(product_tmpl_id, bom_id, possible_bom_ptavs, bom_ptavs, possible_ptavs, selected_ptavs)
+
+        return super().create(vals_list)
+
+    def write(self, vals_list):
+        res = super().write(vals_list)
+        self._check_values(self.product_tmpl_id, self.bom_id,
+            self.possible_bom_product_template_attribute_value_ids,
+            self.bom_product_template_attribute_value_ids,
+            self.possible_product_template_attribute_value_ids,
+            self.selected_product_template_attribute_value_ids
+        )
+        return res
 
     def _skip_bom_line(self, product):
         """ Control if a BoM line should be produced, can be inherited to add
@@ -589,7 +653,7 @@ class MrpBomLine(models.Model):
         self.ensure_one()
         if product._name == 'product.template':
             return False
-        return not product._match_all_variant_values(self.bom_product_template_attribute_value_ids)
+        return not product._match_all_variant_values(self.bom_product_template_attribute_value_ids.filtered(lambda ptav: ptav.attribute_id.create_variant != 'no_variant'))
 
     def action_see_attachments(self):
         domain = [
@@ -613,6 +677,110 @@ class MrpBomLine(models.Model):
             'limit': 80,
             'context': "{'default_res_model': '%s','default_res_id': %d, 'default_company_id': %s}" % ('product.product', self.product_id.id, self.company_id.id)
         }
+
+
+    def get_product_variant(self, product):
+        """
+            This function return the product variant (the component on the bom line) to use with the product passed in params
+
+            We need to match the attribute values with the product attribute values if possible.
+            The product variant (and thus the attributes values) is chosen by following theses rules:
+
+            If there is a product.product defined on the bom line, all the following logic is bypassed and we return the product.product
+            If an attribute value is defined on the line, no need to recompute it
+
+            There are multiple options for each attribute:
+
+                1: There is the same attribute on the product and the component
+                    a: The value present on the bom product is present on the compo => match
+                    b: There is a value on the compo not present on the bom product => never match
+                    c: The value on the bom product is not present on the compo => never match except if the attribute value is set
+                2: There is an attribute that is present on the bom product but not on the compo
+                    The match is done on all other attributes, so the value on that specific bom product attribute does not matter
+                3: There is an attribute that is present on the compo but not on the bom product
+                    Need to specify the attribute value on the component or throw an error
+        """
+
+        if self.product_id:
+            return self.product_id
+
+        template_attribute_lines_values = self.selected_product_template_attribute_value_ids
+
+        compo_pal = self.possible_product_template_attribute_value_ids.attribute_id
+        product_pal = product.product_template_attribute_value_ids.attribute_id
+
+        common_pal = (compo_pal & product_pal).filtered(lambda pal: pal not in template_attribute_lines_values.attribute_id)
+        compo_additional_pal = compo_pal.filtered(lambda cpal: cpal not in product_pal and cpal not in template_attribute_lines_values.attribute_id)
+
+        # check if there are attributes that can be selected based on the attributes of the bom product
+        for bptav in self.bom_product_template_attribute_value_ids:
+            if bptav not in product.product_template_attribute_value_ids:
+                continue
+            if bptav.attribute_id not in common_pal:
+                continue
+            common_pal = common_pal - bptav.attribute_id
+            ptav = self.possible_product_template_attribute_value_ids.filtered(lambda v:
+                v.attribute_id == bptav.attribute_id and v.product_attribute_value_id == bptav.product_attribute_value_id)
+            if not ptav:
+                raise UserError(_("Missing attribute value for %s on the component %s", bptav.attribute_id.name, self.product_tmpl_id.name))
+            template_attribute_lines_values |= ptav
+
+        # check if there are attributes that needs to be specified on the component
+        for pal in compo_additional_pal:
+            ptavs = self.selected_product_template_attribute_value_ids.filtered(lambda v: v.attribute_id == pal)
+            if not ptavs:
+                raise UserError(_("Missing attribute value for %s on the component %s", pal.name, self.product_tmpl_id.name))
+            if len(ptavs) > 1:
+                raise UserError(_("Too many attribute values for %s on the component %s", pal.name, self.product_tmpl_id.name))
+            template_attribute_lines_values |= self.selected_product_template_attribute_value_ids.filtered(lambda v: v.attribute_id == pal)
+
+        # check if there is a match on common attributes
+        for pal in common_pal:
+            prod_value = product.product_template_attribute_value_ids.filtered(lambda v: v.attribute_id == pal)
+            ptav = self.possible_product_template_attribute_value_ids.filtered(lambda ppav: ppav.product_attribute_value_id == prod_value.product_attribute_value_id)
+            if ptav:
+                template_attribute_lines_values |= ptav
+            else:
+                return False
+
+        template_attribute_lines_values = template_attribute_lines_values.filtered(lambda v: v.attribute_id.create_variant != 'no_variant')
+        product_from_template = self.env['product.product'].search([('product_tmpl_id', '=', self.product_tmpl_id.id)])
+        product_match = [product for product in product_from_template if product.product_template_attribute_value_ids.sorted('id').ids == template_attribute_lines_values.sorted('id').ids]
+
+        if not product_match and any(talv.create_variant == "dynamic" for talv in template_attribute_lines_values.attribute_id):
+            return self.product_tmpl_id._create_product_variant(template_attribute_lines_values)
+
+        # not possible to find multiple variants
+        return product_match[0] if len(product_match) == 1 else False
+
+    def _check_values(self, product_tmpl_id, bom_id, possible_bom_ptavs, bom_ptavs, possible_ptavs, selected_ptavs):
+        compo_pal = possible_ptavs.attribute_id
+
+        # TODO: this loop definitely needs simplification
+        # we could just check by attributes, then check for the values instead of doing it by variants
+        # FIXME: no loop on variants
+        for product in bom_id.product_tmpl_id.product_variant_ids:
+            product_pal = product.product_template_attribute_value_ids.attribute_id
+            common_pal = (compo_pal & product_pal).filtered(lambda pal: pal not in selected_ptavs.attribute_id)
+
+            for bptav in bom_ptavs:
+                if bptav.attribute_id not in common_pal:
+                    continue
+                ptav = possible_ptavs.filtered(lambda v: v.attribute_id == bptav.attribute_id and v.product_attribute_value_id == bptav.product_attribute_value_id)
+                if not ptav:
+                    raise UserError(_("Missing attribute value for %s on the component %s", bptav.attribute_id.name, product_tmpl_id.name))
+
+        missing_pal = possible_ptavs.attribute_id\
+            .filtered(lambda cpal: cpal not in bom_id.product_tmpl_id.attribute_line_ids.attribute_id and cpal not in selected_ptavs.attribute_id)
+        if missing_pal:
+            raise UserError(_("Missing attribute value for %s on the component %s", missing_pal.name if len(missing_pal) == 1 else missing_pal[0].name, product_tmpl_id.name))
+
+        attribute_ids_found = []
+        attribute_values_duplicate = next((s for s, seen in ((s, s.attribute_id in attribute_ids_found or attribute_ids_found.append(s.attribute_id)) for s in selected_ptavs) if seen), None)
+        if attribute_values_duplicate:
+            if len(attribute_values_duplicate) > 1:
+                attribute_values_duplicate = attribute_values_duplicate[0]
+            raise UserError(_("Too many attribute value found for %s on the component %s", attribute_values_duplicate.attribute_id.name, product_tmpl_id.name))
 
     # -------------------------------------------------------------------------
     # CATALOG
