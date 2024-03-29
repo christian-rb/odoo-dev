@@ -17,11 +17,45 @@ class ResCompany(models.Model):
     l10n_ar_company_requires_vat = fields.Boolean(compute='_compute_l10n_ar_company_requires_vat', string='Company Requires Vat?')
     l10n_ar_afip_start_date = fields.Date('Activities Start')
 
-    @api.onchange('country_id')
-    def onchange_country(self):
-        """ Argentinean companies use round_globally as tax_calculation_rounding_method """
-        for rec in self.filtered(lambda x: x.country_id.code == "AR"):
-            rec.tax_calculation_rounding_method = 'round_globally'
+    @api.model
+    def _get_ar_responsibility_match(self):
+        """ return responsibility type that match with the given chart_template code
+        """
+        return {
+            'ar_base': self.env.ref('l10n_ar.res_RM'),
+            'ar_ex': self.env.ref('l10n_ar.res_IVAE'),
+            'ar_ri': self.env.ref('l10n_ar.res_IVARI'),
+        }
+
+    def setup_ar_company_if_ar_coa(self):
+        """ Set companies AFIP Responsibility and Country if AR CoA is installed, also set tax calculation rounding
+        method required in order to properly validate match AFIP invoices.
+
+        Also, raise a warning if the user is trying to install a CoA that does not match with the defined AFIP
+        Responsibility defined in the company
+        """
+        coa_responsibility = self._get_ar_responsibility_match()
+        for company in self.filtered(lambda c: coa_responsibility.get(c.chart_template)):
+            company.write({
+                'l10n_ar_afip_responsibility_type_id': coa_responsibility.get(company.chart_template).id,
+                'tax_calculation_rounding_method': 'round_globally',
+                'country_id': self.env.ref('base.ar').id,
+            })
+
+            # set CUIT identification type `which is the argentinean vat` in the created company partner instead of
+            # the default VAT type.
+            company.partner_id.l10n_latam_identification_type_id = self.env.ref('l10n_ar.it_cuit')
+
+    def create(self, vals):
+        companies = super().create(vals)
+        companies.setup_ar_company_if_ar_coa()
+        return companies
+
+    def write(self, vals):
+        res = super().write(vals)
+        if 'chart_template' in vals:
+            self.setup_ar_company_if_ar_coa()
+        return res
 
     @api.depends('l10n_ar_afip_responsibility_type_id')
     def _compute_l10n_ar_company_requires_vat(self):
