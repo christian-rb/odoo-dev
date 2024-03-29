@@ -183,3 +183,14 @@ class ResConfigSettings(models.TransientModel):
     def update_access_tokens(self):
         self.ensure_one()
         self.pos_config_id._update_access_token()
+
+    @api.depends('pos_self_ordering_mode')
+    def _compute_pos_pricelist_id(self):
+        super()._compute_pos_pricelist_id()
+        for res_config in self:
+            currency_id = res_config.pos_journal_id.currency_id.id if res_config.pos_journal_id.currency_id else res_config.pos_config_id.company_id.currency_id.id
+            if res_config.pos_self_ordering_mode == 'kiosk':
+                res_config.pos_available_pricelist_ids = self.env['product.pricelist'].search([
+                    *self.env['product.pricelist']._check_company_domain(res_config.pos_config_id.company_id),
+                    ('currency_id', '=', currency_id),
+                ])

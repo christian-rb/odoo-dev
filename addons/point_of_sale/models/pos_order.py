@@ -483,6 +483,7 @@ class PosOrder(models.Model):
     def _complete_values_from_session(self, session, values):
         if values.get('state') and values['state'] == 'paid' and not values.get('name'):
             values['name'] = self._compute_order_name()
+        values.pop('pricelist_id', False)   # pricelist_id is False in self-ordering and kiosk modes
         values.setdefault('pricelist_id', session.config_id.pricelist_id.id)
         values.setdefault('fiscal_position_id', session.config_id.default_fiscal_position_id.id)
         values.setdefault('company_id', session.config_id.company_id.id)
