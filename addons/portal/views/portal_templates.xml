@@ -7,6 +7,7 @@
         </xpath>
         <xpath expr="//div[@id='wrapwrap']/header/img" position="replace">
             <t t-cache="res_company">
+                <a class="o_skip_to_content btn btn-primary rounded-0 visually-hidden-focusable position-absolute" href="#wrap" tabindex="1" groups="!base.group_user">Skip to Content</a>
                 <nav class="navbar navbar-expand navbar-light bg-light">
                     <div class="container">
                         <a href="/" class="navbar-brand logo">

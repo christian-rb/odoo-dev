@@ -26,6 +26,11 @@ body {
 }
 
 header {
+    .o_skip_to_content {
+        // We require the z-index property to ensure that the "Skip to Content"
+        // button appears above all other elements and header.
+        z-index: 1000;
+    }
     .navbar-brand {
         flex: 0 0 auto;
         max-width: 75%;
