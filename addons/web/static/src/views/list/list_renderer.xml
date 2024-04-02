@@ -15,7 +15,7 @@
                 <thead>
                     <tr>
                         <th t-if="hasSelectors" class="o_list_record_selector o_list_controller align-middle pe-1 cursor-pointer" tabindex="-1" t-on-keydown="(ev) => this.onCellKeydown(ev)" t-on-click.stop="toggleSelection">
-                            <CheckBox disabled="!_canSelectRecord" value="selectAll" className="'d-flex m-0'" onChange.bind="toggleSelection"/>
+                            <CheckBox disabled="!_canSelectRecord" value="selectAll" className="'d-print-none d-flex m-0'" onChange.bind="toggleSelection"/>
                         </th>
                         <t t-foreach="columns" t-as="column" t-key="column.id">
                             <th t-if="column.type === 'field'"
@@ -40,11 +40,11 @@
                                           t-on-pointerdown.stop.prevent="onStartResize"/>
                                 </t>
                             </th>
-                            <th t-else="" t-on-keydown="(ev) => this.onCellKeydown(ev)" t-att-class="{o_list_button: column.type === 'button_group'}"/>
+                            <th t-else="" t-on-keydown="(ev) => this.onCellKeydown(ev)" t-att-class="{'o_list_button d-print-none': column.type === 'button_group'}"/>
                         </t>
                         <th t-if="props.onOpenFormView" t-on-keydown="(ev) => this.onCellKeydown(ev)" class="o_list_open_form_view"/>
                         <th t-if="displayOptionalFields or activeActions.onDelete" t-on-keydown="(ev) => this.onCellKeydown(ev)" class="o_list_controller o_list_actions_header position-sticky end-0">
-                            <div t-if="displayOptionalFields" class="o_optional_columns_dropdown text-center border-top-0">
+                            <div t-if="displayOptionalFields" class="o_optional_columns_dropdown d-print-none text-center border-top-0">
                                 <Dropdown position="'bottom-end'">
                                     <button class="btn p-0" tabindex="-1">
                                         <i class="o_optional_columns_dropdown_toggle oi oi-fw oi-settings-adjust"/>
@@ -87,6 +87,7 @@
                             <td t-if="aggregate" class="o_list_number" >
                                 <span t-esc="aggregate.value" t-att-data-tooltip="aggregate.help"/>
                             </td>
+                            <td t-if="column.type != 'field'" class="d-print-none"/>
                             <td t-else=""/>
                         </t>
                         <td t-if="props.onOpenFormView"/>
@@ -245,7 +246,7 @@
                     </td>
                 </t>
                 <t t-if="column.type === 'button_group'">
-                    <td t-on-keydown="(ev) => this.onCellKeydown(ev, group, record)" class="o_data_cell cursor-pointer" t-att-class="getCellClass(column, record)" t-on-click="(ev) => this.onButtonCellClicked(record, column, ev)" tabindex="-1">
+                    <td t-on-keydown="(ev) => this.onCellKeydown(ev, group, record)" class="o_data_cell d-print-none cursor-pointer" t-att-class="getCellClass(column, record)" t-on-click="(ev) => this.onButtonCellClicked(record, column, ev)" tabindex="-1">
                         <t t-foreach="column.buttons" t-as="button" t-key="button.id">
                             <ViewButton t-if="!evalInvisible(button.invisible, record)"
                                 className="button.className"
