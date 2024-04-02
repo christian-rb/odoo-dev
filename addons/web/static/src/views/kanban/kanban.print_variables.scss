@@ -1,0 +1,22 @@
+$o-kanban-background: #FFFFFF !default;
+$o-kanban-default-record-width: 16rem !default;
+$o-kanban-small-record-width: $o-kanban-default-record-width !default;
+
+$o-kanban-image-width: 64px !default;
+$o-kanban-image-fill-width: 95px !default;
+$o-kanban-inside-vgutter: $o-spacer * 0.5 !default;
+$o-kanban-inside-hgutter: $o-spacer * 0.5 !default;
+$o-kanban-color-border-width: 3px !default;
+$o-kanban-inner-hmargin: 5px !default;
+$o-kanban-progressbar-height: 20px !default;
+$o-kanban-mobile-tabs-height: 40px !default;
+$o-kanban-mobile-empty-height: $o-kanban-image-width !default;
+$o-kanban-record-margin: $o-horizontal-padding / 4 !default;
+$o-kanban-group-padding: $o-horizontal-padding / 2 !default;
+$o-kanban-inside-hgutter-mobile: $o-horizontal-padding !default;
+
+        // --Kanban-background: #FFFFFF;
+
+        // --KanbanGroup-width: 17rem;
+        // --KanbanRecord--small-width: 16rem;
+        // --KanbanGroup-padding-h: 0.3rem;
