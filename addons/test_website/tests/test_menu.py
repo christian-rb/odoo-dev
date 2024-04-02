@@ -1,6 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from lxml import etree
+from lxml import html
 
 from odoo.tests import tagged, HttpCase
 
@@ -38,6 +38,6 @@ class TestWebsiteMenu(HttpCase):
         }])
         for record in records:
             record_url = f"{controller_url}{record.id}"
-            tree = etree.fromstring(self.url_open(record_url).content, etree.HTMLParser())
+            tree = html.fromstring(self.url_open(record_url).content)
             menu_link_el = tree.xpath(".//*[@id='top_menu']//a[@href='%s' and contains(@class, 'active')]" % record_url)
             self.assertEqual(len(menu_link_el), 1, "The menu link related to the current record should be active")
