@@ -76,6 +76,7 @@ class PurchaseOrderLine(models.Model):
     display_type = fields.Selection([
         ('line_section', "Section"),
         ('line_note', "Note")], default=False, help="Technical field for UX purpose.")
+    manual_set = fields.Boolean()
 
     _sql_constraints = [
         ('accountable_required_fields',
@@ -328,19 +329,21 @@ class PurchaseOrderLine(models.Model):
                 quantity=line.product_qty,
                 date=line.order_id.date_order and line.order_id.date_order.date() or fields.Date.context_today(line),
                 uom_id=line.product_uom,
-                params=params)
+                params=params) if line.partner_id else False
 
             if seller or not line.date_planned:
                 line.date_planned = line._get_date_planned(seller).strftime(DEFAULT_SERVER_DATETIME_FORMAT)
 
+            pre_product_uom = line.env['uom.uom'].browse(self.env.context.get('pre_product_uom', line.product_uom.id))
             # If not seller, use the standard price. It needs a proper currency conversion.
             if not seller:
                 unavailable_seller = line.product_id.seller_ids.filtered(
                     lambda s: s.partner_id == line.order_id.partner_id)
-                if not unavailable_seller and line.price_unit and line.product_uom == line._origin.product_uom:
-                    # Avoid to modify the price unit if there is no price list for this partner and
-                    # the line has already one to avoid to override unit price set manually.
+
+                # If there is no unavailable seller, price unit is alredy set and product quntity is set to 0 so stop recomputation.
+                if not unavailable_seller and line.product_qty == 0 and line.price_unit:
                     continue
+
                 po_line_uom = line.product_uom or line.product_id.uom_po_id
                 price_unit = line.env['account.tax']._fix_tax_included_price_company(
                     line.product_id.uom_id._compute_price(line.product_id.standard_price, po_line_uom),
@@ -355,13 +358,24 @@ class PurchaseOrderLine(models.Model):
                     line.date_order or fields.Date.context_today(line),
                     False
                 )
+
+                is_computed_price = line.price_unit in (0, price_unit, line._origin.price_unit, line.product_uom._compute_price(price_unit, line.product_id.uom_po_id))
+                product_price_list = unavailable_seller and line.price_unit in line.product_id.seller_ids.mapped('price')
+                line.manual_set = line.manual_set or not (is_computed_price or product_price_list)
+
+                price_unit = pre_product_uom._compute_price(line.price_unit, po_line_uom) if line.manual_set else price_unit
                 line.price_unit = float_round(price_unit, precision_digits=max(line.currency_id.decimal_places, self.env['decimal.precision'].precision_get('Product Price')))
                 continue
 
             price_unit = line.env['account.tax']._fix_tax_included_price_company(seller.price, line.product_id.supplier_taxes_id, line.taxes_id, line.company_id) if seller else 0.0
             price_unit = seller.currency_id._convert(price_unit, line.currency_id, line.company_id, line.date_order or fields.Date.context_today(line), False)
             price_unit = float_round(price_unit, precision_digits=max(line.currency_id.decimal_places, self.env['decimal.precision'].precision_get('Product Price')))
-            line.price_unit = seller.product_uom._compute_price(price_unit, line.product_uom)
+
+            is_computed_price = line.price_unit in (0, price_unit, line._origin.price_unit)
+            seller_price_list = seller and seller.min_qty <= line.product_qty and line.price_unit in line.product_id.seller_ids.search([('id', '=', seller.id)]).mapped('price')
+            line.manual_set = line.manual_set or not (is_computed_price or seller_price_list)
+
+            line.price_unit = pre_product_uom._compute_price(line.price_unit, line.product_uom) if line.manual_set else seller.product_uom._compute_price(price_unit, line.product_uom)
             line.discount = seller.discount or 0.0
 
             # record product names to avoid resetting custom descriptions

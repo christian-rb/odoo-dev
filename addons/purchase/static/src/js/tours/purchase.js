@@ -124,3 +124,42 @@ registry.category("web_tour.tours").add("purchase_tour", {
         ...new PurchaseAdditionalTourSteps()._get_purchase_stock_steps(),
     ],
 });
+
+registry.category("web_tour.tours").add('purchase_order_vendor_conformation_tour',{ test: true, steps: () => [
+    stepUtils.showAppsMenuItem(),
+    {
+        trigger: '.o_app[data-menu-xmlid="purchase.menu_purchase_root"]',
+        edition: "community",
+    },
+    {
+        trigger: '.o_app[data-menu-xmlid="purchase.menu_purchase_root"]',
+        edition: "enterprise",
+    },
+    {
+        trigger: '.o_list_button_add',
+        run: 'click'
+    },
+    {trigger: '.o_field_x2many_list_row_add > a'},
+    {
+        trigger: ".o_field_widget[name=product_template_id] input",
+        run: 'edit Storage Box'
+    },
+    {trigger: ".ui-menu-item > a:contains('Storage Box')"},
+    {trigger: ".o_data_row > td:contains('14')"},
+    {
+        trigger: '.o_field_purchase_vendor_many2one[name="partner_id"] input',
+        run: 'edit Wood Corner',
+    },
+    {trigger: ".ui-menu-item > a:contains('Wood Corner')"},
+    {trigger: ".modal-footer > .btn-primary"},
+    {trigger: ".o_data_row > td:contains('13')"},
+    {
+        trigger: '.o_field_purchase_vendor_many2one[name="partner_id"] input',
+        run: 'edit Azure Interior',
+    },
+    {trigger: ".ui-menu-item > a:contains('Azure Interior')"},
+    {trigger: ".modal-footer > .btn-secondary"},
+    {trigger: ".o_data_row > td:contains('13')"},
+    {trigger: ".o_form_button_save"},
+    {trigger: ".o_form_button_cancel"},
+]})
