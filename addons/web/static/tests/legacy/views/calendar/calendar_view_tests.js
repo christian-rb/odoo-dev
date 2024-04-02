@@ -5374,36 +5374,31 @@ QUnit.module("Views", ({ beforeEach }) => {
             );
         });
 
-        QUnit.test("Scale: scale default is fetched from sessionStorage", async (assert) => {
+        QUnit.test("Scale: scale default is fetched from localStorage", async (assert) => {
             assert.expect(4);
 
-            patchWithCleanup(browser, {
-                sessionStorage: {
-                    setItem(key, value) {
-                        if (key === "calendar-scale") {
-                            assert.step(`scale_${value}`);
-                        }
-                    },
-                    getItem(key) {
-                        if (key === "calendar-scale") {
-                            return "month";
-                        }
-                    },
+            let view;
+            patchWithCleanup(browser.localStorage, {
+                getItem(key) {
+                    if (key.startsWith("scaleOf-viewId")) {
+                        return "week";
+                    }
+                },
+                setItem(key, value) {
+                    if (key === `scaleOf-viewId-${view?.env?.config?.viewId}`) {
+                        assert.step(`scale_${value}`);
+                    }
                 },
             });
 
-            await makeView({
+            view = await makeView({
                 type: "calendar",
                 resModel: "event",
                 serverData,
-                arch: `
-                <calendar event_open_popup="1" date_start="start" date_stop="stop" attendee="partner_ids">
-                    <field name="partner_ids" write_field="partner_id" />
-                </calendar>
-                `,
+                arch: `<calendar date_start="start" mode="month"/>`,
             });
 
-            assert.equal(target.querySelector(".scale_button_selection").textContent, "Month");
+            assert.equal(target.querySelector(".scale_button_selection").textContent, "Week");
             await changeScale(target, "year");
             assert.equal(target.querySelector(".scale_button_selection").textContent, "Year");
             assert.verifySteps(["scale_year"]);
