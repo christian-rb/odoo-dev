@@ -45,7 +45,7 @@ class TestAutomaticLeaveDates(TestHrHolidaysCommon):
                                    'name': 'monday morning',
                                    'hour_from': 8,
                                    'hour_to': 12,
-                                   'day_period': 'morning',
+                                   'day_period': 'work',
                                    'dayofweek': '0',
                                }),
                                (0, 0, {
@@ -59,7 +59,7 @@ class TestAutomaticLeaveDates(TestHrHolidaysCommon):
                                    'name': 'monday afternoon',
                                    'hour_from': 13,
                                    'hour_to': 17,
-                                   'day_period': 'afternoon',
+                                   'day_period': 'work',
                                    'dayofweek': '0',
                                })]
         })
@@ -90,7 +90,7 @@ class TestAutomaticLeaveDates(TestHrHolidaysCommon):
                                    'name': 'monday morning 1',
                                    'hour_from': 8,
                                    'hour_to': 10,
-                                   'day_period': 'morning',
+                                   'day_period': 'work',
                                    'dayofweek': '0',
                                    'duration_days': 0.25,
                                }),
@@ -98,7 +98,7 @@ class TestAutomaticLeaveDates(TestHrHolidaysCommon):
                                    'name': 'monday morning 2',
                                    'hour_from': 10.25,
                                    'hour_to': 12.25,
-                                   'day_period': 'morning',
+                                   'day_period': 'work',
                                    'dayofweek': '0',
                                    'duration_days': 0.25,
                                }),
@@ -113,7 +113,7 @@ class TestAutomaticLeaveDates(TestHrHolidaysCommon):
                                    'name': 'monday afternoon',
                                    'hour_from': 13,
                                    'hour_to': 17,
-                                   'day_period': 'afternoon',
+                                   'day_period': 'work',
                                    'dayofweek': '0',
                                    'duration_days': 0.5,
                                })]
@@ -144,7 +144,7 @@ class TestAutomaticLeaveDates(TestHrHolidaysCommon):
                                    'name': 'Monday All day',
                                    'hour_from': 8,
                                    'hour_to': 16,
-                                   'day_period': 'morning',
+                                   'day_period': 'work',
                                    'dayofweek': '0',
                                })],
         })
@@ -176,7 +176,7 @@ class TestAutomaticLeaveDates(TestHrHolidaysCommon):
                                    'name': 'tuesday morning',
                                    'hour_from': 8,
                                    'hour_to': 12,
-                                   'day_period': 'morning',
+                                   'day_period': 'work',
                                    'dayofweek': '1',
                                })]
         })
@@ -206,7 +206,7 @@ class TestAutomaticLeaveDates(TestHrHolidaysCommon):
                                    'name': 'monday morning',
                                    'hour_from': 8,
                                    'hour_to': 12,
-                                   'day_period': 'morning',
+                                   'day_period': 'work',
                                    'dayofweek': '0',
                                })]
         })
@@ -237,7 +237,7 @@ class TestAutomaticLeaveDates(TestHrHolidaysCommon):
                                    'name': 'monday morning odd week',
                                    'hour_from': 8,
                                    'hour_to': 12,
-                                   'day_period': 'morning',
+                                   'day_period': 'work',
                                    'dayofweek': '0',
                                    'week_type': '0',
                                    'duration_days': 0.5,
@@ -246,7 +246,7 @@ class TestAutomaticLeaveDates(TestHrHolidaysCommon):
                                    'name': 'monday morning even week',
                                    'hour_from': 10,
                                    'hour_to': 12,
-                                   'day_period': 'morning',
+                                   'day_period': 'work',
                                    'dayofweek': '0',
                                    'week_type': '1',
                                    'duration_days': 0.25
@@ -291,7 +291,7 @@ class TestAutomaticLeaveDates(TestHrHolidaysCommon):
                                    'name': 'monday morning odd week',
                                    'hour_from': 8,
                                    'hour_to': 12,
-                                   'day_period': 'morning',
+                                   'day_period': 'work',
                                    'dayofweek': '0',
                                    'week_type': '0',
                                })]

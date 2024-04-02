@@ -393,7 +393,7 @@ class TestAccrualAllocations(TestHrHolidaysCommon):
                     'hour_from': 8,
                     'hour_to': 12,
                     'dayofweek': str(index),
-                    'day_period': 'morning'
+                    'day_period': 'work'
                 }))
                 attendances.append((0, 0, {
                     'name': '%s_%d' % ('40 Hours', index),
@@ -407,7 +407,7 @@ class TestAccrualAllocations(TestHrHolidaysCommon):
                     'hour_from': 13,
                     'hour_to': 17,
                     'dayofweek': str(index),
-                    'day_period': 'afternoon'
+                    'day_period': 'work'
                 }))
             calendar_emp = self.env['resource.calendar'].create({
                 'name': '40 Hours',

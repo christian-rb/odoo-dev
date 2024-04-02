@@ -388,8 +388,8 @@ class HolidaysRequest(models.Model):
 
 
                 day_period = {
-                    'am': 'morning',
-                    'pm': 'afternoon'
+                    'am': 'work',
+                    'pm': 'work'
                 }.get(holiday.request_date_from_period, None) if holiday.request_unit_half else None
 
                 attendance_from, attendance_to = holiday._get_attendances(holiday.request_date_from, holiday.request_date_to, day_period=day_period)
@@ -1681,9 +1681,9 @@ Attempting to double-book your time off won't magically make your vacation 2x be
             ['hour_from:min', 'hour_to:max'])
 
         # Must be sorted by dayofweek ASC and day_period DESC
-        attendances = sorted([DummyAttendance(hour_from, hour_to, dayofweek, day_period, week_type) for week_type, dayofweek, day_period, hour_from, hour_to in attendances], key=lambda att: (att.dayofweek, att.day_period != 'morning'))
+        attendances = sorted([DummyAttendance(hour_from, hour_to, dayofweek, day_period, week_type) for week_type, dayofweek, day_period, hour_from, hour_to in attendances], key=lambda att: (att.dayofweek, att.day_period != 'work'))
 
-        default_value = DummyAttendance(0, 0, 0, 'morning', False)
+        default_value = DummyAttendance(0, 0, 0, 'work', False)
 
         if self.resource_calendar_id.two_weeks_calendar:
             # find week type of start_date

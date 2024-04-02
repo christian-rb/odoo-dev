@@ -300,7 +300,7 @@ class TestCalendar(TestResourceCommon):
                 (5, 0, 0),
                 (0, 0, {
                     "name": "Monday (morning)",
-                    "day_period": "morning",
+                    "day_period": "work",
                     "dayofweek": "0",
                     "week_type": "0",
                     "hour_from": 8.0,
@@ -309,7 +309,7 @@ class TestCalendar(TestResourceCommon):
                     "date_to": "2022-01-16"}),
                 (0, 0, {
                     "name": "Monday (morning)",
-                    "day_period": "morning",
+                    "day_period": "work",
                     "dayofweek": "0",
                     "week_type": "0",
                     "hour_from": 8.0,
@@ -317,7 +317,7 @@ class TestCalendar(TestResourceCommon):
                     "date_from": "2022-01-17"}),
                 (0, 0, {
                     "name": "Monday (afternoon)",
-                    "day_period": "afternoon",
+                    "day_period": "work",
                     "dayofweek": "0",
                     "week_type": "0",
                     "hour_from": 16.0,
@@ -325,7 +325,7 @@ class TestCalendar(TestResourceCommon):
                     "date_from": "2022-01-17"}),
                 (0, 0, {
                     "name": "Monday (morning)",
-                    "day_period": "morning",
+                    "day_period": "work",
                     "dayofweek": "0",
                     "week_type": "1",
                     "hour_from": 8.0,
@@ -334,7 +334,7 @@ class TestCalendar(TestResourceCommon):
                     "date_to": "2022-01-16"}),
                 (0, 0, {
                     "name": "Monday (afternoon)",
-                    "day_period": "afternoon",
+                    "day_period": "work",
                     "dayofweek": "0",
                     "week_type": "1",
                     "hour_from": 16.0,
@@ -343,7 +343,7 @@ class TestCalendar(TestResourceCommon):
                     "date_to": "2022-01-16"}),
                 (0, 0, {
                     "name": "Monday (morning)",
-                    "day_period": "morning",
+                    "day_period": "work",
                     "dayofweek": "0",
                     "week_type": "1",
                     "hour_from": 8.0,
@@ -351,7 +351,7 @@ class TestCalendar(TestResourceCommon):
                     "date_from": "2022-01-17"}),
                 (0, 0, {
                     "name": "Monday (afternoon)",
-                    "day_period": "afternoon",
+                    "day_period": "work",
                     "dayofweek": "0",
                     "week_type": "1",
                     "hour_from": 16.0,
@@ -374,21 +374,21 @@ class TestCalendar(TestResourceCommon):
             'company_id': self.env.company.id,
             'tz': 'UTC',
             'attendance_ids': [(5, 0, 0),
-                (0, 0, {'name': 'Monday Morning', 'dayofweek': '0', 'hour_from': 8, 'hour_to': 12, 'day_period': 'morning'}),
+                (0, 0, {'name': 'Monday Morning', 'dayofweek': '0', 'hour_from': 8, 'hour_to': 12, 'day_period': 'work'}),
                 (0, 0, {'name': 'Monday Lunch', 'dayofweek': '0', 'hour_from': 12, 'hour_to': 13, 'day_period': 'lunch'}),
-                (0, 0, {'name': 'Monday Afternoon', 'dayofweek': '0', 'hour_from': 13, 'hour_to': 16, 'day_period': 'afternoon'}),
-                (0, 0, {'name': 'Tuesday Morning', 'dayofweek': '1', 'hour_from': 8, 'hour_to': 12, 'day_period': 'morning'}),
+                (0, 0, {'name': 'Monday Afternoon', 'dayofweek': '0', 'hour_from': 13, 'hour_to': 16, 'day_period': 'work'}),
+                (0, 0, {'name': 'Tuesday Morning', 'dayofweek': '1', 'hour_from': 8, 'hour_to': 12, 'day_period': 'work'}),
                 (0, 0, {'name': 'Tuesday Lunch', 'dayofweek': '1', 'hour_from': 12, 'hour_to': 13, 'day_period': 'lunch'}),
-                (0, 0, {'name': 'Tuesday Afternoon', 'dayofweek': '1', 'hour_from': 13, 'hour_to': 16, 'day_period': 'afternoon'}),
-                (0, 0, {'name': 'Wednesday Morning', 'dayofweek': '2', 'hour_from': 8, 'hour_to': 12, 'day_period': 'morning'}),
+                (0, 0, {'name': 'Tuesday Afternoon', 'dayofweek': '1', 'hour_from': 13, 'hour_to': 16, 'day_period': 'work'}),
+                (0, 0, {'name': 'Wednesday Morning', 'dayofweek': '2', 'hour_from': 8, 'hour_to': 12, 'day_period': 'work'}),
                 (0, 0, {'name': 'Wednesday Lunch', 'dayofweek': '2', 'hour_from': 12, 'hour_to': 13, 'day_period': 'lunch'}),
-                (0, 0, {'name': 'Wednesday Afternoon', 'dayofweek': '2', 'hour_from': 13, 'hour_to': 16, 'day_period': 'afternoon'}),
-                (0, 0, {'name': 'Thursday Morning', 'dayofweek': '3', 'hour_from': 8, 'hour_to': 12, 'day_period': 'morning'}),
+                (0, 0, {'name': 'Wednesday Afternoon', 'dayofweek': '2', 'hour_from': 13, 'hour_to': 16, 'day_period': 'work'}),
+                (0, 0, {'name': 'Thursday Morning', 'dayofweek': '3', 'hour_from': 8, 'hour_to': 12, 'day_period': 'work'}),
                 (0, 0, {'name': 'Thursday Lunch', 'dayofweek': '3', 'hour_from': 12, 'hour_to': 13, 'day_period': 'lunch'}),
-                (0, 0, {'name': 'Thursday Afternoon', 'dayofweek': '3', 'hour_from': 13, 'hour_to': 16, 'day_period': 'afternoon'}),
-                (0, 0, {'name': 'Friday Morning', 'dayofweek': '4', 'hour_from': 8, 'hour_to': 12, 'day_period': 'morning'}),
+                (0, 0, {'name': 'Thursday Afternoon', 'dayofweek': '3', 'hour_from': 13, 'hour_to': 16, 'day_period': 'work'}),
+                (0, 0, {'name': 'Friday Morning', 'dayofweek': '4', 'hour_from': 8, 'hour_to': 12, 'day_period': 'work'}),
                 (0, 0, {'name': 'Friday Lunch', 'dayofweek': '4', 'hour_from': 12, 'hour_to': 13, 'day_period': 'lunch'}),
-                (0, 0, {'name': 'Friday Afternoon', 'dayofweek': '4', 'hour_from': 13, 'hour_to': 16, 'day_period': 'afternoon'})
+                (0, 0, {'name': 'Friday Afternoon', 'dayofweek': '4', 'hour_from': 13, 'hour_to': 16, 'day_period': 'work'})
             ],
         })
         res = calendar.get_work_hours_count(
