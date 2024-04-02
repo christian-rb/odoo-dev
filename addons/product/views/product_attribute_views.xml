@@ -26,7 +26,7 @@
                             invisible="not number_related_products">
                         <div class="o_stat_info">
                             <span class="o_stat_value"><field name="number_related_products"/></span>
-                            <span class="o_stat_text">Related Products</span>
+                            <span class="o_stat_text">Products</span>
                         </div>
                     </button>
                 </div>
@@ -35,7 +35,7 @@
                         <label for="name" string="Attribute Name"/>
                         <field name="name" nolabel="1"/>
                         <field name="display_type" widget="radio"/>
-                        <field name="create_variant" widget="radio" readonly="number_related_products != 0"/>
+                        <field name="create_variant" widget="radio" force_save='1' readonly="number_related_products != 0 or display_type == 'multi' "/>
                     </group>
                 </group>
                 <notebook>
@@ -92,6 +92,20 @@
         </field>
     </record>
 
+    <record id="product_template_attribute_line_tree" model="ir.ui.view">
+        <field name="name">product.template.attribute.line.tree</field>
+        <field name="model">product.template.attribute.line</field>
+        <field name="mode">primary</field>
+        <field name="priority" eval="9"/>
+        <field name="arch" type="xml">
+            <tree string="PTAL" editable="bottom">
+                <field name="product_tmpl_id" />
+                <field name="attribute_id"/>
+                <field name="value_ids" widget="many2many_tags"/> 
+            </tree>
+        </field>
+    </record>
+
     <record id="product_template_attribute_value_view_tree" model="ir.ui.view">
         <field name="name">product.template.attribute.value.view.tree</field>
         <field name="model">product.template.attribute.value</field>
@@ -103,6 +117,7 @@
                 <field name="html_color" invisible="display_type != 'color' or image" widget="color"/>
                 <field name="image" invisible="display_type != 'color'" widget="image" options="{'size': [70, 70]}"/>
                 <field name="ptav_active" optional="hide"/>
+                <field name="default_extra_price" readonly="1"/> 
                 <field name="price_extra" widget="monetary" options="{'field_digits': True}"/>
                 <field name="currency_id" column_invisible="True"/>
             </tree>
@@ -123,6 +138,7 @@
                         <field name="image" invisible="display_type != 'color' or not image" widget="image" options="{'size': [70, 70]}"/>
                         <field name="price_extra" widget="monetary" options="{'field_digits': True}"/>
                         <field name="currency_id" invisible="1"/>
+                        <field name="default_extra_price"/>
                         <field name="exclude_for" widget="one2many" mode="tree">
                             <tree editable="bottom">
                                 <field name="product_tmpl_id" />

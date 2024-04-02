@@ -68,7 +68,7 @@ class ProductAttribute(models.Model):
     @api.depends('product_tmpl_ids')
     def _compute_number_related_products(self):
         for pa in self:
-            pa.number_related_products = len(pa.product_tmpl_ids)
+            pa.number_related_products = len(pa.attribute_line_ids)
 
     @api.depends('attribute_line_ids.active', 'attribute_line_ids.product_tmpl_id')
     def _compute_products(self):
@@ -77,6 +77,12 @@ class ProductAttribute(models.Model):
 
     def _without_no_variant_attributes(self):
         return self.filtered(lambda pa: pa.create_variant != 'no_variant')
+
+    @api.onchange("display_type", "number_related_products")
+    def _onchange_display_type(self):
+        self.ensure_one()
+        if self.display_type == "multi" and self.number_related_products == 0:
+            self.create_variant = "no_variant"
 
     def write(self, vals):
         """Override to make sure attribute type can't be changed if it's used on
@@ -118,8 +124,8 @@ class ProductAttribute(models.Model):
     def action_open_related_products(self):
         return {
             'type': 'ir.actions.act_window',
-            'name': _("Related Products"),
-            'res_model': 'product.template',
+            'name': _("Products"),
+            'res_model': 'product.template.attribute.line',
             'view_mode': 'tree,form',
-            'domain': [('id', 'in', self.product_tmpl_ids.ids)],
+            'domain': [('product_tmpl_id.id', 'in', self.product_tmpl_ids.ids), ('attribute_id.id', '=', self.id)],
         }

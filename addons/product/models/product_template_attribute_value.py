@@ -33,7 +33,7 @@ class ProductTemplateAttributeValue(models.Model):
         required=True, ondelete='cascade', index=True)
     # configuration fields: the price_extra and the exclusion rules
     price_extra = fields.Float(
-        string="Value Price Extra",
+        string="Extra Price",
         default=0.0,
         digits='Product Price',
         help="Extra price for the variant with this attribute value on sale price."
@@ -61,6 +61,7 @@ class ProductTemplateAttributeValue(models.Model):
     display_type = fields.Selection(related='product_attribute_value_id.display_type')
     color = fields.Integer(string="Color", default=_get_default_color)
     image = fields.Image(related='product_attribute_value_id.image')
+    default_extra_price = fields.Float(string="Default Extra Price", related="product_attribute_value_id.default_extra_price")
 
     _sql_constraints = [
         ('attribute_value_unique',
