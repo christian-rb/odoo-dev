@@ -52,7 +52,7 @@ class TestMrpCommon(TestStockCommon):
 
     @classmethod
     def setUpClass(cls):
-        super(TestMrpCommon, cls).setUpClass()
+        super().setUpClass()
 
         (
             cls.product_4,
@@ -76,28 +76,35 @@ class TestMrpCommon(TestStockCommon):
             'type': 'product',
         })
 
-        # User Data: mrp user and mrp manager
-        cls.user_mrp_user = mail_new_test_user(
-            cls.env,
-            name='Hilda Ferachwal',
-            login='hilda',
-            email='h.h@example.com',
-            notification_type='inbox',
-            groups='mrp.group_mrp_user, stock.group_stock_user, mrp.group_mrp_byproducts, uom.group_uom',
-        )
-        cls.user_mrp_manager = mail_new_test_user(
-            cls.env,
-            name='Gary Youngwomen',
-            login='gary',
-            email='g.g@example.com',
-            notification_type='inbox',
-            groups='mrp.group_mrp_manager, stock.group_stock_user, mrp.group_mrp_byproducts, uom.group_uom',
-        )
-        # Both groups below are required to make fields `product_uom_id` and
-        # `workorder_ids` to be visible in the view of `mrp.production`. The
-        # field `product_uom_id` must be set by many tests, and subviews of
-        # `workorder_ids` must be present in many tests to create records.
-        cls.env.user.groups_id += cls.env.ref('uom.group_uom') + cls.env.ref('mrp.group_mrp_routings')
+        with cls.sudo():
+            # User Data: mrp user and mrp manager
+            cls.user_mrp_user = mail_new_test_user(
+                cls.env,
+                name='Hilda Ferachwal',
+                login='hilda',
+                email='h.h@example.com',
+                notification_type='inbox',
+                groups='mrp.group_mrp_user, stock.group_stock_user, mrp.group_mrp_byproducts, uom.group_uom',
+            )
+            cls.user_mrp_manager = mail_new_test_user(
+                cls.env,
+                name='Gary Youngwomen',
+                login='gary',
+                email='g.g@example.com',
+                notification_type='inbox',
+                groups='mrp.group_mrp_manager, stock.group_stock_user, mrp.group_mrp_byproducts, uom.group_uom',
+            )
+            cls.assign_company_to_user(cls.user_mrp_user, cls.company)
+            cls.assign_company_to_user(cls.user_mrp_manager, cls.company)
+            # Groups below are required to make fields `product_uom_id` and
+            # `workorder_ids` to be visible in the view of `mrp.production`. The
+            # field `product_uom_id` must be set by many tests, and subviews of
+            # `workorder_ids` must be present in many tests to create records.
+            cls.user.groups_id += (
+                cls.env.ref('uom.group_uom') +
+                cls.env.ref('mrp.group_mrp_manager') +
+                cls.env.ref('mrp.group_mrp_routings')
+            )
 
         cls.workcenter_1 = cls.env['mrp.workcenter'].create({
             'name': 'Nuclear Workcenter',
@@ -120,6 +127,7 @@ class TestMrpCommon(TestStockCommon):
             'time_stop': 0,
             'time_efficiency': 100,
         })
+        cls.calendar = cls.company.resource_calendar_id
 
         cls.bom_1 = cls.env['mrp.bom'].create({
             'product_id': cls.product_4.id,
@@ -206,26 +214,27 @@ class TestMrpCommon(TestStockCommon):
                 (0, 0, {'product_id': cls.product_1.id, 'product_qty': 1}),
             ]})
 
+        cls.pbm_location = cls.warehouse_1.pbm_loc_id
         cls.stock_location_14 = cls.env['stock.location'].create({
             'name': 'Shelf 2',
-            'location_id': cls.env.ref('stock.warehouse0').lot_stock_id.id,
+            'location_id': cls.stock_location.id,
         })
         cls.stock_location_components = cls.env['stock.location'].create({
             'name': 'Shelf 1',
-            'location_id': cls.env.ref('stock.warehouse0').lot_stock_id.id,
+            'location_id': cls.stock_location.id,
         })
         cls.laptop = cls.env['product.product'].create({
             'name': 'Acoustic Bloc Screens',
-            'uom_id': cls.env.ref("uom.product_uom_unit").id,
-            'uom_po_id': cls.env.ref("uom.product_uom_unit").id,
+            'uom_id': cls.uom_unit.id,
+            'uom_po_id': cls.uom_unit.id,
             'type': 'product',
             'tracking': 'none',
             'categ_id': cls.env.ref('product.product_category_all').id,
         })
         cls.graphics_card = cls.env['product.product'].create({
             'name': 'Individual Workplace',
-            'uom_id': cls.env.ref("uom.product_uom_unit").id,
-            'uom_po_id': cls.env.ref("uom.product_uom_unit").id,
+            'uom_id': cls.uom_unit.id,
+            'uom_po_id': cls.uom_unit.id,
             'type': 'product',
             'tracking': 'none',
             'categ_id': cls.env.ref('product.product_category_all').id,
