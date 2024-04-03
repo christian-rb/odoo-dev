@@ -52,6 +52,7 @@ import {
     padLinkWithZws,
     isLinkEligibleForZwnbsp,
     lastLeaf,
+    paragraphRelatedElements,
 } from '../utils/utils.js';
 
 const TEXT_CLASSES_REGEX = /\btext-[^\s]*\b/;
@@ -181,25 +182,44 @@ export const editorCommands = {
         }
 
         startNode = startNode || editor.document.getSelection().anchorNode;
+        const isBlockElement = (node) => isBlock(node) && !['TABLE', 'UL', 'OL', 'DIV'].includes(node.nodeName);
+        const block = closestBlock(selection.anchorNode);
+        const shouldUnwrapBlock = (node) => (
+            block.nodeName === node.nodeName || ['BLOCKQUOTE', 'PRE'].includes(block.nodeName)
+        );
 
         // In case the html inserted is all contained in a single root <p> or <li>
         // tag, we take the all content of the <p> or <li> and avoid inserting the
         // <p> or <li>. The same is true for a <pre> inside a <pre>.
-        if (container.childElementCount === 1 && (
-            container.firstChild.nodeName === 'P' ||
-            container.firstChild.nodeName === 'LI' ||
-            container.firstChild.nodeName === 'PRE' && closestElement(startNode, 'pre')
-        )) {
+        if (
+            container.childElementCount === 1 &&
+            (
+                ['P', 'LI'].includes(container.firstChild.nodeName) ||
+                shouldUnwrapBlock(container.firstChild)
+            )
+        ) {
             const p = container.firstElementChild;
             container.replaceChildren(...p.childNodes);
         } else if (container.childElementCount > 1) {
             // Grab the content of the first child block and isolate it.
-            if (isBlock(container.firstChild) && !['TABLE', 'UL', 'OL'].includes(container.firstChild.nodeName)) {
+            if (
+                isBlockElement(container.firstChild) &&
+                (
+                    shouldUnwrapBlock(container.firstChild) ||
+                    !isBlockElement(block)
+                )
+            ) {
                 containerFirstChild.replaceChildren(...container.firstElementChild.childNodes);
                 container.firstElementChild.remove();
             }
             // Grab the content of the last child block and isolate it.
-            if (isBlock(container.lastChild) && !['TABLE', 'UL', 'OL'].includes(container.lastChild.nodeName)) {
+            if (
+                isBlockElement(container.lastChild) &&
+                (
+                    shouldUnwrapBlock(container.lastChild) ||
+                    !isBlockElement(block)
+                )
+            ) {
                 containerLastChild.replaceChildren(...container.lastElementChild.childNodes);
                 container.lastElementChild.remove();
             }
@@ -277,11 +297,20 @@ export const editorCommands = {
                     }
                     if (offset) {
                         const [left, right] = splitElement(currentNode.parentElement, offset);
+                        if (isEmptyBlock(right) && !isUnbreakable(nodeToInsert)) {
+                            right.remove();
+                        }
                         currentNode = insertBefore ? right : left;
                     } else {
                         currentNode = currentNode.parentElement;
                     }
                 }
+            }
+            if (
+                ['BLOCKQUOTE', 'PRE'].includes(block.nodeName) &&
+                paragraphRelatedElements.includes(nodeToInsert.nodeName)
+            ) {
+                setTagName(nodeToInsert, block.nodeName);
             }
             if (insertBefore) {
                 currentNode.before(nodeToInsert);
@@ -312,7 +341,7 @@ export const editorCommands = {
             currentNode = currentNode.nextSibling;
             lastPosition = getDeepestPosition(...rightPos(currentNode));
         } else {
-            lastPosition = rightPos(currentNode);
+            lastPosition = isBlockElement(currentNode) ? rightPos(lastLeaf(currentNode)) : rightPos(currentNode);
         }
         if (lastPosition[0] === editor.editable) {
             // Correct the position if it happens to be in the editable root.
