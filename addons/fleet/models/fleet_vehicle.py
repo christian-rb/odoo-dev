@@ -116,6 +116,7 @@ class FleetVehicle(models.Model):
         ('today', 'Today'),
     ], compute='_compute_service_activity')
     vehicle_properties = fields.Properties('Properties', definition='model_id.vehicle_properties_definition', copy=True)
+    vehicle_range = fields.Integer(related='model_id.vehicle_range')
 
     @api.depends('log_services')
     def _compute_service_activity(self):
