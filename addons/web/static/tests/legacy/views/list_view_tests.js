@@ -2350,9 +2350,10 @@ QUnit.module("Views", (hooks) => {
         ]);
     });
 
-    QUnit.test("deletion of record is disabled when groupby m2m field", async function (assert) {
+    QUnit.test("enabling archive, unarchive, and delete in list grouped by m2m", async function (assert) {
         patchUserWithCleanup({ hasGroup: () => Promise.resolve(false) });
 
+        serverData.models.foo.fields.active = { string: "Active", type: "boolean", default: true };
         serverData.models.foo.fields.m2m.groupable = true;
 
         await makeView({
@@ -2371,10 +2372,11 @@ QUnit.module("Views", (hooks) => {
         await click(target.querySelector(".o_group_header:first-child")); // open first group
         await click(target.querySelector(".o_data_row .o_list_record_selector input"));
         assert.containsOnce(target, "div.o_control_panel .o_cp_action_menus");
-        assert.containsNone(
-            target,
-            "div.o_control_panel .o_cp_action_menus .dropdown-toggle",
-            "should not have dropdown as delete item is not there"
+        await click(target, "div.o_control_panel .o_cp_action_menus .dropdown-toggle");
+        assert.strictEqual(
+            target.querySelectorAll(".o-dropdown--menu .o_menu_item").length,
+            3,
+            "archive, unarchive and delete option should be present"
         );
 
         // unselect group by m2m (need to unselect record first)
@@ -2389,7 +2391,7 @@ QUnit.module("Views", (hooks) => {
             [...target.querySelectorAll(".o-dropdown--menu .o_menu_item")].map(
                 (el) => el.innerText
             ),
-            ["Duplicate", "Delete"]
+            ["Archive", "Unarchive", "Duplicate", "Delete"]
         );
     });
 
@@ -13380,7 +13382,7 @@ QUnit.module("Views", (hooks) => {
     QUnit.test(
         "list view move to previous page when all records from last page deleted",
         async function (assert) {
-            assert.expect(8);
+            assert.expect(10);
 
             let checkSearchRead = false;
             await makeView({
@@ -13425,7 +13427,7 @@ QUnit.module("Views", (hooks) => {
     QUnit.test(
         "grouped list view move to previous page of group when all records from last page deleted",
         async function (assert) {
-            assert.expect(10);
+            assert.expect(12);
 
             let checkSearchRead = false;
             await makeView({

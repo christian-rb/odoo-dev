@@ -250,6 +250,7 @@ export class DynamicList extends DataPoint {
             this.model.notification.add(msg, { title: _t("Warning") });
         }
         await this._removeRecords(records.map((r) => r.id));
+        this.model.load();
         return unlinked;
     }
 
