@@ -901,7 +901,9 @@ class Task(models.Model):
             if not vals.get('name') and vals.get('display_name'):
                 vals['name'] = vals['display_name']
             if is_portal_user:
+                project_id = vals.get('project_id', self.env.context.get('default_project_id'))
                 self._ensure_fields_are_accessible(vals.keys(), operation='write', check_group_user=False)
+                vals['display_in_project'] = vals.get('display_in_project', False)
 
             if project_id:
                 # set the project => "I want to display the task in the project"
