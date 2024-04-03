@@ -26,6 +26,19 @@ patch(FormRenderer.prototype, {
         }
         this.uiService = useService("ui");
 
+        this.env.bus.addEventListener("add_padding_emoji_picker", ({ detail: { isPadding } }) => {
+            if (isPadding) {
+                document
+                    .getElementsByClassName("o-mail-Form-chatter")[0]
+                    .classList.add("form_emoji_picker_padding");
+                document.getElementsByClassName("o-mail-Chatter-top")[0].scrollIntoView(true);
+            } else {
+                document
+                    .getElementsByClassName("o-mail-Form-chatter")[0]
+                    .classList.remove("form_emoji_picker_padding");
+            }
+        });
+
         this.onResize = useDebounced(this.render, 200);
         onMounted(() => browser.addEventListener("resize", this.onResize));
         onWillUnmount(() => browser.removeEventListener("resize", this.onResize));

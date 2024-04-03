@@ -44,6 +44,10 @@
     width: 100%;
 }
 
+.form_emoji_picker_padding{
+    padding-bottom: 55vh;
+}
+
 // FIX to hide chatter in dialogs when they are opened from an action returned by python code
 .modal .modal-dialog .o_form_view .o-mail-Form-chatter {
     display: none;
