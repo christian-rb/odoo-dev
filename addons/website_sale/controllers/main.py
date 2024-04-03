@@ -601,6 +601,17 @@ class WebsiteSale(payment_portal.PaymentPortal):
         product = request.env['product.product'].browse(product_id)
         return product._is_add_to_cart_allowed()
 
+    @route(['/shop/get_website_options'], type='json', auth='public', website=True, sitemap=False)
+    def get_website_options():
+        """ TODO VCR
+
+        :return: _description_
+        :rtype: _type_
+        """
+        return {
+            'add_to_cart_action': request.website.add_to_cart_action,
+        }
+
     def _product_get_query_url_kwargs(self, category, search, attrib=None, **kwargs):
         return {
             'category': category,
