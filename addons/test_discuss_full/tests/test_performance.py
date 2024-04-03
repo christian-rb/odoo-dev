@@ -1389,6 +1389,7 @@ class TestDiscussFullPerformance(HttpCase):
                 ],
                 "thread": {
                     "id": channel.id,
+                    "name": "public channel 1",
                     "model": "discuss.channel",
                     "module_icon": "/mail/static/description/icon.png",
                 },
@@ -1408,7 +1409,6 @@ class TestDiscussFullPerformance(HttpCase):
                 "starredPersonas": [{"id": self.users[0].partner_id.id, "type": "partner"}],
                 "subject": False,
                 "subtype_description": False,
-                "subtype_id": [mt_note_id, "Note"],
                 "trackingValues": [],
                 "write_date": write_date,
             }
@@ -1440,6 +1440,7 @@ class TestDiscussFullPerformance(HttpCase):
                 "notifications": [],
                 "thread": {
                     "id": channel.id,
+                    "name": "public channel 2",
                     "model": "discuss.channel",
                     "module_icon": "/mail/static/description/icon.png",
                 },
@@ -1453,7 +1454,6 @@ class TestDiscussFullPerformance(HttpCase):
                 "starredPersonas": [],
                 "subject": False,
                 "subtype_description": False,
-                "subtype_id": [mt_comment_id, "Discussions"],
                 "trackingValues": [],
                 "write_date": write_date,
             }
@@ -1485,6 +1485,7 @@ class TestDiscussFullPerformance(HttpCase):
                 "notifications": [],
                 "thread": {
                     "id": channel.id,
+                    "name": "group restricted channel 1",
                     "model": "discuss.channel",
                     "module_icon": "/mail/static/description/icon.png",
                 },
@@ -1498,7 +1499,6 @@ class TestDiscussFullPerformance(HttpCase):
                 "starredPersonas": [],
                 "subject": False,
                 "subtype_description": False,
-                "subtype_id": [mt_comment_id, "Discussions"],
                 "trackingValues": [],
                 "write_date": write_date,
             }
@@ -1530,6 +1530,7 @@ class TestDiscussFullPerformance(HttpCase):
                 "notifications": [],
                 "thread": {
                     "id": channel.id,
+                    "name": "group restricted channel 2",
                     "model": "discuss.channel",
                     "module_icon": "/mail/static/description/icon.png",
                 },
@@ -1543,7 +1544,6 @@ class TestDiscussFullPerformance(HttpCase):
                 "starredPersonas": [],
                 "subject": False,
                 "subtype_description": False,
-                "subtype_id": [mt_comment_id, "Discussions"],
                 "trackingValues": [],
                 "write_date": write_date,
             }
@@ -1574,6 +1574,7 @@ class TestDiscussFullPerformance(HttpCase):
                 "notifications": [],
                 "thread": {
                     "id": channel.id,
+                    "name": "test1 Ernest Employee",
                     "model": "discuss.channel",
                     "module_icon": "/mail/static/description/icon.png",
                 },
@@ -1587,7 +1588,6 @@ class TestDiscussFullPerformance(HttpCase):
                 "starredPersonas": [],
                 "subject": False,
                 "subtype_description": False,
-                "subtype_id": [mt_note_id, "Note"],
                 "trackingValues": [],
                 "write_date": write_date,
             }
@@ -1611,6 +1611,7 @@ class TestDiscussFullPerformance(HttpCase):
                 "notifications": [],
                 "thread": {
                     "id": channel.id,
+                    "name": "anon 2 Ernest Employee",
                     "model": "discuss.channel",
                     "module_icon": "/mail/static/description/icon.png",
                 },
@@ -1624,7 +1625,6 @@ class TestDiscussFullPerformance(HttpCase):
                 "starredPersonas": [],
                 "subject": False,
                 "subtype_description": False,
-                "subtype_id": [mt_note_id, "Note"],
                 "trackingValues": [],
                 "write_date": write_date,
             }

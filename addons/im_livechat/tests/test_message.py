@@ -94,6 +94,7 @@ class TestImLivechatMessage(HttpCase):
             'notifications': [],
             'thread': {
                 'id': channel_livechat_1.id,
+                'name': "test1 Ernest Employee",
                 'model': 'discuss.channel',
                 'module_icon': '/mail/static/description/icon.png',
             },
@@ -111,6 +112,5 @@ class TestImLivechatMessage(HttpCase):
             'starredPersonas': [],
             'subject': False,
             'subtype_description': False,
-            'subtype_id': (self.env.ref('mail.mt_note').id, 'Note'),
             'trackingValues': [],
         }])
