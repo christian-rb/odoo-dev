@@ -92,14 +92,9 @@ class PickingType(models.Model):
 
     def _compute_default_location_dest_id(self):
         repair_picking_type = self.filtered(lambda pt: pt.code == 'repair_operation')
-        prod_locations = self.env['stock.location']._read_group(
-            [('usage', '=', 'production'), ('company_id', 'in', repair_picking_type.company_id.ids)],
-            ['company_id'],
-            ['id:min'],
-        )
-        prod_locations = {l[0].id: l[1] for l in prod_locations}
         for picking_type in repair_picking_type:
-            picking_type.default_location_dest_id = prod_locations.get(picking_type.company_id.id)
+            stock_location = picking_type.warehouse_id.lot_stock_id
+            picking_type.default_location_dest_id = stock_location.id
         super(PickingType, (self - repair_picking_type))._compute_default_location_dest_id()
 
     @api.depends('code')

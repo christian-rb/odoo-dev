@@ -72,6 +72,15 @@ class StockPickingType(models.Model):
             if record.code == "dropship":
                 record.show_picking_type = True
 
+    def _compute_default_location_src_id(self):
+        super()._compute_default_location_src_id()
+        for picking_type in self.filtered(lambda pt: pt.code == 'dropship'):
+            picking_type.default_location_src_id = self.env.ref('stock.stock_location_suppliers').id
+
+    def _compute_default_location_dest_id(self):
+        super()._compute_default_location_dest_id()
+        for picking_type in self.filtered(lambda pt: pt.code == 'dropship'):
+            picking_type.default_location_dest_id = self.env.ref('stock.stock_location_customers').id
 
 class StockLot(models.Model):
     _inherit = 'stock.lot'

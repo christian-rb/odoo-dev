@@ -17,7 +17,7 @@ class Location(models.Model):
     _description = "Inventory Locations"
     _parent_name = "location_id"
     _parent_store = True
-    _order = 'complete_name, id'
+    _order = 'sequence, complete_name, id'
     _rec_name = 'complete_name'
     _rec_names_search = ['complete_name', 'barcode']
     _check_company_auto = True
@@ -96,6 +96,7 @@ class Location(models.Model):
     incoming_move_line_ids = fields.One2many('stock.move.line', 'location_dest_id') # used to compute weight
     net_weight = fields.Float('Net Weight', compute="_compute_weight")
     forecast_weight = fields.Float('Forecasted Weight', compute="_compute_weight")
+    sequence = fields.Integer(string="Sequence", compute='_compute_location_sequence', store=True)
     is_empty = fields.Boolean('Is Empty', compute='_compute_is_empty', search='_search_is_empty')
 
     _sql_constraints = [('barcode_company_uniq', 'unique (barcode,company_id)', 'The barcode for a location must be unique per company!'),
@@ -171,6 +172,11 @@ class Location(models.Model):
                     loc.warehouse_id = view_by_wh[view_location_id]
                     break
 
+    @api.depends('warehouse_id.sequence')
+    def _compute_location_sequence(self):
+        for location in self:
+            location.sequence = location.warehouse_id.sequence if location.warehouse_id else 0
+
     @api.depends('child_ids.usage', 'child_ids.child_internal_location_ids')
     def _compute_child_internal_location_ids(self):
         # batch reading optimization is not possible because the field has recursive=True
@@ -232,16 +238,14 @@ class Location(models.Model):
             modified_locations = self.filtered(
                 lambda l: any(l[f] != values[f] if f in values else False
                               for f in {'usage', 'scrap_location'}))
-            reserved_quantities = self.env['stock.move.line'].search_count([
+            reserved_quantities = self.env['stock.quant'].search_count([
                 ('location_id', 'in', modified_locations.ids),
-                ('state', 'not in', ['done', 'cancel']),
-                ('quantity_product_uom', '>', 0),
+                ('location_id.usage', '=', 'internal'),
+                ('quantity', '>', 0),
             ])
             if reserved_quantities:
                 raise UserError(_(
-                    "You cannot change the location type or its use as a scrap"
-                    " location as there are products reserved in this location."
-                    " Please unreserve the products first."
+                    "Internal locations having stock can't be converted"
                 ))
         if 'active' in values:
             if not values['active']:
