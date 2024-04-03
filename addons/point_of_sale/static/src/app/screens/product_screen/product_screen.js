@@ -418,23 +418,35 @@ export class ProductScreen extends Component {
     }
 
     async loadProductFromDB() {
-        const { searchProductWord } = this.pos;
+        const { searchProductWord, config } = this.pos;
         if (!searchProductWord) {
             return;
         }
 
+<<<<<<< HEAD
         this.pos.setSelectedCategory(0);
+||||||| parent of dfb4db50d3b4 (temp)
+        this.pos.selectedCategoryId = 0;
+=======
+        this.pos.selectedCategoryId = 0;
+        let domain = [
+            "|",
+            "|",
+            ["name", "ilike", searchProductWord],
+            ["default_code", "ilike", searchProductWord],
+            ["barcode", "ilike", searchProductWord],
+            ["available_in_pos", "=", true],
+            ["sale_ok", "=", true],
+        ];
+    
+        if (config.limit_categories && config.iface_available_categ_ids) {
+            const categIds = config.iface_available_categ_ids.map((categ) => categ.id);
+            domain.push(['pos_categ_ids', 'in', categIds]);
+        }
+>>>>>>> dfb4db50d3b4 (temp)
         const product = await this.pos.data.searchRead(
             "product.product",
-            [
-                "&",
-                ["available_in_pos", "=", true],
-                "|",
-                "|",
-                ["name", "ilike", searchProductWord],
-                ["default_code", "ilike", searchProductWord],
-                ["barcode", "ilike", searchProductWord],
-            ],
+            domain,
             this.pos.data.fields["product.product"],
             {
                 offset: this.state.currentOffset,
