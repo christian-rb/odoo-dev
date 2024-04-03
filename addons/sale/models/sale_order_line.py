@@ -438,8 +438,6 @@ class SaleOrderLine(models.Model):
         taxes_by_product_company = defaultdict(lambda: self.env['account.tax'])
         lines_by_company = defaultdict(lambda: self.env['sale.order.line'])
         cached_taxes = {}
-        print("-------------------------")
-        print("COMPUTE TAX", self)
         for line in self:
             lines_by_company[line.company_id] += line
         for product in self.product_id:
@@ -465,7 +463,6 @@ class SaleOrderLine(models.Model):
                     cached_taxes[cache_key] = result
                 # If company_id is set, always filter taxes by the company
                 line.tax_id = result
-                print(line, result)
 
     def _get_custom_compute_tax_cache_key(self):
         """Hook method to be able to set/get cached taxes while computing them"""
@@ -997,8 +994,6 @@ class SaleOrderLine(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        print("--------------------------")
-        print("CREATE")
         for vals in vals_list:
             if vals.get('display_type') or self.default_get(['display_type']).get('display_type'):
                 vals['product_uom_qty'] = 0.0
