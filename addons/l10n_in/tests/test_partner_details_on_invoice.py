@@ -139,3 +139,49 @@ class TestReports(AccountTestInvoicingCommon):
                 'l10n_in_state_id': self.env.company.state_id.id,
             }]
         )
+
+    def test_place_of_supply(self):
+        # ==== Partners ====
+        test_partner_1 = self.env['res.partner'].create({
+            'company_id': self.env.company.id,
+            'name': 'Partner 1',
+            'company_type': 'company',
+            'country_id': self.env.ref("base.in").id,
+            'state_id': self.env.ref('base.state_in_hp').id,
+        })
+
+        test_partner_2 = self.env['res.partner'].create({
+            'company_id': self.env.company.id,
+            'name': 'Partner 2',
+            'company_type': 'company',
+            'country_id': self.env.ref("base.in").id,
+            'state_id': self.env.ref("base.state_in_mh").id,
+        })
+
+        test_partner_3 = self.env['res.partner'].create({
+            'name': 'Partner 3',
+            'company_type': 'person',
+            'parent_id': test_partner_1.id,
+            'is_company': False,
+            'customer_rank': 1,
+            'country_id': self.env.ref("base.in").id,
+            'state_id': self.env.ref("base.state_in_dl").id,
+        })
+
+        # ==== Invoices ====
+        invoice = self.env['account.move'].create({
+            'move_type': 'out_invoice',
+            'partner_id': test_partner_1.id,
+            'partner_shipping_id': test_partner_2.id,
+            'country_code': 'IN',
+        })
+
+        self.assertNotEqual(invoice.partner_id.commercial_partner_id, invoice.partner_shipping_id.commercial_partner_id)
+        self.assertEqual(invoice.l10n_in_state_id, invoice.partner_id.state_id)
+
+        invoice.write({
+            'partner_shipping_id': test_partner_3.id,
+        })
+
+        self.assertEqual(invoice.partner_id.commercial_partner_id, invoice.partner_shipping_id.commercial_partner_id)
+        self.assertEqual(invoice.l10n_in_state_id, invoice.partner_shipping_id.state_id)

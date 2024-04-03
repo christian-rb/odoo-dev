@@ -45,13 +45,16 @@ class AccountMove(models.Model):
                 record.l10n_in_gst_treatment = gst_treatment
         (self - indian_invoice).l10n_in_gst_treatment = False
 
-    @api.depends('partner_id', 'company_id')
+    @api.depends('partner_id', 'partner_shipping_id', 'company_id')
     def _compute_l10n_in_state_id(self):
         for move in self:
             if move.country_code == 'IN' and move.journal_id.type == 'sale':
                 country_code = move.partner_id.country_id.code
                 if country_code == 'IN':
-                    move.l10n_in_state_id = move.partner_id.state_id
+                    if move.commercial_partner_id == move.partner_shipping_id.commercial_partner_id and move.partner_shipping_id.state_id.code:
+                        move.l10n_in_state_id = move.partner_shipping_id.state_id
+                    else:
+                        move.l10n_in_state_id = move.partner_id.state_id
                 elif country_code:
                     move.l10n_in_state_id = self.env.ref('l10n_in.state_in_oc', raise_if_not_found=False)
                 else:
