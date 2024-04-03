@@ -54,6 +54,14 @@ class TestUi(AccountTestInvoicingCommon, odoo.tests.HttpCase):
                 invoice.button_draft()
         invoices.unlink()
 
+        # ensure there is an empty miscellaneous journal to test the onboarding
+        self.env['account.journal'].create({
+            'name': 'Misc 2',
+            'code': 'M2',
+            'type': 'general',
+            'company_id': self.env.company.id,
+        })
+
         self.start_tour("/web", 'account_tour', login="admin")
 
     def test_01_account_tax_groups_tour(self):

@@ -3,13 +3,14 @@
         <field name="name">account.journal.dashboard.kanban</field>
         <field name="model">account.journal</field>
         <field name="arch" type="xml">
-            <kanban create="false" class="o_kanban_dashboard o_account_kanban" banner_route="/onboarding/account_dashboard" js_class="account_dashboard_kanban">
+            <kanban create="false" class="o_kanban_dashboard o_account_kanban" js_class="account_dashboard_kanban">
                 <field name="id"/>
                 <field name="name"/>
                 <field name="type"/>
                 <field name="color"/>
                 <field name="show_on_dashboard"/>
                 <field name="kanban_dashboard"/>
+                <field name="entries_count"/>
                 <field name="activity_ids"/>
                 <field name="activity_state"/>
                 <field name="alias_domain_id"/>
@@ -18,6 +19,7 @@
                         <div t-attf-class="d-flex flex-column flex-fill">
                             <t t-value="JSON.parse(record.kanban_dashboard.raw_value)" t-set="dashboard"/>
                             <t t-value="record.type.raw_value" t-set="journal_type"/>
+                            <t t-value="!record.entries_count.raw_value" t-set="journal_is_empty"/>
                             <t t-call="JournalTop"/>
                             <div t-att-class="'container o_kanban_card_content' + (dashboard.is_sample_data ? ' o_sample_data' : '')">
                                 <div class="row">
@@ -201,24 +203,27 @@
                     </t>
 
                     <t t-name="JournalMiscelaneous">
-                        <div class="col-12 col-sm-4 mb-3 mb-sm-0 o_kanban_primary_left">
-                            <button id="new_misc_entry_button" type="object" name="action_create_new" class="btn btn-primary" groups="account.group_account_invoice">
-                                <span>New Entry</span>
-                            </button>
-                        </div>
-                        <div class="col-12 col-sm-8 o_kanban_primary_right">
-                            <field name="json_activity_data" widget="kanban_vat_activity"/>
-                            <t t-if="dashboard.number_to_check > 0">
-                                <div class="row">
-                                    <div class="col overflow-hidden text-start">
-                                        <a type="object" name="open_action" context="{'action_name': 'action_move_journal_line', 'search_default_to_check': True}"><t t-out="dashboard.number_to_check"/> to check</a>
+                        <widget name="account_onboarding" t-if="journal_is_empty and dashboard['onboarding']"/>
+                        <t t-else="">
+                            <div class="col-12 col-sm-4 mb-3 mb-sm-0 o_kanban_primary_left">
+                                <button id="new_misc_entry_button" type="object" name="action_create_new" class="btn btn-primary" groups="account.group_account_invoice">
+                                    <span>New Entry</span>
+                                </button>
+                            </div>
+                            <div class="col-12 col-sm-8 o_kanban_primary_right">
+                                <field name="json_activity_data" widget="kanban_vat_activity"/>
+                                <t t-if="dashboard.number_to_check > 0">
+                                    <div class="row">
+                                        <div class="col overflow-hidden text-start">
+                                            <a type="object" name="open_action" context="{'action_name': 'action_move_journal_line', 'search_default_to_check': True}"><t t-out="dashboard.number_to_check"/> to check</a>
+                                        </div>
+                                        <div class="col-auto text-end">
+                                            <span class="o_kanban_monetary"><t t-out="dashboard.to_check_balance"/></span>
+                                        </div>
                                     </div>
-                                    <div class="col-auto text-end">
-                                        <span class="o_kanban_monetary"><t t-out="dashboard.to_check_balance"/></span>
-                                    </div>
-                                </div>
-                            </t>
-                        </div>
+                                </t>
+                            </div>
+                        </t>
                     </t>
 
                     <t t-name="JournalBodyBankCash">

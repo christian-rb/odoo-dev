@@ -75,23 +75,6 @@ class OnboardingStep(models.Model):
         }
 
     @api.model
-    def action_open_step_default_taxes(self):
-        """ Called by the 'Taxes' button of the setup bar."""
-        self.action_validate_step('account.onboarding_onboarding_step_default_taxes')
-
-        view_id_list = self.env.ref('account.view_onboarding_tax_tree').id
-        view_id_form = self.env.ref('account.view_tax_form').id
-
-        return {
-            'type': 'ir.actions.act_window',
-            'name': _('Taxes'),
-            'res_model': 'account.tax',
-            'target': 'current',
-            'views': [[view_id_list, 'list'], [view_id_form, 'form']],
-            'context': {'search_default_sale': True, 'search_default_purchase': True, 'active_test': False},
-        }
-
-    @api.model
     def action_open_step_chart_of_accounts(self):
         """ Called by the 'Chart of Accounts' button of the dashboard onboarding panel."""
         company = self.env.company

@@ -320,6 +320,7 @@ class account_journal(models.Model):
         self._fill_bank_cash_dashboard_data(dashboard_data)
         self._fill_sale_purchase_dashboard_data(dashboard_data)
         self._fill_general_dashboard_data(dashboard_data)
+        self._fill_onboarding_data(dashboard_data)
         return dashboard_data
 
     def _fill_dashboard_data_count(self, dashboard_data, model, name, domain):
@@ -562,6 +563,28 @@ class account_journal(models.Model):
                 'to_check_balance': currency.format(amount_total_signed_sum),
             })
 
+    def _fill_onboarding_data(self, dashboard_data):
+        """ Populate journals with onboarding data if they have no entries"""
+        journal_onboarding_map = {
+            'general': 'account_dashboard',
+        }
+        onboarding_data = {}
+        onboardings = self.env['onboarding.onboarding'].sudo().search([('route_name', 'in', list(journal_onboarding_map.values()))])
+        for onboarding in onboardings:
+            onboarding_data[onboarding.route_name] = onboarding._prepare_rendering_values()
+            onboarding_data[onboarding.route_name]['current_onboarding_state'] = onboarding.current_onboarding_state
+            onboarding_data[onboarding.route_name]['steps'] = [
+                {
+                    'id': step.id,
+                    'title': step.title,
+                    'description': step.description,
+                    'state': onboarding_data[onboarding.route_name]['state'][step.id],
+                    'action': step.panel_step_open_action_name,
+                }
+                for step in onboarding_data[onboarding.route_name]['steps']]
+        for journal in self:
+            dashboard_data[journal.id]['onboarding'] = onboarding_data.get(journal_onboarding_map.get(journal.type))
+
     def _get_open_bills_to_pay_query(self):
         return self.env['account.move']._where_calc([
             *self.env['account.move']._check_company_domain(self.env.companies),
@@ -728,7 +751,6 @@ class account_journal(models.Model):
         """ This function is called by the "Import" button of Vendor Bills,
         visible on dashboard if no bill has been created yet.
         """
-        self.env['onboarding.onboarding.step'].action_validate_step('account.onboarding_onboarding_step_setup_bill')
 
         new_wizard = self.env['account.tour.upload.bill'].create({})
         view_id = self.env.ref('account.account_tour_upload_bill').id
