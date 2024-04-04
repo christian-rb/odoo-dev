@@ -23,37 +23,59 @@ export class KanbanCompiler extends ViewCompiler {
             throw new Error("a kanban arch must have one (and only one) <card> child");
         }
         const cardEl = cardEls[0];
-        let sectionContainer;
-        let withAside = false;
-        const kanban = createElement("div");
+        let asideNode;
+        let asidePosition;
+        let mainNode;
+        const card = createElement("div");
         for (const child of cardEl.childNodes) {
-            if (getTag(child) === "aside") {
-                withAside = true;
-                append(kanban, this.compileAside(child, params));
-            } else if (getTag(child) === "section") {
-                if (!sectionContainer) {
-                    sectionContainer = createElement("div");
-                    sectionContainer.setAttribute(
-                        "class",
-                        "o_kanban_section_container d-flex flex-column justify-content-between gap-2 w-100 h-100"
-                    );
-                    append(kanban, sectionContainer);
+            switch (getTag(child)) {
+                case "card-aside": {
+                    asidePosition = child.getAttribute("position") || "start";
+                    child.removeAttribute("position");
+                    asideNode = this.compileAside(child, params);
+                    break;
                 }
-                append(sectionContainer, this.compileSection(child, params));
-            } else if (getTag(child) === "menu") {
-                append(kanban, this.compileMenu(child, params));
-            } else {
-                append(kanban, this.compileNode(child, params));
+                case "card-group":
+                case "card-header":
+                case "card-footer": {
+                    if (!mainNode) {
+                        mainNode = createElement("div");
+                        mainNode.setAttribute(
+                            "class",
+                            "o_kanban_card_main d-flex flex-column justify-content-between gap-2 w-100 h-100"
+                        );
+                    }
+                    append(mainNode, this.compileGroup(child, params));
+                    break;
+                }
+                case "menu": {
+                    append(card, this.compileMenu(child, params));
+                    break;
+                }
+                default: {
+                    append(card, this.compileNode(child, params));
+                    break;
+                }
             }
         }
-        kanban.setAttribute("class", `w-100${withAside ? " d-flex flex-row" : ""}`);
-        return kanban;
+        const cardClass = cardEl.getAttribute("class") || "";
+        card.setAttribute("class", `w-100${asideNode ? " d-flex flex-row" : ""} ${cardClass}`);
+        if (asideNode && asidePosition === "start") {
+            append(card, asideNode);
+        }
+        if (mainNode) {
+            append(card, mainNode);
+        }
+        if (asideNode && asidePosition === "end") {
+            append(card, asideNode);
+        }
+        return card;
     }
 
     compileAside(el, params) {
         const aside = createElement("div");
-        const elClass = el.getAttribute("class");
-        let asideClass = `o_kanban_aside d-block${elClass ? elClass : ""}`;
+        const elClass = el.getAttribute("class") || "";
+        let asideClass = `o_kanban_aside d-block ${elClass}`;
         if (archParseBoolean(el.getAttribute("full"), false)) {
             asideClass += " o_kanban_aside_full";
         }
@@ -64,22 +86,21 @@ export class KanbanCompiler extends ViewCompiler {
         return aside;
     }
 
-    compileSection(el, params) {
-        const section = createElement("div");
-        const elClass = el.getAttribute("class");
-        let sectionClass = `d-flex justify-content-between overflow-hidden${
-            elClass ? elClass : ""
-        }`;
-        if (el.getAttribute("type") === "row") {
-            sectionClass += " flex-row align-items-end";
+    compileGroup(el, params) {
+        const group = createElement("div");
+        const elClass = el.getAttribute("class") || "";
+        const type = getTag(el);
+        let groupClass = `d-flex justify-content-between overflow-hidden d-empty-none ${elClass}`;
+        if (type === "card-group") {
+            groupClass += " flex-column o_kanban_card_group";
         } else {
-            sectionClass += " flex-column";
+            groupClass += ` flex-row align-items-end o_kanban_card_${type === "card-header" ? "header" : "footer"}`;
         }
-        section.setAttribute("class", sectionClass);
+        group.setAttribute("class", groupClass);
         for (const child of el.childNodes) {
-            append(section, this.compileNode(child, params));
+            append(group, this.compileNode(child, params));
         }
-        return section;
+        return group;
     }
 
     compileMenu(el, params) {

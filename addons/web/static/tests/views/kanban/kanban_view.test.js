@@ -242,7 +242,7 @@ test("kanban card with arbitrary html content", async () => {
 
     expect(".o_kanban_record:not(.o_kanban_ghost)").toHaveCount(1);
     expect(queryFirst(".o_kanban_record")).toHaveInnerHTML(`
-        <div class="w-100">
+        <div class="w-100 ">
             <div>
                 <strong>Title</strong>
             </div>
@@ -252,23 +252,23 @@ test("kanban card with arbitrary html content", async () => {
         </div>`);
 });
 
-test("kanban card with sections", async () => {
+test("kanban card with groups", async () => {
     await mountView({
         type: "kanban",
         resModel: "partner",
         arch: `
             <kanban>
                 <card>
-                    <section>
-                        <strong><field name="foo"/></strong>
-                    </section>
-                    <section>
+                    <card-group>
+                        <field name="foo"/>
+                    </card-group>
+                    <card-group>
                         <field name="int_field"/>
                         <field name="float_field"/>
-                    </section>
-                    <section>
+                    </card-group>
+                    <card-group>
                         <field name="category_ids" widget="many2many_tags"/>
-                    </section>
+                    </card-group>
                 </card>
             </kanban>`,
         domain: [["id", "=", 2]],
@@ -277,18 +277,16 @@ test("kanban card with sections", async () => {
     expect(".o_kanban_record:not(.o_kanban_ghost)").toHaveCount(1);
 
     expect(queryFirst(".o_kanban_record")).toHaveInnerHTML(`
-        <div class="w-100">
-            <div class="o_kanban_section_container d-flex flex-column justify-content-between gap-2 w-100 h-100">
-                <div class="d-flex justify-content-between overflow-hidden flex-column">
-                    <strong>
-                        <span>blip</span>
-                    </strong>
+        <div class="w-100 ">
+            <div class="o_kanban_card_main d-flex flex-column justify-content-between gap-2 w-100 h-100">
+                <div class="d-flex justify-content-between overflow-hidden d-empty-none  flex-column o_kanban_card_group">
+                    <span>blip</span>
                 </div>
-                <div class="d-flex justify-content-between overflow-hidden flex-column">
+                <div class="d-flex justify-content-between overflow-hidden d-empty-none  flex-column o_kanban_card_group">
                     <span>9</span>
                     <span>13.00</span>
                 </div>
-                <div class="d-flex justify-content-between overflow-hidden flex-column">
+                <div class="d-flex justify-content-between overflow-hidden d-empty-none  flex-column o_kanban_card_group">
                     <div name="category_ids" class="o_field_widget o_field_many2many_tags">
                         <div class="d-flex flex-wrap gap-1">
                             <span class="o_tag position-relative d-inline-flex align-items-center user-select-none mw-100 o_badge badge rounded-pill lh-1 o_tag_color_0" tabindex="-1" title="gold">
@@ -320,7 +318,7 @@ test("kanban with arbitray html outside <card>", async () => {
     expect(".o_kanban_record:not(.o_kanban_ghost)").toHaveCount(1);
 
     expect(queryFirst(".o_kanban_record")).toHaveInnerHTML(`
-        <div class="w-100">
+        <div class="w-100 ">
             <span>blip</span>
         </div>`);
 });
@@ -332,19 +330,19 @@ test("kanban card with aside", async () => {
         arch: `
             <kanban>
                 <card>
-                    <aside>
+                    <card-aside>
                         <field name="image" widget="kanban_image"/>
-                    </aside>
-                    <section>
-                        <strong><field name="foo"/></strong>
-                    </section>
-                    <section>
+                    </card-aside>
+                    <card-group>
+                        <field name="foo"/>
+                    </card-group>
+                    <card-group>
                         <field name="int_field"/>
                         <field name="float_field"/>
-                    </section>
-                    <section>
+                    </card-group>
+                    <card-group>
                         <field name="category_ids" widget="many2many_tags"/>
-                    </section>
+                    </card-group>
                 </card>
             </kanban>`,
         domain: [["id", "=", 2]],
@@ -353,21 +351,19 @@ test("kanban card with aside", async () => {
     expect(".o_kanban_record:not(.o_kanban_ghost)").toHaveCount(1);
 
     expect(queryFirst(".o_kanban_record")).toHaveInnerHTML(`
-        <div class="w-100 d-flex flex-row">
-            <div class="o_kanban_aside d-block">
+        <div class="w-100 d-flex flex-row ">
+            <div class="o_kanban_aside d-block ">
                 <div name="image" class="o_field_widget o_field_empty o_field_kanban_image"/>
             </div>
-            <div class="o_kanban_section_container d-flex flex-column justify-content-between gap-2 w-100 h-100">
-                <div class="d-flex justify-content-between overflow-hidden flex-column">
-                    <strong>
-                        <span>blip</span>
-                    </strong>
+            <div class="o_kanban_card_main d-flex flex-column justify-content-between gap-2 w-100 h-100">
+                <div class="d-flex justify-content-between overflow-hidden d-empty-none  flex-column o_kanban_card_group">
+                    <span>blip</span>
                 </div>
-                <div class="d-flex justify-content-between overflow-hidden flex-column">
+                <div class="d-flex justify-content-between overflow-hidden d-empty-none  flex-column o_kanban_card_group">
                     <span>9</span>
                     <span>13.00</span>
                 </div>
-                <div class="d-flex justify-content-between overflow-hidden flex-column">
+                <div class="d-flex justify-content-between overflow-hidden d-empty-none  flex-column o_kanban_card_group">
                     <div name="category_ids" class="o_field_widget o_field_many2many_tags">
                         <div class="d-flex flex-wrap gap-1">
                             <span class="o_tag position-relative d-inline-flex align-items-center user-select-none mw-100 o_badge badge rounded-pill lh-1 o_tag_color_0" tabindex="-1" title="gold">
@@ -389,16 +385,16 @@ test("kanban card with aside (full)", async () => {
         arch: `
             <kanban>
                 <card>
-                    <aside full="1">
+                    <card-aside full="1">
                         <field name="image" widget="kanban_image"/>
-                    </aside>
-                    <section>
+                    </card-aside>
+                    <card-group>
                         <strong><field name="foo"/></strong>
-                    </section>
-                    <section>
+                    </card-group>
+                    <card-group>
                         <field name="int_field"/>
                         <field name="float_field"/>
-                    </section>
+                    </card-group>
                 </card>
             </kanban>`,
         domain: [["id", "=", 2]],
@@ -407,17 +403,17 @@ test("kanban card with aside (full)", async () => {
     expect(".o_kanban_record:not(.o_kanban_ghost)").toHaveCount(1);
 
     expect(queryFirst(".o_kanban_record")).toHaveInnerHTML(`
-        <div class="w-100 d-flex flex-row">
-            <div class="o_kanban_aside d-block o_kanban_aside_full">
+        <div class="w-100 d-flex flex-row ">
+            <div class="o_kanban_aside d-block  o_kanban_aside_full">
                 <div name="image" class="o_field_widget o_field_empty o_field_kanban_image"/>
             </div>
-            <div class="o_kanban_section_container d-flex flex-column justify-content-between gap-2 w-100 h-100">
-                <div class="d-flex justify-content-between overflow-hidden flex-column">
+            <div class="o_kanban_card_main d-flex flex-column justify-content-between gap-2 w-100 h-100">
+                <div class="d-flex justify-content-between overflow-hidden d-empty-none  flex-column o_kanban_card_group">
                     <strong>
                         <span>blip</span>
                     </strong>
                 </div>
-                <div class="d-flex justify-content-between overflow-hidden flex-column">
+                <div class="d-flex justify-content-between overflow-hidden d-empty-none  flex-column o_kanban_card_group">
                     <span>9</span>
                     <span>13.00</span>
                 </div>
@@ -425,20 +421,20 @@ test("kanban card with aside (full)", async () => {
         </div>`);
 });
 
-test("kanban card with section of type row", async () => {
+test("kanban card with header/footer", async () => {
     await mountView({
         type: "kanban",
         resModel: "partner",
         arch: `
             <kanban>
                 <card>
-                    <section>
-                        <strong><field name="foo"/></strong>
-                    </section>
-                    <section type="row">
+                    <card-header>
+                        <field name="foo"/>
+                    </card-header>
+                    <card-footer>
                         <field name="int_field"/>
                         <field name="float_field"/>
-                    </section>
+                    </card-footer>
                 </card>
             </kanban>`,
         domain: [["id", "=", 2]],
@@ -447,14 +443,12 @@ test("kanban card with section of type row", async () => {
     expect(".o_kanban_record:not(.o_kanban_ghost)").toHaveCount(1);
 
     expect(queryFirst(".o_kanban_record")).toHaveInnerHTML(`
-        <div class="w-100">
-            <div class="o_kanban_section_container d-flex flex-column justify-content-between gap-2 w-100 h-100">
-                <div class="d-flex justify-content-between overflow-hidden flex-column">
-                    <strong>
-                        <span>blip</span>
-                    </strong>
+        <div class="w-100 ">
+            <div class="o_kanban_card_main d-flex flex-column justify-content-between gap-2 w-100 h-100">
+                <div class="d-flex justify-content-between overflow-hidden d-empty-none  flex-row align-items-end o_kanban_card_header">
+                    <span>blip</span>
                 </div>
-                <div class="d-flex justify-content-between overflow-hidden flex-row align-items-end">
+                <div class="d-flex justify-content-between overflow-hidden d-empty-none  flex-row align-items-end o_kanban_card_footer">
                     <span>9</span>
                     <span>13.00</span>
                 </div>
@@ -473,13 +467,13 @@ test("kanban card with menu", async () => {
                         <a type="edit" class="dropdown-item">Edit</a>
                         <a type="delete" class="dropdown-item">Delete</a>
                     </menu>
-                    <section>
+                    <card-group>
                         <strong><field name="foo"/></strong>
-                    </section>
-                    <section>
+                    </card-group>
+                    <card-group>
                         <field name="int_field"/>
                         <field name="float_field"/>
-                    </section>
+                    </card-group>
                 </card>
             </kanban>`,
         domain: [["id", "=", 2]],
@@ -488,19 +482,19 @@ test("kanban card with menu", async () => {
     expect(".o_kanban_record:not(.o_kanban_ghost)").toHaveCount(1);
 
     expect(queryFirst(".o_kanban_record")).toHaveInnerHTML(`
-        <div class="w-100">
+        <div class="w-100 ">
             <div class="o_dropdown_kanban bg-transparent position-absolute end-0 top-0">
                 <button class="btn o-no-caret rounded-0 o-dropdown dropdown-toggle dropdown" title="Dropdown menu" aria-expanded="false">
                     <span class="fa fa-ellipsis-v"/>
                 </button>
             </div>
-            <div class="o_kanban_section_container d-flex flex-column justify-content-between gap-2 w-100 h-100">
-                <div class="d-flex justify-content-between overflow-hidden flex-column">
+            <div class="o_kanban_card_main d-flex flex-column justify-content-between gap-2 w-100 h-100">
+                <div class="d-flex justify-content-between overflow-hidden d-empty-none  flex-column o_kanban_card_group">
                     <strong>
                         <span>blip</span>
                     </strong>
                 </div>
-                <div class="d-flex justify-content-between overflow-hidden flex-column">
+                <div class="d-flex justify-content-between overflow-hidden d-empty-none  flex-column o_kanban_card_group">
                     <span>9</span>
                     <span>13.00</span>
                 </div>
@@ -521,13 +515,13 @@ test("kanban arch with progressbar", async () => {
             <kanban>
                 <progressbar field="foo" colors='{"yop": "success", "gnap": "warning", "blip": "danger"}'/>
                 <card>
-                    <section>
+                    <card-group>
                         <strong><field name="foo"/></strong>
-                    </section>
-                    <section>
+                    </card-group>
+                    <card-group>
                         <field name="int_field"/>
                         <field name="float_field"/>
-                    </section>
+                    </card-group>
                 </card>
             </kanban>`,
         domain: [["id", "=", 2]],
@@ -539,14 +533,14 @@ test("kanban arch with progressbar", async () => {
     expect(".o_kanban_group .o_kanban_counter .o_column_progress").toHaveCount(1);
 
     expect(queryFirst(".o_kanban_record")).toHaveInnerHTML(`
-        <div class="w-100">
-            <div class="o_kanban_section_container d-flex flex-column justify-content-between gap-2 w-100 h-100">
-                <div class="d-flex justify-content-between overflow-hidden flex-column">
+        <div class="w-100 ">
+            <div class="o_kanban_card_main d-flex flex-column justify-content-between gap-2 w-100 h-100">
+                <div class="d-flex justify-content-between overflow-hidden d-empty-none  flex-column o_kanban_card_group">
                     <strong>
                         <span>blip</span>
                     </strong>
                 </div>
-                <div class="d-flex justify-content-between overflow-hidden flex-column">
+                <div class="d-flex justify-content-between overflow-hidden d-empty-none  flex-column o_kanban_card_group">
                     <span>9</span>
                     <span>13.00</span>
                 </div>
