@@ -7,7 +7,7 @@
         <field name="street2">Fraccionamiento Montecarlo</field>
         <field name="zip">85134</field>
         <field name="city">Ciudad Obregón</field>
-        <field name="state_id" ref="base.state_mx_son"/>
+        <field name="state_id" ref="base.state_mx_ags"/>
         <field name="country_id" ref="base.mx"/>
         <field name="phone">+52 222 123 4567</field>
         <field name="email">info@company.mxexample.com</field>
