@@ -3,7 +3,7 @@
     height: 100%;
     position: absolute;
     background-color: #AAAA;
-    z-index: 2;
+    z-index: 3;
     left: 0;
     top: 0;
     i {
@@ -12,6 +12,12 @@
       align-items: center;
       height: 100%;
     }
+}
+
+.bill_guide_container {
+  @include media-breakpoint-up(sm) {
+    min-width: 460px;
+  }
 }
 
 .file_upload_kanban_action_a {
@@ -24,4 +30,8 @@
       color: inherit;
     }
   }
+}
+
+.account_drag_drop_btn {
+  border-style: dashed !important;
 }

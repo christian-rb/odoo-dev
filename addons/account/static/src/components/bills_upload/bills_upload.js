@@ -14,7 +14,7 @@ import { KanbanRecord } from "@web/views/kanban/kanban_record";
 import { FileUploader } from "@web/views/fields/file_handler";
 import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
 
-import { Component, useState } from "@odoo/owl";
+import { Component, useState, onWillStart } from "@odoo/owl";
 
 export class AccountFileUploader extends Component {
     static template = "account.AccountFileUploader";
@@ -26,6 +26,7 @@ export class AccountFileUploader extends Component {
         record: { type: Object, optional: true },
         togglerTemplate: { type: String, optional: true },
         btnClass: { type: String, optional: true },
+        divClass: { type: String, optional: true },
         linkText: { type: String, optional: true },
         slots: { type: Object, optional: true },
     };
@@ -73,6 +74,10 @@ export class AccountFileUploader extends Component {
         }
         this.action.doAction(action);
     }
+
+    get divClass() {
+        return this.props.divClass || (this.props.record && this.props.record.data ? 'oe_kanban_color_' + this.props.record.data.color : '');
+    }
 }
 //when file uploader is used on account.journal (with a record)
 
@@ -90,6 +95,55 @@ export const accountFileUploader = {
 };
 
 registry.category("view_widgets").add("account_file_uploader", accountFileUploader);
+
+export class BillGuide extends Component {
+    static template = "account.BillGuide";
+    static components = {
+        AccountFileUploader,
+    };
+    static props = ["*"];  // could contain view_widget props
+
+    setup() {
+        this.orm = useService("orm");
+        this.action = useService("action");
+        this.context = null;
+        this.alias = null;
+        onWillStart(this.onWillStart);
+    }
+
+    async onWillStart() {
+        const rec = this.props.record;
+        const ctx = this.env.searchModel.context;
+        if (rec) {
+            // prepare context from journal record
+            this.context = {
+                default_journal_id: rec.resId,
+                default_move_type: (rec.data.type === 'sale' && 'out_invoice') || (rec.data.type === 'purchase' && 'in_invoice') || 'entry',
+                active_model: rec.resModel,
+                active_ids: [rec.resId],
+            }
+            this.alias = rec.data.alias_domain_id && rec.data.alias_id[1] || false;
+        } else if (ctx?.default_journal_id) {
+            this.alias = await this.orm.call("account.journal", "get_journal_alias", [ctx.default_journal_id]);
+        }
+    }
+
+    handleButtonClick(action, model="account.journal") {
+        this.action.doActionButton({
+            resModel: model,
+            name: action,
+            context: this.context || this.env.searchModel.context,
+            type: 'object',
+        });
+    }
+}
+
+
+export const billGuide = {
+    component: BillGuide,
+};
+
+registry.category("view_widgets").add("bill_upload_guide", billGuide);
 
 export class AccountDropZone extends Component {
     static template = "account.DropZone";
@@ -130,6 +184,7 @@ export class AccountMoveUploadListRenderer extends ListRenderer {
     static components = {
         ...ListRenderer.components,
         AccountDropZone,
+        BillGuide,
     };
 
     setup() {

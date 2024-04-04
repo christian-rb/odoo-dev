@@ -287,6 +287,17 @@ class AccountJournal(models.Model):
         for journal, pay_method_ids_commands in pay_method_ids_commands_x_journal.items():
             journal.available_payment_method_ids = pay_method_ids_commands
 
+    def get_journal_alias(self):
+        self.ensure_one()
+        if self.alias_domain_id:
+            return self.alias_id.alias_full_name
+        else:
+            return self.search([
+                ('alias_domain_id', '!=', False),
+                ('alias_id', '!=', False),
+                ('type', '=', self.type),
+            ], limit=1).alias_id.alias_full_name
+
     @api.model
     def _get_reusable_payment_methods(self):
         return {'manual'}

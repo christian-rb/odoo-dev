@@ -31,11 +31,19 @@
         .o_dashboard_graph {
             margin-bottom: -$o-horizontal-padding/2;
         }
+
+        .bill_guide_left, .bill_guide_right {
+            width: 45%;
+        }
+
+        .separator_wrapper {
+            width: 10%;
+        }
     }
 
     &.o_kanban_ungrouped {
         .o_kanban_record {
-            width: 450px;
+            width: 32vw;
         }
     }
 

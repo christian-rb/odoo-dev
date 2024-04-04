@@ -727,7 +727,10 @@ class account_journal(models.Model):
 
     def _get_move_action_context(self):
         ctx = self._context.copy()
-        ctx['default_journal_id'] = self.id
+        if not ctx.get('default_journal_id'):
+            ctx['default_journal_id'] = self.id
+        elif not self:
+            self = self.browse(ctx['default_journal_id'])
         if self.type == 'sale':
             ctx['default_move_type'] = 'out_refund' if ctx.get('refund') else 'out_invoice'
         elif self.type == 'purchase':
@@ -763,6 +766,7 @@ class account_journal(models.Model):
             'target': 'new',
             'res_id': new_wizard.id,
             'views': [[view_id, 'form']],
+            'context': self.env.context,
         }
 
     def to_check_ids(self):
