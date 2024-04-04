@@ -1420,6 +1420,9 @@ actual arch.
                 )
                 self._raise_view_error(msg, node)
 
+            if field.type == 'properties' and node_info['view_type'] != 'search':
+                name_manager.must_have_field(node, field._description_definition_record, f"definition record of {field.name}")
+
             for child in node:
                 if child.tag not in ('form', 'tree', 'graph', 'kanban', 'calendar'):
                     continue
