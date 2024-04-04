@@ -6,6 +6,7 @@ from contextlib import contextmanager
 from dateutil.relativedelta import relativedelta
 import itertools
 from psycopg2 import OperationalError
+from odoo.exceptions import UserError
 
 from odoo import api, fields, models, tools, _
 from odoo.osv import expression
@@ -187,7 +188,12 @@ class HrWorkEntry(models.Model):
         with self._error_checking(skip=skip_check, employee_ids=employee_ids):
             return super(HrWorkEntry, self).write(vals)
 
+    def _error_raising(self):
+        if any(w.state == 'validated' for w in self):
+            raise UserError(_("This work entry is used in a validated payslip. You can't delete it."))
+
     def unlink(self):
+        self._error_raising()
         employee_ids = self.employee_id.ids
         with self._error_checking(employee_ids=employee_ids):
             return super().unlink()
