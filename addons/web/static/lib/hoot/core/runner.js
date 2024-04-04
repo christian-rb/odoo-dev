@@ -647,7 +647,20 @@ export class TestRunner {
 
         this.#dry = true;
 
+        const stopWatching = watchListeners(
+            window,
+            document,
+            document.documentElement,
+            document.head,
+            document.body
+        );
         await callback();
+        cleanupWindow();
+        cleanupNavigator();
+        this.fixture.cleanup();
+        cleanupDOM();
+        cleanupTime();
+        stopWatching();
 
         this.#prepareRunner();
 
