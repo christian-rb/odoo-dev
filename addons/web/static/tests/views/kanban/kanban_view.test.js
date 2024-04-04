@@ -259,16 +259,16 @@ test("kanban card with groups", async () => {
         arch: `
             <kanban>
                 <card>
-                    <card-group>
+                    <group>
                         <field name="foo"/>
-                    </card-group>
-                    <card-group>
+                    </group>
+                    <group>
                         <field name="int_field"/>
                         <field name="float_field"/>
-                    </card-group>
-                    <card-group>
+                    </group>
+                    <group>
                         <field name="category_ids" widget="many2many_tags"/>
-                    </card-group>
+                    </group>
                 </card>
             </kanban>`,
         domain: [["id", "=", 2]],
@@ -330,19 +330,19 @@ test("kanban card with aside", async () => {
         arch: `
             <kanban>
                 <card>
-                    <card-aside>
+                    <side>
                         <field name="image" widget="kanban_image"/>
-                    </card-aside>
-                    <card-group>
+                    </side>
+                    <group>
                         <field name="foo"/>
-                    </card-group>
-                    <card-group>
+                    </group>
+                    <group>
                         <field name="int_field"/>
                         <field name="float_field"/>
-                    </card-group>
-                    <card-group>
+                    </group>
+                    <group>
                         <field name="category_ids" widget="many2many_tags"/>
-                    </card-group>
+                    </group>
                 </card>
             </kanban>`,
         domain: [["id", "=", 2]],
@@ -385,16 +385,16 @@ test("kanban card with aside (full)", async () => {
         arch: `
             <kanban>
                 <card>
-                    <card-aside full="1">
+                    <side full="1">
                         <field name="image" widget="kanban_image"/>
-                    </card-aside>
-                    <card-group>
+                    </side>
+                    <group>
                         <strong><field name="foo"/></strong>
-                    </card-group>
-                    <card-group>
+                    </group>
+                    <group>
                         <field name="int_field"/>
                         <field name="float_field"/>
-                    </card-group>
+                    </group>
                 </card>
             </kanban>`,
         domain: [["id", "=", 2]],
@@ -428,13 +428,13 @@ test("kanban card with header/footer", async () => {
         arch: `
             <kanban>
                 <card>
-                    <card-header>
+                    <chead>
                         <field name="foo"/>
-                    </card-header>
-                    <card-footer>
+                    </chead>
+                    <cfoot>
                         <field name="int_field"/>
                         <field name="float_field"/>
-                    </card-footer>
+                    </cfoot>
                 </card>
             </kanban>`,
         domain: [["id", "=", 2]],
@@ -467,13 +467,13 @@ test("kanban card with menu", async () => {
                         <a type="edit" class="dropdown-item">Edit</a>
                         <a type="delete" class="dropdown-item">Delete</a>
                     </menu>
-                    <card-group>
+                    <group>
                         <strong><field name="foo"/></strong>
-                    </card-group>
-                    <card-group>
+                    </group>
+                    <group>
                         <field name="int_field"/>
                         <field name="float_field"/>
-                    </card-group>
+                    </group>
                 </card>
             </kanban>`,
         domain: [["id", "=", 2]],
@@ -515,13 +515,13 @@ test("kanban arch with progressbar", async () => {
             <kanban>
                 <progressbar field="foo" colors='{"yop": "success", "gnap": "warning", "blip": "danger"}'/>
                 <card>
-                    <card-group>
+                    <group>
                         <strong><field name="foo"/></strong>
-                    </card-group>
-                    <card-group>
+                    </group>
+                    <group>
                         <field name="int_field"/>
                         <field name="float_field"/>
-                    </card-group>
+                    </group>
                 </card>
             </kanban>`,
         domain: [["id", "=", 2]],
