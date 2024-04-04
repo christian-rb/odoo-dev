@@ -173,3 +173,15 @@ ProductScreen.exec.addOrderline('Test Product 1', '1.00', '100');
 ProductScreen.check.totalAmountIs('80.00');
 
 registry.category("web_tour.tours").add("PosLoyaltyPromotion", { test: true, url: "/pos/web", steps: getSteps() });
+
+startSteps();
+
+ProductScreen.do.confirmOpeningPopup();
+ProductScreen.do.clickHomeCategory();
+
+ProductScreen.exec.addOrderline('Desk Organizer', '3');
+
+PosLoyalty.check.orderTotalIs('15.3');
+PosLoyalty.exec.finalizeOrder('Cash', '15.3');
+
+registry.category("web_tour.tours").add("PosLoyaltyNextOrderCouponExpirationDate", { test: true, url: "/pos/web", steps: getSteps() });
