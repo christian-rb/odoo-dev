@@ -4,6 +4,7 @@
 import base64
 from collections import OrderedDict
 from datetime import datetime
+import io
 
 from odoo import http
 from odoo.exceptions import AccessError, MissingError
@@ -12,6 +13,10 @@ from odoo.tools import image_process
 from odoo.tools.translate import _
 from odoo.addons.portal.controllers import portal
 from odoo.addons.portal.controllers.portal import pager as portal_pager
+try:
+    from werkzeug.utils import send_file
+except ImportError:
+    from odoo.tools._vendor.send_file import send_file
 
 
 class CustomerPortal(portal.CustomerPortal):
@@ -196,3 +201,34 @@ class CustomerPortal(portal.CustomerPortal):
         if updated_dates:
             order_sudo._update_date_planned_for_lines(updated_dates)
         return Response(status=204)
+
+    @http.route(['/my/purchase/<int:order_id>/download_edi'], auth="public", website=True)
+    def portal_my_purchase_order_download_edi(self, order_id=None, access_token=None, **kw):
+        """User update scheduled date on purchase order line.
+        """
+        try:
+            order_sudo = self._document_check_access('purchase.order', order_id, access_token=access_token)
+        except (AccessError, MissingError):
+            return request.redirect('/my')
+
+        builders = []
+        order_sudo._get_edi_builders(builders)
+
+        if len(builders) != 1:
+            return request.redirect('/my')
+
+        # This handles only one builder for now, more can be added in the future
+        builder = builders[0]
+        xml_content = builder._export_order(order_sudo)
+        xml_file_data = io.BytesIO(xml_content)
+
+        download_name = builder._export_purchase_order_filename(order_sudo)
+
+        return send_file(
+            xml_file_data,
+            request.httprequest.environ,
+            download_name=download_name,
+            mimetype='text/xml',
+            as_attachment=True,
+            response_class=Response
+        )
