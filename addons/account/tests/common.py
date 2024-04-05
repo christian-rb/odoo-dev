@@ -6,8 +6,10 @@ from odoo.tools.float_utils import float_round
 
 import json
 import base64
+from contextlib import contextmanager
 from lxml import etree
 from unittest import SkipTest
+from unittest.mock import patch
 
 
 def instantiate_accountman(cls):
@@ -664,7 +666,33 @@ class AccountTestInvoicingCommon(TransactionCase):
         return etree.fromstring(xml_tree_str)
 
 
-class AccountTestInvoicingHttpCommon(AccountTestInvoicingCommon, HttpCase):
+class AccountTestMockOnlineSyncCommon(HttpCase):
+    @classmethod
+    @contextmanager
+    def mock_online_sync_favorite_institutions(cls):
+        def get_institutions(*args, **kwargs):
+            return [
+                {
+                    'country': 'US',
+                    'id': 3245,
+                    'name': 'BMO Business Banking',
+                    'picture': '/base/static/img/logo_white.png',
+                },
+                {
+                    'country': 'US',
+                    'id': 8192,
+                    'name': 'Banc of California',
+                    'picture': '/base/static/img/logo_white.png'
+                },
+            ]
+        with patch.object(
+             target=cls.registry['account.journal'],
+             attribute='fetch_online_sync_favorite_institutions',
+             new=get_institutions,
+             create=True):
+            yield
+
+class AccountTestInvoicingHttpCommon(AccountTestInvoicingCommon, AccountTestMockOnlineSyncCommon):
     pass
 
 
