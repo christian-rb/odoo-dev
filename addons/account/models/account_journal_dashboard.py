@@ -424,6 +424,10 @@ class account_journal(models.Model):
             to_check_balance, number_to_check = to_check.get(journal, (0, 0))
             misc_balance, number_misc = misc_totals.get(journal.default_account_id, (0, 0))
             accessible = journal.company_id.id in journal.company_id._accessible_branches().ids
+            drag_drop_settings = {
+                'image': '/account/static/src/img/bank.svg' if journal.type == 'bank' else '/web/static/img/rfq.svg',
+                'text': _('Drop to import %s transactions.', journal.type),
+            }
 
             dashboard_data[journal.id].update({
                 'number_to_check': number_to_check,
@@ -440,6 +444,7 @@ class account_journal(models.Model):
                 'is_sample_data': journal.has_statement_lines,
                 'nb_misc_operations': number_misc,
                 'misc_operations_balance': currency.format(misc_balance),
+                'drag_drop_settings': drag_drop_settings,
             })
 
     def _fill_sale_purchase_dashboard_data(self, dashboard_data):
@@ -523,6 +528,11 @@ class account_journal(models.Model):
                 title_has_sequence_holes = _("Irregularities due to draft, cancelled or deleted bills with a sequence number since last lock date.")
             else:
                 title_has_sequence_holes = _("Irregularities due to draft, cancelled or deleted invoices with a sequence number since last lock date.")
+            drag_drop_settings = {
+                'image': '/account/static/src/img/Bill.svg' if journal.type == 'purchase' else '/web/static/img/quotation.svg',
+                'text': _('Drop and let the AI process your bills automatically.') if journal.type == 'purchase' else 'Drop to import your invoices.',
+            }
+
             dashboard_data[journal.id].update({
                 'number_to_check': count,
                 'to_check_balance': currency.format(amount_total_signed_sum),
@@ -536,6 +546,7 @@ class account_journal(models.Model):
                 'has_sequence_holes': journal.has_sequence_holes,
                 'title_has_sequence_holes': title_has_sequence_holes,
                 'is_sample_data': dashboard_data[journal.id]['entries_count'],
+                'drag_drop_settings': drag_drop_settings,
             })
 
     def _fill_general_dashboard_data(self, dashboard_data):
@@ -558,9 +569,16 @@ class account_journal(models.Model):
         for journal in general_journals:
             currency = journal.currency_id or self.env['res.currency'].browse(journal.company_id.sudo().currency_id.id)
             amount_total_signed_sum, count = to_check_vals.get(journal.id, (0, 0))
+            drag_drop_settings = {
+                'image': '/web/static/img/folder.svg',
+                'text': _('Drop to create journal entries with attachments.'),
+                'group': 'account.group_account_readonly',
+            }
+
             dashboard_data[journal.id].update({
                 'number_to_check': count,
                 'to_check_balance': currency.format(amount_total_signed_sum),
+                'drag_drop_settings': drag_drop_settings,
             })
 
     def _fill_onboarding_data(self, dashboard_data):

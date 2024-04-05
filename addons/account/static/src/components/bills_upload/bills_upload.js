@@ -2,6 +2,7 @@
 
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
+import { user } from "@web/core/user";
 import { useService } from "@web/core/utils/hooks";
 import { listView } from "@web/views/list/list_view";
 import { ListRenderer } from "@web/views/list/list_renderer";
@@ -14,7 +15,7 @@ import { KanbanRecord } from "@web/views/kanban/kanban_record";
 import { FileUploader } from "@web/views/fields/file_handler";
 import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
 
-import { Component, useState, onWillStart } from "@odoo/owl";
+import { Component, useState, onWillStart, useSubEnv, reactive } from "@odoo/owl";
 
 export class AccountFileUploader extends Component {
     static template = "account.AccountFileUploader";
@@ -150,6 +151,9 @@ export class AccountDropZone extends Component {
     static props = {
         visible: { type: Boolean, optional: true },
         hideZone: { type: Function, optional: true },
+        dragIcon: { type: String, optional: true },
+        dragText: { type: String, optional: true },
+        dragTitle: { type: String, optional: true },
     };
     static defaultProps = {
         hideZone: () => {},
@@ -157,6 +161,7 @@ export class AccountDropZone extends Component {
 
     setup() {
         this.notificationService = useService("notification");
+        this.dashboardState = useState(this.env.dashboardState || {});
     }
 
     onDrop(ev) {
@@ -267,17 +272,64 @@ export class DashboardKanbanRecord extends KanbanRecord {
     };
     setup() {
         super.setup();
+        onWillStart(async () => {
+            this.allowDrop = this.recordDropSettings.group ? await user.hasGroup(this.recordDropSettings.group) : true;
+        });
         this.dropzoneState = useState({
             visible: false,
         });
     }
+
+    get recordDropSettings() {
+        return JSON.parse(this.props.record.data.kanban_dashboard).drag_drop_settings;
+    }
+
+    get dropzoneProps() {
+        const {image, text} = this.recordDropSettings;
+        return {
+            visible: this.dropzoneState.visible,
+            dragIcon: image,
+            dragText: text,
+            dragTitle: this.props.record.data.name,
+            hideZone: () => { this.dropzoneState.visible = false; },
+        }
+    }
 }
 
 export class DashboardKanbanRenderer extends KanbanRenderer {
+    static template = "account.DashboardKanbanRenderer";
     static components = {
         ...KanbanRenderer.components,
         KanbanRecord: DashboardKanbanRecord,
     };
+    setup() {
+        super.setup();
+        useSubEnv({
+            dashboardState: reactive({isDragging: false}),
+            disableDragging: this.disableDragging.bind(this),
+        });
+    }
+    kanbanDragEnter(e) {
+        this.env.dashboardState.isDragging = true;
+    }
+    kanbanDragLeave(e) {
+        const mouseX = e.clientX, mouseY = e.clientY;
+        const {x, y, width, height} = this.rootRef.el.getBoundingClientRect();
+        if (!(mouseX > x && mouseX <= x + width && mouseY > y && mouseY <= y + height)) {
+            // if the mouse position is outside the kanban renderer, all cards should hide their dropzones.
+            this.disableDragging();
+        } else {
+            this.env.dashboardState.isDragging = true;
+        }
+    }
+    kanbanDragDrop(e) {
+        this.disableDragging();
+        return false;
+    }
+    disableDragging() {
+        this.env.dashboardState.isDragging = false;
+    }
+
 }
 
 export const DashboardKanbanView = {

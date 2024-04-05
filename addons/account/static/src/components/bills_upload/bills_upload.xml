@@ -2,12 +2,27 @@
 
 <templates>
     <t t-name="account.DropZone">
-        <div t-if="props.visible"
-            t-attf-class="o_drop_area"
+        <div t-if="dashboardState.isDragging or props.visible"
+            class="o_drop_area d-flex align-items-center justify-content-center flex-column"
+            t-att-class="{
+                'drag_to_card': props.visible,
+            }"
+            t-on-click="() => this.env.disableDragging()"
             t-on-dragover.prevent="()=>{}"
             t-on-dragleave="props.hideZone"
             t-on-drop.prevent="onDrop">
-            <i class="fa fa-upload fa-10x"></i>
+            <t t-if="props.dragIcon and props.dragText">
+                <div t-if="props.dragIcon" class="text-align-center pe-none"><img class="img-fluid" t-att-src="props.dragIcon"/></div>
+                <div t-if="props.visible" class="position-absolute upload_badge pe-none">
+                    <i class="fa fa-circle fa-stack-2x text-primary"></i>
+                    <i class="fa fa-upload fa-stack-1x fa-inverse"></i>
+                </div>
+                <div t-out="props.dragTitle" class="h3 pe-none" t-att-class="{'text-primary': props.visible}"/>
+                <div class="journal_dropzone_label pe-none">
+                    <span t-if="props.dragText" t-att-class="{'invisible': !props.visible, 'text-primary': props.visible}" t-out="props.dragText"/>
+                </div>
+            </t>
+            <i t-elif="props.visible" class="fa fa-upload fa-10x pe-none"></i>
         </div>
     </t>
 
@@ -139,6 +154,15 @@
         </AccountFileUploader>
     </t>
 
+    <t t-name="account.DashboardKanbanRenderer" t-inherit="web.KanbanRenderer" t-inherit-mode="primary">
+        <xpath expr="//div[@t-ref='root']" position="attributes">
+            <attribute name="t-on-dragenter.prevent">kanbanDragEnter</attribute>
+            <attribute name="t-on-dragleave">kanbanDragLeave</attribute>
+            <attribute name="t-on-drop.prevent">kanbanDragDrop</attribute>
+            <attribute name="t-on-dragover.prevent">() =&gt; {}</attribute>
+        </xpath>
+    </t>
+
     <t t-name="account.DashboardKanbanRecord">
         <div
             role="article"
@@ -148,14 +172,13 @@
             t-on-click="onGlobalClick"
             t-on-dragenter.stop.prevent="() => dropzoneState.visible = true"
             t-ref="root">
-            <AccountFileUploader record="props.record">
+            <AccountFileUploader t-if="allowDrop" record="props.record">
                 <t t-set-slot="default">
-                    <AccountDropZone
-                        visible="dropzoneState.visible"
-                        hideZone="() => dropzoneState.visible = false"/>
+                    <AccountDropZone t-props="dropzoneProps"/>
                     <t t-call="{{ templates[this.constructor.KANBAN_BOX_ATTRIBUTE] }}" t-call-context="renderingContext"/>
                 </t>
             </AccountFileUploader>
+            <t t-else="" t-call="{{ templates[this.constructor.KANBAN_BOX_ATTRIBUTE] }}" t-call-context="renderingContext"/>
             <t t-call="{{ this.constructor.menuTemplate }}"/>
         </div>
     </t>
