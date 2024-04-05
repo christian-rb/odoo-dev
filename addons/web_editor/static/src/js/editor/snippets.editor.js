@@ -813,7 +813,9 @@ var SnippetEditor = Widget.extend({
 
         this.isTargetMovable = (this.selectorSiblings.length > 0 || this.selectorChildren.length > 0);
 
-        this.$el.find('[data-bs-toggle="dropdown"]').dropdown();
+        document.querySelectorAll('[data-bs-toggle="dropdown"]').forEach(el => {
+            const dropdown = new Dropdown(el);
+        });
 
         return Promise.all(defs).then(async () => {
             const options = sortBy(Object.values(this.styles), "__order");
