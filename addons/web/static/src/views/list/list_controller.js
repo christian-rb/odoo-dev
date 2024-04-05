@@ -106,6 +106,10 @@ export class ListController extends Component {
                 renderer.scrollLeft = rendererScrollPositions.left;
                 renderer.scrollTop = rendererScrollPositions.top;
             }
+            // Editable list view starts in create mode
+            if (this.editable && this.props.context?.create_mode) {
+                this.createRecord();
+            }
         });
 
         this.archiveEnabled =
