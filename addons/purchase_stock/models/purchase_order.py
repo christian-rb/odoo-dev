@@ -125,11 +125,13 @@ class PurchaseOrder(models.Model):
             # If the product is MTO, change the procure_method of the closest move to purchase to MTS.
             # The purpose is to link the po that the user will manually generate to the existing moves's chain.
             if order.state in ('draft', 'sent', 'to approve', 'purchase'):
+                mtso_moves = order.group_id.stock_move_ids.filtered(lambda m: m.rule_id and m.rule_id.procure_method == 'mts_else_mto').grouped('product_id')
                 for order_line in order.order_line:
                     order_line.move_ids._action_cancel()
-                    if order_line.move_dest_ids:
-                        move_dest_ids = order_line.move_dest_ids.filtered(lambda move: move.state != 'done' and not move.scrapped
-                                                                          and move.rule_id.route_id == move.location_dest_id.warehouse_id.reception_route_id)
+                    linked_moves = order_line.move_dest_ids | mtso_moves.get(order_line.product_id, self.env['stock.move'])  # In case of MTSO, also check group to define 'move_dest'
+                    if linked_moves:
+                        move_dest_ids = linked_moves.filtered(lambda move: move.state != 'done' and not move.scrapped
+                                                                    and move.rule_id.route_id == move.location_dest_id.warehouse_id.reception_route_id)
                         moves_to_unlink = move_dest_ids.filtered(lambda m: len(m.created_purchase_line_ids.ids) > 1)
                         if moves_to_unlink:
                             moves_to_unlink.created_purchase_line_ids = [Command.unlink(order_line.id)]
