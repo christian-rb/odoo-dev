@@ -124,7 +124,7 @@
                         <div class="d-flex flex-column gap-4">
                             <div class="d-flex flex-column gap-2">
                                 <div class="o_download_pdf d-flex flex-lg-column flex-xl-row flex-wrap gap-2">
-                                    <a class="btn btn-light flex-grow-1 o_print_btn o_portal_invoice_print" t-att-href="invoice.get_portal_url(report_type='pdf')" id="print_invoice_report" title="Print" role="button" target="_blank"><i class="fa fa-print me-1"/> Print</a>
+                                    <a class="btn btn-secondary flex-grow-1 o_print_btn o_portal_invoice_print" t-att-href="invoice.get_portal_url(report_type='pdf')" id="print_invoice_report" title="Print" role="button" target="_blank"><i class="fa fa-print me-1"/> Print</a>
                                 </div>
                             </div>
                             <div t-if="invoice.invoice_user_id" class="flex-grow-1">
