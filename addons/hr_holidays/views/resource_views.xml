@@ -86,6 +86,6 @@
         <field name="domain">[('resource_id', '=', False)]</field>
         <field name="view_id" ref="resource_calendar_leaves_tree_inherit"/>
         <field name="context">{
-            'search_default_filter_date': True}</field>
+            'search_default_filter_date': True, 'public_holiday': True}</field>
     </record>
 </odoo>

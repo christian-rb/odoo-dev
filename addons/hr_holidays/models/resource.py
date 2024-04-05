@@ -5,6 +5,8 @@ from odoo.exceptions import ValidationError
 from odoo.osv import expression
 import pytz
 from datetime import datetime
+from pytz import timezone, utc
+from dateutil.relativedelta import relativedelta
 
 class CalendarLeaves(models.Model):
     _inherit = "resource.calendar.leaves"
@@ -151,6 +153,16 @@ class CalendarLeaves(models.Model):
         self._reevaluate_leaves(time_domain_dict)
 
         return res
+
+    @api.depends('date_from')
+    def _compute_date_to(self):
+        """This compute serves only UX purpose within hr_holidays module (in specific view afaik).
+        When user inputs a public holiday starting day, he doesn't need to fill end date (as it is set to the end of the same day)."""
+        if self._context.get('public_holiday', False):
+            user_tz = timezone(self.env.user.tz or self._context.get('tz') or self.company_id.resource_calendar_id.tz or 'UTC')
+            for leave in self:
+                date_to_tz = user_tz.localize(leave.date_from) + relativedelta(hour=23, minute=59, second=59)
+                leave.date_to = date_to_tz.astimezone(utc).replace(tzinfo=None)
 
 class ResourceCalendar(models.Model):
     _inherit = "resource.calendar"
