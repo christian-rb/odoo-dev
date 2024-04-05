@@ -192,6 +192,8 @@ export class CalendarModel extends Model {
                             [info.filterFieldName]: active,
                         };
                         await this.orm.write(info.writeResModel, [filter.recordId], data);
+                    } else if (filter.type == "all") {
+                        this.meta.allFilter = { sectionLabel: section.label, allFilterValue: active };
                     }
                 }
             }
@@ -596,7 +598,7 @@ export class CalendarModel extends Model {
         }
 
         const previousAllFilter = previousFilters.find((f) => f.type === "all");
-        filters.push(this.makeFilterAll(previousAllFilter, isUserOrPartner));
+        filters.push(this.makeFilterAll(previousAllFilter, isUserOrPartner, filterInfo.label));
 
         return {
             label: filterInfo.label,
@@ -810,7 +812,7 @@ export class CalendarModel extends Model {
     /**
      * @protected
      */
-    makeFilterAll(previousAllFilter, isUserOrPartner) {
+    makeFilterAll(previousAllFilter, isUserOrPartner, sectionLabel) {
         return {
             type: "all",
             recordId: null,
@@ -818,7 +820,7 @@ export class CalendarModel extends Model {
             label: isUserOrPartner
                 ? this.env._t("Everybody's calendars")
                 : this.env._t("Everything"),
-            active: previousAllFilter ? previousAllFilter.active : false,
+            active: previousAllFilter ? previousAllFilter.active : ( sectionLabel == this.meta.allFilter?.sectionLabel ? this.meta.allFilter.allFilterValue : false ),
             canRemove: false,
             colorIndex: null,
             hasAvatar: false,
