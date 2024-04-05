@@ -45,6 +45,7 @@ class PurchaseOrderLine(models.Model):
     price_tax = fields.Float(compute='_compute_amount', string='Tax', store=True)
 
     order_id = fields.Many2one('purchase.order', string='Order Reference', index=True, required=True, ondelete='cascade')
+    amount_untaxed = fields.Monetary(related='order_id.amount_untaxed')
 
     company_id = fields.Many2one('res.company', related='order_id.company_id', string='Company', store=True, readonly=True)
     state = fields.Selection(related='order_id.state', store=True)
@@ -660,3 +661,13 @@ class PurchaseOrderLine(models.Model):
                 business_domain='purchase_order',
                 company_id=line.company_id.id,
             )
+
+    def action_open_record(self):
+        self.ensure_one()
+
+        return {
+            'type': 'ir.actions.act_window',
+            'view_mode': 'form',
+            'res_id': self.order_id.id,
+            'res_model': 'purchase.order',
+        }

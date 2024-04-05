@@ -791,7 +791,7 @@
                         <filter name="groupby_supplier" string="Vendor" domain="[]" context="{'group_by' : 'partner_id'}" />
                         <filter name="groupby_product" string="Product" domain="[]" context="{'group_by' : 'product_id'}" />
                         <filter string="Order Reference" name="order_reference" domain="[]" context="{'group_by' :'order_id'}"/>
-                        <filter string="Status" name="status" domain="[]" context="{'group_by' : 'state'}" />
+                        <filter string="Status" name="status" domain="[('state', '=', 'purchase')]" />
                     </group>
                 </search>
             </field>
@@ -801,21 +801,83 @@
         <field name="name">purchase.history.tree</field>
         <field name="model">purchase.order.line</field>
         <field name="arch" type="xml">
-            <tree create="false" default_order="order_id asc">
+            <tree create="false" default_order="order_id asc" action="action_open_record" type="object">
                 <field name="order_id" widget="many2one"/>
                 <field name="date_approve"/>
-                <field name="partner_id"/>
-                <field name="product_uom_qty"/>
+                <field name="partner_id" string="Vendor"/>
+                <field name="product_uom_qty" string="Quantity"/>
+                <field name="amount_untaxed" string="Total Untaxed"/>
                 <field name="price_unit"/>
+                <field name="state" optional="hide"/>
             </tree>
+        </field>
+    </record>
+
+    <record id="purchase_history_pivot" model="ir.ui.view">
+         <field name="name">purchase.history.pivot</field>
+         <field name="model">purchase.order.line</field>
+         <field name="arch" type="xml">
+             <pivot>
+                <field name="price_total" string="Total purchased amount" type="measure"/>
+                <field name="product_uom_qty" string="Total Qty purchased" type="measure"/>
+             </pivot>
+         </field>
+    </record>
+
+     <record id="purchase_history_graph" model="ir.ui.view">
+         <field name="name">purchase.history.graph</field>
+         <field name="model">purchase.order.line</field>
+         <field name="arch" type="xml">
+             <graph string="purchase Analysis" type="line" sample="1">
+                <field name="date_order" interval="month"/>
+                <field name="product_uom_qty" type="measure"/>
+             </graph>
+         </field>
+    </record>
+
+    <record id="purchase_history_kanban" model="ir.ui.view">
+        <field name="name">purchase.history.kanban</field>
+        <field name="model">purchase.order.line</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_mobile" action="action_open_record" type="object" sample="1" quick_create="false">
+                <field name="name"/>
+                <field name="order_id"/>
+                <field name="partner_id"/>
+                <field name="date_approve"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="oe_kanban_card oe_kanban_global_click">
+                            <div class="o_kanban_record_top mb16">
+                                <div class="o_kanban_record_headings mt4">
+                                    <strong class="o_kanban_record_title">
+                                        <span t-out="record.partner_id.value"/>
+                                    </strong>
+                                </div>
+                                <strong>
+                                    <field name="order_id"/>
+                                </strong>
+                            </div>
+                            <div class="o_kanban_record_bottom">
+                                <div class="oe_kanban_bottom_left text-muted">
+                                    <field name="date_approve"/>
+                                </div>
+                                <div class="oe_kanban_bottom_right">
+                                    <field name="price_unit" />
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
         </field>
     </record>
 
     <record id="action_purchase_history" model="ir.actions.act_window">
         <field name="res_model">purchase.order.line</field>
-        <field name="view_mode">tree</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="view_mode">tree,pivot,graph,kanban</field>
         <field name="view_id" ref="purchase.purchase_history_tree"/>
-        <field name="context">{}</field>
+        <field name="context">{'search_default_status': 1, 'search_default_date_order': 1}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 No purchase order were made for this product yet!

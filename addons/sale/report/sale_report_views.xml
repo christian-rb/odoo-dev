@@ -8,7 +8,7 @@
              <pivot string="Sales Analysis" sample="1">
                  <field name="team_id" type="col"/>
                  <field name="date" interval="month" type="row"/>
-                 <field name="price_subtotal" type="measure"/>
+                 <field name="product_uom_qty" type="measure"/>
              </pivot>
          </field>
     </record>
@@ -18,8 +18,8 @@
          <field name="model">sale.report</field>
          <field name="arch" type="xml">
              <graph string="Sales Analysis" type="line" sample="1">
-                 <field name="date" interval="day"/>
-                 <field name="price_subtotal" type="measure"/>
+                 <field name="date" interval="month"/>
+                 <field name="product_uom_qty" type="measure"/>
              </graph>
          </field>
     </record>
@@ -53,17 +53,20 @@
         <field name="name">sale.report.view.tree</field>
         <field name="model">sale.report</field>
         <field name="arch" type="xml">
-            <tree string="Sales Analysis">
+            <tree string="Sales Analysis" action="action_open_record" type="object">
                 <field name="date"/>
-                <field name="order_reference" optional="show"/>
-                <field name="partner_id" optional="hide"/>
+                <field name="order_reference" optional="show" string="Order"/>
+                <field name="partner_id"/>
                 <field name="product_id" string="Product" optional="show"/>
                 <field name="user_id" optional="show" widget="many2one_avatar_user"/>
-                <field name="team_id" optional="show"/>
+                <field name="team_id" optional="hide"/>
+                <field name="product_uom_qty" string="Quantity"/>
                 <field name="company_id" optional="show" groups="base.group_multi_company"/>
                 <field name="price_subtotal" optional="hide" sum="Sum of Untaxed Total"/>
+                <field name="price_unit"/>
                 <field name="price_total" optional="show" sum="Sum of Total"/>
-                <field name="state" optional="hide"/>
+                <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'sale'"/>
+                <field name="pricelist_id" optional="hide"/>
                 <field name="invoice_status" optional="hide"/>
                 <field name="currency_id" column_invisible="True"/>
             </tree>
@@ -81,7 +84,7 @@
                 <filter string="Sales Orders" name="Sales" domain="[('state','not in',('draft', 'cancel', 'sent'))]"/>
                 <separator/>
                 <filter name="filter_date" date="date" default_period="this_month"/>
-                <filter name="filter_order_date" invisible="1" string="Order Date: Last 365 Days" domain="[('date', '&gt;=', (datetime.datetime.combine(context_today() + relativedelta(days=-365), datetime.time(0,0,0))).strftime('%Y-%m-%d %H:%M:%S'))]"/>
+                <filter name="filter_order_date" invisible="1" string="Order Date:Last Month" domain="[('date', '&gt;=', (datetime.datetime.combine(context_today() + relativedelta(days=-30), datetime.time(0,0,0))).strftime('%Y-%m-%d %H:%M:%S'))]"/>
                 <separator/>
                 <field name="user_id"/>
                 <field name="team_id"/>
@@ -112,7 +115,7 @@
                     <separator/>
                     <filter string="Order Date" name="date" context="{'group_by':'date'}"
                             invisible="context.get('sale_report_view_hide_date')"/>
-                    <filter string="Order Date" name="group_by_date_day" context="{'group_by':'date:day'}"
+                    <filter string="Order Date" name="group_by_date_day" context="{'group_by':'date:month'}"
                             invisible="not context.get('sale_report_view_hide_date')"/>
                 </group>
             </search>
@@ -163,7 +166,7 @@
     <record id="report_all_channels_sales_action" model="ir.actions.act_window">
         <field name="name">Sales Analysis</field>
         <field name="res_model">sale.report</field>
-        <field name="view_mode">pivot,tree,graph</field>
+        <field name="view_mode">tree,pivot,graph,form</field>
     </record>
 
     <record id="action_order_report_quotation_salesteam" model="ir.actions.act_window">

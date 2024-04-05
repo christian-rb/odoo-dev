@@ -27,6 +27,8 @@ class SaleReport(models.Model):
         select_ = f"""
             -MIN(l.id) AS id,
             l.product_id AS product_id,
+            l.order_id AS Order_id,
+            l.price_unit AS price_unit,
             t.uom_id AS product_uom,
             SUM(l.qty) AS product_uom_qty,
             SUM(l.qty_delivered) AS qty_delivered,

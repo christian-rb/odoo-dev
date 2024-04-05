@@ -71,7 +71,8 @@ class SaleReport(models.Model):
 
     weight = fields.Float(string="Gross Weight", readonly=True)
     volume = fields.Float(string="Volume", readonly=True)
-
+    order_id = fields.Many2one('sale.order', string="Order")
+    price_unit = fields.Float(string="Unit Price", aggregator='avg')
     discount = fields.Float(string="Discount %", readonly=True, aggregator='avg')
     discount_amount = fields.Monetary(string="Discount Amount", readonly=True)
 
@@ -90,6 +91,8 @@ class SaleReport(models.Model):
         select_ = f"""
             MIN(l.id) AS id,
             l.product_id AS product_id,
+            l.order_id AS order_id,
+            l.price_unit AS price_unit,
             t.uom_id AS product_uom,
             CASE WHEN l.product_id IS NOT NULL THEN SUM(l.product_uom_qty / u.factor * u2.factor) ELSE 0 END AS product_uom_qty,
             CASE WHEN l.product_id IS NOT NULL THEN SUM(l.qty_delivered / u.factor * u2.factor) ELSE 0 END AS qty_delivered,
@@ -188,6 +191,7 @@ class SaleReport(models.Model):
         return """
             l.product_id,
             l.order_id,
+            l.price_unit,
             t.uom_id,
             t.categ_id,
             s.name,
@@ -227,3 +231,13 @@ class SaleReport(models.Model):
     @property
     def _table_query(self):
         return self._query()
+
+    def action_open_record(self):
+        self.ensure_one()
+
+        return {
+            'type': 'ir.actions.act_window',
+            'view_mode': 'form',
+            'res_id': self.order_id.id,
+            'res_model': 'sale.order',
+        }
