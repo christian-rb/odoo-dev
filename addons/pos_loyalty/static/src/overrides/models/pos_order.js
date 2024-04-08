@@ -76,6 +76,7 @@ patch(PosOrder.prototype, {
             disabledRewards: new Set(),
             codeActivatedProgramRules: [],
             couponPointChanges: {},
+            pendingGiftCardCoupons: [],
         };
 
         const oldCouponMapping = {};
@@ -672,7 +673,13 @@ patch(PosOrder.prototype, {
      * @returns {Array} List of {Object} containing the coupon_id and reward keys
      */
     getClaimableRewards(coupon_id = false, program_id = false, auto = false) {
+        const couponPointChanges = this.uiState.couponPointChanges;
+        const excludedCouponIds = Object.keys(couponPointChanges)
+            .filter((id) => couponPointChanges[id].manual && couponPointChanges[id].existing_code)
+            .map((id) => couponPointChanges[id].coupon_id);
+
         const allCouponPrograms = Object.values(this.uiState.couponPointChanges)
+            .filter((pe) => !excludedCouponIds.includes(pe.coupon_id))
             .map((pe) => {
                 return {
                     program_id: pe.program_id,

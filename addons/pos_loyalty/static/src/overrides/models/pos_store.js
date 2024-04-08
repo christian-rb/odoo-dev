@@ -161,6 +161,9 @@ patch(PosStore.prototype, {
             const oldChanges = changesPerProgram[program.id] || [];
             // Update point changes for those that exist
             for (let idx = 0; idx < Math.min(pointsAdded.length, oldChanges.length); idx++) {
+                if (oldChanges[idx].manual) {
+                    continue;
+                }
                 Object.assign(oldChanges[idx], pointsAdded[idx]);
             }
             if (pointsAdded.length < oldChanges.length) {
@@ -180,6 +183,7 @@ patch(PosStore.prototype, {
                         barcode: pa.barcode,
                         appliedRules: pointsForProgramsCountedRules[program.id],
                     };
+                    order.uiState.pendingGiftCardCoupons.push(coupon.id);
                 }
             }
         }

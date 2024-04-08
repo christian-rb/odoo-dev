@@ -83,4 +83,10 @@ patch(PosOrderline.prototype, {
             "fst-italic": this.is_reward_line,
         };
     },
+    isLinkedProgramGiftCard() {
+        const product = this.product_id;
+        const linkedPrograms =
+            product.models["loyalty.program"].getBy("trigger_product_ids", product.id) || [];
+        return linkedPrograms.length === 1 && linkedPrograms[0].program_type === "gift_card";
+    },
 });
