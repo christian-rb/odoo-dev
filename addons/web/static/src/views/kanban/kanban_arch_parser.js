@@ -38,6 +38,7 @@ export class KanbanArchParser {
         let headerButtons = [];
         const creates = [];
         let button_id = 0;
+        let cardClassName;
         // Root level of the template
         visitXML(xmlDoc, (node) => {
             if (node.tagName === "header") {
@@ -90,6 +91,9 @@ export class KanbanArchParser {
                 widgetNodes[widgetId] = widgetInfo;
                 node.setAttribute("widget_id", widgetId);
             }
+            if (node.tagName === "card") {
+                cardClassName = node.getAttribute("class") || null;
+            }
         });
 
         // Progressbar
@@ -106,6 +110,7 @@ export class KanbanArchParser {
         return {
             activeActions,
             allowGlobalClick,
+            cardClassName,
             className,
             creates,
             defaultGroupBy,

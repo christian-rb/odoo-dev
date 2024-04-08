@@ -26,7 +26,7 @@ export class KanbanCompiler extends ViewCompiler {
         let asideNode;
         let asidePosition;
         let mainNode;
-        const card = createElement("div");
+        const card = createElement("t");
         for (const child of cardEl.childNodes) {
             switch (getTag(child)) {
                 case "card-aside": {
@@ -58,8 +58,6 @@ export class KanbanCompiler extends ViewCompiler {
                 }
             }
         }
-        const cardClass = cardEl.getAttribute("class") || "";
-        card.setAttribute("class", `w-100${asideNode ? " d-flex flex-row" : ""} ${cardClass}`);
         if (asideNode && asidePosition === "start") {
             append(card, asideNode);
         }
@@ -94,7 +92,9 @@ export class KanbanCompiler extends ViewCompiler {
         if (type === "card-group") {
             groupClass += " flex-column o_kanban_card_group";
         } else {
-            groupClass += ` flex-row align-items-end o_kanban_card_${type === "card-header" ? "header" : "footer"}`;
+            groupClass += ` flex-row align-items-end o_kanban_card_${
+                type === "card-header" ? "header" : "footer"
+            }`;
         }
         group.setAttribute("class", groupClass);
         for (const child of el.childNodes) {

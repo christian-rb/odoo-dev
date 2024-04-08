@@ -108,7 +108,10 @@ export class KanbanRecord extends Component {
 
     getRecordClasses() {
         const { archInfo, canResequence, forceGlobalClick, record, progressBarState } = this.props;
-        const classes = ["o_kanban_record d-flex"];
+        const classes = ["o_kanban_record d-flex flex-row"];
+        if (archInfo.cardClassName) {
+            classes.push(archInfo.cardClassName);
+        }
         if (canResequence) {
             classes.push("o_draggable");
         }
