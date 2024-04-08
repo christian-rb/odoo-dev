@@ -1,4 +1,4 @@
-import { append, createElement, getTag } from "@web/core/utils/xml";
+import { append, combineAttributes, createElement, getTag } from "@web/core/utils/xml";
 import { archParseBoolean } from "@web/views/utils";
 import { ViewCompiler } from "@web/views/view_compiler";
 
@@ -22,12 +22,14 @@ export class KanbanCompiler extends ViewCompiler {
         if (cardEls.length !== 1) {
             throw new Error("a kanban arch must have one (and only one) <card> child");
         }
-        const cardEl = cardEls[0];
+        const card = createElement("article");
+        card.setAttribute("t-att-class", "__comp__.rootClass");
+        card.setAttribute("t-att-data-id", "__comp__.props.record.id");
+        card.setAttribute("t-att-tabindex", "__comp__.props.record.model.useSampleModel ? -1 : 0");
         let asideNode;
         let asidePosition;
         let mainNode;
-        const card = createElement("t");
-        for (const child of cardEl.childNodes) {
+        for (const child of cardEls[0].childNodes) {
             switch (getTag(child)) {
                 case "card-aside": {
                     asidePosition = child.getAttribute("position") || "start";
@@ -66,6 +68,9 @@ export class KanbanCompiler extends ViewCompiler {
         }
         if (asideNode && asidePosition === "end") {
             append(card, asideNode);
+        }
+        if (asideNode || mainNode) {
+            combineAttributes(card, "t-att-class", "' d-flex flex-row'", " + ");
         }
         return card;
     }

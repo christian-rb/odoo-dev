@@ -602,4 +602,28 @@ export class KanbanRenderer extends Component {
             return true;
         }
     }
+
+    onRecordClicked(ev, record) {
+        // These classes determine whether a click on a record should open it.
+        const CANCEL_GLOBAL_CLICK = ["a", "button", ".dropdown"].join(",");
+        if (ev.target.closest(CANCEL_GLOBAL_CLICK)) {
+            return;
+        }
+        const { archInfo, forceGlobalClick, openRecord } = this.props;
+        if (!forceGlobalClick && archInfo.openAction) {
+            this.action.doActionButton({
+                name: archInfo.openAction.action,
+                type: archInfo.openAction.type,
+                resModel: record.resModel,
+                resId: record.resId,
+                resIds: record.resIds,
+                context: record.context,
+                onClose: async () => {
+                    await record.model.root.load();
+                },
+            });
+        } else if (forceGlobalClick || this.props.archInfo.allowGlobalClick) {
+            openRecord(record);
+        }
+    }
 }

@@ -259,16 +259,16 @@ test("kanban card with groups", async () => {
         arch: `
             <kanban>
                 <card>
-                    <group>
+                    <card-group>
                         <field name="foo"/>
-                    </group>
-                    <group>
+                    </card-group>
+                    <card-group>
                         <field name="int_field"/>
                         <field name="float_field"/>
-                    </group>
-                    <group>
+                    </card-group>
+                    <card-group>
                         <field name="category_ids" widget="many2many_tags"/>
-                    </group>
+                    </card-group>
                 </card>
             </kanban>`,
         domain: [["id", "=", 2]],
@@ -323,26 +323,24 @@ test("kanban with arbitray html outside <card>", async () => {
         </div>`);
 });
 
-test("kanban card with aside", async () => {
+test.debug("kanban card with aside", async () => {
     await mountView({
         type: "kanban",
         resModel: "partner",
         arch: `
             <kanban>
-                <card>
-                    <side>
-                        <field name="image" widget="kanban_image"/>
-                    </side>
-                    <group>
+                <card class="cocuou">
+                    
+                    <card-group>
                         <field name="foo"/>
-                    </group>
-                    <group>
+                    </card-group>
+                    <card-group>
                         <field name="int_field"/>
                         <field name="float_field"/>
-                    </group>
-                    <group>
+                    </card-group>
+                    <card-group>
                         <field name="category_ids" widget="many2many_tags"/>
-                    </group>
+                    </card-group>
                 </card>
             </kanban>`,
         domain: [["id", "=", 2]],

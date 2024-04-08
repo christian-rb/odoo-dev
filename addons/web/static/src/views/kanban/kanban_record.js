@@ -7,16 +7,15 @@ import { ViewButton } from "@web/views/view_button/view_button";
 import { useViewCompiler } from "@web/views/view_compiler";
 import { Widget } from "@web/views/widgets/widget";
 import { getFormattedValue } from "../utils";
-import { KANBAN_BOX_ATTRIBUTE, KANBAN_MENU_ATTRIBUTE } from "./kanban_arch_parser";
 import { KanbanCompiler } from "./kanban_compiler";
 import { KanbanCoverImageDialog } from "./kanban_cover_image_dialog";
 import { KanbanRecordMenu } from "./kanban_record_menu";
 
-import { Component, useRef } from "@odoo/owl";
+import { Component, xml } from "@odoo/owl";
 const { COLORS } = ColorList;
 
-// These classes determine whether a click on a record should open it.
-const CANCEL_GLOBAL_CLICK = ["a", "button", ".dropdown"].join(",");
+// // These classes determine whether a click on a record should open it.
+// const CANCEL_GLOBAL_CLICK = ["a", "button", ".dropdown"].join(",");
 
 /**
  * Returns the class name of a record according to its color.
@@ -40,6 +39,7 @@ function getColorIndex(value) {
 }
 
 export class KanbanRecord extends Component {
+    static template = xml`<t t-call="{{ template }}" t-call-context="this.renderingContext"/>`;
     static components = {
         KanbanRecordMenu,
         Field,
@@ -69,23 +69,16 @@ export class KanbanRecord extends Component {
         "templates?", // legacy
     ];
     static Compiler = KanbanCompiler;
-    static KANBAN_BOX_ATTRIBUTE = KANBAN_BOX_ATTRIBUTE;
-    static KANBAN_MENU_ATTRIBUTE = KANBAN_MENU_ATTRIBUTE;
-    static menuTemplate = "web.KanbanRecordMenuLegacy";
-    static template = "web.KanbanRecord";
 
     setup() {
         this.evaluateBooleanExpr = evaluateBooleanExpr;
 
-        this.action = useService("action");
         this.dialog = useService("dialog");
         this.notification = useService("notification");
 
         const ViewCompiler = this.props.Compiler || this.constructor.Compiler;
         const templates = useViewCompiler(ViewCompiler, { kanban: this.props.archInfo.xmlDoc });
         this.template = templates.kanban;
-
-        this.rootRef = useRef("root");
     }
 
     get canDelete() {
@@ -100,15 +93,9 @@ export class KanbanRecord extends Component {
         return this.props.archInfo.activeActions.edit;
     }
 
-    getFormattedValue(fieldId) {
-        const { archInfo, record } = this.props;
-        const { attrs, name } = archInfo.fieldNodes[fieldId];
-        return getFormattedValue(record, name, attrs);
-    }
-
-    getRecordClasses() {
+    get rootClass() {
         const { archInfo, canResequence, forceGlobalClick, record, progressBarState } = this.props;
-        const classes = ["o_kanban_record d-flex flex-row"];
+        const classes = ["o_kanban_record"];
         if (archInfo.cardClassName) {
             classes.push(archInfo.cardClassName);
         }
@@ -137,29 +124,10 @@ export class KanbanRecord extends Component {
         return classes.join(" ");
     }
 
-    /**
-     * @param {MouseEvent} ev
-     */
-    onGlobalClick(ev) {
-        if (ev.target.closest(CANCEL_GLOBAL_CLICK)) {
-            return;
-        }
-        const { archInfo, forceGlobalClick, openRecord, record } = this.props;
-        if (!forceGlobalClick && archInfo.openAction) {
-            this.action.doActionButton({
-                name: archInfo.openAction.action,
-                type: archInfo.openAction.type,
-                resModel: record.resModel,
-                resId: record.resId,
-                resIds: record.resIds,
-                context: record.context,
-                onClose: async () => {
-                    await record.model.root.load();
-                },
-            });
-        } else if (forceGlobalClick || this.props.archInfo.allowGlobalClick) {
-            openRecord(record);
-        }
+    getFormattedValue(fieldId) {
+        const { archInfo, record } = this.props;
+        const { attrs, name } = archInfo.fieldNodes[fieldId];
+        return getFormattedValue(record, name, attrs);
     }
 
     /**
