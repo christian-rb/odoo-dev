@@ -39,7 +39,7 @@ export class KanbanCompiler extends ViewCompiler {
                 case "card-header":
                 case "card-footer": {
                     if (!mainNode) {
-                        mainNode = createElement("div");
+                        mainNode = createElement("main");
                         mainNode.setAttribute(
                             "class",
                             "o_kanban_card_main d-flex flex-column justify-content-between gap-2 w-100 h-100"
@@ -71,11 +71,11 @@ export class KanbanCompiler extends ViewCompiler {
     }
 
     compileAside(el, params) {
-        const aside = createElement("div");
+        const aside = createElement("aside");
         const elClass = el.getAttribute("class") || "";
-        let asideClass = `o_kanban_aside d-block ${elClass}`;
+        let asideClass = `o_kanban_card_aside d-block ${elClass}`;
         if (archParseBoolean(el.getAttribute("full"), false)) {
-            asideClass += " o_kanban_aside_full";
+            asideClass += " o_kanban_card_aside_full";
         }
         aside.setAttribute("class", asideClass);
         for (const child of el.childNodes) {
@@ -85,14 +85,22 @@ export class KanbanCompiler extends ViewCompiler {
     }
 
     compileGroup(el, params) {
-        const group = createElement("div");
-        const elClass = el.getAttribute("class") || "";
         const type = getTag(el);
+        let tagName;
+        if (type === "card-group") {
+            tagName = "section";
+        } else if (type === "card-header") {
+            tagName = "header";
+        } else {
+            tagName = "footer";
+        }
+        const group = createElement(tagName);
+        const elClass = el.getAttribute("class") || "";
         let groupClass = `d-flex justify-content-between overflow-hidden d-empty-none ${elClass}`;
         if (type === "card-group") {
             groupClass += " flex-column o_kanban_card_group";
         } else {
-            groupClass += ` flex-row align-items-end o_kanban_card_${
+            groupClass += ` flex-row align-items-end o_kanban_card_group o_kanban_card_${
                 type === "card-header" ? "header" : "footer"
             }`;
         }

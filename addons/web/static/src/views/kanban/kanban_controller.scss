@@ -98,8 +98,8 @@
             visibility: visible;
         }
 
-        .o_kanban_aside {
-            &.o_kanban_aside_full {
+        .o_kanban_card_aside {
+            &.o_kanban_card_aside_full {
                 @include media-breakpoint-up(md) {
                     margin: {
                         top: calc(var(--KanbanRecord-padding-v) * -1);
