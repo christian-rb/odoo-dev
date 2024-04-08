@@ -4,6 +4,12 @@
         <xpath expr="//div[hasclass('o_avatar_card_buttons')]" position="inside">
             <button class="btn btn-secondary btn-sm" t-if="user.employee_ids?.length > 0" t-on-click.stop="onClickViewEmployee">View profile</button>
         </xpath>
+        <xpath expr="//a[hasclass('o-mail-avatar-card-tel')]" position="after">
+            <span t-if="user.name_work_location_display" class="text-muted" data-tooltip="Work Location">
+                <i class="me-1" t-att-class="locationIcon"/>
+                <t t-esc="user.name_work_location_display"/>
+            </span>
+        </xpath>
     </t>
 
     <t t-name="hr.avatarCardUserInfos">

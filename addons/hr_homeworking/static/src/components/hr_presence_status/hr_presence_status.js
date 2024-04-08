@@ -4,6 +4,7 @@ import { patch } from "@web/core/utils/patch";
 
 import { HrPresenceStatus, hrPresenceStatus } from "@hr/components/hr_presence_status/hr_presence_status";
 import { HrPresenceStatusPrivate, hrPresenceStatusPrivate } from "@hr/components/hr_presence_status_private/hr_presence_status_private";
+import { _t } from "@web/core/l10n/translation";
 
 const patchHrPresenceStatus = () => ({
     get color() {
@@ -41,7 +42,7 @@ const patchHrPresenceStatus = () => ({
 
     get label() {
         if (this.location) {
-            return this.props.record.data.name_work_location_display;
+            return this.props.record.data.name_work_location_display || _t("Unspecified");
         }
         return super.label;
     },

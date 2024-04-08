@@ -1,6 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import _, api, fields, models
+from odoo import api, fields, models
 
 from .hr_homeworking import DAYS
 
@@ -22,7 +22,6 @@ class HrEmployeeBase(models.AbstractModel):
     hr_icon_display = fields.Selection(selection_add=[('presence_home', 'At Home'),
                                                       ('presence_office', 'At Office'),
                                                       ('presence_other', 'At Other')])
-    name_work_location_display = fields.Char(compute="_compute_name_work_location_display")
     today_location_name = fields.Char()
 
     @api.model
@@ -41,13 +40,14 @@ class HrEmployeeBase(models.AbstractModel):
             res['views']['list']['arch'] = res['views']['list']['arch'].replace('name_work_location_display', dayfield)
         return res
 
-    @api.depends('exceptional_location_id')
-    def _compute_name_work_location_display(self):
+    @api.depends("work_location_id.name", "work_location_id.location_type", "exceptional_location_id")
+    def _compute_type_name_work_location_display(self):
+        super()._compute_type_name_work_location_display()
         dayfield = self._get_current_day_location_field()
-        unspecified = _('Unspecified')
         for employee in self:
             current_location_id = employee.exceptional_location_id or employee[dayfield]
-            employee.name_work_location_display = current_location_id.name if current_location_id else unspecified
+            employee.name_work_location_display = current_location_id.name or employee.name_work_location_display
+            employee.type_work_location = current_location_id.location_type or employee.type_work_location
 
     def _compute_exceptional_location_id(self):
         today = fields.Date.today()

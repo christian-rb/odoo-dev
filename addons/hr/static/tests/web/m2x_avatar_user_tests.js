@@ -67,6 +67,8 @@ QUnit.module("M2XAvatarUser", ({ beforeEach }) => {
             work_phone: "+585555555",
             job_title: "sub manager",
             department_id: departmentId,
+            name_work_location_display: "Odoo",
+            type_work_location: "office",
         });
         const mockRPC = (route, args) => {
             if (route === "/web/dataset/call_kw/res.users/read") {
@@ -78,6 +80,8 @@ QUnit.module("M2XAvatarUser", ({ beforeEach }) => {
                     "share",
                     "work_phone",
                     "work_email",
+                    "name_work_location_display",
+                    "type_work_location",
                     "job_title",
                     "department_id",
                     "employee_ids",
@@ -115,12 +119,17 @@ QUnit.module("M2XAvatarUser", ({ beforeEach }) => {
         await click(document, ".o_m2o_avatar > img");
         assert.verifySteps(["setTimeout of 250ms", "user read"]);
         assert.containsOnce(target, ".o_avatar_card");
+        assert.containsOnce(
+            target,
+            ".o_avatar_card span[data-tooltip='Work Location'] .fa-building-o"
+        );
         assert.deepEqual(getNodesTextContent(target.querySelectorAll(".o_card_user_infos > *")), [
             "Mario",
             "sub manager",
             "Managemment",
             "Mario@odoo.pro",
             "+585555555",
+            "Odoo",
         ]);
         // Close card
         await click(document, ".o_action_manager");
