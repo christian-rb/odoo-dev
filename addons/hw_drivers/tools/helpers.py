@@ -85,6 +85,25 @@ def start_nginx_server():
     elif platform.system() == 'Linux':
         subprocess.check_call(["sudo", "service", "nginx", "restart"])
 
+
+def _get_certificate():
+    if platform.system() == 'Windows':
+        path = Path(get_path_nginx()).joinpath('conf/nginx-cert.crt')
+    elif platform.system() == 'Linux':
+        path = Path('/etc/ssl/certs/nginx-cert.crt')
+
+    if not path.exists():
+        return {"status": CertificateStatus.NEED_REFRESH}
+
+    try:
+        with path.open('r') as f:
+            return crypto.load_certificate(crypto.FILETYPE_PEM, f.read())
+    except EnvironmentError:
+        _logger.exception("Unable to read certificate file")
+        return {"status": CertificateStatus.ERROR,
+                "error_code": "ERR_IOT_HTTPS_CHECK_CERT_READ_EXCEPTION"}
+
+
 def check_certificate():
     """
     Check if the current certificate is up to date or not authenticated
@@ -96,21 +115,9 @@ def check_certificate():
         return {"status": CertificateStatus.ERROR,
                 "error_code": "ERR_IOT_HTTPS_CHECK_NO_SERVER"}
 
-    if platform.system() == 'Windows':
-        path = Path(get_path_nginx()).joinpath('conf/nginx-cert.crt')
-    elif platform.system() == 'Linux':
-        path = Path('/etc/ssl/certs/nginx-cert.crt')
-
-    if not path.exists():
-        return {"status": CertificateStatus.NEED_REFRESH}
-
-    try:
-        with path.open('r') as f:
-            cert = crypto.load_certificate(crypto.FILETYPE_PEM, f.read())
-    except EnvironmentError:
-        _logger.exception("Unable to read certificate file")
-        return {"status": CertificateStatus.ERROR,
-                "error_code": "ERR_IOT_HTTPS_CHECK_CERT_READ_EXCEPTION"}
+    cert = _get_certificate()
+    if isinstance(cert, dict):
+        return cert
 
     cert_end_date = datetime.datetime.strptime(cert.get_notAfter().decode('utf-8'), "%Y%m%d%H%M%SZ") - datetime.timedelta(days=10)
     for key in cert.get_subject().get_components():

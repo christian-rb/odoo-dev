@@ -47,6 +47,8 @@ configure_wizard_template = jinja_env.get_template('configure_wizard.html')
 six_payment_terminal_template = jinja_env.get_template('six_payment_terminal.html')
 list_credential_template = jinja_env.get_template('list_credential.html')
 upgrade_page_template = jinja_env.get_template('upgrade_page.html')
+technical_page_template = jinja_env.get_template('technical.html')
+
 
 class IoTboxHomepage(Home):
     def __init__(self):
