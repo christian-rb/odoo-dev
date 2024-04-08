@@ -42,7 +42,7 @@ class PickingType(models.Model):
     default_location_return_id = fields.Many2one('stock.location', 'Default returns location', check_company=True,
         help="This is the default location for returns created from a picking with this operation type.",
         domain="[('return_location', '=', True)]")
-    code = fields.Selection([('incoming', 'Receipt'), ('outgoing', 'Delivery'), ('internal', 'Internal Transfer')], 'Type of Operation', required=True)
+    code = fields.Selection([('incoming', 'Receipt'), ('outgoing', 'Delivery'), ('internal', 'Internal Transfer')], 'Operation Category', required=True)
     return_picking_type_id = fields.Many2one(
         'stock.picking.type', 'Operation Type for Returns',
         check_company=True)
@@ -368,11 +368,10 @@ class Picking(models.Model):
             return picking_types[:1].id
 
     name = fields.Char(
-        'Reference', default='/',
+        'Reference', default='New',
         copy=False, index='trigram', readonly=True)
     origin = fields.Char(
-        'Source Document', index='trigram',
-        help="Reference of the document")
+        'Source Document', index='trigram')
     note = fields.Html('Notes')
     backorder_id = fields.Many2one(
         'stock.picking', 'Back Order of',
@@ -806,7 +805,7 @@ class Picking(models.Model):
         for vals in vals_list:
             defaults = self.default_get(['name', 'picking_type_id'])
             picking_type = self.env['stock.picking.type'].browse(vals.get('picking_type_id', defaults.get('picking_type_id')))
-            if vals.get('name', '/') == '/' and defaults.get('name', '/') == '/' and vals.get('picking_type_id', defaults.get('picking_type_id')):
+            if vals.get('name', '/') == '/' and defaults.get('name', 'New') == _('New') and vals.get('picking_type_id', defaults.get('picking_type_id')):
                 if picking_type.sequence_id:
                     vals['name'] = picking_type.sequence_id.next_by_id()
 
@@ -1223,7 +1222,10 @@ class Picking(models.Model):
     def action_toggle_is_locked(self):
         self.ensure_one()
         self.is_locked = not self.is_locked
-        return True
+        return {
+        'type': 'ir.actions.client',
+        'tag': 'reload',
+        }
 
     def _check_backorder(self):
         prec = self.env["decimal.precision"].precision_get("Product Unit of Measure")

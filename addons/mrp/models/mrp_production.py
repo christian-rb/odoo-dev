@@ -1012,7 +1012,10 @@ class MrpProduction(models.Model):
     def action_toggle_is_locked(self):
         self.ensure_one()
         self.is_locked = not self.is_locked
-        return True
+        return {
+        'type': 'ir.actions.client',
+        'tag': 'reload',
+        }
 
     def action_product_forecast_report(self):
         self.ensure_one()

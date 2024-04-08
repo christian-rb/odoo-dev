@@ -25,7 +25,7 @@
                                             t-options='{"widget": "contact", "fields": ["address", "name", "phone"], "no_marker": True, "phone_icons": True}'>
                                                 <div class="bg-light border-1 rounded h-100 d-flex flex-column align-items-center justify-content-center p-4 opacity-75 text-muted text-center">
                                                     <strong>Delivery address</strong>
-                                                    <div>Presence depends on the type of operation.</div>
+                                                    <div>Presence depends on the operation category.</div>
                                                 </div>
                                         </div>
                                     </div>
@@ -35,7 +35,7 @@
                                             t-options='{"widget": "contact", "fields": ["address", "name", "phone"], "no_marker": True, "phone_icons": True}'>
                                                 <div class="bg-light border-1 rounded h-100 d-flex flex-column align-items-center justify-content-center p-4 opacity-75 text-muted text-center">
                                                     <strong>Warehouse address</strong>
-                                                    <div>Presence depends on the type of operation.</div>
+                                                    <div>Presence depends on the operation category.</div>
                                                 </div>
                                         </div>
                                     </div>
@@ -59,7 +59,7 @@
                                              t-options='{"widget": "contact", "fields": ["address", "name", "phone", "vat"], "no_marker": True, "phone_icons": True}'>
                                              <div class="bg-light border-1 rounded h-100 d-flex flex-column align-items-center justify-content-center p-4 opacity-75 text-muted text-center">
                                                 <strong>Recipient address</strong>
-                                                <div>Presence depends on the type of operation.</div>
+                                                <div>Presence depends on the operation category.</div>
                                             </div>
                                         </div>
                                     </div>

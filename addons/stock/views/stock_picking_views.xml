@@ -197,8 +197,9 @@
                     </div>
                     <div class="oe_title">
                         <h1 class="d-flex">
-                            <field name="priority" widget="priority" class="me-3" invisible="name == '/'"/>
-                            <field name="name" invisible="name == '/'"/>
+                            <field name="priority" widget="priority" class="me-3"/>
+                            <span><field name="name"/></span>
+                            <i class="fa fa-lock m-3 fs-3" title="This transfer is locked" invisible="not is_locked or name == 'New'" />
                         </h1>
                     </div>
                     <group>
@@ -211,7 +212,7 @@
                                 <label for="partner_id" string="Contact" style="font-weight:bold;"
                                        invisible="picking_type_code in ['incoming', 'outgoing']"/>
                             </div>
-                            <field name="partner_id" nolabel="1" readonly="state in ['cancel', 'done']"/>
+                            <field name="partner_id" nolabel="1" readonly="state in ['cancel', 'done']" placeholder="Select a Contact..."/>
                             <field name="picking_type_id" options="{'no_open': True}"
                                    invisible="hide_picking_type"
                                    readonly="state != 'draft' and id"
@@ -226,7 +227,6 @@
                             <label for="scheduled_date"/>
                             <div class="o_row">
                                 <field name="scheduled_date" readonly="state in ['cancel', 'done']" required="id"
-                                    decoration-warning="state not in ('done', 'cancel') and scheduled_date &lt; now"
                                     decoration-danger="state not in ('done', 'cancel') and scheduled_date &lt; current_date"
                                     decoration-bf="state not in ('done', 'cancel') and (scheduled_date &lt; current_date or scheduled_date &lt; now)"/>
                                 <field name="json_popover" nolabel="1" widget="stock_rescheduling_popover" invisible="not json_popover"/>
@@ -419,7 +419,7 @@
                 <p class="o_view_nocontent_smiling_face">
                     No receipt found. Let's create one!
                 </p><p>
-                    Receipts allow you to get products from a partner.
+                    Receipts allow you to get products from a supplier.
                 </p>
             </field>
         </record>
@@ -471,18 +471,6 @@
             </field>
         </record>
 
-        <record id="action_unreserve_picking" model="ir.actions.server">
-            <field name="name">Unreserve</field>
-            <field name="model_id" ref="stock.model_stock_picking"/>
-            <field name="binding_model_id" ref="stock.model_stock_picking"/>
-            <field name="binding_view_types">list,form</field>
-            <field name="state">code</field>
-            <field name="code">
-            if records:
-                records.do_unreserve()
-            </field>
-        </record>
-
         <record id="action_toggle_is_locked" model="ir.actions.server">
             <field name="name">Lock/Unlock</field>
             <field name="model_id" ref="stock.model_stock_picking"/>
@@ -491,7 +479,7 @@
             <field name="state">code</field>
             <field name="code">
             if records:
-                records.action_toggle_is_locked()</field>
+               action = records.action_toggle_is_locked()</field>
         </record>
 
         <record id="action_scrap" model="ir.actions.server">
