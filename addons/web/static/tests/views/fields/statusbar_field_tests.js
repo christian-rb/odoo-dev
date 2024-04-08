@@ -661,7 +661,7 @@ QUnit.module("Fields", (hooks) => {
 
             await click(target, ".o_back_button");
             await click(target.querySelector(".o_data_row .o_data_cell"));
-            assert.verifySteps([]);
+            assert.verifySteps(["search_read"]);
         }
     );
 
@@ -893,4 +893,68 @@ QUnit.module("Fields", (hooks) => {
         );
         assert.verifySteps([]);
     });
+
+    QUnit.test("Stages should be updated when they are edited or added",
+        async function (assert) {
+            serverData.views = {
+                "partner,3,list": '<tree><field name="display_name"/></tree>',
+                "partner,9,search": `<search></search>`,
+                "partner,false,form": `<form>
+                <header>
+                    <field name="display_name"/>
+                    <field name="trululu" widget="statusbar" readonly="1"/>
+                </header>
+            </form>`,
+            };
+
+            serverData.actions = {
+                1: {
+                    id: 1,
+                    name: "Partners",
+                    res_model: "partner",
+                    type: "ir.actions.act_window",
+                    views: [
+                        [false, "list"],
+                        [false, "form"],
+                    ],
+                },
+            };
+
+            const mockRPC = (route, args) => {
+                if (args.method === "search_read") {
+                    assert.step("search_read");
+                }
+            };
+
+            const webClient = await createWebClient({ serverData, mockRPC });
+            await doAction(webClient, 1);
+
+            await click(target.querySelector(".o_data_row .o_data_cell"));
+            assert.verifySteps(["search_read"]);
+            await editInput(target, ".o_field_widget[name='display_name'] input", "Third stage");
+            await clickSave(target);
+            await click(target, ".o_back_button");
+            await click(target.querySelector(".o_data_row .o_data_cell"));
+            assert.verifySteps(["search_read"]);
+
+            assert.deepEqual(
+                [...target.querySelectorAll("[role='radio']")].map((el) => el.textContent),
+                ["aaa","second record","Third stage"]
+            );
+
+            await click(target, ".o_back_button");
+            await click(target, ".d-none .o_list_button_add");
+            assert.verifySteps(["search_read"]);
+            await editInput(target, ".o_field_widget[name='display_name'] input", "First stage");
+            await clickSave(target);
+            await click(target, ".o_back_button");
+            await click(target.querySelector(".o_data_row .o_data_cell"));
+            assert.verifySteps(["search_read"]);
+
+            assert.deepEqual(
+                [...target.querySelectorAll("[role='radio']")].map((el) => el.textContent),
+                ["First stage","aaa","second record","Third stage"]
+            );
+        }
+    );
 });
