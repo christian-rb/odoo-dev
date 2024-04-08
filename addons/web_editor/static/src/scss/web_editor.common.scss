@@ -161,10 +161,12 @@ ul.o_checklist {
         }
     }
 }
-ul.o_checklist[dir="rtl"] > li:not(.oe-nested)::before {
-    left: auto;
-    right: - $o-checklist-margin-left;
-    text-align: right;
+ul.o_checklist[dir="rtl"], ul.o_checklist[dir="ltr"] {
+    li:not(.oe-nested)::before {
+        left: auto;
+        right: - $o-checklist-margin-left;
+        text-align: right;
+    }
 }
 ol > li.o_indent, ul > li.o_indent {
     margin-left: 0;
