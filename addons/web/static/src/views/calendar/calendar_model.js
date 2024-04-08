@@ -515,7 +515,7 @@ export class CalendarModel extends Model {
 
         const showTime =
             !(fieldMapping.all_day && rawRecord[fieldMapping.all_day]) &&
-            scale === "month" &&
+            (scale === "month" || this.env.isSmall) &&
             startType !== "date" &&
             start.day === end.day;
 
