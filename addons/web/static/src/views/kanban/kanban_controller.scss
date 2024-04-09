@@ -133,7 +133,8 @@
             }
         }
 
-        &:hover .o_dropdown_kanban {
+        &:hover .o_dropdown_kanban,
+        .o_dropdown_kanban:has(.show) {
             visibility: visible;
         }
 
