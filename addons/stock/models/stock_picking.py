@@ -351,6 +351,15 @@ class PickingType(models.Model):
         for record in self:
             record.show_picking_type = record.code in ['incoming', 'outgoing', 'internal']
 
+    def _get_code_report_name(self):
+        self.ensure_one()
+        code_names = {
+            'outgoing': _('Delivery Note'),
+            'incoming': _('Goods Receipt Note'),
+            'internal': _('Internal Move'),
+        }
+        return code_names.get(self.code)
+
 
 class Picking(models.Model):
     _name = "stock.picking"
