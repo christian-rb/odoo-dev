@@ -6,11 +6,14 @@ const SPECIAL_TYPES = ["edit", "delete", "archive", "unarchive", "set_cover"];
 
 export class KanbanCompiler extends ViewCompiler {
     setup() {
-        this.compilers.push({
-            selector: "kanban",
-            fn: this.compileKanban,
-            doNotCopyAttributes: true,
-        });
+        this.compilers.push(
+            {
+                selector: "kanban",
+                fn: this.compileKanban,
+                doNotCopyAttributes: true,
+            },
+            { selector: "card-group, card-header, card-footer", fn: this.compileGroup }
+        );
     }
 
     //-----------------------------------------------------------------------------
@@ -22,6 +25,7 @@ export class KanbanCompiler extends ViewCompiler {
         if (cardEls.length !== 1) {
             throw new Error("a kanban arch must have one (and only one) <card> child");
         }
+        const cardEl = cardEls[0];
         const card = createElement("article");
         card.setAttribute("t-att-class", "__comp__.rootClass");
         card.setAttribute("t-att-data-id", "__comp__.props.record.id");
@@ -29,7 +33,7 @@ export class KanbanCompiler extends ViewCompiler {
         let asideNode;
         let asidePosition;
         let mainNode;
-        for (const child of cardEls[0].childNodes) {
+        for (const child of cardEl.childNodes) {
             switch (getTag(child)) {
                 case "card-aside": {
                     asidePosition = child.getAttribute("position") || "start";
@@ -70,7 +74,8 @@ export class KanbanCompiler extends ViewCompiler {
             append(card, asideNode);
         }
         if (asideNode || mainNode) {
-            combineAttributes(card, "t-att-class", "' d-flex flex-row'", " + ");
+            const direction = cardEl.getAttribute("direction") === "column" ? "column" : "row";
+            combineAttributes(card, "t-att-class", `" d-flex flex-${direction}"`, " + ");
         }
         return card;
     }

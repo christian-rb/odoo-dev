@@ -99,21 +99,39 @@
         }
 
         .o_kanban_card_aside {
-            &.o_kanban_card_aside_full {
-                @include media-breakpoint-up(md) {
-                    margin: {
-                        top: calc(var(--KanbanRecord-padding-v) * -1);
-                        bottom: calc(var(--KanbanRecord-padding-v) * -1);
-                        left: calc(var(--KanbanRecord-padding-h) * -1);
-                    }
-                }
-            }
-            margin-right: var(--KanbanRecord-padding-h);
             flex: 1 0 var(--KanbanRecord__image--fill-width);
             > div {
                 height: 100%;
             }
         }
+        &.d-flex {
+            gap: var(--KanbanRecord-padding-h);
+
+            &.flex-row {
+                .o_kanban_card_aside_full {
+                    @include media-breakpoint-up(md) {
+                        margin: {
+                            top: calc(var(--KanbanRecord-padding-v) * -1);
+                            bottom: calc(var(--KanbanRecord-padding-v) * -1);
+                            left: calc(var(--KanbanRecord-padding-h) * -1);
+                        }
+                    }
+                }
+            }
+
+            &.flex-column {
+                .o_kanban_card_aside_full {
+                    @include media-breakpoint-up(md) {
+                        margin: {
+                            top: calc(var(--KanbanRecord-padding-v) * -1);
+                            right: calc(var(--KanbanRecord-padding-v) * -1);
+                            left: calc(var(--KanbanRecord-padding-h) * -1);
+                        }
+                    }
+                }
+            }
+        }
+
         .o_kanban_card_main {
             min-width: 0; // prevent from overflowing
         }

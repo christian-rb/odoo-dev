@@ -70,6 +70,7 @@ import { registry } from "@web/core/registry";
 import { user } from "@web/core/user";
 import { Deferred } from "@web/core/utils/concurrency";
 import { getOrigin } from "@web/core/utils/urls";
+import { Record } from "@web/model/relational_model/record";
 import { RelationalModel } from "@web/model/relational_model/relational_model";
 import { SampleServer } from "@web/model/sample_server";
 import { KanbanCompiler } from "@web/views/kanban/kanban_compiler";
@@ -323,76 +324,20 @@ test("kanban with arbitray html outside <card>", async () => {
         </div>`);
 });
 
-test.debug("kanban card with aside", async () => {
-    await mountView({
-        type: "kanban",
-        resModel: "partner",
-        arch: `
-            <kanban>
-                <card class="cocuou">
-                    
-                    <card-group>
-                        <field name="foo"/>
-                    </card-group>
-                    <card-group>
-                        <field name="int_field"/>
-                        <field name="float_field"/>
-                    </card-group>
-                    <card-group>
-                        <field name="category_ids" widget="many2many_tags"/>
-                    </card-group>
-                </card>
-            </kanban>`,
-        domain: [["id", "=", 2]],
-    });
-
-    expect(".o_kanban_record:not(.o_kanban_ghost)").toHaveCount(1);
-
-    expect(queryFirst(".o_kanban_record")).toHaveInnerHTML(`
-        <div class="w-100 d-flex flex-row ">
-            <div class="o_kanban_aside d-block ">
-                <div name="image" class="o_field_widget o_field_empty o_field_kanban_image"/>
-            </div>
-            <div class="o_kanban_card_main d-flex flex-column justify-content-between gap-2 w-100 h-100">
-                <div class="d-flex justify-content-between overflow-hidden d-empty-none  flex-column o_kanban_card_group">
-                    <span>blip</span>
-                </div>
-                <div class="d-flex justify-content-between overflow-hidden d-empty-none  flex-column o_kanban_card_group">
-                    <span>9</span>
-                    <span>13.00</span>
-                </div>
-                <div class="d-flex justify-content-between overflow-hidden d-empty-none  flex-column o_kanban_card_group">
-                    <div name="category_ids" class="o_field_widget o_field_many2many_tags">
-                        <div class="d-flex flex-wrap gap-1">
-                            <span class="o_tag position-relative d-inline-flex align-items-center user-select-none mw-100 o_badge badge rounded-pill lh-1 o_tag_color_0" tabindex="-1" title="gold">
-                                <div class="o_tag_badge_text text-truncate">
-                                    gold
-                                </div>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>`);
-});
-
-test("kanban card with aside (full)", async () => {
+test("kanban card with header inside group", async () => {
     await mountView({
         type: "kanban",
         resModel: "partner",
         arch: `
             <kanban>
                 <card>
-                    <side full="1">
-                        <field name="image" widget="kanban_image"/>
-                    </side>
-                    <group>
-                        <strong><field name="foo"/></strong>
-                    </group>
-                    <group>
+                    <card-group>
+                        <card-header>
+                            <field name="foo"/>
+                        </card-header>
                         <field name="int_field"/>
                         <field name="float_field"/>
-                    </group>
+                    </card-group>
                 </card>
             </kanban>`,
         domain: [["id", "=", 2]],
@@ -401,22 +346,54 @@ test("kanban card with aside (full)", async () => {
     expect(".o_kanban_record:not(.o_kanban_ghost)").toHaveCount(1);
 
     expect(queryFirst(".o_kanban_record")).toHaveInnerHTML(`
-        <div class="w-100 d-flex flex-row ">
-            <div class="o_kanban_aside d-block  o_kanban_aside_full">
-                <div name="image" class="o_field_widget o_field_empty o_field_kanban_image"/>
-            </div>
-            <div class="o_kanban_card_main d-flex flex-column justify-content-between gap-2 w-100 h-100">
-                <div class="d-flex justify-content-between overflow-hidden d-empty-none  flex-column o_kanban_card_group">
-                    <strong>
-                        <span>blip</span>
-                    </strong>
-                </div>
-                <div class="d-flex justify-content-between overflow-hidden d-empty-none  flex-column o_kanban_card_group">
-                    <span>9</span>
-                    <span>13.00</span>
-                </div>
-            </div>
-        </div>`);
+        <main class="o_kanban_card_main d-flex flex-column justify-content-between gap-2 w-100 h-100">
+            <section class="d-flex justify-content-between overflow-hidden d-empty-none  flex-column o_kanban_card_group">
+                <header class="d-flex justify-content-between overflow-hidden d-empty-none  flex-row align-items-end o_kanban_card_group o_kanban_card_header">
+                    <span>blip</span>
+                </header>
+                <span>9</span>
+                <span>13.00</span>
+            </section>
+        </main>`);
+});
+
+test("kanban card with nested groups", async () => {
+    await mountView({
+        type: "kanban",
+        resModel: "partner",
+        arch: `
+            <kanban>
+                <card>
+                    <card-group>
+                        <card-group>
+                            <field name="foo"/>
+                        </card-group>
+                        <card-group>
+                            <field name="int_field"/>
+                            <field name="float_field"/>
+                        </card-group>
+                    </card-group>
+                    <card-group>
+                        <field name="product_id"/>
+                        <field name="state"/>
+                    </card-group>
+                </card>
+            </kanban>`,
+        domain: [["id", "=", 2]],
+    });
+
+    expect(".o_kanban_record:not(.o_kanban_ghost)").toHaveCount(1);
+
+    expect(queryFirst(".o_kanban_record")).toHaveInnerHTML(`
+        <main class="o_kanban_card_main d-flex flex-column justify-content-between gap-2 w-100 h-100">
+            <section class="d-flex justify-content-between overflow-hidden d-empty-none  flex-column o_kanban_card_group">
+                <header class="d-flex justify-content-between overflow-hidden d-empty-none  flex-row align-items-end o_kanban_card_group o_kanban_card_header">
+                    <span>blip</span>
+                </header>
+                <span>9</span>
+                <span>13.00</span>
+            </section>
+        </main>`);
 });
 
 test("kanban card with header/footer", async () => {
@@ -452,6 +429,291 @@ test("kanban card with header/footer", async () => {
                 </div>
             </div>
         </div>`);
+});
+
+test("kanban card custom classnames on semantic nodes", async () => {
+    await mountView({
+        type: "kanban",
+        resModel: "partner",
+        arch: `
+            <kanban>
+                <card class="my_card">
+                    <card-header class="my_header">
+                        <field name="foo"/>
+                    </card-header>
+                    <card-group class="my_group">
+                        <field name="product_id"/>
+                    </card-group>
+                    <card-footer class="my_footer">
+                        <field name="int_field"/>
+                    </card-footer>
+                </card>
+            </kanban>`,
+        domain: [["id", "=", 2]],
+    });
+
+    expect(".o_kanban_record:not(.o_kanban_ghost)").toHaveCount(1);
+
+    expect(queryFirst(".o_kanban_record")).toHaveClass("my_card");
+    expect(queryFirst(".o_kanban_record")).toHaveInnerHTML(`
+        <main class="o_kanban_card_main d-flex flex-column justify-content-between gap-2 w-100 h-100">
+            <header class="d-flex justify-content-between overflow-hidden d-empty-none my_header flex-row align-items-end o_kanban_card_group o_kanban_card_header">
+                <span>blip</span>
+            </header>
+            <section class="d-flex justify-content-between overflow-hidden d-empty-none my_group flex-column o_kanban_card_group">
+                <span>xmo</span>
+            </section>
+            <footer class="d-flex justify-content-between overflow-hidden d-empty-none my_footer flex-row align-items-end o_kanban_card_group o_kanban_card_footer">
+                <span>9</span>
+            </footer>
+        </main>`);
+});
+
+test("kanban card with aside", async () => {
+    patchWithCleanup(Record.prototype, {
+        setup() {
+            super.setup(...arguments);
+            this.id = "datapoint_99";
+        },
+    });
+
+    await mountView({
+        type: "kanban",
+        resModel: "partner",
+        arch: `
+            <kanban>
+                <card>
+                    <card-aside>
+                        <field name="image" widget="kanban_image"/>
+                    </card-aside>
+                    <card-group>
+                        <field name="foo"/>
+                    </card-group>
+                    <card-group>
+                        <field name="int_field"/>
+                        <field name="float_field"/>
+                    </card-group>
+                    <card-group>
+                        <field name="category_ids" widget="many2many_tags"/>
+                    </card-group>
+                </card>
+            </kanban>`,
+        domain: [["id", "=", 2]],
+    });
+
+    expect(".o_kanban_record:not(.o_kanban_ghost)").toHaveCount(1);
+
+    expect(queryFirst(".o_kanban_record")).toHaveOuterHTML(`
+        <article class="o_kanban_record o_kanban_global_click flex-grow-1 flex-md-shrink-1 flex-shrink-0 o_new_kanban d-flex flex-row" data-id="datapoint_99" tabindex="0">
+            <aside class="o_kanban_card_aside d-block ">
+                <div name="image" class="o_field_widget o_field_empty o_field_kanban_image"/>
+            </aside>
+            <main class="o_kanban_card_main d-flex flex-column justify-content-between gap-2 w-100 h-100">
+                <section class="d-flex justify-content-between overflow-hidden d-empty-none  flex-column o_kanban_card_group">
+                    <span>blip</span>
+                </section>
+                <section class="d-flex justify-content-between overflow-hidden d-empty-none  flex-column o_kanban_card_group">
+                    <span>9</span>
+                    <span>13.00</span>
+                </section>
+                <section class="d-flex justify-content-between overflow-hidden d-empty-none  flex-column o_kanban_card_group">
+                    <div name="category_ids" class="o_field_widget o_field_many2many_tags">
+                        <div class="d-flex flex-wrap gap-1">
+                            <span class="o_tag position-relative d-inline-flex align-items-center user-select-none mw-100 o_badge badge rounded-pill lh-1 o_tag_color_0" tabindex="-1" title="gold">
+                                <div class="o_tag_badge_text text-truncate">gold</div>
+                            </span>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </article>`);
+});
+
+test("kanban card with aside (full)", async () => {
+    await mountView({
+        type: "kanban",
+        resModel: "partner",
+        arch: `
+            <kanban>
+                <card>
+                    <card-aside full="1">
+                        <field name="image" widget="kanban_image"/>
+                    </card-aside>
+                    <card-group>
+                        <strong><field name="foo"/></strong>
+                    </card-group>
+                    <card-group>
+                        <field name="int_field"/>
+                        <field name="float_field"/>
+                    </card-group>
+                </card>
+            </kanban>`,
+        domain: [["id", "=", 2]],
+    });
+
+    expect(".o_kanban_record:not(.o_kanban_ghost)").toHaveCount(1);
+
+    expect(queryFirst(".o_kanban_record")).toHaveOuterHTML(`
+        <article class="o_kanban_record o_kanban_global_click flex-grow-1 flex-md-shrink-1 flex-shrink-0 o_new_kanban d-flex flex-row" data-id="datapoint_2" tabindex="0">
+            <aside class="o_kanban_card_aside d-block  o_kanban_card_aside_full">
+                <div name="image" class="o_field_widget o_field_empty o_field_kanban_image"/>
+            </aside>
+            <main class="o_kanban_card_main d-flex flex-column justify-content-between gap-2 w-100 h-100">
+                <section class="d-flex justify-content-between overflow-hidden d-empty-none  flex-column o_kanban_card_group">
+                    <strong>
+                        <span>blip</span>
+                    </strong>
+                </section>
+                <section class="d-flex justify-content-between overflow-hidden d-empty-none  flex-column o_kanban_card_group">
+                    <span>9</span>
+                    <span>13.00</span>
+                </section>
+            </main>
+        </article>`);
+});
+
+test("kanban card with aside and direction='col'", async () => {
+    patchWithCleanup(Record.prototype, {
+        setup() {
+            super.setup(...arguments);
+            this.id = "datapoint_99";
+        },
+    });
+
+    await mountView({
+        type: "kanban",
+        resModel: "partner",
+        arch: `
+            <kanban>
+                <card direction="col">
+                    <card-aside>
+                        <field name="image" widget="kanban_image"/>
+                    </card-aside>
+                    <card-group>
+                        <field name="foo"/>
+                    </card-group>
+                    <card-group>
+                        <field name="int_field"/>
+                        <field name="float_field"/>
+                    </card-group>
+                </card>
+            </kanban>`,
+        domain: [["id", "=", 2]],
+    });
+
+    expect(".o_kanban_record:not(.o_kanban_ghost)").toHaveCount(1);
+
+    expect(queryFirst(".o_kanban_record")).toHaveOuterHTML(`
+        <article class="o_kanban_record o_kanban_global_click flex-grow-1 flex-md-shrink-1 flex-shrink-0 o_new_kanban d-flex flex-column" data-id="datapoint_99" tabindex="0">
+            <aside class="o_kanban_card_aside d-block ">
+                <div name="image" class="o_field_widget o_field_empty o_field_kanban_image"/>
+            </aside>
+            <main class="o_kanban_card_main d-flex flex-column justify-content-between gap-2 w-100 h-100">
+                <section class="d-flex justify-content-between overflow-hidden d-empty-none  flex-column o_kanban_card_group">
+                    <span>blip</span>
+                </section>
+                <section class="d-flex justify-content-between overflow-hidden d-empty-none  flex-column o_kanban_card_group">
+                    <span>9</span>
+                    <span>13.00</span>
+                </section>
+            </main>
+        </article>`);
+});
+
+test("kanban card with aside and position='end'", async () => {
+    patchWithCleanup(Record.prototype, {
+        setup() {
+            super.setup(...arguments);
+            this.id = "datapoint_99";
+        },
+    });
+
+    await mountView({
+        type: "kanban",
+        resModel: "partner",
+        arch: `
+            <kanban>
+                <card>
+                    <card-aside position="end">
+                        <field name="image" widget="kanban_image"/>
+                    </card-aside>
+                    <card-group>
+                        <field name="foo"/>
+                    </card-group>
+                    <card-group>
+                        <field name="int_field"/>
+                        <field name="float_field"/>
+                    </card-group>
+                </card>
+            </kanban>`,
+        domain: [["id", "=", 2]],
+    });
+
+    expect(".o_kanban_record:not(.o_kanban_ghost)").toHaveCount(1);
+
+    expect(queryFirst(".o_kanban_record")).toHaveOuterHTML(`
+        <article class="o_kanban_record o_kanban_global_click flex-grow-1 flex-md-shrink-1 flex-shrink-0 o_new_kanban d-flex flex-row" data-id="datapoint_99" tabindex="0">
+            <main class="o_kanban_card_main d-flex flex-column justify-content-between gap-2 w-100 h-100">
+                <section class="d-flex justify-content-between overflow-hidden d-empty-none  flex-column o_kanban_card_group">
+                    <span>blip</span>
+                </section>
+                <section class="d-flex justify-content-between overflow-hidden d-empty-none  flex-column o_kanban_card_group">
+                    <span>9</span>
+                    <span>13.00</span>
+                </section>
+            </main>
+            <aside class="o_kanban_card_aside d-block ">
+                <div name="image" class="o_field_widget o_field_empty o_field_kanban_image"/>
+            </aside>
+        </article>`);
+});
+
+test("kanban card with aside position='end' and direction='col'", async () => {
+    patchWithCleanup(Record.prototype, {
+        setup() {
+            super.setup(...arguments);
+            this.id = "datapoint_99";
+        },
+    });
+
+    await mountView({
+        type: "kanban",
+        resModel: "partner",
+        arch: `
+            <kanban>
+                <card direction="column">
+                    <card-aside position="end">
+                        <field name="image" widget="kanban_image"/>
+                    </card-aside>
+                    <card-group>
+                        <field name="foo"/>
+                    </card-group>
+                    <card-group>
+                        <field name="int_field"/>
+                        <field name="float_field"/>
+                    </card-group>
+                </card>
+            </kanban>`,
+        domain: [["id", "=", 2]],
+    });
+
+    expect(".o_kanban_record:not(.o_kanban_ghost)").toHaveCount(1);
+
+    expect(queryFirst(".o_kanban_record")).toHaveOuterHTML(`
+        <article class="o_kanban_record o_kanban_global_click flex-grow-1 flex-md-shrink-1 flex-shrink-0 o_new_kanban d-flex flex-column" data-id="datapoint_99" tabindex="0">
+            <main class="o_kanban_card_main d-flex flex-column justify-content-between gap-2 w-100 h-100">
+                <section class="d-flex justify-content-between overflow-hidden d-empty-none  flex-column o_kanban_card_group">
+                    <span>blip</span>
+                </section>
+                <section class="d-flex justify-content-between overflow-hidden d-empty-none  flex-column o_kanban_card_group">
+                    <span>9</span>
+                    <span>13.00</span>
+                </section>
+            </main>
+            <aside class="o_kanban_card_aside d-block ">
+                <div name="image" class="o_field_widget o_field_empty o_field_kanban_image"/>
+            </aside>
+        </article>`);
 });
 
 test("kanban card with menu", async () => {
