@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_move_line_tree_tcs_tds_l10n_in" model="ir.ui.view">
+        <field name="name">account.move.line.tree.l10n_in.tcs.tds</field>
+        <field name="model">account.move.line</field>
+        <field name="arch" type="xml">
+            <tree string="Products" editable="top" create="0" default_group_by="l10n_in_tax_group">
+                <field name="product_id"/>
+                <field name="name" widget="section_and_note_text"/>
+                <field name="account_id"/>
+                <field name="tax_ids" widget="many2many_tags" context="{'active_test': True}"/>
+                <field name="quantity"/>
+                <field name="price_unit"/>
+                <field name="price_subtotal" string="Tax excl."/>
+                <field name="price_total" string="Tax incl." optional="hide"/>
+            </tree>
+        </field>
+    </record>
+</odoo>

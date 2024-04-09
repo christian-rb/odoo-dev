@@ -119,3 +119,28 @@ class AccountTax(models.Model):
             'display_uom': display_uom,
             'items': items,
         }
+
+
+class AccountTaxGroup(models.Model):
+    _inherit = 'account.tax.group'
+
+    l10_in_is_threshold = fields.Boolean("TDS Threshold Limit", default=False)
+    l10n_in_consider_tax = fields.Selection([
+            ('untaxed_amount', 'Untaxed Amount'),
+            ('total_amount', 'Total Amount'),
+        ], string="Consider", default='untaxed_amount', required=True)
+    l10n_in_is_per_transection_limit = fields.Boolean("Per Transection", default=False)
+    l10n_in_per_transection_limit = fields.Float("Per Transaction")
+    l10n_in_is_aggregate_limit = fields.Boolean("Aggregate", default=False)
+    l10n_in_aggregate_limit = fields.Float("Aggregate")
+    l10n_in_tax_group = fields.Char(compute='_compute_l10n_in_tax_group', store=True)
+
+    _sql_constraints = [
+        ('l10n_in_per_transection_limit', 'CHECK(l10n_in_per_transection_limit >= 0)', 'Per transaction limit must be positive'),
+        ('l10n_in_aggregate_limit', 'CHECK(l10n_in_aggregate_limit >= 0)', 'Aggregate limit must be positive'),
+    ]
+
+    @api.depends('name')
+    def _compute_l10n_in_tax_group(self):
+        for record in self:
+            record.l10n_in_tax_group = record.name[:3]

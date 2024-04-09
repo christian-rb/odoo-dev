@@ -1,4 +1,4 @@
-from odoo import fields, models
+from odoo import api, fields, models
 
 class ResCompany(models.Model):
     _inherit = 'res.company'
@@ -12,6 +12,12 @@ class ResCompany(models.Model):
         ],
         string="HSN Code Digit",
     )
+    l10n_in_pan = fields.Char(string="PAN", compute='_compute_l10n_in_pan', store=True)
+
+    @api.depends('vat')
+    def _compute_l10n_in_pan(self):
+        if self.vat:
+            self.l10n_in_pan = self.vat[2:12]
 
     def create(self, vals):
         res = super().create(vals)

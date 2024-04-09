@@ -29,6 +29,7 @@ class AccountMove(models.Model):
     l10n_in_shipping_port_code_id = fields.Many2one('l10n_in.port.code', 'Port code')
     l10n_in_reseller_partner_id = fields.Many2one('res.partner', 'Reseller', domain=[('vat', '!=', False)], help="Only Registered Reseller")
     l10n_in_journal_type = fields.Selection(string="Journal Type", related='journal_id.type')
+    l10n_in_tcs_tds_warning = fields.Char('TDC/TCS Warning', compute="_compute_l10n_in_tcs_tds_warning", store=True)
 
     @api.depends('partner_id', 'partner_id.l10n_in_gst_treatment', 'state')
     def _compute_l10n_in_gst_treatment(self):
@@ -61,6 +62,38 @@ class AccountMove(models.Model):
             else:
                 move.l10n_in_state_id = False
 
+    @api.depends('state')
+    def _compute_l10n_in_tcs_tds_warning(self):
+        for move in self:
+            if move.state == 'posted':
+                warning_sections = []
+                partner_pan = move.partner_id.l10n_in_pan
+                company_pan = move.company_id.l10n_in_pan
+                per_transection_obj = self._l10n_in_calculate_per_transection_object()
+                aggregate_obj = self._l10n_in_calculate_aggregate_total(partner_pan, company_pan)
+
+                if per_transection_obj or aggregate_obj:
+                    # check if per teansection limit is exceeded or not
+                    for tax_group_id in per_transection_obj:
+                        if tax_group_id.l10n_in_is_per_transection_limit and per_transection_obj[tax_group_id] > tax_group_id.l10n_in_per_transection_limit:
+                            warning_sections.append(tax_group_id.name[5:])
+                    # check if aggregate limit is exceeded or not
+                    for tax_group_id in aggregate_obj:
+                        if any(tax_group_id in line.account_id.l10n_in_tds_tcs_section for line in move.invoice_line_ids):
+                            if tax_group_id.l10n_in_is_aggregate_limit and aggregate_obj[tax_group_id] > tax_group_id.l10n_in_aggregate_limit and tax_group_id.name[5:] not in warning_sections:
+                                warning_sections.append(tax_group_id.name[5:])
+                    warning = ', '.join(warning_sections)
+
+                    if move.journal_id.type == 'sale':
+                        warning_message = _("It's advisable to collect TCS u/s %s on this transaction.") % warning
+                    elif move.journal_id.type == 'purchase':
+                        warning_message = _("It's advisable to deduct TDS u/s %s on this transaction.") % warning
+                    move.l10n_in_tcs_tds_warning = len(warning_sections) > 0 and warning_message or False
+                    if not move.invoice_line_ids.filtered(lambda line: line.account_id.l10n_in_tds_tcs_section not in line.tax_ids.mapped('tax_group_id')):
+                        move.l10n_in_tcs_tds_warning = False
+                else:
+                    move.l10n_in_tcs_tds_warning = False
+
     @api.onchange('name')
     def _onchange_name_warning(self):
         if self.country_code == 'IN' and self.journal_id.type == 'sale' and self.name and (len(self.name) > 16 or not re.match(r'^[a-zA-Z0-9-\/]+$', self.name)):
@@ -72,6 +105,69 @@ class AccountMove(models.Model):
                 )
             }}
         return super()._onchange_name_warning()
+
+    def action_show_invoice_lines_tds(self):
+        self.ensure_one()
+        lines = self.invoice_line_ids.filtered(lambda line: line.account_id.l10n_in_tds_tcs_section not in line.tax_ids.mapped('tax_group_id'))
+        view_id = self.env.ref('l10n_in.view_move_line_tree_tcs_tds_l10n_in').id
+        action = {
+            'type': 'ir.actions.act_window',
+            'name': 'Invoice Lines',
+            'view_mode': 'list',
+            'views': [[view_id, 'list']],
+            'res_model': 'account.move.line',
+            'domain': [('id', 'in', lines.ids)],
+        }
+        return action
+
+    def _l10n_in_calculate_aggregate_total(self, partner_pan, company_pan):
+        company = self.env.company
+        fiscal_year_last_day = company.fiscalyear_last_day
+        fiscal_year_last_month = company.fiscalyear_last_month
+        current_year = fields.Date.today().year
+        fiscal_year_end_date = fields.Date.from_string('%s-%s-%s' % (current_year + 1, fiscal_year_last_month, fiscal_year_last_day))
+        fiscal_year_start_date = fields.Date.add(fields.Date.subtract(fiscal_year_end_date, months=12), days=1)
+
+        parent_company_id = self.env.company.parent_id.id or self.env.company.id
+        company_ids = self.env['res.company'].search(['|', '|', ('id', 'child_of', parent_company_id), ('id', '=', parent_company_id), ('l10n_in_pan', '=', company_pan)])
+        partner_ids = self.env['res.partner'].search([('l10n_in_pan', '=', partner_pan)])
+        moves_within_fiscal_year = self.env['account.move'].search([
+            ('date', '>=', fiscal_year_start_date),
+            ('date', '<=', fiscal_year_end_date),
+            ('partner_id', 'in', partner_ids.ids),
+            ('company_id', 'in', company_ids.ids),
+        ])
+        aggregate_obj = self._l10n_in_calculate_aggregate_object(moves_within_fiscal_year)
+        return aggregate_obj
+
+    def _l10n_in_calculate_per_transection_object(self):
+        for move in self:
+            accounts = set(move.invoice_line_ids.mapped('account_id'))
+            per_transection_obj = {account.l10n_in_tds_tcs_section: 0 for account in accounts}
+            if per_transection_obj:
+                for line in move.invoice_line_ids:
+                    if line.account_id.l10n_in_tds_tcs_section not in line.tax_ids.mapped('tax_group_id'):
+                        tax_group_id = line.account_id.l10n_in_tds_tcs_section
+                        per_transection_obj[tax_group_id] += line.price_total if tax_group_id.l10n_in_consider_tax == 'total_amount' else line.price_subtotal
+            else:
+                return False
+        return per_transection_obj
+
+    def _l10n_in_calculate_aggregate_object(self, moves):
+        aggregate_obj = {}
+        for move in moves:
+            accounts = set(move.invoice_line_ids.mapped('account_id'))
+            for account in accounts:
+                if account.l10n_in_tds_tcs_section not in aggregate_obj:
+                    aggregate_obj[account.l10n_in_tds_tcs_section] = 0
+                else:
+                    continue
+            if aggregate_obj:
+                for line in move.invoice_line_ids:
+                    if line.account_id.l10n_in_tds_tcs_section not in line.tax_ids.mapped('tax_group_id'):
+                        tax_group_id = line.account_id.l10n_in_tds_tcs_section
+                        aggregate_obj[tax_group_id] += line.price_total if tax_group_id.l10n_in_consider_tax == 'total_amount' else line.price_subtotal
+        return aggregate_obj
 
     def _get_name_invoice_report(self):
         self.ensure_one()
