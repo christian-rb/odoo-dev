@@ -39,3 +39,10 @@ class SkillLevel(models.Model):
         if vals.get('default_level'):
             self.skill_type_id.skill_level_ids.filtered(lambda r: r.id != self.id).default_level = False
         return res
+
+    def copy(self, default=None):
+        new_levels = super().copy(default)
+        for old_level, new_level in zip(self, new_levels):
+            if old_level.default_level:
+                new_level.default_level = True
+        return new_levels
