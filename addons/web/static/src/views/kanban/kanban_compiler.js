@@ -72,10 +72,13 @@ export class KanbanCompiler extends ViewCompiler {
         }
         if (asideNode && asidePosition === "end") {
             append(card, asideNode);
+            // TO DO: add o_kanban_aside_end on asideNode
         }
         if (asideNode || mainNode) {
-            const direction = cardEl.getAttribute("direction") === "column" ? "column" : "row";
-            combineAttributes(card, "t-att-class", `" d-flex flex-${direction}"`, " + ");
+            const direction = cardEl.getAttribute("direction");
+            if(direction === "column") {
+                combineAttributes(card, "t-att-class", `" o_kanban_card_${direction}"`, " + ");
+            }
         }
         return card;
     }
