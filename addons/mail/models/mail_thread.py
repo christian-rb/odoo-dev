@@ -2041,7 +2041,7 @@ class MailThread(models.AbstractModel):
                      email_from=None, author_id=None, parent_id=False,
                      subtype_xmlid=None, subtype_id=False, partner_ids=None,
                      attachments=None, attachment_ids=None, body_is_html=False,
-                     **kwargs):
+                     channel_ids=None, **kwargs):
         """ Post a new message in an existing thread, returning the new mail.message.
 
         :param str|Markup body: body of the message, str content will be escaped, Markup
@@ -2060,6 +2060,7 @@ class MailThread(models.AbstractModel):
             notification mechanism;
         :param list(int) partner_ids: partner_ids to notify in addition to partners
             computed based on subtype / followers matching;
+        :param list(int) channel_ids: channel_ids to notify for mentioned channels
         :param list(tuple(str,str), tuple(str,str, dict)) attachments : list of attachment
             tuples in the form ``(name,content)`` or ``(name,content, info)`` where content
             is NOT base64 encoded;
@@ -2112,7 +2113,13 @@ class MailThread(models.AbstractModel):
                  )
             )
         partner_ids = list(partner_ids or [])
-
+        if channel_ids and not tools.is_list_of(channel_ids, int):
+            raise ValueError(
+                _('Posting a message should receive channels as a list of IDs (received %(pids)s)',
+                  pids=repr(channel_ids),
+                 )
+            )
+        channel_ids = list(channel_ids or [])
         # split message additional values from notify additional values
         msg_kwargs = {key: val for key, val in kwargs.items()
                       if key in self.env['mail.message']._fields}
@@ -2139,6 +2146,10 @@ class MailThread(models.AbstractModel):
         # automatically subscribe recipients if asked to
         if self._context.get('mail_post_autofollow') and partner_ids:
             self.message_subscribe(partner_ids=list(partner_ids))
+
+        channel_partners = self.env['discuss.channel.member'].search([('channel_id', 'in', channel_ids)])
+        thread_partner_ids = [partner.partner_id.id for partner in channel_partners]
+        partner_ids.extend(thread_partner_ids)
 
         msg_values = dict(msg_kwargs)
         if 'email_add_signature' not in msg_values:
@@ -2167,6 +2178,7 @@ class MailThread(models.AbstractModel):
             'subtype_id': subtype_id,
             # recipients
             'partner_ids': partner_ids,
+            'channel_ids': channel_ids,
         })
         # add default-like values afterwards, to avoid useless queries
         if 'record_alias_domain_id' not in msg_values:
@@ -2843,23 +2855,35 @@ class MailThread(models.AbstractModel):
         """ Low-level helper to create mail.message records. It is mainly used
         to hide the cleanup of given values, for mail gateway or helpers."""
         create_values_list = []
+        create_channel_list = []
 
         # preliminary value safety check
         self._raise_for_invalid_parameters(
             {key for values in values_list for key in values.keys()},
             restricting_names=self._get_message_create_valid_field_names()
         )
-
         for values in values_list:
             create_values = dict(values)
             # Avoid warnings about non-existing fields
             for x in ('from', 'to', 'cc'):
                 create_values.pop(x, None)
             create_values['partner_ids'] = [Command.link(pid) for pid in (create_values.get('partner_ids') or [])]
+            channel_ids = create_values.pop('channel_ids', None)
             create_values_list.append(create_values)
+
+            if channel_ids:
+                for channel_id in channel_ids:
+                    create_channel_values = dict(create_values)
+                    create_channel_values['res_id'] = channel_id
+                    create_channel_values['model'] = 'discuss.channel'
+                    create_channel_list.append(create_channel_values)
 
         # remove context, notably for default keys, as this thread method is not
         # meant to propagate default values for messages, only for master records
+        self.env['mail.message'].with_context(
+            clean_context(self.env.context)
+        ).create(create_channel_list)
+
         return self.env['mail.message'].with_context(
             clean_context(self.env.context)
         ).create(create_values_list)
@@ -2874,6 +2898,7 @@ class MailThread(models.AbstractModel):
             'author_guest_id',
             'author_id',
             'body',
+            'channel_ids',
             'create_date',  # anyway limited to admins
             'date',
             'email_add_signature',

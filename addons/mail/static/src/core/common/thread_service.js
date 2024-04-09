@@ -670,6 +670,7 @@ export class ThreadService {
                   })
                 : undefined;
         const partner_ids = validMentions?.partners.map((partner) => partner.id) ?? [];
+        const channel_ids = validMentions?.threads.map((thread) => thread.id) ?? [];
         const recipientEmails = [];
         const recipientAdditionalValues = {};
         if (!isNote) {
@@ -693,6 +694,7 @@ export class ThreadService {
                 attachment_ids: attachments.map(({ id }) => id),
                 attachment_tokens: attachments.map((attachment) => attachment.accessToken),
                 canned_response_ids: cannedResponseIds,
+                channel_ids,
                 message_type: "comment",
                 partner_ids,
                 subtype_xmlid: subtype,
