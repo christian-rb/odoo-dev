@@ -48,7 +48,7 @@ export class KanbanCompiler extends ViewCompiler {
                         mainNode = createElement("main");
                         mainNode.setAttribute(
                             "class",
-                            "o_kanban_card_main d-flex flex-column justify-content-between gap-2 w-100 h-100"
+                            "o_kanban_card_main"
                         );
                     }
                     append(mainNode, this.compileGroup(child, params));
@@ -86,7 +86,7 @@ export class KanbanCompiler extends ViewCompiler {
     compileAside(el, params) {
         const aside = createElement("aside");
         const elClass = el.getAttribute("class") || "";
-        let asideClass = `o_kanban_card_aside d-block ${elClass}`;
+        let asideClass = `o_kanban_card_aside ${elClass}`;
         if (archParseBoolean(el.getAttribute("full"), false)) {
             asideClass += " o_kanban_card_aside_full";
         }
@@ -109,11 +109,11 @@ export class KanbanCompiler extends ViewCompiler {
         }
         const group = createElement(tagName);
         const elClass = el.getAttribute("class") || "";
-        let groupClass = `d-flex justify-content-between overflow-hidden d-empty-none ${elClass}`;
+        let groupClass = elClass;
         if (type === "card-group") {
-            groupClass += " flex-column o_kanban_card_group";
+            groupClass += " o_kanban_card_group";
         } else {
-            groupClass += ` flex-row align-items-end o_kanban_card_group o_kanban_card_${
+            groupClass += ` o_kanban_card_group o_kanban_card_${
                 type === "card-header" ? "header" : "footer"
             }`;
         }

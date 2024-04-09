@@ -117,9 +117,6 @@ export class KanbanRecord extends Component {
             const value = record.data[archInfo.cardColorField];
             classes.push(getColorClass(value)); // FIXME
         }
-        if (!this.props.list.isGrouped) {
-            classes.push("flex-grow-1 flex-md-shrink-1 flex-shrink-0");
-        }
         classes.push("o_new_kanban"); // TODO : remove
         return classes.join(" ");
     }
