@@ -3317,7 +3317,6 @@ class BaseModel(metaclass=MetaModel):
                     related_sudo=False,
                     copy=field.copy,
                     readonly=field.readonly,
-                    cache_validator=field.cache_validator,
                     export_string_translation=field.export_string_translation,
                 ))
 

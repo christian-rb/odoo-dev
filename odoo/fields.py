@@ -326,8 +326,6 @@ class Field(MetaField('DummyField', (object,), {})):
     default_export_compatible = False   # whether the field must be exported by default in an import-compatible export
     exportable = True
 
-    cache_validator = None              # a function to validate the cache of the field
-
     def __init__(self, string=Default, **kwargs):
         kwargs['string'] = string
         self._sequence = next(_global_seq)
@@ -766,7 +764,6 @@ class Field(MetaField('DummyField', (object,), {})):
     _related_help = property(attrgetter('help'))
     _related_groups = property(attrgetter('groups'))
     _related_aggregator = property(attrgetter('aggregator'))
-    _related_cache_validator = property(attrgetter('cache_validator'))
 
     @property
     def base_field(self):
@@ -1210,9 +1207,12 @@ class Field(MetaField('DummyField', (object,), {})):
             self.recompute(record)
 
         value = env.cache.get(self, record.env.cache_key(self), record._ids[0])
-        if value is NOTHING or (self.cache_validator and not self.cache_validator(env, value)):
-            value = self._get(record)
-
+        if value is not NOTHING:
+            try:
+                return self.convert_to_record(value, record)
+            except CacheMiss:
+                pass
+        value = self._get(record)
         return self.convert_to_record(value, record)
 
     def _get(self, record):
@@ -1249,7 +1249,11 @@ class Field(MetaField('DummyField', (object,), {})):
                     raise
                 record._fetch_field(self)
             value = env.cache.get(self, record.env.cache_key(self), record._ids[0])
-            if value is NOTHING or (self.cache_validator and not self.cache_validator(env, value)):
+            try:
+                if value is NOTHING:
+                    raise CacheMiss(record, self)
+                self.convert_to_record(value, record)  # use convert_to_record to check the value
+            except CacheMiss:
                 raise MissingError("\n".join([
                     _("Record does not exist or has been deleted."),
                     _("(Record: %s, User: %s)", record, env.uid),
@@ -1801,11 +1805,6 @@ class _String(Field):
             kwargs['translate'] = bool(kwargs['translate'])
         super(_String, self).__init__(string=string, **kwargs)
 
-    def _setup_attrs(self, model_class, name):
-        super()._setup_attrs(model_class, name)
-        if self.translate:
-            self.cache_validator = self._translation_validator
-
     _related_translate = property(attrgetter('translate'))
 
     def _description_translate(self, env):
@@ -1861,7 +1860,10 @@ class _String(Field):
             return False
         if self.translate:
             lang = (record.env.lang or 'en_US') if self.translate is True else record.env._lang
-            value = value[lang]
+            try:
+                value = value[lang]
+            except KeyError:
+                raise CacheMiss(record, self)
         if callable(self.translate) and record.env.context.get('edit_translations'):
             if not (terms := self.get_trans_terms(value)):
                 return value
@@ -2121,13 +2123,6 @@ class _String(Field):
                     record_cache.setdefault(lang, value)
 
         return inserter
-
-    def _translation_validator(self, env, cache_value):
-        lang = (env.lang or 'en_US') if self.translate is True else env._lang
-        if cache_value is None or lang in cache_value:
-            return True
-        # checking isinstance at last because isinstance is slow and TranslatedCacheValue is rare
-        return isinstance(cache_value, TranslatedCacheValue)
 
 
 class Char(_String):
@@ -5471,7 +5466,7 @@ def apply_required(model, field_name):
 
 # imported here to avoid dependency cycle issues
 # pylint: disable=wrong-import-position
-from .exceptions import AccessError, MissingError, UserError
+from .exceptions import AccessError, MissingError, UserError, CacheMiss
 from .models import (
     check_pg_name, expand_ids, is_definition_class,
     BaseModel, IdType, NewId, PREFETCH_MAX,
