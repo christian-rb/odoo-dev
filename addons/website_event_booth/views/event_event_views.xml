@@ -9,10 +9,10 @@
             <field name="address_id" position="after">
                 <field name="exhibition_map"/>
             </field>
-            <field name="website_menu" position="after">
-                <label for="booth_menu"/>
+            <xpath expr="//label[@for='website_menu']" position="after">
                 <field name="booth_menu"/>
-            </field>
+                <label class="me-5 mb-3" for="booth_menu"/>
+            </xpath>
         </field>
     </record>
 

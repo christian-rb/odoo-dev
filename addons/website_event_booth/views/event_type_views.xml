@@ -8,8 +8,8 @@
         <field name="arch" type="xml">
             <xpath expr="//span[@name='website_menu']" position='after'>
                 <span>
-                    <label for="booth_menu" string="Booth Menu Item"/>
                     <field name="booth_menu"/>
+                    <label class="me-5 mb-3" for="booth_menu" string="Booth Menu Item"/>
                 </span>
             </xpath>
         </field>
