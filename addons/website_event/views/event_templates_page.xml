@@ -61,7 +61,7 @@
                                 </li>
                             </t>
                             <t t-else="">
-                                <li class="breadcrumb-item active" aria-current="page"><span class="pe-3" t-field="event.name"/></li>
+                                <li class="breadcrumb-item" aria-current="page"><a class="pe-3 nav-item" t-field="event.name" t-att-href="'/event/%s/register' % (slug(event))"/></li>
                             </t>
                         </ul>
                         <ul t-if="not navbar__back_url" class="nav" t-att-data-menu_name="editable and 'Event Menu'" t-att-data-content_menu_id="editable and event.menu_id.id">

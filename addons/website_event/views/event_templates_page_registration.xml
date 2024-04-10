@@ -127,15 +127,25 @@
                             <small itemprop="location" t-field="event.organizer_id" t-options="{'widget': 'contact', 'fields': ['phone', 'mobile', 'email']}"/>
                         </div>
                         <!-- Social -->
-                        <div class="o_wevent_sidebar_block">
-                            <h6 class="o_wevent_sidebar_title">Share</h6>
-                            <p>Find out what people see and say about this event, and join the conversation.</p>
-                            <t t-snippet-call="website.s_share">
-                                <t t-set="_no_title" t-value="True"/>
-                                <t t-set="_classes" t-valuef="o_wevent_sidebar_social mx-n1"/>
-                                <t t-set="_link_classes" t-valuef="o_wevent_social_link"/>
-                            </t>
+                        <div class="oe_structure oe_empty"/>
+                        <div class="oe_structure">
+                            <section>
+                                <div class="o_wevent_sidebar_block">
+                                    <h6 class="o_wevent_sidebar_title">Share</h6>
+                                    <p>Find out what people see and say about this event, and join the conversation.</p>
+                                </div>
+                            </section>
                         </div>
+                        <div class="oe_structure">
+                            <section>
+                                    <span t-snippet-call="website.s_share">
+                                        <!-- <t t-set="_no_title" t-value="True"/>
+                                        <t t-set="_classes" t-valuef="o_wevent_sidebar_social mx-n1"/>
+                                        <t t-set="_link_classes" t-valuef="o_wevent_social_link"/> -->
+                                    </span>
+                            </section>
+                        </div>
+                        <div class="oe_structure oe_empty"/>
                     </aside>
                 </div>
             </div>

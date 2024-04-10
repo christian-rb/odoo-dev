@@ -143,7 +143,6 @@ class WebsiteEventController(http.Controller):
 
         if '.' not in page:
             page = 'website_event.%s' % page
-
         try:
             # Every event page view should have its own SEO.
             values['seo_object'] = request.website.get_template(page)
@@ -151,9 +150,8 @@ class WebsiteEventController(http.Controller):
         except ValueError:
             # page not found
             values['path'] = re.sub(r"^website_event\.", '', page)
-            values['from_template'] = 'website_event.default_page'  # .strip('website_event.')
-            page = request.env.user.has_group('website.group_website_designer') and 'website.page_404' or 'http_routing.404'
-
+            values['from_template'] = 'website_event.default_page&event_id=%s' % event.id
+            page = request.env.user.has_group('website.group_website_designer') and 'website_event.page_404' or 'http_routing.404'
         return request.render(page, values)
 
     @http.route(['''/event/<model("event.event"):event>'''], type='http', auth="public", website=True, sitemap=True)

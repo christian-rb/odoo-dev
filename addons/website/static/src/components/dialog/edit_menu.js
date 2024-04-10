@@ -191,6 +191,16 @@ export class EditMenuDialog extends Component {
     }
 
     addMenu(isMegaMenu) {
+        var current_url = window.location.href;
+        // Check if the current URL contains '/event/' in the first part
+        var event_index = current_url.indexOf('/event/');
+        var event_url = '';
+        if (event_index !== -1) {
+            // Extract event name from the current URL
+            var event_name = current_url.substring(event_index + 7).split('/')[0];
+            // Construct the event URL containing only event/event_name/page/
+            event_url = '/event/' + event_name + '/page/';
+        }
         this.dialogs.add(MenuDialog, {
             isMegaMenu,
             save: (name, url, isNewWindow) => {
@@ -198,7 +208,7 @@ export class EditMenuDialog extends Component {
                     fields: {
                         id: `menu_${(new Date).toISOString()}`,
                         name,
-                        url: isMegaMenu ? '#' : url,
+                        url: isMegaMenu ? '#' : event_url + url,
                         new_window: isNewWindow,
                         'is_mega_menu': isMegaMenu,
                         sequence: 0,

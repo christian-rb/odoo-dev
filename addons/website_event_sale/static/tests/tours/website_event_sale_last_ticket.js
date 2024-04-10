@@ -20,7 +20,6 @@ registry.category("web_tour.tours").add('event_buy_last_ticket', {
     },
     {
         content: "Select 2 units of `VIP` ticket type",
-        extra_trigger: '#wrap:not(:has(a[href*="/event"]:contains("Last ticket test")))',
         trigger: 'select:eq(0)',
         run: "select 2",
     },

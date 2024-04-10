@@ -58,6 +58,24 @@ class EventEvent(models.Model):
 
     def _get_website_menu_entries(self):
         self.ensure_one()
-        return super(EventEvent, self)._get_website_menu_entries() + [
-            (_('Exhibitors'), '/event/%s/exhibitors' % slug(self), False, 60, 'exhibitor')
-        ]
+        menu_entries = super()._get_website_menu_entries()
+        # Check if 'Exhibitor' menu entry already exists
+        exhibitor_menu_exists = False
+        for entry in menu_entries:
+            if entry[0] == _('Exhibitor'):
+                exhibitor_menu_exists = True
+                break
+        # If 'Exhibitor' menu entry doesn't exist, add it
+        if not exhibitor_menu_exists:
+            menu_entries.append(
+                (_('Exhibitor'), '#', False, 55, 'exhibitor', False)
+            )
+            menu_entries.append(
+                (_('Exhibitors'), '/event/%s/exhibitors' % slug(self), False, 60, 'exhibitor', 'exhibitor')
+            )
+        else:
+            menu_entries.append(
+            (_('Exhibitors'), '/event/%s/exhibitors' % slug(self), False, 60, 'exhibitor', 'booth')
+        )
+
+        return menu_entries
