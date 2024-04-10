@@ -172,6 +172,10 @@ export class PivotUIGlobalFilterPlugin extends OdooUIPlugin {
 
         for (const filter of filters) {
             const dataSource = this.getters.getPivot(pivotId);
+            const { type } = this.getters.getPivotCoreDefinition(pivotId);
+            if (type !== "ODOO") {
+                continue;
+            }
             const { field, granularity: time } = dataSource.parseGroupField(argField);
             const pivotFieldMatching = this.getters.getPivotFieldMatching(pivotId, filter.id);
             if (pivotFieldMatching && pivotFieldMatching.chain === field.name) {

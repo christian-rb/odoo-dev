@@ -10,56 +10,6 @@ declare module "@spreadsheet" {
         order: string;
     }
 
-    export interface Pivot<T> {
-        definition: T;
-        getMeasure: (name: string) => PivotMeasure;
-        computePivotHeaderValue(domain: Array<string | number>): string | boolean | number;
-        getLastPivotGroupValue(domain: Array<string | number>): string | boolean | number;
-        getTableStructure(): SpreadsheetPivotTable;
-        getPivotCellValue(
-            measure: string,
-            domain: Array<string | number>
-        ): string | boolean | number;
-        getPivotFieldFormat(name: string): string;
-        getPivotMeasureFormat(name: string): string | undefined;
-        assertIsValid({ throwOnError }: { throwOnError: boolean }): boolean;
-    }
-
-    export type Aggregator =
-        | "array_agg"
-        | "count"
-        | "count_distinct"
-        | "bool_and"
-        | "bool_or"
-        | "max"
-        | "min"
-        | "avg"
-        | "sum";
-    export type Granularity = "day" | "week" | "month" | "quarter" | "year";
-
-    export interface PivotDimensionDefinition {
-        name: string;
-        order?: "asc" | "desc";
-        granularity?: Granularity | string;
-    }
-
-    export interface PivotMeasureDefinition {
-        name: string;
-        aggregator?: Aggregator | string;
-    }
-
-    export interface PivotMeasure extends PivotMeasureDefinition {
-        nameWithAggregator: string;
-        displayName: string | LazyTranslatedString;
-        type: string;
-    }
-
-    export interface PivotDimension extends PivotDimensionDefinition {
-        nameWithGranularity: string;
-        displayName: string | LazyTranslatedString;
-        type: string;
-    }
-
     export interface CommonPivotDefinition {
         columns: PivotDimensionDefinition[];
         rows: PivotDimensionDefinition[];

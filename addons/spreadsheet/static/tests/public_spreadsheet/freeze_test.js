@@ -11,7 +11,7 @@ import { addGlobalFilter } from "@spreadsheet/../tests/utils/commands";
 import { OdooPivot, OdooPivotRuntimeDefinition } from "@spreadsheet/pivot/pivot_data_source";
 import { registries } from "@odoo/o-spreadsheet";
 
-const { pivotRegistry } = registries;
+const { pivotRegistry, supportedPivotExplodedFormulaRegistry } = registries;
 
 QUnit.module("freezing spreadsheet", {}, function () {
     QUnit.test("odoo pivot functions are replaced with their value", async function (assert) {
@@ -33,9 +33,13 @@ QUnit.module("freezing spreadsheet", {}, function () {
     QUnit.test("Pivot with a type different of ODOO is not converted", async function (assert) {
         // Add a pivot with a type different of ODOO
         pivotRegistry.add("NEW_KIND_OF_PIVOT", {
-            cls: OdooPivot,
+            ui: OdooPivot,
             definition: OdooPivotRuntimeDefinition,
+            externalData: true,
+            onEvaluationCycleEnded: () => {},
+            granularities: [],
         });
+        supportedPivotExplodedFormulaRegistry.add("NEW_KIND_OF_PIVOT", true);
         const spreadsheetData = {
             pivots: {
                 1: {

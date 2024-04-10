@@ -542,6 +542,10 @@ export class OdooPivotModel extends PivotModel {
             if (measure.type === "many2one" && !measure.aggregator) {
                 return `${measure.name}:count_distinct`;
             }
+            if (measure.name === "__count") {
+                // Remove aggregator that is not supported by python
+                return "__count";
+            }
             return measure.nameWithAggregator;
         });
     }

@@ -9,7 +9,7 @@ import { OdooPivotModel } from "./pivot_model";
 import { EvaluationError, PivotRuntimeDefinition, registries, helpers } from "@odoo/o-spreadsheet";
 import { LOADING_ERROR } from "@spreadsheet/data_sources/data_source";
 
-const { pivotRegistry } = registries;
+const { pivotRegistry, supportedPivotExplodedFormulaRegistry } = registries;
 const { pivotTimeAdapter } = helpers;
 
 /**
@@ -20,6 +20,7 @@ const { pivotTimeAdapter } = helpers;
  * @typedef {import("@spreadsheet").OdooPivotDefinition} OdooPivotDefinition
  * @typedef {import("@spreadsheet").SortedColumn} SortedColumn
  * @typedef {import("@spreadsheet").OdooGetters} OdooGetters
+ * @typedef {import("@odoo/o-spreadsheet").FPayload} FPayload
  */
 
 /**
@@ -45,6 +46,7 @@ export class OdooPivot extends OdooViewsDataSource {
             },
         };
         super(services, params);
+        this.type = "ODOO";
         this._rawDefinition = definition;
         /** @type {OdooPivotRuntimeDefinition | undefined} */
         this._runtimeDefinition = undefined;
@@ -52,10 +54,15 @@ export class OdooPivot extends OdooViewsDataSource {
         this._model = undefined;
         /** @type {OdooGetters} */
         this.getters = getters;
+        this.isDirtyForEvaluation = false;
         this.setup();
     }
 
     setup() {}
+
+    init(params) {
+        this.load(params);
+    }
 
     async _load() {
         await super._load();
@@ -92,24 +99,25 @@ export class OdooPivot extends OdooViewsDataSource {
      * - measure header 'PIVOT.HEADER(1,"stage_id",2,"user_id",6,"measure","expected_revenue")
      * - positional header 'PIVOT.HEADER(1,"#stage_id",1,"#user_id",1)'
      *
-     * @param {(string | number)[]} domainArgs arguments of the function (except the first one which is the pivot id)
-     * @returns {string | number | boolean}
+     * @param {string[]} domainArgs arguments of the function (except the first one which is the pivot id)
+     * @returns {FPayload}
      */
-    computePivotHeaderValue(domainArgs) {
+    getPivotHeaderValueAndFormat(domainArgs) {
         this.assertIsValid();
         if (domainArgs.length === 0) {
-            return _t("Total");
+            return { value: _t("Total") };
         }
         if (domainArgs.at(-2) === "measure") {
             const measureName = domainArgs.at(-1).toString();
-            return this.getMeasure(measureName).displayName;
+            return { value: this.getMeasure(measureName).displayName };
         }
         const field = domainArgs.at(-2).toString();
         const value = this._model.getGroupByCellValue(
             field,
             this._model.getLastPivotGroupValue(domainArgs)
         );
-        return value;
+        const format = this._getPivotFieldFormat(field);
+        return { value, format };
     }
 
     /**
@@ -148,7 +156,7 @@ export class OdooPivot extends OdooViewsDataSource {
      * @param {string} fieldName
      * @returns {string | undefined}
      */
-    getPivotFieldFormat(fieldName) {
+    _getPivotFieldFormat(fieldName) {
         const { field, granularity } = this.parseGroupField(fieldName);
         switch (field.type) {
             case "integer":
@@ -167,31 +175,30 @@ export class OdooPivot extends OdooViewsDataSource {
         }
     }
 
-    getPivotMeasureFormat(measureName) {
+    /**
+     * @param {string} measureName
+     * @param {string[]} domain
+     * @returns {FPayload}
+     */
+    getPivotCellValueAndFormat(measureName, domain) {
+        this.assertIsValid();
+        const value = this._model.getPivotCellValue(measureName, domain);
         const measure = this.getMeasure(measureName);
+        let format;
         switch (measure.aggregator) {
             case "count":
             case "count_distinct":
-                return "0";
+                format = "0";
+                break;
             default:
-                return this.getPivotFieldFormat(measure.name);
+                format = measure.name === "__count" ? "0" : this._getPivotFieldFormat(measure.name);
         }
+        return { value, format };
     }
 
     //--------------------------------------------------------------------------
     // Odoo specific
     //--------------------------------------------------------------------------
-
-    /**
-     * @param {string} measure Field name of the measures
-     * @param {Array<string | number>} domain
-     *
-     * @returns {string | number | boolean}
-     */
-    getPivotCellValue(measure, domain) {
-        this.assertIsValid();
-        return this._model.getPivotCellValue(measure, domain);
-    }
 
     /**
      * @param {string} groupFieldString
@@ -261,6 +268,15 @@ export class OdooPivotRuntimeDefinition extends PivotRuntimeDefinition {
         this._model = definition.model;
         /** @type {SortedColumn} */
         this._sortedColumn = definition.sortedColumn;
+        /**
+         * month_number is currently not supported in Odoo, remove it
+         */
+        for (const dimension of this.columns.concat(this.rows)) {
+            if (dimension.granularity === "month_number") {
+                dimension.granularity = undefined;
+                dimension.nameWithGranularity = dimension.name;
+            }
+        }
     }
 
     get sortedColumn() {
@@ -308,6 +324,11 @@ export class OdooPivotRuntimeDefinition extends PivotRuntimeDefinition {
 }
 
 pivotRegistry.add("ODOO", {
-    cls: OdooPivot,
+    ui: OdooPivot,
     definition: OdooPivotRuntimeDefinition,
+    externalData: true,
+    onEvaluationCycleEnded: () => {},
+    granularities: ["year", "quarter", "month", "week", "day"],
 });
+
+supportedPivotExplodedFormulaRegistry.add("ODOO", true);
