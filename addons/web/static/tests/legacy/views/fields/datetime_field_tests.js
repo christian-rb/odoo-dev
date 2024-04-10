@@ -573,4 +573,31 @@ QUnit.module("Fields", (hooks) => {
 
         assert.strictEqual(getInput().value, "٠٢/٠٨/٢٠١٧ ١١:٤٥:٠٠");
     });
+
+    QUnit.test("list datetime with date widget test", async (assert) => {
+        assert.expect(6);
+
+        await makeView({
+            type: "list",
+            resModel: "partner",
+            serverData,
+            arch: /* xml */ `
+                <tree>
+                    <field name="date" widget="date" string='date with date widget' />
+                    <field name="date" widget="datetime" string='date with datetime widget' />
+                    <field name="datetime" widget="date" string='datetime with date widget' />
+                    <field name="datetime" widget="datetime" string='datetime with datetime widget' />
+                    <field name="datetime" widget="datetime" options="{'showTime': True}" string='datetime with datetime widget and showTime as true' />
+                    <field name="datetime" widget="datetime" options="{'showTime': False}" string='datetime with datetime widget and showTime as false' />
+                </tree>`,
+        });
+
+        let dates = target.querySelectorAll(".d-flex.gap-2.align-items-center")
+        assert.strictEqual(dates[0].textContent, "02/03/2017", 'for date field only date should be visible with date widget');
+        assert.strictEqual(dates[1].innerText, "02/03/2017 00:00:00", 'for date field both date and time should be visible with datetime widget');
+        assert.strictEqual(dates[2].innerText, "02/08/2017", 'for datetime field only date should be visible with date widget');
+        assert.strictEqual(dates[3].innerText, "02/08/2017 11:00:00", 'for datetime field both date and time should be visible with datetime widget');
+        assert.strictEqual(dates[4].innerText, "02/08/2017 11:00:00", 'for datetime field both date and time should be visible with datetime widget and showTime as true');
+        assert.strictEqual(dates[5].innerText, "02/08/2017", 'for datetime field only date should be visible with datetime widget and showTime as false');
+    });
 });

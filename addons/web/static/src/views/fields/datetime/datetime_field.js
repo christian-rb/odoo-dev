@@ -26,6 +26,7 @@ import { standardFieldProps } from "../standard_field_props";
  *  rounding?: number;
  *  startDateField?: string;
  *  warnFuture?: boolean;
+ *  showTime?: boolean;
  * }} DateTimeFieldProps
  *
  * @typedef {import("@web/core/datetime/datetime_picker").DateTimePickerProps} DateTimePickerProps
@@ -44,6 +45,7 @@ export class DateTimeField extends Component {
         rounding: { type: Number, optional: true },
         startDateField: { type: String, optional: true },
         warnFuture: { type: Boolean, optional: true },
+        showTime: { type: Boolean, optional: true },
     };
 
     static template = "web.DateTimeField";
@@ -168,9 +170,9 @@ export class DateTimeField extends Component {
     getFormattedValue(valueIndex) {
         const value = this.values[valueIndex];
         return value
-            ? this.field.type === "date"
-                ? formatDate(value)
-                : formatDateTime(value)
+            ? this.props.showTime
+                ? formatDateTime(value)
+                : formatDate(value)
             : "";
     }
 
@@ -290,7 +292,7 @@ export const dateField = {
             help: _t(`Displays a warning icon if the input dates are in the future.`),
         },
     ],
-    supportedTypes: ["date"],
+    supportedTypes: ["date", "datetime"],
     extractProps: ({ attrs, options }, dynamicInfo) => ({
         endDateField: options[END_DATE_FIELD_OPTION],
         maxDate: options.max_date,
@@ -342,7 +344,20 @@ export const dateTimeField = {
                 `Control the number of minutes in the time selection. E.g. set it to 15 to work in quarters.`
             ),
         },
+        {
+            label: _t("Show time"),
+            name: "showTime",
+            type: "boolean",
+            default: true,
+            help: _t(
+                `Set to true to show time in the input field.`
+            ),
+        },
     ],
+    extractProps: ({ attrs, options }, dynamicInfo) => ({
+        ...dateField.extractProps({ attrs, options }, dynamicInfo),
+        showTime: archParseBoolean(options.showTime ?? true),
+    }),
     supportedTypes: ["datetime"],
 };
 
@@ -374,6 +389,10 @@ export const dateRangeField = {
         },
     ],
     supportedTypes: ["date", "datetime"],
+    extractProps: ({ attrs, options }, dynamicInfo) => ({
+        ...dateTimeField.extractProps({ attrs, options }, dynamicInfo),
+        showTime: archParseBoolean(options.showTime ?? false),
+    })
 };
 
 registry
