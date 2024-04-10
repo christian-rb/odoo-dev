@@ -782,7 +782,6 @@ class TestReports(TestReportsCommon):
                 'location_src_id': wh_2.lot_stock_id.id,
                 'location_dest_id': wh.lot_stock_id.id,
                 'picking_type_id': wh_2.int_type_id.id,
-                'location_dest_from_rule': True,
             })],
         })
         self.env.ref('stock.route_warehouse0_mto').active = True

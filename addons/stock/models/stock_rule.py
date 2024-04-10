@@ -60,10 +60,6 @@ class StockRule(models.Model):
         domain="[('id', '=?', route_company_id)]")
     location_dest_id = fields.Many2one('stock.location', 'Destination Location', required=True, check_company=True, index=True)
     location_src_id = fields.Many2one('stock.location', 'Source Location', check_company=True, index=True)
-    location_dest_from_rule = fields.Boolean(
-        "Destination location origin from rule", default=False,
-        help="When set to True the destination location of the stock.move will be the rule."
-        "Otherwise, it takes it from the picking type.")
     route_id = fields.Many2one('stock.route', 'Route', required=True, ondelete='cascade', index=True)
     route_company_id = fields.Many2one(related='route_id.company_id', string='Route Company')
     procure_method = fields.Selection([
@@ -156,7 +152,7 @@ class StockRule(models.Model):
         source, destination, direct_destination, operation = self._get_message_values()
         if self.action in ('push', 'pull', 'pull_push'):
             suffix = ""
-            if self.action in ('pull', 'pull_push') and direct_destination and not self.location_dest_from_rule:
+            if self.action in ('pull', 'pull_push') and direct_destination:
                 suffix = _("<br>The products will be moved towards <b>%(destination)s</b>, <br/> as specified from <b>%(operation)s</b> destination.", destination=direct_destination, operation=operation)
             if self.procure_method == 'make_to_order' and self.location_src_id:
                 suffix += _("<br>A need is created in <b>%s</b> and a rule will be triggered to fulfill it.", source)
@@ -168,7 +164,7 @@ class StockRule(models.Model):
             }
         return message_dict
 
-    @api.depends('action', 'location_dest_id', 'location_src_id', 'picking_type_id', 'procure_method', 'location_dest_from_rule')
+    @api.depends('action', 'location_dest_id', 'location_src_id', 'picking_type_id', 'procure_method')
     def _compute_action_message(self):
         """ Generate dynamicaly a message that describe the rule purpose to the
         end user.
@@ -368,8 +364,6 @@ class StockRule(models.Model):
             'orderpoint_id': values.get('orderpoint_id') and values['orderpoint_id'].id,
             'product_packaging_id': values.get('product_packaging_id') and values['product_packaging_id'].id,
         }
-        if self.location_dest_from_rule:
-            move_values['location_dest_id'] = self.location_dest_id.id
         for field in self._get_custom_move_fields():
             if field in values:
                 move_values[field] = values.get(field)

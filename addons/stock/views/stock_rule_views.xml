@@ -76,7 +76,6 @@
                                 <field name="picking_type_id"/>
                                 <field name="location_src_id" options="{'no_create': True}" required="action in ['pull', 'push', 'pull_push']"/>
                                 <field name="location_dest_id" options="{'no_create': True}"/>
-                                <field name="location_dest_from_rule" invisible="action not in ['pull', 'pull_push']" groups="base.group_no_one"/>
                                 <field name="auto" invisible="action not in ['push', 'pull_push']"/>
                                 <field name="procure_method" invisible="action not in ['pull', 'pull_push']"/>
                             </group>

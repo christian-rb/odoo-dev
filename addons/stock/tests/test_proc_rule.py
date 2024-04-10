@@ -79,7 +79,6 @@ class TestProcRule(TransactionCase):
                 'picking_type_id': self.ref('stock.picking_type_internal'),
                 'location_src_id': self.ref('stock.stock_location_stock'),
                 'location_dest_id': self.ref('stock.stock_location_output'),
-                'location_dest_from_rule': True,
             })],
         })
 
