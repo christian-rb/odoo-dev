@@ -1,7 +1,6 @@
 .o_spreadsheet_dashboard_search_panel {
-    width: fit-content;
-    max-width: 200px;
-    align-items: center;
+    // width: fit-content;
+    // max-width: 200px;
 
     ul {
         padding-inline-start: 0px
@@ -19,6 +18,11 @@
         }
     }
 
+}
+
+.o_spreadsheet_dashboard_search_panel2 {
+    width: 600px;
+    max-width: 600px;
 }
 
 .o_spreadsheet_dashboard_action {

@@ -2,18 +2,35 @@
 <templates>
     <div t-name="spreadsheet_dashboard.DashboardAction" class="o_action o_spreadsheet_dashboard_action o_field_highlight">
         <ControlPanel display="controlPanelDisplay">
-            <t t-set-slot="layout-actions">
-                <t t-set="status" t-value="state.activeDashboard and state.activeDashboard.status"/>
-                <FilterValue
-                    t-if="status === Status.Loaded"
-                    filter="filter"
-                    model="state.activeDashboard.model"
-                    t-as="filter"
-                    t-foreach="filters"
-                    t-key="filter.id"
-                />
-            </t>
             <t t-set-slot="control-panel-navigation-additional">
+                <a t-if="dashboard" class="btn btn-link d-xl-none" data-bs-toggle="offcanvas" href="#offcanvasExample" role="button" aria-controls="offcanvasExample">
+                    Filters
+                    <i class="fa fa-filter ms-1"/>
+                </a>
+                <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
+                    <div class="offcanvas-header">
+                        <h4 class="offcanvas-title" id="offcanvasLabel">Filters</h4>
+                        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                    </div>
+                    <div class="offcanvas-body d-flex flex-column gap-4 d-xl-none">
+                        <t t-set="status" t-value="state.activeDashboard and state.activeDashboard.status"/>
+                        <t t-foreach="filters" t-as="filter" t-key="filter.id">
+                            <div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <label class="fw-bold">Filter label</label>
+                                    <button role="button" class="btn btn-link p-0">Clear</button>
+                                </div>
+                                <div class="border p-2 rounded">
+                                    <FilterValue
+                                        t-if="status === Status.Loaded"
+                                        filter="filter"
+                                        model="state.activeDashboard.model"
+                                    />
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+                </div>
                 <SpreadsheetShareButton t-key="activeDashboardId" model="state.activeDashboard?.model" onSpreadsheetShared.bind="shareSpreadsheet"/>
             </t>
         </ControlPanel>
@@ -39,6 +56,27 @@
                     An error occured while loading the dashboard
                 </div>
                 <t t-else="">
+                    <div class="d-none d-xl-flex flex-column gap-4 o_searchpanel px-3 border-end h-100  o_spreadsheet_dashboard_search_panel2 overflow-y-auto">
+                        <t t-set="status" t-value="state.activeDashboard and state.activeDashboard.status"/>
+                        <h4 class="mt-3">Filters</h4>
+                        <t t-foreach="filters" t-as="filter" t-key="filter.id">
+                            <div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <label class="fw-bold">Filter label</label>
+                                    <button role="button" class="btn btn-link p-0">Clear</button>
+                                </div>
+                                <div class="border p-2 rounded">
+                                    <FilterValue
+                                        t-if="status === Status.Loaded"
+                                        filter="filter"
+                                        model="state.activeDashboard.model"
+                                    />
+                                </div>
+                            </div>
+                        </t>
+                        <!-- Todo: use itemsVisible props to handle how many tags are visible at once  -->
+                        <!-- Todo 2: remove the close icon from filter line and replace with a "clear all" label next to the filter label  -->
+                    </div>
                     <MobileFigureContainer t-if="env.isSmall" spreadsheetModel="dashboard.model" t-key="dashboard.id"/>
                     <div t-else="" class="o_renderer">
                         <SpreadsheetComponent
@@ -66,7 +104,7 @@
     </t>
 
     <t t-name="spreadsheet_dashboard.DashboardAction.Expanded">
-        <div class="o_spreadsheet_dashboard_search_panel o_search_panel flex-grow-0 border-end flex-shrink-0 pe-2 pb-5 ps-4 h-100 bg-view overflow-auto position-relative">
+        <div t-if="dashboard" class="o_spreadsheet_dashboard_search_panel o_search_panel flex-grow-0 border-end flex-shrink-0 pe-2 pb-5 ps-4 h-100 bg-view overflow-auto position-relative">
             <button t-if="!env.isSmall and state.activeDashboard" class="btn btn-light btn-sm end-0 m-1 mb-2 position-absolute px-2 py-1 top-0 z-index-1" t-on-click="toggleSidebar">
                 <i class="fa fa-fw fa-angle-double-left"/>
             </button>
