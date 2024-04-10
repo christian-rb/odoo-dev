@@ -265,6 +265,9 @@ class GoogleSync(models.AbstractModel):
                 if values:
                     self.exists().with_context(dont_notify=True).need_sync = False
 
+    def _need_video_call(self):
+        return True
+
     @after_commit
     def _google_insert(self, google_service: GoogleCalendarService, values, timeout=TIMEOUT):
         if not values:
@@ -274,7 +277,7 @@ class GoogleSync(models.AbstractModel):
                 try:
                     send_updates = self._context.get('send_updates', True)
                     google_service.google_service = google_service.google_service.with_context(send_updates=send_updates)
-                    google_id = google_service.insert(values, token=token, timeout=timeout)
+                    google_id = google_service.insert(values, token=token, timeout=timeout, need_video_call=self._need_video_call())
                     # Everything went smoothly
                     self.with_context(dont_notify=True).write({
                         'google_id': google_id,
