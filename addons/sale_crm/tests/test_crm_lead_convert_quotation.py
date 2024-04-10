@@ -118,3 +118,51 @@ class TestLeadConvertToTicket(crm_common.TestCrmCommon):
         self.assertEqual(new_partner, self.env['res.partner'])
         self.assertEqual(lead.partner_id, self.env['res.partner'])
         self.assertEqual(action['context']['default_partner_id'], False)
+
+    def test_crm_quotation_expected_revenue(self):
+        product1, product2 = self.env['product.template'].create([{
+            'name': 'Test product1',
+            'list_price': 100.0,
+        }, {
+            'name': 'Test product2',
+            'list_price': 200.0,
+        }])
+
+        so1 = self.env['sale.order'].create({
+            'partner_id': self.env.user.partner_id.id,
+            'opportunity_id': self.lead_1.id,
+        })
+
+        self.env['sale.order.line'].create({
+            'product_id': product1.product_variant_id.id,
+            'order_id': so1.id,
+        })
+        email_act = so1.action_quotation_send()
+        email_ctx = email_act.get('context', {})
+        so1.with_context(**email_ctx).message_post_with_source(
+            self.env['mail.template'].browse(email_ctx.get('default_template_id')),
+            subtype_xmlid='mail.mt_comment',
+        )
+        self.assertEqual(self.lead_1.expected_revenue, 100)
+        so1.action_confirm()
+
+        so2 = self.env['sale.order'].create({
+            'partner_id': self.env.user.partner_id.id,
+            'opportunity_id': self.lead_1.id,
+        })
+
+        self.env['sale.order.line'].create([{
+            'product_id': product1.product_variant_id.id,
+            'order_id': so2.id,
+        }, {
+            'product_id': product2.product_variant_id.id,
+            'order_id': so2.id,
+        }])
+
+        email_act = so2.action_quotation_send()
+        email_ctx = email_act.get('context', {})
+        so2.with_context(**email_ctx).message_post_with_source(
+            self.env['mail.template'].browse(email_ctx.get('default_template_id')),
+            subtype_xmlid='mail.mt_comment',
+        )
+        self.assertEqual(self.lead_1.expected_revenue, 300)
