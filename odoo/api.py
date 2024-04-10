@@ -30,7 +30,7 @@ try:
 except ImportError:
     from decorator import decorator
 
-from .exceptions import AccessError, UserError
+from .exceptions import AccessError, UserError, CacheMiss
 from .tools import clean_context, frozendict, lazy_property, OrderedSet, Query, SQL, StackMap
 from .tools.translate import _
 
@@ -1001,10 +1001,16 @@ class Cache:
         """ Return whether ``field`` has a value for at least one record. """
         return any(self._data.get(field, EMPTY_DICT).values())
 
-    def get(self, field, context, id_):
+    def get(self, field, context, id_, default=NOTHING):
         """ Return the value of ``field`` for ``record``. """
         field_cache = self._get_field_cache(field, context)
-        return field_cache.get(id_, NOTHING)
+        try:
+            return field_cache[id_]
+        except KeyError:
+            if default is NOTHING:
+                raise CacheMiss(field.model_name, (id_,), field) from None
+            return default
+
 
     def set(self, field, context, id_, value, dirty=False, check_dirty=True, setter=None):
         """ Set the value of ``field`` for ``record``.

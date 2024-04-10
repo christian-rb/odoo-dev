@@ -1206,12 +1206,11 @@ class Field(MetaField('DummyField', (object,), {})):
             # process pending computations
             self.recompute(record)
 
-        value = env.cache.get(self, record.env.cache_key(self), record._ids[0])
-        if value is not NOTHING:
-            try:
-                return self.convert_to_record(value, record)
-            except CacheMiss:
-                pass
+        try:
+            value = env.cache.get(self, record.env.cache_key(self), record._ids[0])
+            return self.convert_to_record(value, record)
+        except CacheMiss:
+            pass
         value = self._get(record)
         return self.convert_to_record(value, record)
 
@@ -1248,10 +1247,9 @@ class Field(MetaField('DummyField', (object,), {})):
                 if len(recs) == 1:
                     raise
                 record._fetch_field(self)
-            value = env.cache.get(self, record.env.cache_key(self), record._ids[0])
+
             try:
-                if value is NOTHING:
-                    raise CacheMiss(record, self)
+                value = env.cache.get(self, record.env.cache_key(self), record._ids[0])
                 self.convert_to_record(value, record)  # use convert_to_record to check the value
             except CacheMiss:
                 raise MissingError("\n".join([
@@ -1863,7 +1861,7 @@ class _String(Field):
             try:
                 value = value[lang]
             except KeyError:
-                raise CacheMiss(record, self)
+                raise CacheMiss(record._name, record._ids, self) from None
         if callable(self.translate) and record.env.context.get('edit_translations'):
             if not (terms := self.get_trans_terms(value)):
                 return value
@@ -1919,7 +1917,7 @@ class _String(Field):
         # assert (self.translate and self.store and record)
         record._recompute_recordset([self.name])  # for stored computed translated fields
         context_key = record.env.cache_key(self)
-        cache_value = record.env.cache.get(self, context_key, record._ids[0])
+        cache_value = record.env.cache.get(self, context_key, record._ids[0], default={})
         if not (cache_value is None or isinstance(cache_value, TranslatedCacheValue)):
             # invalidate prefetch_ids records so the data will be flushed and the in_cache_without will miss
             record.browse(record._prefetch_ids).invalidate_recordset([self.name])
@@ -2639,21 +2637,22 @@ class Binary(Field):
             cache = records.env.cache
             no_bin_size_context_key = records_no_bin_size.env.cache_key(self)
             for record_no_bin_size, record in zip(records_no_bin_size, records):
-                value = cache.get(self, no_bin_size_context_key, record_no_bin_size._ids[0])
-                if value is NOTHING:
-                    continue
                 try:
-                    value = base64.b64decode(value)
-                except (TypeError, binascii.Error):
+                    value = cache.get(self, no_bin_size_context_key, record_no_bin_size._ids[0])
+                    try:
+                        value = base64.b64decode(value)
+                    except (TypeError, binascii.Error):
+                        pass
+                    try:
+                        if isinstance(value, (bytes, _BINARY)):
+                            value = human_size(len(value))
+                    except (TypeError):
+                        pass
+                    cache_value = self.convert_to_cache(value, record)
+                    dirty = self.column_type and self.store and any(records._ids)
+                    self.set_cache(record, cache_value, dirty=dirty)
+                except CacheMiss:
                     pass
-                try:
-                    if isinstance(value, (bytes, _BINARY)):
-                        value = human_size(len(value))
-                except (TypeError):
-                    pass
-                cache_value = self.convert_to_cache(value, record)
-                dirty = self.column_type and self.store and any(records._ids)
-                self.set_cache(record, cache_value, dirty=dirty)
         else:
             super().compute_value(records)
 
@@ -3396,8 +3395,8 @@ class Many2one(_Relational):
         for invf in records.pool.field_inverses[self]:
             co_context_key = records.env.cache_key(invf)
             for corecord_id in corecords_ids:
-                ids0 = cache.get(invf, co_context_key, corecord_id)
-                if ids0 is not None and ids0 is not NOTHING:
+                ids0 = cache.get(invf, co_context_key, corecord_id, None)
+                if ids0 is not None:
                     ids1 = tuple(id_ for id_ in ids0 if id_ not in record_ids)
                     cache.set(invf, co_context_key, corecord_id, ids1)
 
@@ -3412,11 +3411,11 @@ class Many2one(_Relational):
             if not valid_records:
                 continue
             context_key = corecord.env.cache_key(invf)
-            ids0 = cache.get(invf, context_key, corecord._ids[0])
+            ids0 = cache.get(invf, context_key, corecord._ids[0], None)
             # if the value for the corecord is not in cache, but this is a new
             # record, assign it anyway, as you won't be able to fetch it from
             # database (see `test_sale_order`)
-            if (ids0 is not None and ids0 is not NOTHING) or not corecord.id:
+            if ids0 is not None or not corecord.id:
                 ids1 = tuple(unique((ids0 or ()) + valid_records._ids))
                 cache.set(invf, context_key, corecord._ids[0], ids1)
 
@@ -3463,11 +3462,11 @@ class Many2oneReference(Integer):
             if not records:
                 continue
             context_key = corecord.env.cache_key(invf)
-            ids0 = cache.get(invf, context_key, corecord._ids[0])
+            ids0 = cache.get(invf, context_key, corecord._ids[0], None)
             # if the value for the corecord is not in cache, but this is a new
             # record, assign it anyway, as you won't be able to fetch it from
             # database (see `test_sale_order`)
-            if (ids0 is not None and ids0 is not NOTHING) or not corecord.id:
+            if ids0 is not None or not corecord.id:
                 ids1 = tuple(unique((ids0 or ()) + records._ids))
                 cache.set(invf, context_key, corecord._ids[0], ids1)
 
@@ -5219,11 +5218,12 @@ class Many2many(_RelationalMulti):
                     continue
                 context_key = comodel.env.cache_key(invf)
                 for y, xs in y_to_xs.items():
-                    ids0 = cache.get(invf, context_key, y)
-                    if ids0 is NOTHING:
-                        continue
-                    ids1 = tuple(set(ids0) | (xs & valid_ids))
-                    cache.set(invf, context_key, y, ids1)
+                    try:
+                        ids0 = cache.get(invf, context_key, y)
+                        ids1 = tuple(set(ids0) | (xs & valid_ids))
+                        cache.set(invf, context_key, y, ids1)
+                    except CacheMiss:
+                        pass
 
         # process pairs to remove
         pairs = [(x, y) for x, ys in old_relation.items() for y in ys - new_relation[x]]
@@ -5257,11 +5257,12 @@ class Many2many(_RelationalMulti):
             for invf in records.pool.field_inverses[self]:
                 context_key = comodel.env.cache_key(invf)
                 for y, xs in y_to_xs.items():
-                    ids0 = cache.get(invf, context_key, y)
-                    if ids0 is NOTHING:
-                        continue
-                    ids1 = tuple(id_ for id_ in ids0 if id_ not in xs)
-                    cache.set(invf, context_key, y, ids1)
+                    try:
+                        ids0 = cache.get(invf, context_key, y)
+                        ids1 = tuple(id_ for id_ in ids0 if id_ not in xs)
+                        cache.set(invf, context_key, y, ids1)
+                    except CacheMiss:
+                        pass
 
         if modified_corecord_ids:
             # trigger the recomputation of fields that depend on the inverse
@@ -5347,12 +5348,12 @@ class Many2many(_RelationalMulti):
                     continue
                 context_key = comodel.env.cache_key(invf)
                 for y, xs in y_to_xs.items():
-                    ids0 = cache.get(invf, context_key, y)
-                    if ids0 is NOTHING:
-                        continue
-                    ids1 = tuple(set(ids0) | (xs & valid_ids))
-                    cache.set(invf, context_key, y, ids1)
-
+                    try:
+                        ids0 = cache.get(invf, context_key, y)
+                        ids1 = tuple(set(ids0) | (xs & valid_ids))
+                        cache.set(invf, context_key, y, ids1)
+                    except CacheMiss:
+                        pass
 
         # process pairs to remove
         pairs = [(x, y) for x, ys in old_relation.items() for y in ys - new_relation[x]]
@@ -5365,11 +5366,12 @@ class Many2many(_RelationalMulti):
             for invf in records.pool.field_inverses[self]:
                 context_key = comodel.env.cache_key(invf)
                 for y, xs in y_to_xs.items():
-                    ids0 = cache.get(invf, context_key, y)
-                    if ids0 is NOTHING:
-                        continue
-                    ids1 = tuple(id_ for id_ in ids0 if id_ not in xs)
-                    cache.set(invf, context_key, y, ids1)
+                    try:
+                        ids0 = cache.get(invf, context_key, y)
+                        ids1 = tuple(id_ for id_ in ids0 if id_ not in xs)
+                        cache.set(invf, context_key, y, ids1)
+                    except CacheMiss:
+                        pass
 
         if modified_corecord_ids:
             # trigger the recomputation of fields that depend on the inverse

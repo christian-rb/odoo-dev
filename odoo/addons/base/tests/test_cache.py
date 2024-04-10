@@ -9,7 +9,7 @@ import psutil
 import timeit
 import unittest
 
-from odoo.api import NOTHING
+from odoo.exceptions import CacheMiss
 from odoo.addons.base.tests.common import TransactionCaseWithUserDemo, TransactionCase
 
 
@@ -28,10 +28,12 @@ class TestRecordCache(TransactionCaseWithUserDemo):
             # value is None means no value in cache
             context_key = record.env.cache_key(field)
             self.assertEqual(cache.contains(field, context_key, record.id), value is not None)
-            cache_value = cache.get(field, context_key, record._ids[0])
-            if cache_value is not NOTHING:
+            try:
+                cache_value = cache.get(field, context_key, record._ids[0])
                 self.assertEqual(cache_value, value)
                 self.assertIsNotNone(value)
+            except CacheMiss:
+                pass
             self.assertEqual(field.name in record._cache, value is not None)
             self.assertEqual(record.id in cache._get_field_cache(field, context_key), value is not None)
 

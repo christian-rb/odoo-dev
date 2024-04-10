@@ -4921,7 +4921,7 @@ class BaseModel(metaclass=MetaModel):
             # if value in cache has not been updated by other_fields, remove it
             for record, field in cachetoclear:
                 context_key = record.env.cache_key(field)
-                if not (cache_value := record._cache[field.name]) and cache_value is not api.NOTHING:
+                if not self.env.cache.get(field, context_key, record._ids[0], True):
                     self.env.cache.remove(field, context_key, record._ids[0])
 
         # check Python constraints for stored fields
