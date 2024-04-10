@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-name="pos_restaurant.TransferMergeDialog">
+        <Dialog title="this.props.title" body="this.props.body">
+            <t t-esc="this.props.body"/>
+            <t t-set-slot="footer">
+                <button class="btn btn-primary o-default-button" t-on-click="transfer">Transfer</button>
+                <button class="btn btn-secondary o-default-button" t-on-click="merge">Merge into single bill</button>
+                <button class="btn btn-secondary o-default-button" t-on-click="closeDialog">Discard</button>
+            </t>
+        </Dialog>
+    </t>
+
+</templates>

@@ -8,7 +8,7 @@ import { FloorScreen } from "@pos_restaurant/app/floor_screen/floor_screen";
 import { TipScreen } from "@pos_restaurant/app/tip_screen/tip_screen";
 import { ConnectionLostError } from "@web/core/network/rpc";
 import { _t } from "@web/core/l10n/translation";
-import { ask } from "@point_of_sale/app/store/make_awaitable_dialog";
+import { TransferMergeDialog } from "../components/dialog/transfer_merge_dialog";
 
 const NON_IDLE_EVENTS = [
     "mousemove",
@@ -269,6 +269,12 @@ patch(PosStore.prototype, {
     shouldShowNavbarButtons() {
         return super.shouldShowNavbarButtons(...arguments) && !this.orderToTransfer;
     },
+    tableTransfer(){
+        this.isTableToMerge = false;
+    },
+    mergeTable(){
+        this.isTableToMerge = true;
+    },
     async transferTable(table) {
         const originalTable = this.models["restaurant.table"].getBy(
             "id",
@@ -282,15 +288,22 @@ patch(PosStore.prototype, {
             this.tableHasOrders(table) &&
             this.tableHasOrders(originalTable)
         ) {
-            const confirm = await ask(this.dialog, {
-                title: _t("Multiple open orders"),
-                body: _t(
-                    "Both tables have an open order. If you proceed, both orders will live on the same table. You can access them anytime from the Orders menu."
-                ),
+            await new Promise((resolve) => {
+                this.dialog.add(
+                    TransferMergeDialog,{
+                        isTableToMerge: this.isTableToMerge,
+                        tableTransfer: () => {
+                            this.tableTransfer();
+                            resolve(true);
+                        },
+                        mergeTable: () => {
+                            this.mergeTable();
+                            resolve(true);
+                        },
+                        title: _t("Transfer/Merge"),
+                        body: _t("Transferring to an occupied table will add a new, separate order found in the order menu. Perhaps you would prefer to merge them into a single instead?"),
+                    });
             });
-            if (!confirm) {
-                return;
-            }
         }
         this.selectedTable = table;
         try {
@@ -301,6 +314,7 @@ patch(PosStore.prototype, {
             if (this.isTableToMerge && this.orderToTransfer.tableId !== table.id) {
                 originalTable.update({ parent_id: table });
                 this.updateTables(originalTable);
+                this.updateOrders(originalTable);
                 this.isTableToMerge = false;
             }
             this.orderToTransfer.tableId = table.id;
@@ -308,6 +322,34 @@ patch(PosStore.prototype, {
             this.transferredOrdersSet.add(this.orderToTransfer);
             this.orderToTransfer = null;
         }
+    },
+    updateOrders(originalTable) {
+        const selectedTableId = this.selectedTable.id;
+        const originalOrder = this.orders.find(order => order.tableId === originalTable.id) || [];
+        const selectedOrder = this.orders.find(order => order.tableId === selectedTableId) || [];
+        const selectedOrderIndex = this.orders.findIndex(order => order.tableId === selectedTableId);
+        const originalOrderIndex = this.orders.findIndex(order => order.tableId === originalTable.id);
+        if (originalOrder.orderlines.length && selectedOrderIndex !== -1) {
+            originalOrder.orderlines.forEach(line => {
+                const existingLineIndex = this.orders[selectedOrderIndex].orderlines.findIndex(existingLine => existingLine.full_product_name === line.full_product_name);
+                if (existingLineIndex !== -1) {
+                    this.orders[selectedOrderIndex].orderlines[existingLineIndex].quantity += line.quantity;
+                } else {
+                    this.orders[selectedOrderIndex].orderlines.push(line);
+                }
+            });
+        }
+        if (selectedOrder.orderlines.length && originalOrderIndex !== -1) {
+            selectedOrder.orderlines.forEach(line => {
+                const existingLineIndex = this.orders[originalOrderIndex].orderlines.findIndex(existingLine => existingLine.full_product_name === line.full_product_name);
+                if(existingLineIndex === -1) {
+                    this.orders[originalOrderIndex].orderlines.push(line)
+                }
+            });
+        }
+        this.orders[selectedOrderIndex].setCustomerCount(this.orders[selectedOrderIndex].getCustomerCount() + originalOrder.getCustomerCount());
+        this.orderToTransfer.setCustomerCount(0);
+        this.removeOrder(originalOrder);
     },
     updateTables(...tables) {
         this.data.call("restaurant.table", "update_tables", [
