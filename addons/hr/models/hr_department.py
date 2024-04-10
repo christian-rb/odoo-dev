@@ -141,27 +141,27 @@ class Department(models.Model):
         action['context'] = {'default_department_id': self.id, 'search_default_department_id': self.id}
         return action
 
-    def action_employee_from_department(self):
-        if self.env['hr.employee'].check_access_rights('read', raise_exception=False):
-            res_model = "hr.employee"
-            search_view_id = self.env.ref('hr.view_employee_filter').id
-        else:
-            res_model = "hr.employee.public"
-            search_view_id = self.env.ref('hr.hr_employee_public_view_search').id
-        return {
-            'name': _("Employees"),
-            'type': 'ir.actions.act_window',
-            'res_model': res_model,
-            'view_mode': 'tree,kanban,form',
-            'search_view_id': [search_view_id, 'search'],
-            'context' : {
-                'searchpanel_default_department_id': self.id,
-                'default_department_id': self.id,
-                'search_default_group_department': 1,
-                'search_default_department_id': self.id,
-                'expand': 1
-            },
-        }
+    # def action_employee_from_department(self):
+    #     if self.env['hr.employee'].check_access_rights('read', raise_exception=False):
+    #         res_model = "hr.employee"
+    #         search_view_id = self.env.ref('hr.view_employee_filter').id
+    #     else:
+    #         res_model = "hr.employee.public"
+    #         search_view_id = self.env.ref('hr.hr_employee_public_view_search').id
+    #     return {
+    #         'name': _("Employees"),
+    #         'type': 'ir.actions.act_window',
+    #         'res_model': res_model,
+    #         'view_mode': 'tree,kanban,form',
+    #         'search_view_id': [search_view_id, 'search'],
+    #         'context' : {
+    #             'searchpanel_default_department_id': self.id,
+    #             'default_department_id': self.id,
+    #             'search_default_group_department': 1,
+    #             'search_default_department_id': self.id,
+    #             'expand': 1
+    #         },
+    #     }
 
     def get_children_department_ids(self):
         return self.env['hr.department'].search([('id', 'child_of', self.ids)])

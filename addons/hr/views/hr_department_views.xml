@@ -9,7 +9,7 @@
                     <field name="company_id" invisible="1"/>
                     <sheet>
                         <div class="oe_button_box" name="button_box" invisible="not id">
-                            <button class="oe_stat_button" type="object" name="action_employee_from_department" icon="fa-users">
+                            <button class="oe_stat_button" type="action" name="%(hr.action_employee_from_department)d" icon="fa-users">
                                 <field string="Employees" name="total_employee" widget="statinfo"/>
                             </button>
                             <button class="oe_stat_button" type="object" name="action_plan_from_department" icon="fa-list-ul">
@@ -104,7 +104,7 @@
                                 <div class="container o_kanban_card_content" t-if="!selection_mode">
                                     <div class="row o_kanban_card_upper_content">
                                         <div class="col-6 o_kanban_primary_left">
-                                            <button class="btn btn-primary" type="object" name="action_employee_from_department">
+                                            <button class="btn btn-primary" type="action" name="%(hr.action_employee_from_department)d">
                                                 <t t-out="record.total_employee.raw_value"/> Employees
                                             </button>
                                         </div>
