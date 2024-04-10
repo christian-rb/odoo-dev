@@ -3,7 +3,7 @@
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
 import { user } from "@web/core/user";
-import { fuzzyLookup } from "@point_of_sale/utils";
+import { fuzzyLookup } from "@web/core/utils/search";
 import { Dialog } from "@web/core/dialog/dialog";
 import { PartnerLine } from "@point_of_sale/app/screens/partner_list/partner_line/partner_line";
 import { PartnerEditor } from "@point_of_sale/app/screens/partner_list/partner_editor/partner_editor";
