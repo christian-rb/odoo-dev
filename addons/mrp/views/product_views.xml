@@ -41,6 +41,20 @@
             </field>
         </record>
 
+        <record id="mrp_product_product_kanban_catalog_view" model="ir.ui.view">
+            <field name="name">mrp.product.product.kanban.catalog</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="product.product_view_kanban_catalog"/>
+            <field name="arch" type="xml">
+                <xpath expr="//div[hasclass('oe_kanban_details')]" position="attributes">
+                    <attribute name="class">oe_kanban_details p-2 d-flex me-5</attribute>
+                </xpath>
+                <xpath expr="//div[hasclass('o_kanban_image')]" position="attributes">
+                    <attribute name="class">o_kanban_image me-3</attribute>
+                </xpath>
+            </field>
+        </record>
+
         <record id="product_template_action" model="ir.actions.act_window">
             <field name="name">Products</field>
             <field name="res_model">product.template</field>

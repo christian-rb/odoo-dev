@@ -25,7 +25,7 @@ SIZE_BACK_ORDER_NUMERING = 3
 class MrpProduction(models.Model):
     """ Manufacturing Orders """
     _name = 'mrp.production'
-    _description = 'Production Order'
+    _description = 'Manufacturing Order'
     _date_name = 'date_start'
     _inherit = ['mail.thread', 'mail.activity.mixin', 'product.catalog.mixin']
     _order = 'priority desc, date_start asc,id'
@@ -2817,3 +2817,11 @@ class MrpProduction(models.Model):
 
     def _get_product_catalog_domain(self):
         return expression.AND([super()._get_product_catalog_domain(), [('id', '!=', self.product_id.id)]])
+
+    def _get_action_add_from_catalog_extra_context(self):
+        return {
+            **super()._get_action_add_from_catalog_extra_context(),
+            'display_uom': self.env.user.has_group('uom.group_uom'),
+            'precision': self.env['decimal.precision'].precision_get('Product Unit of Measure'),
+            'product_catalog_currency_id': self.product_id.currency_id.id,
+        }

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="ProductCatalogMrpMoveRawLine"
+       t-inherit="product.ProductCatalogOrderLine"
+       t-inherit-mode="primary">
+        <xpath expr="//i[hasclass('fa fa-shopping-cart')]" position="attributes">
+             <attribute name="class">fa fa-gear</attribute>
+        </xpath>
+    </t>
+</templates>
