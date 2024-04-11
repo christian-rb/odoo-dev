@@ -75,9 +75,11 @@ class MailThread(models.AbstractModel):
         for record in self:
             all_numbers = [record[fname] for fname in tocheck_fields if fname in record]
             all_partners = record._mail_get_partners()[record.id]
-
+            mobile_number = False
             valid_number, fname = False, False
             for fname in [f for f in tocheck_fields if f in record]:
+                if fname == 'mobile':
+                    mobile_number = record[fname]
                 valid_number = record._phone_format(fname=fname)
                 if valid_number:
                     break
@@ -89,11 +91,15 @@ class MailThread(models.AbstractModel):
                     'number': record[fname],
                     'partner_store': False,
                     'field_store': fname,
+                    'mobile_number': mobile_number
                 }
             elif all_partners and partner_fallback:
                 partner = self.env['res.partner']
+                mobile_number = False
                 for partner in all_partners:
                     for fname in self.env['res.partner']._phone_get_number_fields():
+                        if fname == 'mobile':
+                            mobile_number = partner[fname]
                         valid_number = partner._phone_format(fname=fname)
                         if valid_number:
                             break
@@ -107,6 +113,7 @@ class MailThread(models.AbstractModel):
                     'number': partner[fname],
                     'partner_store': True,
                     'field_store': fname,
+                    'mobile_number': mobile_number
                 }
             else:
                 # did not find any sanitized number -> take first set value as fallback;
@@ -120,7 +127,8 @@ class MailThread(models.AbstractModel):
                     'sanitized': False,
                     'number': value,
                     'partner_store': False,
-                    'field_store': fname
+                    'field_store': fname,
+                    'mobile_number': value
                 }
         return result
 

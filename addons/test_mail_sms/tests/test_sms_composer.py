@@ -618,3 +618,22 @@ class TestSMSComposerMass(SMSCommon):
             test_record_2.customer_id, None,
             content="Hello %s ceci est en français." % test_record_2.display_name
         )
+
+class TestSmsComposer(SMSCommon):
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.partner = cls.env['res.partner'].create({'name': 'Test Partner', 'mobile': '123456789'})
+        cls.sms_test_partner = cls.env['sms.test.partner'].create({'partner_id': cls.partner.id})
+        cls.sms_template = cls._create_sms_template('sms.test.partner')
+
+    def test_sms_compose_mobile_retrieval(self):
+        sms_composer = self.env['sms.composer'].create({
+            'composition_mode': 'comment',
+            'template_id': self.sms_template.id,
+            'res_id': self.sms_test_partner.id,
+            'res_model': 'sms.test.partner',
+        })
+        number = sms_composer.recipient_single_number_itf
+        self.assertEqual(number, '123456789', 'The mobile number should be retrieved from the partner')
