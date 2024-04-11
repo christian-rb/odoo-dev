@@ -1506,33 +1506,26 @@ export class PosStore extends Reactive {
     }
     async selectPartner() {
         // FIXME, find order to refund when we are in the ticketscreen.
-        // const currentOrder = this.get_order();
-        // if (!currentOrder) {
-        //     return;
-        // }
-        // const currentPartner = currentOrder.get_partner();
-        // if (currentPartner && currentOrder.getHasRefundLines()) {
-        //     this.dialog.add(AlertDialog, {
-        //         title: _t("Can't change customer"),
-        //         body: _t(
-        //             "This order already has refund lines for %s. We can't change the customer associated to it. Create a new order for the new customer.",
-        //             currentPartner.name
-        //         ),
-        //     });
-        //     return;
-        // }
+        const currentOrder = this.get_order();
+        if (!currentOrder) {
+            return;
+        }
+        const currentPartner = currentOrder.get_partner();
+        if (currentPartner && currentOrder.getHasRefundLines()) {
+            this.dialog.add(AlertDialog, {
+                title: _t("Can't change customer"),
+                body: _t(
+                    "This order already has refund lines for %s. We can't change the customer associated to it. Create a new order for the new customer.",
+                    currentPartner.name
+                ),
+            });
+            return;
+        }
         // const payload = await makeAwaitable(this.dialog, PartnerList, {
         //     partner: currentPartner,
         //     getPayload: (newPartner) => currentOrder.set_partner(newPartner),
         // });
-
-        // if (payload) {
-        //     currentOrder.set_partner(payload);
-        // } else {
-        //     currentOrder.set_partner(false);
-        // }
-
-        // return currentPartner;
+        // const partner = await new Promise((resolve) => {
         this.dialog.add(SelectCreateDialog, {
             resModel: "res.partner",
             noCreate: true,
@@ -1542,6 +1535,14 @@ export class PosStore extends Reactive {
                 console.log(resIds);
             },
         });
+        // });
+        // if (payload) {
+        //     currentOrder.set_partner(payload);
+        // } else {
+        //     currentOrder.set_partner(false);
+        // }
+
+        // return currentPartner;
     }
     // FIXME: POSREF, method exist only to be overrided
     async addProductFromUi(product, options) {
