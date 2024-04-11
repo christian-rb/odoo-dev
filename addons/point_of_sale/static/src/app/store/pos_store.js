@@ -21,7 +21,6 @@ import { EditListPopup } from "@point_of_sale/app/store/select_lot_popup/select_
 import { ProductConfiguratorPopup } from "./product_configurator_popup/product_configurator_popup";
 import { ComboConfiguratorPopup } from "./combo_configurator_popup/combo_configurator_popup";
 import { makeAwaitable, ask } from "@point_of_sale/app/store/make_awaitable_dialog";
-import { PartnerList } from "../screens/partner_list/partner_list";
 import { ScaleScreen } from "../screens/scale_screen/scale_screen";
 import { computeComboLines } from "../models/utils/compute_combo_lines";
 import { changesToOrder, getOrderChanges } from "../models/utils/order_change";
@@ -33,6 +32,7 @@ import {
 import { QRPopup } from "@point_of_sale/app/utils/qr_code_popup/qr_code_popup";
 import { ConnectionLostError } from "@web/core/network/rpc";
 import { FormViewDialog } from "@web/views/view_dialogs/form_view_dialog";
+import { SelectCreateDialog } from "@web/views/view_dialogs/select_create_dialog";
 
 const { DateTime } = luxon;
 
@@ -1503,33 +1503,42 @@ export class PosStore extends Reactive {
     }
     async selectPartner() {
         // FIXME, find order to refund when we are in the ticketscreen.
-        const currentOrder = this.get_order();
-        if (!currentOrder) {
-            return;
-        }
-        const currentPartner = currentOrder.get_partner();
-        if (currentPartner && currentOrder.getHasRefundLines()) {
-            this.dialog.add(AlertDialog, {
-                title: _t("Can't change customer"),
-                body: _t(
-                    "This order already has refund lines for %s. We can't change the customer associated to it. Create a new order for the new customer.",
-                    currentPartner.name
-                ),
-            });
-            return;
-        }
-        const payload = await makeAwaitable(this.dialog, PartnerList, {
-            partner: currentPartner,
-            getPayload: (newPartner) => currentOrder.set_partner(newPartner),
+        // const currentOrder = this.get_order();
+        // if (!currentOrder) {
+        //     return;
+        // }
+        // const currentPartner = currentOrder.get_partner();
+        // if (currentPartner && currentOrder.getHasRefundLines()) {
+        //     this.dialog.add(AlertDialog, {
+        //         title: _t("Can't change customer"),
+        //         body: _t(
+        //             "This order already has refund lines for %s. We can't change the customer associated to it. Create a new order for the new customer.",
+        //             currentPartner.name
+        //         ),
+        //     });
+        //     return;
+        // }
+        // const payload = await makeAwaitable(this.dialog, PartnerList, {
+        //     partner: currentPartner,
+        //     getPayload: (newPartner) => currentOrder.set_partner(newPartner),
+        // });
+
+        // if (payload) {
+        //     currentOrder.set_partner(payload);
+        // } else {
+        //     currentOrder.set_partner(false);
+        // }
+
+        // return currentPartner;
+        this.dialog.add(SelectCreateDialog, {
+            resModel: "res.partner",
+            noCreate: true,
+            multiSelect: false,
+            onSelected: (resIds) => {
+                // this.pos.onClickSaleOrder(resIds[0]);
+                console.log(resIds);
+            },
         });
-
-        if (payload) {
-            currentOrder.set_partner(payload);
-        } else {
-            currentOrder.set_partner(false);
-        }
-
-        return currentPartner;
     }
     // FIXME: POSREF, method exist only to be overrided
     async addProductFromUi(product, options) {
