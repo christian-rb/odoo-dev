@@ -1,5 +1,6 @@
 /** @odoo-module */
 
+import { View } from "@web/views/view";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { useBarcodeReader } from "@point_of_sale/app/barcode/barcode_reader_hook";
@@ -36,6 +37,7 @@ export class ProductScreen extends Component {
         Input,
         ControlButtons,
         OrderSummary,
+        View,
         ProductCard,
     };
     static numpadActionName = _t("Payment");

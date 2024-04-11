@@ -2,9 +2,6 @@ import { ORM, ormService } from "@web/core/orm_service";
 import { registry } from "@web/core/registry";
 import { ConnectionLostError } from "@web/core/network/rpc";
 
-/**
- * The idea is that we catch ch all the views that have to work offline
- */
 class PosORM extends ORM {
     constructor() {
         super();
