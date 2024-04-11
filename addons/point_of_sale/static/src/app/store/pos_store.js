@@ -33,7 +33,6 @@ import { QRPopup } from "@point_of_sale/app/utils/qr_code_popup/qr_code_popup";
 import { ConnectionLostError } from "@web/core/network/rpc";
 import { FormViewDialog } from "@web/views/view_dialogs/form_view_dialog";
 import { SelectCreateDialog } from "@web/views/view_dialogs/select_create_dialog";
-import { View } from "@web/views/view";
 
 const { DateTime } = luxon;
 
@@ -110,6 +109,7 @@ export class PosStore extends Reactive {
         this.printer = printer;
         this.bus = bus_service;
         this.data = pos_data;
+        this.renderer = renderer;
         this.unwatched = markRaw({});
         this.pushOrderMutex = new Mutex();
 
@@ -163,11 +163,6 @@ export class PosStore extends Reactive {
         this.closeOtherTabs();
         this.preloadImages();
         this.showScreen("ProductScreen");
-        renderer.toHtml(View, {
-            resModel: "res.partner",
-            type: "list",
-            // loadIrFilters: true,
-        });
     }
 
     useProxy() {

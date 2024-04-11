@@ -1,6 +1,9 @@
 import { ORM, ormService } from "@web/core/orm_service";
 import { registry } from "@web/core/registry";
 import { ConnectionLostError } from "@web/core/network/rpc";
+import { patch } from "@web/core/utils/patch";
+import { PosStore } from "@point_of_sale/app/store/pos_store";
+import { View } from "@web/views/view";
 
 class PosORM extends ORM {
     constructor() {
@@ -35,6 +38,17 @@ export const posOrmService = {
         return new PosORM();
     },
 };
+
+patch(PosStore.prototype, {
+    async setup() {
+        await super.setup(...arguments);
+        this.renderer.toHtml(View, {
+            resModel: "res.partner",
+            type: "list",
+            searchViewId: false,
+        });
+    },
+});
 
 registry.category("services").remove("orm");
 registry.category("services").add("orm", posOrmService);
