@@ -130,7 +130,7 @@
             <t t-set="o_portal_fullwidth_alert" groups="sales_team.group_sale_salesman">
                 <!-- Uses backend_url provided in rendering values -->
                 <t t-call="portal.portal_back_in_edit_mode"/>
-            </t>
+            </t> <!-- ANKO -->
 
             <div class="row o_portal_sale_sidebar">
                 <!-- Sidebar -->
@@ -141,6 +141,16 @@
                         <h2 t-field="sale_order.amount_total" data-id="total_amount"/>
                     </t>
                     <t t-set="entries">
+                        <t t-if="sale_order.state in 'draft,sent' and sale_order.require_payment">
+                            <t t-if="sale_order.amount_paid > 0">
+                                <div class="alert alert-warning" role="alert">
+                                    Amount paid: <span t-field="sale_order.amount_paid"/>
+                                </div>
+                            </t>
+                            <div class="alert alert-success" role="alert">
+                                Amount due: <span t-esc="sale_order._get_prepayment_required_amount() - sale_order.amount_paid"/>
+                            </div>
+                        </t>
                         <div class="d-flex flex-column gap-4">
                             <div class="d-flex flex-column gap-2" id="sale_order_sidebar_button">
                                 <a t-if="sale_order._has_to_be_signed()" role="button" class="btn btn-primary d-block" data-bs-toggle="modal" data-bs-target="#modalaccept" href="#">
@@ -207,12 +217,12 @@
                             <form id="accept" method="POST" t-att-data-order-id="sale_order.id" t-att-data-token="sale_order.access_token" class="js_accept_json modal-content js_website_submit_form">
                                 <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                                 <header class="modal-header">
-                                    <h4 class="modal-title">Validate Order</h4>
+                                    <h4 class="modal-title">Validate Order dupa dupa</h4>
                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </header>
                                 <main class="modal-body" id="sign-dialog">
                                     <span>
-                                        By signing, you confirm acceptance on behalf of
+                                        By signing, you confirm acceptance on behalf of dupa dupa
                                         <b t-field="sale_order.partner_id.commercial_partner_id"/>
                                         for the <b data-id="total_amount" t-field="sale_order.amount_total"/> quote.
                                     </span>
@@ -225,10 +235,12 @@
                             </form>
                         </div>
 
+<!--   in a link it has to pass the partial amount, and in modal it needs to check if there is partial amount defined-if it is, to
+ have a buttons with the partial amount and full amount, and if not, then no buttons and full amount and put payment reference from link-->
                         <div class="modal-dialog" t-if="not sale_order._has_to_be_signed() and sale_order._has_to_be_paid()">
                             <div class="modal-content">
                                 <header class="modal-header">
-                                    <h4 class="modal-title">Validate Order</h4>
+                                    <h4 class="modal-title">Validate Order dupa 2</h4>
                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </header>
                                 <main class="modal-body" id="sign-dialog">

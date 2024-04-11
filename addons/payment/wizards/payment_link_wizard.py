@@ -5,6 +5,7 @@ from werkzeug import urls
 from odoo import _, api, fields, models
 
 from odoo.addons.payment import utils as payment_utils
+from odoo.addons.portal.models import portal_mixin as dupa
 
 
 class PaymentLinkWizard(models.TransientModel):
@@ -58,13 +59,13 @@ class PaymentLinkWizard(models.TransientModel):
         )
 
     @api.depends('amount', 'currency_id', 'partner_id', 'company_id')
-    def _compute_link(self):
+    def _compute_link(self): #ANKO
         for payment_link in self:
             related_document = self.env[payment_link.res_model].browse(payment_link.res_id)
             base_url = related_document.get_base_url()  # Don't generate links for the wrong website
             url_params = {
                 'amount': self.amount,
-                'access_token': self._get_access_token(),
+                'access_token': related_document.access_token,
                 **self._get_additional_link_values(),
             }
             payment_link.link = f'{base_url}/payment/pay?{urls.url_encode(url_params)}'

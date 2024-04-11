@@ -28,7 +28,7 @@ class PortalMixin(models.AbstractModel):
 
     def _portal_ensure_token(self):
         """ Get the current record access token """
-        if not self.access_token:
+        if not self.access_token: #here it creates access token for the document
             # we use a `write` to force the cache clearing otherwise `return self.access_token` will return False
             self.sudo().write({'access_token': str(uuid.uuid4())})
         return self.access_token
@@ -124,7 +124,7 @@ class PortalMixin(models.AbstractModel):
             - query_string: additional query string
             - anchor: string to append after the anchor #
         """
-        self.ensure_one()
+        self.ensure_one() #ANKO
         url = self.access_url + '%s?access_token=%s%s%s%s%s' % (
             suffix if suffix else '',
             self._portal_ensure_token(),
