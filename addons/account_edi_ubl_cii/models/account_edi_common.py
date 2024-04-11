@@ -342,7 +342,7 @@ class AccountEdiCommon(models.AbstractModel):
                 if invoice.message_main_attachment_id and \
                         invoice.message_main_attachment_id.name.endswith('.xml') and \
                         'pdf' not in invoice.message_main_attachment_id.mimetype:
-                    invoice.message_main_attachment_id = attachment
+                    invoice._message_set_main_attachment_id(attachment.ids, force=True)
                 attachments |= attachment
         if attachments:
             invoice.with_context(no_new_invoice=True).message_post(attachment_ids=attachments.ids)

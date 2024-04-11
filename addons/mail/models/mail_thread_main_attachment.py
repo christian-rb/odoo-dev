@@ -21,8 +21,15 @@ class MailMainAttachmentMixin(models.AbstractModel):
             for attachment_command in (msg_values['attachment_ids'] or [])
         ])
 
-    def _message_set_main_attachment_id(self, attachment_ids):
-        if attachment_ids and not self.message_main_attachment_id:
+    def _message_set_main_attachment_id(self, attachment_ids, force=False):
+        """ Update 'main' attachment.
+
+        :param list attachment_ids: new main attachment IDS; if several attachments
+          are given, we search for pdf or image first;
+        :param boolean force: if set, replace an existing attachment; otherwise
+          update is skipped;
+        """
+        if attachment_ids and (force or not self.message_main_attachment_id):
             # we filter out attachment with 'xml' and 'octet' types
             attachments = self.env['ir.attachment'].browse(attachment_ids).filtered(lambda r: not r.mimetype.endswith('xml')
                                                                                               and not r.mimetype.endswith('application/octet-stream'))
