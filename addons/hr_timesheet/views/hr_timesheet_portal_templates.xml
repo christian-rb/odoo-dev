@@ -193,7 +193,22 @@
                             </div>
                         </tr>
                         <tr>
-                            <div t-if="task.total_hours_spent > 0 and timesheets_by_subtask" name="total_time">
+                            <!-- to-do: Remove this in master -->
+                            <div class="d-none" t-if="task.total_hours_spent > 0 and timesheets_by_subtask" name="total_time">
+                                <t t-if="is_uom_day">
+                                    <td><strong>Total Days: </strong></td>
+                                    <td class="text-end">
+                                        <span t-esc="timesheets._convert_hours_to_days(task.total_hours_spent)" t-options='{"widget": "timesheet_uom"}'/>
+                                    </td>
+                                </t>
+                                <t t-else="">
+                                    <td><strong>Total Hours: </strong></td>
+                                    <td class="text-end">
+                                        <span t-esc="task.total_hours_spent" t-options='{"widget": "float_time"}'/>
+                                    </td>
+                                </t>
+                            </div>
+                            <div t-if="task.total_hours_spent and task.subtask_effective_hours" name="total_time">
                                 <t t-if="is_uom_day">
                                     <td><strong>Total Days: </strong></td>
                                     <td class="text-end">
