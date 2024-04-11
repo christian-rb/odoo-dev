@@ -2,6 +2,7 @@
 from odoo import models, fields, api, _, Command
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools.misc import format_date, formatLang
+from odoo.tools import create_index
 
 
 class AccountPayment(models.Model):
@@ -18,7 +19,16 @@ class AccountPayment(models.Model):
         string='Journal Entry', required=True, readonly=True, ondelete='cascade',
         index='btree_not_null',
         check_company=True)
-
+    journal_id = fields.Many2one(
+        comodel_name='account.journal',
+        compute='_compute_journal_id', inverse='_inverse_company_journal', store=True, readonly=False, precompute=True,
+        index=False,  # covered by account_payment_journal_id_company_id_idx
+    )
+    company_id = fields.Many2one(
+        comodel_name='res.company',
+        compute='_compute_company_id', inverse='_inverse_company_journal', store=True, readonly=False, precompute=True,
+        index=False,  # covered by account_payment_journal_id_company_id_idx
+    )
     is_reconciled = fields.Boolean(string="Is Reconciled", store=True,
         compute='_compute_reconciliation_status')
     is_matched = fields.Boolean(string="Is Matched With a Bank Statement", store=True,
@@ -167,6 +177,22 @@ class AccountPayment(models.Model):
             "The payment amount cannot be negative.",
         ),
     ]
+
+    def init(self):
+        super().init()
+        create_index(
+            self.env.cr,
+            indexname='account_payment_journal_id_company_id_idx',
+            tablename='account_payment',
+            expressions=['journal_id', 'company_id']
+        )
+        create_index(
+            self.env.cr,
+            indexname='account_payment_unmatched_idx',
+            tablename='account_payment',
+            expressions=['journal_id', 'company_id'],
+            where="NOT is_matched OR is_matched IS NULL"
+        )
 
     # -------------------------------------------------------------------------
     # HELPERS
@@ -364,6 +390,16 @@ class AccountPayment(models.Model):
     # COMPUTE METHODS
     # -------------------------------------------------------------------------
 
+    @api.depends('move_id.journal_id')
+    def _compute_journal_id(self):
+        for payment in self:
+            payment.journal_id = payment.move_id.journal_id
+
+    @api.depends('move_id.company_id')
+    def _compute_company_id(self):
+        for payment in self:
+            payment.company_id = payment.move_id.company_id
+
     @api.depends('move_id.line_ids.amount_residual', 'move_id.line_ids.amount_residual_currency', 'move_id.line_ids.account_id')
     def _compute_reconciliation_status(self):
         ''' Compute the field indicating if the payments are already reconciled with something.
@@ -439,7 +475,8 @@ class AccountPayment(models.Model):
     def _compute_partner_bank_id(self):
         ''' The default partner_bank_id will be the first available on the partner. '''
         for pay in self:
-            pay.partner_bank_id = pay.available_partner_bank_ids[:1]._origin
+            if pay.partner_bank_id not in pay.available_partner_bank_ids:
+                pay.partner_bank_id = pay.available_partner_bank_ids[:1]._origin
 
     @api.depends('partner_id', 'journal_id', 'destination_journal_id')
     def _compute_is_internal_transfer(self):
@@ -672,9 +709,25 @@ class AccountPayment(models.Model):
         """ To override in order to change the title displayed on the payment receipt report """
         self.payment_receipt_title = _('Payment Receipt')
 
+    def _inverse_company_journal(self):
+        for payment in self:
+            vals = {}
+            if not payment.move_id.payment_id:
+                vals['payment_id'] = payment.id
+            if payment.move_id.journal_id != payment.journal_id:
+                vals['journal_id'] = payment.journal_id.id
+            if payment.move_id.company_id != payment.company_id:
+                vals['company_id'] = payment.company_id.id
+            if vals:
+                payment.move_id.write(vals)
+
     # -------------------------------------------------------------------------
     # ONCHANGE METHODS
     # -------------------------------------------------------------------------
+
+    @api.onchange('journal_id')
+    def _onchange_journal_id(self):
+        self.move_id.journal_id = self.journal_id
 
     @api.onchange('posted_before', 'state', 'journal_id', 'date')
     def _onchange_journal_date(self):
@@ -702,12 +755,17 @@ class AccountPayment(models.Model):
     # LOW-LEVEL METHODS
     # -------------------------------------------------------------------------
 
+    def default_get(self, fields_list):
+        self_ctx = self.with_context(is_payment=True)
+        defaults = super(AccountPayment, self_ctx).default_get(fields_list)
+        if 'journal_id' in fields_list and not defaults.get('journal_id'):
+            defaults['journal_id'] = self_ctx.env['account.move']._search_default_journal().id
+        if 'company_id' in fields_list and not defaults.get('company_id'):
+            defaults['company_id'] = self.env.company.id
+        return defaults
+
     def new(self, values=None, origin=None, ref=None):
-        payment = super().new(values, origin, ref)
-        if not any(values.values()) and not payment.journal_id and not payment.default_get(['journal_id']):  # might not be computed because declared by inheritance
-            payment.move_id.payment_id = payment
-            payment.move_id._compute_journal_id()
-        return payment
+        return super(AccountPayment, self.with_context(is_payment=True)).new(values, origin, ref)
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -725,14 +783,13 @@ class AccountPayment(models.Model):
 
             # Force the move_type to avoid inconsistency with residual 'default_move_type' inside the context.
             vals['move_type'] = 'entry'
-            vals['journal_id'] = vals.get('journal_id') or self.move_id.with_context(is_payment=True)._search_default_journal().id
 
-        payments = super().create([{
+        payments = super(AccountPayment, self.with_context(is_payment=True)).create([{
             'name': False,
             **vals,
         } for vals in vals_list])
 
-        for i, pay in enumerate(payments):
+        for i, (pay, vals) in enumerate(zip(payments, vals_list)):
             # Write payment_id on the journal entry plus the fields being stored in both models but having the same
             # name, e.g. partner_bank_id. The ORM is currently not able to perform such synchronization and make things
             # more difficult by creating related fields on the fly to handle the _inherits.
@@ -752,12 +809,13 @@ class AccountPayment(models.Model):
                     )
                 ]
 
-            pay.move_id.write(to_write)
+            with self.env.protecting(self.env['account.move']._get_protected_vals(vals, pay)):
+                pay.move_id.write(to_write)
             self.env.add_to_compute(self.env['account.move']._fields['name'], pay.move_id)
 
         # We need to reset the cached name, since it was recomputed on the delegate account.move model
         payments.invalidate_recordset(fnames=['name'])
-        return payments
+        return payments.with_env(self.env)
 
     def write(self, vals):
         # OVERRIDE
@@ -931,6 +989,7 @@ class AccountPayment(models.Model):
 
             paired_payment = payment.copy({
                 'journal_id': payment.destination_journal_id.id,
+                'company_id': payment.company_id.id,
                 'destination_journal_id': payment.journal_id.id,
                 'payment_type': payment.payment_type == 'outbound' and 'inbound' or 'outbound',
                 'move_id': None,
