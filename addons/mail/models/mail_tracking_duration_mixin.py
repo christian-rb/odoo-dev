@@ -41,9 +41,12 @@ class MailTrackingDurationMixin(models.AbstractModel):
                 'Field "(field)r on model %(model)r must be of type Many2one and have tracking=True for the computation of duration.',
                 field=self._track_duration_field, model=self._name
             ))
-
-        self.env['mail.tracking.value'].flush_model()
-        self.env['mail.message'].flush_model()
+        if f'mail.tracking.{self._name}' in self.env.cr.precommit.data:
+            # this will generate the tracking messages and flush all
+            self._track_finalize()
+        else:
+            self.env['mail.tracking.value'].flush_model()
+            self.env['mail.message'].flush_model()
         query = """
                SELECT m.res_id,
                       v.create_date,
