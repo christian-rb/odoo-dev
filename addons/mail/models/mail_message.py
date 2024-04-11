@@ -979,7 +979,7 @@ class Message(models.Model):
                 'personas': [{'id': guest.id, 'name': guest.name, 'type': "guest"} for guest in reactions.guest_id] + [{'id': partner.id, 'name': partner.name, 'type': "partner"} for partner in reactions.partner_id],
                 'message': {'id': message_sudo.id},
             } for content, reactions in reactions_per_content.items()]
-            allowed_tracking_ids = message_sudo.tracking_value_ids._filter_tracked_field_access(self.env)
+            allowed_tracking_ids = message_sudo.tracking_value_ids._filter_has_field_access(self.env)
             displayed_tracking_ids = allowed_tracking_ids
             if record_sudo and hasattr(record_sudo, '_track_filter_for_display'):
                 displayed_tracking_ids = record_sudo._track_filter_for_display(displayed_tracking_ids)
