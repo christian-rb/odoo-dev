@@ -13,7 +13,8 @@
         <xpath expr="//ul[hasclass('o_wprofile_nav_tabs')]" position="inside">
             <li t-if="show_certification_tab" class="nav-item">
                 <a role="tab" aria-controls="certification" href="#profile_tab_content_certification" t-attf-class="nav-link #{ 'active' if active_tab == 'certification' else '' }" data-bs-toggle="tab">
-                    <t t-if="user_inputs" t-out="len(user_inputs)" /> Certification Attempts
+                    <t t-if="user_inputs" t-set="certification_attempts" t-value="len([user_input for user_input in user_inputs if user_input['state'] == 'done'])"/>
+                    <t t-if="certification_attempts" t-out="certification_attempts" /> Certification Attempts
                 </a>
             </li>
         </xpath>
@@ -32,14 +33,15 @@
                         </div>
                     </form>
                 </h5>
-                <t t-if="not user_inputs">
+                <t t-if="user_inputs" t-set="done_user_inputs" t-value="[user_input for user_input in user_inputs if user_input['state'] == 'done']"/>
+                <t t-if="not done_user_inputs">
                     <p t-if="certification_search_terms">No certification found for the given search term.</p>
                     <p t-else="">You have not taken any certification yet.</p>
                     <a href="/slides/all?slide_category=certification">
                         <i class="fa fa-arrow-right"/> See Certifications
                     </a>
                 </t>
-                <div t-else="" class="card p-3 mb-3" t-foreach="user_inputs" t-as="user_input">
+                <div t-else="" class="card p-3 mb-3" t-foreach="done_user_inputs" t-as="user_input">
                     <div class="row">
                         <div class="col-sm-3" t-out="user_input.create_date" t-options="{'widget': 'datetime'}"/>
                         <div class="col-sm-4">
