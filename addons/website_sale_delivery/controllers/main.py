@@ -193,17 +193,29 @@ class WebsiteSaleDelivery(WebsiteSale):
                     name=_('Anonymous express checkout partner for order %s', order_sudo.name),
                 )
 
-        # Returns the list of develivery carrier available for the sale order.
+        # Returns the list of delivery carrier available for the sale order.
         return sorted([{
-            'id': carrier.id,
-            'name': carrier.name,
-            'description': carrier.website_description,
-            'minorAmount': payment_utils.to_minor_currency_units(
-                WebsiteSaleDelivery._get_rate(carrier, order_sudo, is_express_checkout_flow=True)['price'],
-                order_sudo.currency_id,
-            ),
-        } for carrier in order_sudo._get_delivery_methods()],
-        key=lambda carrier: carrier['minorAmount'])
+                'id': carrier.id,
+                'name': carrier.name,
+                'description': carrier.website_description,
+                'minorAmount': payment_utils.to_minor_currency_units(price, order_sudo.currency_id),
+            } for carrier, price in self._get_carriers_express_checkout(order_sudo).items()
+            ], key=lambda carrier: carrier['minorAmount'])
+
+    def _get_carriers_express_checkout(self, order):
+        """ Return available carriers and their prices for the given order in dict of
+        {carrier: price}. """
+        res = {}
+        for carrier in order._get_delivery_methods():
+            rate = WebsiteSaleDelivery._get_rate(carrier, order, is_express_checkout_flow=True)
+            if rate['success']:
+                if (
+                    hasattr(carrier, '%s_use_location' % carrier.delivery_type)
+                    and getattr(carrier, '%s_use_location' % carrier.delivery_type)
+                ):  # skip if `use_locations` is activated
+                    continue
+                res[carrier] = rate['price']
+        return res
 
     @staticmethod
     def _get_rate(carrier, order, is_express_checkout_flow=False):
