@@ -163,6 +163,7 @@
             ('remove', 'web/static/src/webclient/actions/reports/layout_assets/**/*'),
             ('remove', 'web/static/src/webclient/actions/**/*css'),
             'web/static/src/webclient/company_service.js',
+
         ],
         'point_of_sale.base_tests': [
             "web/static/lib/jquery/jquery.js",
