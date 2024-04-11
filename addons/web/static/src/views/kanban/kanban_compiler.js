@@ -48,7 +48,7 @@ export class KanbanCompiler extends ViewCompiler {
                         mainNode = createElement("main");
                         mainNode.setAttribute(
                             "class",
-                            "o_kanban_card_main"
+                            "o_kanban_card_main o_kanban_card_item"
                         );
                     }
                     append(mainNode, this.compileGroup(child, params));
@@ -86,7 +86,7 @@ export class KanbanCompiler extends ViewCompiler {
     compileAside(el, params) {
         const aside = createElement("aside");
         const elClass = el.getAttribute("class") || "";
-        let asideClass = `o_kanban_card_aside ${elClass}`;
+        let asideClass = `o_kanban_card_aside o_kanban_card_item ${elClass}`;
         if (archParseBoolean(el.getAttribute("full"), false)) {
             asideClass += " o_kanban_card_aside_full";
         }
@@ -111,9 +111,9 @@ export class KanbanCompiler extends ViewCompiler {
         const elClass = el.getAttribute("class") || "";
         let groupClass = elClass;
         if (type === "card-group") {
-            groupClass += " o_kanban_card_group";
+            groupClass += " o_kanban_card_group o_kanban_card_item";
         } else {
-            groupClass += ` o_kanban_card_group o_kanban_card_${
+            groupClass += ` o_kanban_card_item o_kanban_card_${
                 type === "card-header" ? "header" : "footer"
             }`;
         }

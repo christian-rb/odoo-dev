@@ -110,9 +110,14 @@
             }
         }
 
+        .o_kanban_card_item {
+            display: flex;
+        }
+
         .o_kanban_card_aside {
             padding: var(--KanbanRecord-padding-v) 0 var(--KanbanRecord-padding-v) var(--KanbanRecord-padding-h);
-            flex: 1 0 var(--KanbanRecord__image--fill-width);
+            flex-direction: column;
+            flex: 0 0 var(--Card-Aside-width, #{$o-kanban-image-fill-width});
 
             &.o_kanban_card_aside_full {
                 @include media-breakpoint-up(md) {
@@ -130,7 +135,6 @@
         }
 
         .o_kanban_card_main {
-            display: flex;
             flex-direction: column;
             gap: var(--KanbanCardMain-gap);
             min-width: 0; // prevent from overflowing
@@ -139,16 +143,12 @@
         }
 
         .o_kanban_card_group {
-            display: flex;
             gap: var(--KanbanCardGroup-gap);
+            flex-direction: column;
 
             .o_kanban_card_header + * { // Subtitle
                 color: $text-muted;
             }
-        }
-
-        section.o_kanban_card_group {
-            flex-direction: column;
         }
 
         .o_kanban_card_footer {
