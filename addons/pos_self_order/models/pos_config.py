@@ -428,3 +428,23 @@ class PosConfig(models.Model):
             'target': 'new',
             'views': [(self.env.ref('pos_self_order.pos_self_order_kiosk_read_only_form_dialog').id, 'form')],
         }
+
+    @api.model
+    def _modify_pos_restaurant_config(self):
+        pos_config = self.env.ref('pos_restaurant.pos_config_main_restaurant', raise_if_not_found=False)
+        if pos_config:
+            pos_config.write({
+                'self_ordering_mode': 'mobile',
+                'self_ordering_service_mode': 'table',
+                'self_ordering_pay_after': 'meal'
+            })
+            self.env['pos_self_order.custom_link'].create({
+                'name': _('Order Now'),
+                'url': f'/pos-self/{pos_config.id}/products',
+                'pos_config_ids': [(4, pos_config.id)],
+            })
+
+    @api.model
+    def load_onboarding_restaurant_scenario(self):
+        super().load_onboarding_restaurant_scenario()
+        self._modify_pos_restaurant_config()

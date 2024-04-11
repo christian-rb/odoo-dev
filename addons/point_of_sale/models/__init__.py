@@ -9,7 +9,6 @@ from . import account_tax
 from . import account_move
 from . import pos_bus_mixin
 from . import barcode_rule
-from . import chart_template
 from . import digest
 from . import pos_category
 from . import pos_config

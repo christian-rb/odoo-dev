@@ -4,6 +4,7 @@
 from odoo import api, fields, models, _
 import json
 from collections import defaultdict
+from odoo.tools import convert
 
 
 class PosConfig(models.Model):
@@ -13,7 +14,6 @@ class PosConfig(models.Model):
     iface_printbill = fields.Boolean(string='Bill Printing', help='Allows to print the Bill before payment.')
     floor_ids = fields.Many2many('restaurant.floor', string='Restaurant Floors', help='The restaurant floors served by this point of sale.')
     set_tip_after_payment = fields.Boolean('Set Tip After Payment', help="Adjust the amount authorized by payment terminals to add a tip after the customers left or at the end of the day.")
-    module_pos_restaurant = fields.Boolean(default=True)
     module_pos_restaurant_appointment = fields.Boolean("Table Booking")
     takeaway = fields.Boolean("Takeaway", help="Allow to create orders for takeaway customers.")
     takeaway_fp_id = fields.Many2one(
@@ -69,7 +69,7 @@ class PosConfig(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
-            is_restaurant = 'module_pos_restaurant' not in vals or vals['module_pos_restaurant']
+            is_restaurant = 'module_pos_restaurant' in vals and vals['module_pos_restaurant']
             if is_restaurant and 'iface_splitbill' not in vals:
                 vals['iface_splitbill'] = True
             if not is_restaurant or not vals.get('iface_tipproduct', False):
@@ -92,52 +92,6 @@ class PosConfig(models.Model):
 
         return super().write(vals)
 
-    @api.model
-    def post_install_pos_localisation(self, companies=False):
-        self = self.sudo()
-        if not companies:
-            companies = self.env['res.company'].search([])
-        super(PosConfig, self).post_install_pos_localisation(companies)
-        for company in companies.filtered('chart_template'):
-            pos_configs = self.search([
-                *self.env['account.journal']._check_company_domain(company),
-                ('module_pos_restaurant', '=', True),
-            ])
-            if not pos_configs:
-                pos_configs = self.env['pos.config'].with_company(company).create({
-                'name': _('Bar'),
-                'company_id': company.id,
-                'module_pos_restaurant': True,
-                'iface_splitbill': True,
-                'iface_printbill': True,
-            })
-            pos_configs.setup_defaults(company)
-
-    def setup_defaults(self, company):
-        main_restaurant = self.env.ref('pos_restaurant.pos_config_main_restaurant', raise_if_not_found=False)
-        main_restaurant_is_present = main_restaurant and self.filtered(lambda cfg: cfg.id == main_restaurant.id)
-        if main_restaurant_is_present:
-            non_main_restaurant_configs = self - main_restaurant
-            non_main_restaurant_configs.assign_payment_journals(company)
-            main_restaurant._setup_main_restaurant_defaults()
-            self.generate_pos_journal(company)
-            self.setup_invoice_journal(company)
-        else:
-            super().setup_defaults(company)
-
-    def _setup_main_restaurant_defaults(self):
-        self.ensure_one()
-        self._link_same_non_cash_payment_methods_if_exists('point_of_sale.pos_config_main')
-        self._ensure_cash_payment_method('MRCSH', _('Cash Restaurant'))
-        self._archive_shop()
-
-    def _archive_shop(self):
-        shop = self.env.ref('point_of_sale.pos_config_main', raise_if_not_found=False)
-        if shop:
-            session_count = self.env['pos.session'].search_count([('config_id', '=', shop.id)])
-            if session_count == 0:
-                shop.update({'active': False})
-
     def _setup_default_floor(self, pos_config):
         if not pos_config.floor_ids:
             main_floor = self.env['restaurant.floor'].create({
@@ -153,3 +107,103 @@ class PosConfig(models.Model):
                 'width': 100,
                 'height': 100,
             })
+
+    @api.model
+    def load_onboarding_bar_scenario(self):
+        convert.convert_file(self.env, 'pos_restaurant', 'data/scenarios/bar_data.xml', None, mode='init', kind='data')
+        journal, payment_methods_ids = self._create_journal_and_payment_methods()
+        payment_methods_ids += self.env['pos.payment.method']._ensure_payment_methods([
+            {'name': 'Cash bar', 'type': 'cash', 'ref': 'pos_restaurant.cash_payment_method_bar'}
+        ])
+        bar_categories = [
+            self.env.ref('pos_restaurant.pos_category_cocktails').id,
+            self.env.ref('pos_restaurant.pos_category_soft_drinks').id,
+        ]
+        config = self.env['pos.config'].create({
+            'name': 'Bar',
+            'company_id': self.env.company.id,
+            'journal_id': journal.id,
+            'payment_method_ids': payment_methods_ids,
+            'limit_categories': True,
+            'iface_available_categ_ids': bar_categories,
+            'iface_splitbill': True,
+            'module_pos_restaurant': True,
+        })
+        self.env['ir.model.data']._update_xmlids([{
+            'xml_id': 'pos_restaurant.pos_config_main_bar',
+            'record': config,
+            'noupdate': True,
+        }])
+
+    @api.model
+    def load_onboarding_restaurant_scenario(self):
+        convert.convert_file(self.env, 'pos_restaurant', 'data/scenarios/restaurant_data.xml', None, mode='init', kind='data')
+        journal, payment_methods_ids = self._create_journal_and_payment_methods()
+        payment_methods_ids += self.env['pos.payment.method']._ensure_payment_methods([
+            {'name': 'Cash restaurant', 'type': 'cash', 'ref': 'pos_restaurant.cash_payment_method_restaurant'}
+        ])
+        restaurant_categories = [
+            self.env.ref('pos_restaurant.food').id,
+            self.env.ref('pos_restaurant.drinks').id,
+        ]
+        config = self.env['pos.config'].create({
+            'name': 'Restaurant',
+            'company_id': self.env.company.id,
+            'journal_id': journal.id,
+            'payment_method_ids': payment_methods_ids,
+            'limit_categories': True,
+            'iface_available_categ_ids': restaurant_categories,
+            'iface_splitbill': True,
+            'module_pos_restaurant': True,
+        })
+        self.env['ir.model.data']._update_xmlids([{
+            'xml_id': 'pos_restaurant.pos_config_main_restaurant',
+            'record': config,
+            'noupdate': True,
+        }])
+        if self.env.company.id == self.env.ref('base.main_company').id:
+            self._load_demo_orders()
+
+    @api.model
+    def _load_demo_orders(self):
+        existing_session = self.env.ref('pos_restaurant.pos_closed_session_3', raise_if_not_found=False)
+        if existing_session:
+            return
+        convert.convert_file(self.env, 'pos_restaurant', 'data/restaurant_session_floor.xml', None, noupdate=True, mode='init', kind='data')
+
+    def _create_journal_and_payment_methods(self):
+        journal = self.env['account.journal']._ensure_company_account_journal()
+        payment_methods_ids = self.env['pos.payment.method']._ensure_payment_methods([
+            {'name': 'Bank', 'type': 'bank', 'ref': 'pos_restaurant.bank_payment_method'},
+            {'name': 'Customer Account', 'type': 'pay_later', 'ref': 'pos_restaurant.customer_payment_method'},
+        ])
+        return journal, payment_methods_ids
+
+    @api.model
+    def load_onboarding_pos_config_restaurant(self):
+        journal, payment_methods_ids = self._create_journal_and_payment_methods()
+        payment_methods_ids += self.env['pos.payment.method']._ensure_payment_methods([
+            {'name': 'Cash restaurant', 'type': 'cash', 'ref': 'point_of_sale.cash_payment_method_restaurant'}
+        ])
+        self.env['pos.config'].create({
+            'name': 'Restaurant',
+            'company_id': self.env.company.id,
+            'journal_id': journal.id,
+            'payment_method_ids': payment_methods_ids,
+            'module_pos_restaurant': True,
+        })
+
+    @api.model
+    def load_onboarding_pos_config_kiosk(self):
+        journal, payment_methods_ids = self._create_journal_and_payment_methods()
+        payment_methods_ids += self.env['pos.payment.method']._ensure_payment_methods([
+            {'name': 'Cash kiosk', 'type': 'cash', 'ref': 'point_of_sale.cash_payment_method_kiosk'}
+        ])
+        # TODO-manv: ask moda on how to config kiosk
+        self.env['pos.config'].create({
+            'name': 'Kiosk: self-order',
+            'company_id': self.env.company.id,
+            'journal_id': journal.id,
+            'payment_method_ids': payment_methods_ids,
+            'module_pos_restaurant': True,
+        })

@@ -317,44 +317,6 @@ export class ProductScreen extends Component {
         ].filter((id) => !this.pos.models["product.product"].get(id)?.available_in_pos);
     }
 
-    async loadDemoDataProducts() {
-        this.state.loadingDemo = true;
-        try {
-            const result = await this.pos.data.callRelated(
-                "pos.session",
-                "load_product_frontend",
-                [odoo.pos_session_id],
-                {},
-                false
-            );
-
-            const posOrder = result["pos.order"];
-
-            if (!result["pos.category"] && !result["product.product"]) {
-                this.dialog.add(AlertDialog, {
-                    title: _t("Demo products are no longer available"),
-                    body: _t(
-                        "A valid product already exists for Point of Sale. Therefore, demonstration products cannot be loaded."
-                    ),
-                });
-            }
-
-            for (const dataName of ["pos.category", "product.product", "pos.order"]) {
-                if (!result[dataName] && Object.keys(posOrder).length === 0) {
-                    this._showLoadDemoDataMissingDataError(dataName);
-                }
-            }
-
-            if (this.pos.models["product.product"].length > 5) {
-                this.pos.session._has_available_products = true;
-            }
-
-            this.pos.loadOpenOrders(posOrder);
-        } finally {
-            this.state.loadingDemo = false;
-        }
-    }
-
     _showLoadDemoDataMissingDataError(missingData) {
         console.error(
             `Missing '${missingData}' in pos.session:load_product_frontend server answer.`
@@ -424,6 +386,10 @@ export class ProductScreen extends Component {
     async onProductInfoClick(product) {
         const info = await reactive(this.pos).getProductInfo(product, 1);
         this.dialog.add(ProductInfoPopup, { info: info, product: product });
+    }
+
+    get isModulePosRestaurant() {
+        return this.pos.config.module_pos_restaurant;
     }
 }
 

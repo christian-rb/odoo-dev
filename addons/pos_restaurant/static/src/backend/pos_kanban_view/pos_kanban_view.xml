@@ -1,0 +1,27 @@
+<odoo>
+    <t t-name="pos_restaurant.PosActionHelper" t-inherit="point_of_sale.PosActionHelper" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('shop-scenarios')]" position="before">
+            <div class="restaurant-scenarios row p-3 justify-content-center">
+                <t t-foreach="restaurantScenarios" t-as="item" t-key="item_index">
+                    <div class="col-md-4">
+                        <div class="card mb-3 rounded-3 scenario-card" style="max-width: 540px;" t-on-click="() => this.loadScenarioData(item.function_name)">
+                            <div class="row g-0">
+                                <div class="col-md-4">
+                                    <div class="img-container m-2 d-flex align-items-center justify-content-center">
+                                        <img t-attf-src="/pos_restaurant/static/img/{{item.icon_file}}" class="scenario-img"/>
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="card-body text-start p-3 m-2">
+                                        <h3 class="card-title fw-bolder" t-esc="item.name"/>
+                                        <p class="card-text text-large" t-esc="item.description"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </div>
+        </xpath>
+    </t>
+</odoo>

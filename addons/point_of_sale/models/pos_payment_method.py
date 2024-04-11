@@ -212,3 +212,60 @@ class PosPaymentMethod(models.Model):
 
         return payment_bank.with_context(is_online_qr=True).build_qr_code_base64(
             float(amount), free_communication, structured_communication, currency, debtor_partner, self.qr_code_method, silent_errors=False)
+    @api.model
+    def _ensure_payment_methods(self, vals_list):
+        res = []
+        for vals in vals_list:
+            if vals['type'] == 'cash':
+                pm = self._ensure_payment_method(vals, 'cash')
+            elif vals['type'] == 'bank':
+                pm = self._ensure_payment_method(vals, 'bank')
+            elif vals['type'] == 'pay_later':
+                pm = self._ensure_pay_later_payment_method(vals)
+            else:
+                raise ValueError('Unknown payment method type: %s' % vals['type'])
+
+            if pm:
+                res.append(pm.id)
+                self.env['ir.model.data']._update_xmlids([{
+                    'xml_id': vals['ref'],
+                    'record': pm,
+                    'noupdate': True,
+                }])
+        return res
+
+    @api.model
+    def _ensure_payment_method(self, vals, payment_type):
+        """ create the cash payment method and journal if they don't exist """
+        pm = self.env['pos.payment.method'].search([
+            ('name', '=', vals['name']),
+            ('company_id', '=', self.env.company.id),
+        ], limit=1)
+        if pm:
+            return pm
+
+        journal = self.env['account.journal'].create({
+            'name': vals['name'],
+            'type': payment_type,
+            'company_id': self.env.company.id,
+        })
+
+        return self.env['pos.payment.method'].create({
+            'name': vals['name'],
+            'journal_id': journal.id,
+            'company_id': self.env.company.id,
+        })
+
+    @api.model
+    def _ensure_pay_later_payment_method(self, vals):
+        pm = self.env['pos.payment.method'].search([
+            ('name', '=', vals['name']),
+            ('company_id', '=', self.env.company.id),
+        ], limit=1)
+        if pm:
+            return pm
+
+        return self.env['pos.payment.method'].create({
+            'name': vals['name'],
+            'company_id': self.env.company.id
+        })

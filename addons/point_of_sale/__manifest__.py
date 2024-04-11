@@ -49,7 +49,8 @@
         'views/res_config_settings_views.xml',
     ],
     'demo': [
-        'data/point_of_sale_demo.xml',
+        'data/demo_data.xml',
+        'data/scenarios/furniture_products_overide.xml',
     ],
     'installable': True,
     'application': True,
@@ -72,6 +73,7 @@
             'point_of_sale/static/src/scss/pos_monetary_field.scss',
             'point_of_sale/static/src/backend/tours/point_of_sale.js',
             'point_of_sale/static/src/backend/debug_manager.js',
+            'point_of_sale/static/src/backend/pos_kanban_view/*',
         ],
         'web.assets_tests': [
             'point_of_sale/static/tests/tours/**/*',
