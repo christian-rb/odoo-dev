@@ -604,6 +604,30 @@ class AccountJournal(models.Model):
                 alias_name = f"{alias_name}-{company_identifier}"
         return self.env['mail.alias']._sanitize_alias_name(alias_name)
 
+    def _check_unique_alias(self, vals, company):
+        """ Check uniqueness of the alias name within the given alias domain.
+        :param vals: the values of the journal.
+        :return: a unique alias name.
+        """
+        alias_name = vals.get('alias_name')
+        alias_domain_name = company.alias_domain_id.name
+
+        existing_alias = None
+        if alias_domain_name:
+            existing_alias = self.env['mail.alias'].search_count([
+                ('alias_name', '=', alias_name),
+                ('alias_domain', '=', alias_domain_name),
+            ])
+        else:
+            existing_alias = self.env['mail.alias'].search_count([
+                ('alias_name', '=', alias_name),
+            ])
+
+        if existing_alias > 0:
+            alias_name = f"{alias_name}-{vals.get('code', vals['name'][:5])}"
+
+        return alias_name
+
     @api.model
     def get_next_bank_cash_default_code(self, journal_type, company, cache=None, protected_codes=False):
         prefix_map = {'cash': 'CSH', 'general': 'GEN', 'bank': 'BNK'}
@@ -697,6 +721,7 @@ class AccountJournal(models.Model):
             vals['alias_name'] = self._alias_prepare_alias_name(
                 False, vals.get('name'), vals.get('code'), journal_type, company
             )
+        vals['alias_name'] = self._check_unique_alias(vals, company)
 
     @api.model_create_multi
     def create(self, vals_list):
