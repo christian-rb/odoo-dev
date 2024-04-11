@@ -2,7 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 {
     'name': 'Account Audit Trail',
-    'version': '1.0',
+    'version': '1.1',
     'category': 'Accounting/Accounting',
     'summary': 'Account Audit Trail',
     'depends': ['account'],
