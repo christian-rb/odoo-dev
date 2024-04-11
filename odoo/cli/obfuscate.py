@@ -12,7 +12,7 @@ from . import Command
 _logger = logging.getLogger(__name__)
 
 class Obfuscate(Command):
-    """Obfuscate datas in a given odoo database"""
+    """Obfuscate data in a given odoo database"""
     def __init__(self):
         super().__init__()
         self.cr = None
