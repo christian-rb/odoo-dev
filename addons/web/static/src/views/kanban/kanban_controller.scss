@@ -35,10 +35,6 @@
     --KanbanColumn__highlight-background: #{tint-color($o-action, 90%)};
     --KanbanColumn__highlight-border: #{$o-action};
 
-    --KanbanCardMain-gap: #{map-get($spacers, 2)};
-
-    --KanbanCardGroup-gap: #{0 map-get($spacers, 2)};
-
     --o-view-nocontent-zindex: 1;
 
     // ----------------------------------------------------------------------------
@@ -80,6 +76,9 @@
 
     // New semantic
     .o_kanban_record.o_new_kanban {
+        $-py:  var(--KanbanRecord-padding-v);
+        $-px:  var(--KanbanRecord-padding-h);
+
         position: relative;
         display: flex;
         align-items: stretch;
@@ -91,21 +90,18 @@
         word-wrap: break-word;
         word-break: break-word;
 
+        --Tag-max-width: 100%;
+        --Tag-font-size: #{$o-font-size-base-smaller};
+        --Tags-margin: calc(1em - var(--Tag-font-size, .75rem)) 0;
+
         &.o_kanban_card_column {
             flex-direction: column;
 
-            &.o_kanban_aside_end {
-                flex-direction: column-reverse;
-            }
+            .o_kanban_card_aside_contained {
+                padding: var(--Card-Aside-padding, #{$-py $-px 0 $-px});
 
-            .o_kanban_card_aside {
-                padding-right: var(--KanbanRecord-padding-h);
-                padding-bottom: 0;
-
-                // TODO: remove "&:last-child when o_kanban_aside_end is added.
-                &:last-child, &.o_kanban_aside_end {
-                    padding-bottom: var(--KanbanRecord-padding-h);
-                    padding-top: 0;
+                &.o_kanban_aside_end {
+                    padding: var(--Card-Aside-padding, #{0 $-px $-py $-px});
                 }
             }
         }
@@ -115,46 +111,69 @@
         }
 
         .o_kanban_card_aside {
-            padding: var(--KanbanRecord-padding-v) 0 var(--KanbanRecord-padding-v) var(--KanbanRecord-padding-h);
             flex-direction: column;
             flex: 0 0 var(--Card-Aside-width, #{$o-kanban-image-fill-width});
+        }
 
-            &.o_kanban_card_aside_full {
-                @include media-breakpoint-up(md) {
-                    padding: 0;
-                }
-            }
+        .o_kanban_card_aside_contained {
+            padding: var(--Card-Aside-padding, #{$-py 0 $-py $-px});
 
-            > div {
-                height: 100%;
+            &.o_kanban_aside_end {
+                padding: var(--Card-Aside-padding, #{$-py $-px $-py 0});
             }
         }
 
+        .o_kanban_card_aside_full > div {
+            flex-grow: 1;
+        }
+
         .o_kanban_card_header {
-            @include o-kanban-record-title();
+            font-weight: var(--Card-Header-color, #{$headings-font-weight});
+            line-height: var(--Card-Header-line-height, #{$headings-line-height});;
+            font-size: var(--Card-Header-font-size, #{$h5-font-size});
+            color: var(--Card-Header-color, #{$headings-color});
+            margin-bottom: var(--Card-Header-margin-bottom, #{$o-kanban-card-header-margin-bottom});
+        }
+
+        .o_kanban_card_group:has(.o_kanban_card_header) {
+            --Card-Header-margin-bottom: 0;
+
+            color: var(--Card-Subtitle-color, #{$text-muted});
+            margin-bottom: var(--Card-HeaderGroup-margin-bottom, #{$o-kanban-card-header-margin-bottom});
         }
 
         .o_kanban_card_main {
             flex-direction: column;
-            gap: var(--KanbanCardMain-gap);
+            column-gap: var(--Card-Main-gap, #{$o-kanban-card-main-gap});
             min-width: 0; // prevent from overflowing
             width: 100%;
             padding: var(--KanbanRecord-padding-v) var(--KanbanRecord-padding-h);
         }
 
         .o_kanban_card_group {
-            gap: var(--KanbanCardGroup-gap);
             flex-direction: column;
-
-            .o_kanban_card_header + * { // Subtitle
-                color: $text-muted;
-            }
+            column-gap: var(--Card-Group-gap, #{map-get($spacers, 2)});
         }
 
         .o_kanban_card_footer {
             align-items: center;
             margin-top: auto;
+            padding-top: var(--KanbanRecord-padding-h);
+            column-gap: var(--Card-Footer-gap, #{map-get($spacers, 2)});
+            font-size: var(--Card-Footer-font-size, 1rem);
             line-height: 1;
+        }
+
+        .o_kanban_card_header, .o_kanban_card_footer {
+            --Tag-font-size: 1em;
+            --Status-size: 1.5em;
+            --Avatar-size: 1.5em;
+            --Favorite-font-size: 1em;
+            --Priority-font-size: 1em;
+
+            .o_field_many2many_tags_avatar {
+                --img-text-gap-v: 0;
+            }
         }
 
         &.o_kanban_global_click {
@@ -175,28 +194,10 @@
             visibility: visible;
         }
 
-        .o_field_many2many_tags {
-            display: block;
-            margin-bottom: var(--KanbanRecord-gap-v);
-            word-break: break-all;
-
-            &.avatar {
-                margin: 0 0 0 6px;
-                .o_m2m_avatar_empty > span {
-                    display: block;
-                    margin-top: 3px;
-                }
-            }
-
-            .o_tag {
-                --Tag-max-width: MAX(200px, 100%);
-                --Tag-font-size: #{$o-font-size-base-smaller};
-            }
-        }
-
         .o_attachment_image > img {
             width: 100%;
             height: auto;
+            border-radius: var(--Attachment-Image-border-radius, #{$border-radius});
         }
 
         // Records colours (see o-kanban-record-color mixin)

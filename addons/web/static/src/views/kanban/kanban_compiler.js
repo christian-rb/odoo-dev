@@ -37,7 +37,6 @@ export class KanbanCompiler extends ViewCompiler {
             switch (getTag(child)) {
                 case "card-aside": {
                     asidePosition = child.getAttribute("position") || "start";
-                    child.removeAttribute("position");
                     asideNode = this.compileAside(child, params);
                     break;
                 }
@@ -89,8 +88,13 @@ export class KanbanCompiler extends ViewCompiler {
         let asideClass = `o_kanban_card_aside o_kanban_card_item ${elClass}`;
         if (archParseBoolean(el.getAttribute("full"), false)) {
             asideClass += " o_kanban_card_aside_full";
+        } else {
+            asideClass += " o_kanban_card_aside_contained";
         }
         aside.setAttribute("class", asideClass);
+        aside.classList.toggle("o_kanban_aside_end", el.getAttribute("position") == "end");
+        el.removeAttribute("position"); // needed ?
+
         for (const child of el.childNodes) {
             append(aside, this.compileNode(child, params));
         }
