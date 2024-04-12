@@ -1,0 +1,221 @@
+import { createElement } from "@web/core/utils/xml";
+import { Field } from "@web/views/fields/field";
+
+export const DEFAULT_DATE = luxon.DateTime.local(2021, 7, 16, 8, 0, 0, 0);
+
+export const FAKE_RECORDS = {
+    1: {
+        id: 1,
+        title: "1 day, all day in July",
+        start: DEFAULT_DATE,
+        isAllDay: true,
+        end: DEFAULT_DATE,
+    },
+    2: {
+        id: 2,
+        title: "3 days, all day in July",
+        start: DEFAULT_DATE.plus({ days: 2 }),
+        isAllDay: true,
+        end: DEFAULT_DATE.plus({ days: 4 }),
+    },
+    3: {
+        id: 3,
+        title: "1 day, all day in June",
+        start: DEFAULT_DATE.plus({ months: -1 }),
+        isAllDay: true,
+        end: DEFAULT_DATE.plus({ months: -1 }),
+    },
+    4: {
+        id: 4,
+        title: "3 days, all day in June",
+        start: DEFAULT_DATE.plus({ months: -1, days: 2 }),
+        isAllDay: true,
+        end: DEFAULT_DATE.plus({ months: -1, days: 4 }),
+    },
+    5: {
+        id: 5,
+        title: "Over June and July",
+        start: DEFAULT_DATE.startOf("month").plus({ days: -2 }),
+        isAllDay: true,
+        end: DEFAULT_DATE.startOf("month").plus({ days: 2 }),
+    },
+};
+
+export const FAKE_FILTER_SECTIONS = [
+    {
+        label: "Attendees",
+        fieldName: "partner_ids",
+        avatar: {
+            model: "res.partner",
+            field: "avatar_128",
+        },
+        hasAvatar: true,
+        write: {
+            model: "filter_partner",
+            field: "partner_id",
+        },
+        canCollapse: true,
+        canAddFilter: true,
+        filters: [
+            {
+                type: "user",
+                label: "Mitchell Admin",
+                active: true,
+                value: 3,
+                colorIndex: 3,
+                recordId: null,
+                canRemove: false,
+                hasAvatar: true,
+            },
+            {
+                type: "all",
+                label: "Everybody's calendar",
+                active: false,
+                value: "all",
+                colorIndex: null,
+                recordId: null,
+                canRemove: false,
+                hasAvatar: false,
+            },
+            {
+                type: "record",
+                label: "Brandon Freeman",
+                active: true,
+                value: 4,
+                colorIndex: 4,
+                recordId: 1,
+                canRemove: true,
+                hasAvatar: true,
+            },
+            {
+                type: "record",
+                label: "Marc Demo",
+                active: false,
+                value: 6,
+                colorIndex: 6,
+                recordId: 2,
+                canRemove: true,
+                hasAvatar: true,
+            },
+        ],
+    },
+    {
+        label: "Users",
+        fieldName: "user_id",
+        avatar: {
+            model: null,
+            field: null,
+        },
+        hasAvatar: false,
+        write: {
+            model: null,
+            field: null,
+        },
+        canCollapse: false,
+        canAddFilter: false,
+        filters: [
+            {
+                type: "record",
+                label: "Brandon Freeman",
+                active: false,
+                value: 1,
+                colorIndex: false,
+                recordId: null,
+                canRemove: true,
+                hasAvatar: true,
+            },
+            {
+                type: "record",
+                label: "Marc Demo",
+                active: false,
+                value: 2,
+                colorIndex: false,
+                recordId: null,
+                canRemove: true,
+                hasAvatar: true,
+            },
+        ],
+    },
+];
+
+export const FAKE_FIELDS = {
+    id: { string: "Id", type: "integer" },
+    user_id: { string: "User", type: "many2one", relation: "user", default: -1 },
+    partner_id: {
+        string: "Partner",
+        type: "many2one",
+        relation: "partner",
+        related: "user_id.partner_id",
+        default: 1,
+    },
+    name: { string: "Name", type: "char" },
+    start_date: { string: "Start Date", type: "date" },
+    stop_date: { string: "Stop Date", type: "date" },
+    start: { string: "Start Datetime", type: "datetime" },
+    stop: { string: "Stop Datetime", type: "datetime" },
+    delay: { string: "Delay", type: "float" },
+    allday: { string: "Is All Day", type: "boolean" },
+    partner_ids: {
+        string: "Attendees",
+        type: "one2many",
+        relation: "partner",
+        default: [[6, 0, [1]]],
+    },
+    type: { string: "Type", type: "integer" },
+    event_type_id: { string: "Event Type", type: "many2one", relation: "event_type" },
+    color: { string: "Color", type: "integer", related: "event_type_id.color" },
+};
+
+export const FAKE_MODEL = {
+    canCreate: true,
+    canDelete: true,
+    canEdit: true,
+    date: DEFAULT_DATE,
+    fieldMapping: {
+        date_start: "start_date",
+        date_stop: "stop_date",
+        date_delay: "delay",
+        all_day: "allday",
+        color: "color",
+    },
+    fieldNames: ["start_date", "stop_date", "color", "delay", "allday", "user_id"],
+    fields: FAKE_FIELDS,
+    filterSections: FAKE_FILTER_SECTIONS,
+    firstDayOfWeek: 0,
+    isDateHidden: false,
+    isTimeHidden: false,
+    hasAllDaySlot: true,
+    hasEditDialog: false,
+    quickCreate: false,
+    popoverFieldNodes: {
+        name: Field.parseFieldNode(
+            createElement("field", { name: "name" }),
+            { event: { fields: FAKE_FIELDS } },
+            "event",
+            "calendar"
+        ),
+    },
+    activeFields: {
+        name: {
+            context: "{}",
+            invisible: false,
+            readonly: false,
+            required: false,
+            onChange: false,
+        },
+    },
+    rangeEnd: DEFAULT_DATE.endOf("month"),
+    rangeStart: DEFAULT_DATE.startOf("month"),
+    records: FAKE_RECORDS,
+    resModel: "event",
+    scale: "month",
+    scales: ["day", "week", "month", "year"],
+    unusualDays: [],
+    load() {},
+    createFilter() {},
+    createRecord() {},
+    unlinkFilter() {},
+    unlinkRecord() {},
+    updateFilter() {},
+    updateRecord() {},
+};
