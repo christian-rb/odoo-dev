@@ -18,8 +18,16 @@ wTourUtils.registerWebsitePreviewTour('slides_tour', {
     position: 'bottom',
     width: 210,
 }, {
+<<<<<<< HEAD
     trigger: 'input#name',
     content: markup(_t("Give your course an engaging <b>Title</b>.")),
+||||||| parent of dc4defba5742 (temp)
+    trigger: 'input#name',
+    content: Markup(_t("Give your course an engaging <b>Title</b>.")),
+=======
+    trigger: 'input#name_0',
+    content: Markup(_t("Give your course an engaging <b>Title</b>.")),
+>>>>>>> dc4defba5742 (temp)
     position: 'bottom',
     width: 280,
     run: 'text My New Course',
@@ -31,14 +39,30 @@ wTourUtils.registerWebsitePreviewTour('slides_tour', {
     run: 'text This course is for advanced users.',
 }, {
     trigger: 'button.btn-primary',
+<<<<<<< HEAD
     content: markup(_t("Click on the <b>Create</b> button to create your first course.")),
+||||||| parent of dc4defba5742 (temp)
+    content: Markup(_t("Click on the <b>Create</b> button to create your first course.")),
+=======
+    content: Markup(_t("Click on the <b>Save</b> button to create your first course.")),
+>>>>>>> dc4defba5742 (temp)
 }, {
     trigger: 'iframe .o_wslides_js_slide_section_add',
     content: markup(_t("Congratulations, your course has been created, but there isn't any content yet. First, let's add a <b>Section</b> to give your course a structure.")),
     position: 'bottom',
 }, {
+    trigger: 'iframe #section_name',
+    content: Markup(_t("A good course has a structure. Pick a name for your first <b>Section</b>.")),
+    position: 'bottom',
+}, {
     trigger: 'iframe button.btn-primary',
+<<<<<<< HEAD
     content: markup(_t("A good course has a structure. Pick a name for your first section and click <b>Save</b> to create it.")),
+||||||| parent of dc4defba5742 (temp)
+    content: Markup(_t("A good course has a structure. Pick a name for your first section and click <b>Save</b> to create it.")),
+=======
+    content: Markup(_t("Click <b>Save</b> to create it.")),
+>>>>>>> dc4defba5742 (temp)
     position: 'bottom',
     width: 260,
 }, {
