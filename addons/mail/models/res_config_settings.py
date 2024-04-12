@@ -2,6 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import datetime
+import uuid
 
 from odoo import _, fields, models
 from odoo.exceptions import UserError
@@ -42,6 +43,12 @@ class ResConfigSettings(models.TransientModel):
     )
     sfu_server_url = fields.Char("SFU Server URL", config_parameter="mail.sfu_server_url")
     sfu_server_key = fields.Char("SFU Server key", config_parameter="mail.sfu_server_key", help="Base64 encoded key")
+    sfu_local_key = fields.Char(
+        "SFU Local key",
+        config_parameter="mail.sfu_local_key",
+        default=lambda self: str(uuid.uuid4()),
+        help="Key for encryption with the SFU"
+    )
     email_primary_color = fields.Char(related='company_id.email_primary_color', readonly=False)
     email_secondary_color = fields.Char(related='company_id.email_secondary_color', readonly=False)
 
