@@ -22,15 +22,23 @@ class OdooBaseChecker(BaseChecker):
             'Bad usage of _, _lt function.',
             'gettext-variable',
             'See https://www.odoo.com/documentation/master/developer/misc/i18n/translations.html#variables'
-        )
+        ),
+        'E8505': (
+            'Usage of _, _lt function with multiple unnamed placeholders',
+            'gettext-placeholders',
+            'Use keyword arguments when you have multiple placeholders',
+        ),
     }
 
-    @only_required_for_messages('gettext-variable')
+    @only_required_for_messages('gettext-variable', 'gettext-placeholders')
     def visit_call(self, node):
         if isinstance(node.func, astroid.Name) and node.func.name in ('_', '_lt'):
             first_arg = node.args[0]
-            if not (isinstance(first_arg, astroid.Const) and isinstance(first_arg.value, str)):
-                self.add_message('gettext-variable', node=node)
+            if isinstance(first_arg.value, str):
+                if not isinstance(first_arg, astroid.Const):
+                    self.add_message('gettext-variable', node=node)
+                elif str(first_arg.value).count('%s') >= 2:
+                    self.add_message('gettext-placeholders', node=node)
 
 
 def register(linter):
