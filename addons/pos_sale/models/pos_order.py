@@ -51,17 +51,22 @@ class PosOrder(models.Model):
             for line in order.lines.filtered(lambda l: l.product_id == order.config_id.down_payment_product_id and l.qty != 0 and (l.sale_order_origin_id or l.refunded_orderline_id.sale_order_origin_id)):
                 sale_lines = line.sale_order_origin_id.order_line or line.refunded_orderline_id.sale_order_origin_id.order_line
                 sale_order_origin = line.sale_order_origin_id or line.refunded_orderline_id.sale_order_origin_id
-                sale_line = self.env['sale.order.line'].create({
-                    'order_id': sale_order_origin.id,
-                    'product_id': line.product_id.id,
-                    'price_unit': line.price_unit,
-                    'product_uom_qty': 0,
-                    'tax_id': [(6, 0, line.tax_ids.ids)],
-                    'is_downpayment': True,
-                    'discount': line.discount,
-                    'sequence': sale_lines and sale_lines[-1].sequence + 1 or 10,
-                })
-                line.sale_order_line_id = sale_line
+                # update sale_order_line_id of newly created pos_order_line to avoid creation of same sale_order_line for down payment
+                update_sale_order_line_id = sale_lines.filtered(lambda l: not l.pos_order_line_ids and l.is_downpayment)
+                if update_sale_order_line_id:
+                    line.sale_order_line_id = update_sale_order_line_id
+                else:
+                    sale_line = self.env['sale.order.line'].create({
+                        'order_id': sale_order_origin.id,
+                        'product_id': line.product_id.id,
+                        'price_unit': line.price_unit,
+                        'product_uom_qty': 0,
+                        'tax_id': [(6, 0, line.tax_ids.ids)],
+                        'is_downpayment': True,
+                        'discount': line.discount,
+                        'sequence': sale_lines and sale_lines[-1].sequence + 1 or 10,
+                    })
+                    line.sale_order_line_id = sale_line
 
             so_lines = order.lines.mapped('sale_order_line_id')
 
