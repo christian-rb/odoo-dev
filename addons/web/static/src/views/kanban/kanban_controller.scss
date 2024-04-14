@@ -153,6 +153,12 @@
         .o_kanban_card_group {
             flex-direction: column;
             column-gap: var(--Card-Group-gap, #{map-get($spacers, 2)});
+
+            &:empty,                          // Hide empty groups
+            > *:empty,                        // Hide group's empty direct children
+            &:not(:has( > *:not(:empty))) {   // Hide groups that contain empty children only
+                display: none;
+            }
         }
 
         .o_kanban_card_footer {
