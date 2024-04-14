@@ -16,7 +16,8 @@
                     </card-aside>
                     <card-header>
                         <field name="name"/>
-                        <field name="is_favorite" widget="boolean_favorite" nolabel="1" class="ms-auto"/>
+                        <spacer/>
+                        <field name="is_favorite" widget="boolean_favorite" nolabel="1"/>
                     </card-header>
                     <card-group>
                         <div invisible="not default_code">
@@ -108,7 +109,8 @@
                                 </span>
                             </a>
                         </div>
-                        <field name="activity_ids" widget="kanban_activity" class="ms-auto"/>
+                        <spacer/>
+                        <field name="activity_ids" widget="kanban_activity"/>
                     </card-footer>
                 </card>
             </kanban>
@@ -160,7 +162,8 @@
                     </card-group>
                     <card-footer>
                         <field name="activity_ids" widget="kanban_activity"/>
-                        <field name="kanban_state" widget="state_selection" class="ms-auto"/>
+                        <spacer/>
+                        <field name="kanban_state" widget="state_selection"/>
                         <field name="user_id" widget="many2one_avatar_user"/>
                     </card-footer>
                 </card>
@@ -220,7 +223,8 @@
                     <card-footer>
                         <field name="priority" widget="priority"/>
                         <field name="activity_ids" widget="kanban_activity"/>
-                        <field name="user_id" widget="many2one_avatar_user" domain="[('share', '=', False)]" on_change="1" class="ms-auto"/>
+                        <spacer/>
+                        <field name="user_id" widget="many2one_avatar_user" domain="[('share', '=', False)]" on_change="1"/>
                     </card-footer>
                 </card>
             </kanban>
@@ -291,7 +295,8 @@
                         <div invisible="not subtask_count">
                             <widget name="subtask_counter"/>
                         </div>
-                        <field name="user_ids" widget="many2many_avatar_user" domain="[('share', '=', False)]" class="ms-auto"/>
+                        <spacer/>
+                        <field name="user_ids" widget="many2many_avatar_user" domain="[('share', '=', False)]"/>
                         <field name="state" widget="project_task_state_selection" options="{'is_toggle_mode': false}"/>
                     </card-footer>
                 </card>

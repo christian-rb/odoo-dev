@@ -123,7 +123,14 @@ export class KanbanCompiler extends ViewCompiler {
         }
         group.setAttribute("class", groupClass);
         for (const child of el.childNodes) {
-            append(group, this.compileNode(child, params));
+            if (getTag(child) == "spacer") {
+                const spacerEl = createElement("span");
+
+                spacerEl.classList.add("o_kanban_card_spacer", ...child.classList);
+                append(group, spacerEl);
+            } else {
+                append(group, this.compileNode(child, params));
+            }
         }
         return group;
     }

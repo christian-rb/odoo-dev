@@ -200,6 +200,10 @@
             visibility: visible;
         }
 
+        .o_kanban_card_spacer {
+            flex-grow: 1;
+        }
+
         .o_attachment_image > img {
             width: 100%;
             height: auto;
