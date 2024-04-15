@@ -2060,7 +2060,7 @@ class MailThread(models.AbstractModel):
             notification mechanism;
         :param list(int) partner_ids: partner_ids to notify in addition to partners
             computed based on subtype / followers matching;
-        :param list(int) channel_ids: channel_ids to notify for mentioned channels
+        :param list(int) channel_ids: channel_ids to to add message in mentioned channels
         :param list(tuple(str,str), tuple(str,str, dict)) attachments : list of attachment
             tuples in the form ``(name,content)`` or ``(name,content, info)`` where content
             is NOT base64 encoded;
@@ -2120,6 +2120,7 @@ class MailThread(models.AbstractModel):
                  )
             )
         channel_ids = list(channel_ids or [])
+
         # split message additional values from notify additional values
         msg_kwargs = {key: val for key, val in kwargs.items()
                       if key in self.env['mail.message']._fields}
@@ -2146,10 +2147,6 @@ class MailThread(models.AbstractModel):
         # automatically subscribe recipients if asked to
         if self._context.get('mail_post_autofollow') and partner_ids:
             self.message_subscribe(partner_ids=list(partner_ids))
-
-        channel_partners = self.env['discuss.channel.member'].search([('channel_id', 'in', channel_ids)])
-        thread_partner_ids = [partner.partner_id.id for partner in channel_partners]
-        partner_ids.extend(thread_partner_ids)
 
         msg_values = dict(msg_kwargs)
         if 'email_add_signature' not in msg_values:
@@ -2855,13 +2852,13 @@ class MailThread(models.AbstractModel):
         """ Low-level helper to create mail.message records. It is mainly used
         to hide the cleanup of given values, for mail gateway or helpers."""
         create_values_list = []
-        create_channel_list = []
 
         # preliminary value safety check
         self._raise_for_invalid_parameters(
             {key for values in values_list for key in values.keys()},
             restricting_names=self._get_message_create_valid_field_names()
         )
+
         for values in values_list:
             create_values = dict(values)
             # Avoid warnings about non-existing fields
@@ -2870,20 +2867,23 @@ class MailThread(models.AbstractModel):
             create_values['partner_ids'] = [Command.link(pid) for pid in (create_values.get('partner_ids') or [])]
             channel_ids = create_values.pop('channel_ids', None)
             create_values_list.append(create_values)
-
+            # Create message in mentioned channels
             if channel_ids:
+                create_channel_list = []
+                backlink_html = f'<a href="/web#model={self._name}&id={self.id}">{create_values.get("record_name")}</a>'
+                user = f'<a href="/web#model=res.partner&id={self.env.user.partner_id.id}">{self.env.user.name}</a>'
                 for channel_id in channel_ids:
                     create_channel_values = dict(create_values)
+                    create_channel_values['body'] = f"{user} mentioned this channel in {backlink_html}"
                     create_channel_values['res_id'] = channel_id
                     create_channel_values['model'] = 'discuss.channel'
                     create_channel_list.append(create_channel_values)
-
+                messages_in_channel = self.env['mail.message'].with_context(
+                    clean_context(self.env.context)
+                ).create(create_channel_list)
+                self._notify_thread_by_channel(messages_in_channel)
         # remove context, notably for default keys, as this thread method is not
         # meant to propagate default values for messages, only for master records
-        self.env['mail.message'].with_context(
-            clean_context(self.env.context)
-        ).create(create_channel_list)
-
         return self.env['mail.message'].with_context(
             clean_context(self.env.context)
         ).create(create_values_list)
@@ -3132,6 +3132,24 @@ class MailThread(models.AbstractModel):
             self._notify_thread_by_web_push(message, recipients_data, msg_vals, **kwargs)
 
         return recipients_data
+
+    def _notify_thread_by_channel(self, messages, **kwargs):
+        """ Send bus notifications for messages through channels.
+
+        :param recordset messages: A recordset of mail.message records being
+         notified. It may be void as 'msg_vals' supersedes it.
+        """
+        bus_notifications = []
+        if messages:
+            for message in messages:
+                message_format = message.message_format()[0]
+                if "temporary_id" in self.env.context:
+                    message_format["temporary_id"] = self.env.context["temporary_id"]
+                bus_notifications.append((
+                    self.env['discuss.channel'].browse(message['res_id']),
+                    "discuss.channel/new_message",
+                    {"id": message['res_id'], "message": message_format}))
+        self.env['bus.bus']._sendmany(bus_notifications)
 
     def _notify_thread_by_inbox(self, message, recipients_data, msg_vals=False, **kwargs):
         """ Notificaty recipients inbox of a message. It does two main things :

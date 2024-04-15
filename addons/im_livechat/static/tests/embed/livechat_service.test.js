@@ -125,6 +125,7 @@ test("Only necessary requests are made when creating a new chat", async () => {
                 attachment_ids: [],
                 attachment_tokens: [],
                 canned_response_ids: [],
+                channel_ids: [],
                 message_type: "comment",
                 partner_ids: [],
                 subtype_xmlid: "mail.mt_comment",

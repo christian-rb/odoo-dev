@@ -368,6 +368,17 @@ class TestChannelInternals(MailCommon, HttpCase):
             channel.name = "test test"
             channel.description = "test"
 
+    def test_channel_mention_should_send_message_in_channel(self):
+        channel = self.env['discuss.channel'].create({"name": "Test Channel", "channel_type": "channel"})
+        partner = self.env["res.partner"].create({
+        "name": "Test Partner",
+        "email": "testpartner@odoo.com",
+        })
+        # Message Post
+        partner.message_post(body="Hello", channel_ids=[channel.id], message_type="comment", subtype_xmlid="mail.mt_comment")
+        # Check that the mentioned channel containt a message with id of channel
+        self.assertTrue(len(self.env['mail.message'].search([('res_id', '=', channel.id), ('model', '=', 'discuss.channel')])) == 1)
+
     def test_channel_write_should_send_notification_if_image_128_changed(self):
         channel = self.env['discuss.channel'].create({'name': '', 'uuid': 'test-uuid'})
         # do the operation once before the assert to grab the value to expect
