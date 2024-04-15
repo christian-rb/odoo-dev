@@ -4152,7 +4152,7 @@ class AccountMove(models.Model):
             move.mapped('line_ids.analytic_line_ids').unlink()
 
         self.mapped('line_ids').remove_move_reconcile()
-        self.write({'state': 'draft', 'is_move_sent': False})
+        self.write({'state': 'draft'})
 
     def button_request_cancel(self):
         """ Hook allowing the localizations to request a cancellation from the government before cancelling the invoice. """

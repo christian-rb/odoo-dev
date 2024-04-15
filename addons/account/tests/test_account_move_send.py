@@ -1060,3 +1060,11 @@ class TestAccountMoveSend(TestAccountMoveSendCommon):
 
         self.assertTrue(self._get_mail_message(invoice))  # email was sent
         self.assertEqual(res['type'], 'ir.actions.act_window_close')  # the download which is a default value didn't happen
+
+    def test_out_invoice_is_move_sent(self):
+        invoice = self.init_invoice(move_type='out_invoice', amounts=[1000.0], post=True)
+        option_vals = self.env['account.move.send']._get_wizard_vals_restrict_to({'checkbox_send_mail': True})
+        wizard = self.create_send_and_print(invoice, **option_vals)
+
+        wizard.action_send_and_print()
+        self.assertTrue(invoice.is_move_sent)
