@@ -65,6 +65,7 @@ class WebsiteSaleDelivery(WebsiteSale):
         order_sudo = request.website.sale_get_order()
 
         self._include_country_and_state_in_address(partial_shipping_address)
+        partial_shipping_address, _side_values = self._values_preprocess(partial_shipping_address)
         if order_sudo._is_public_order():
             # The partner_shipping_id and partner_invoice_id will be automatically computed when
             # changing the partner_id of the SO. This allow website_sale to avoid create duplicates.
@@ -72,21 +73,23 @@ class WebsiteSaleDelivery(WebsiteSale):
                 'Anonymous express checkout partner for order %s',
                 order_sudo.name,
             )
-            order_sudo.partner_id = self._create_or_edit_partner(
-                partial_shipping_address,
-                type='delivery',
+            new_partner_sudo = self._create_new_address(
+                order_sudo=order_sudo,
+                mode='shipping',
+                use_same=False,
+                address_values=partial_shipping_address,
             )
             # Pricelist are recomputed every time the partner is changed. We don't want to recompute
             # the price with another pricelist at this state since the customer has already accepted
             # the amount and validated the payment.
-            order_sudo.env.remove_to_compute(order_sudo._fields['pricelist_id'], order_sudo)
+            with request.env.protecting(['pricelist_id'], order_sudo):
+                order_sudo.partner_id = new_partner_sudo
         elif order_sudo.partner_shipping_id.name.endswith(order_sudo.name):
-            self._create_or_edit_partner(
-                partial_shipping_address,
-                edit=True,
-                type='delivery',
-                partner_id=order_sudo.partner_shipping_id.id,
-            )
+            order_sudo.partner_shipping_id.write(partial_shipping_address)
+            # TODO VFE TODO VCR do we want to trigger cart recomputation here ?
+            # order_sudo._cart_update_address(
+            #     order_sudo.partner_shipping_id.id, ['partner_shipping_id'],
+            # )
         elif not self._are_address_identical(
             partial_shipping_address,
             order_sudo.partner_shipping_id,
@@ -101,10 +104,11 @@ class WebsiteSaleDelivery(WebsiteSale):
                 'Anonymous express checkout partner for order %s',
                 order_sudo.name,
             )
-            order_sudo.partner_shipping_id = child_partner_id or self._create_or_edit_partner(
-                partial_shipping_address,
-                type='delivery',
-                parent_id=order_sudo.partner_id.id,
+            order_sudo.partner_shipping_id = child_partner_id or self._create_new_address(
+                order_sudo,
+                mode='shipping',
+                use_same=False,
+                address_values=partial_shipping_address,
             )
 
         # Returns the list of develivery carrier available for the sale order.
