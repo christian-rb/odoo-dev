@@ -166,6 +166,13 @@
                         </page>
                     </notebook>
                 </sheet>
+                <footer>
+                    <button string="Save &amp; Close" special="save" data-hotkey="q" class="btn btn-primary" close="1"/>
+                    <button string="Discard" special="cancel" data-hotkey="x" class="btn btn-secondary" close="1"/>
+                    <button name="action_view_project" type="object" title="View task" class="btn btn-secondary w-md-auto ms-auto" close="1">
+                        <i class="fa fa-expand"/>
+                    </button>
+                </footer>
                 <chatter reload_on_follower="True"/>
                 </form>
             </field>
