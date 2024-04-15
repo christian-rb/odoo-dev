@@ -27,20 +27,27 @@ registry.category("web_tour.tours").add('hr_recruitment_tour',{
     width: 195
 }, {
     trigger: ".o_job_name",
-    extra_trigger: '.o_hr_job_simple_form',
+    extra_trigger: '.o_view_hr_job_form',
     content: _t("What do you want to recruit today? Choose a job title..."),
     position: "right"
 }, {
     trigger: ".o_job_alias",
-    extra_trigger: '.o_hr_job_simple_form',
+    extra_trigger: '.o_view_hr_job_form',
     content: _t("Choose an application email."),
     position: "right",
     width: 195
 }, {
-    trigger: '.o_create_job',
-    content: _t('Let\'s create the position. An email will be setup for applications, and a public job description, if you use the Website app.'),
-    position: 'bottom',
-    run: "click .modal:visible .btn.btn-primary",
+    trigger: ".o_form_button_save",
+    extra_trigger: ".o_view_hr_job_form",
+    content: _t("Save it!"),
+    position: "bottom",
+    width: 80
+}, {
+    trigger: ".breadcrumb-item:not(.active):last",
+    extra_trigger: '.o_view_hr_job_form',
+    content: _t("Let’s go back to the dashboard."),
+    position: "bottom",
+    width: 195
 }, {
     trigger: ".oe_kanban_action_button",
     extra_trigger: '.o_hr_recruitment_kanban',
