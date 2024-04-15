@@ -1530,6 +1530,12 @@ export class PosStore extends Reactive {
             resModel: "res.partner",
             noCreate: true,
             multiSelect: false,
+            // dropDownOptions : [
+            //     {
+            //         name: "name",
+            //         callback:
+            //     }
+            // ]
             onSelected: (resIds) => {
                 // this.pos.onClickSaleOrder(resIds[0]);
                 console.log(resIds);

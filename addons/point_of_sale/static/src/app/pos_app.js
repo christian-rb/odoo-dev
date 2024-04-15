@@ -5,6 +5,7 @@ import { MainComponentsContainer } from "@web/core/main_components_container";
 import { Navbar } from "@point_of_sale/app/navbar/navbar";
 import { usePos } from "@point_of_sale/app/store/pos_hook";
 import { reactive, Component, onMounted, onWillStart } from "@odoo/owl";
+import { useOwnDebugContext } from "@web/core/debug/debug_context";
 
 /**
  * Chrome is the root component of the PoS App.
@@ -18,6 +19,7 @@ export class Chrome extends Component {
         const reactivePos = reactive(this.pos);
         // TODO: Should we continue on exposing posmodel as global variable?
         window.posmodel = reactivePos;
+        useOwnDebugContext();
 
         // prevent backspace from performing a 'back' navigation
         document.addEventListener("keydown", (ev) => {
