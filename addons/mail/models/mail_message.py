@@ -1027,7 +1027,7 @@ class Message(models.Model):
                 displayed_tracking_ids = allowed_tracking_ids
                 if record and hasattr(record, '_track_filter_for_display'):
                     displayed_tracking_ids = record._track_filter_for_display(displayed_tracking_ids)
-                vals["needaction_partner_ids"] = notifs.filtered(lambda n: not n.is_read).res_partner_id.ids
+                vals["needaction"] = self.env.user.partner_id in notifs.filtered(lambda n: not n.is_read).res_partner_id
                 vals["history_partner_ids"] = notifs.filtered("is_read").res_partner_id.ids
                 vals["starredPersonas"] = [{"id": partner_id, "type": "partner"} for partner_id in message_sudo.starred_partner_ids.ids]
                 vals["trackingValues"] = displayed_tracking_ids._tracking_value_format()

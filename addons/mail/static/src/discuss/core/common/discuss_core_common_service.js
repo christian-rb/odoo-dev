@@ -208,7 +208,7 @@ export class DiscussCoreCommon {
                 if (notifId > channel.message_unread_counter_bus_id) {
                     channel.incrementUnreadCounter();
                 }
-                if (message.isNeedaction) {
+                if (message.needaction) {
                     const inbox = this.store.discuss.inbox;
                     if (notifId > inbox.counter_bus_id) {
                         inbox.counter++;

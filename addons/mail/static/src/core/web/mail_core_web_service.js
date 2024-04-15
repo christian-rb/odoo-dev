@@ -23,7 +23,7 @@ export class MailCoreWeb {
             }
         });
         this.env.bus.addEventListener("mail.message/delete", ({ detail: { message, notifId } }) => {
-            if (message.isNeedaction && notifId > this.store.discuss.inbox.counter_bus_id) {
+            if (message.needaction && notifId > this.store.discuss.inbox.counter_bus_id) {
                 this.store.discuss.inbox.counter--;
             }
             if (message.isStarred && notifId > this.store.discuss.starred.counter_bus_id) {
@@ -63,7 +63,7 @@ export class MailCoreWeb {
                 const thread = message.thread;
                 if (
                     thread &&
-                    message.isNeedaction &&
+                    message.needaction &&
                     notifId > thread.message_needaction_counter_bus_id
                 ) {
                     thread.message_needaction_counter--;

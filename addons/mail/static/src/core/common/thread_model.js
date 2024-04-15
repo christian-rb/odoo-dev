@@ -1135,7 +1135,7 @@ export class Thread extends Record {
         let newNeedactionCounter = 0;
         let newUnreadCounter = 0;
         for (const message of this.messages.slice(lastReadIndex + 1)) {
-            if (message.isNeedaction) {
+            if (message.needaction) {
                 newNeedactionCounter++;
             }
             if (Number.isInteger(message.id)) {
