@@ -27,7 +27,7 @@ import {
     reactive,
 } from "@odoo/owl";
 import { downloadReport, getReportUrl } from "./reports/utils";
-import { pick } from "@web/core/utils/objects";
+import { omit, pick, shallowEqual } from "@web/core/utils/objects";
 import { zip } from "@web/core/utils/arrays";
 
 class BlankComponent extends Component {
@@ -84,7 +84,7 @@ export const standardActionServiceProps = {
     globalState: { type: Object, optional: true }, // prop added by _updateUI
     state: { type: Object, optional: true }, // prop added by _updateUI
     resId: { type: [Number, Boolean], optional: true },
-    updateResId: { type: Function, optional: true },
+    updateActionState: { type: Function, optional: true },
 };
 
 function parseActiveIds(ids) {
@@ -168,6 +168,7 @@ export function makeActionManager(env, router = _router) {
                     action: {},
                     props: {},
                     state: { ...actionState, actionStack: state.actionStack.slice(0, index + 1) },
+                    currentState: {},
                 };
                 if (actionState.action) {
                     controller.action.id = actionState.action;
@@ -190,6 +191,7 @@ export function makeActionManager(env, router = _router) {
                     }
                     if (actionState.active_id) {
                         controller.action.context = { active_id: actionState.active_id };
+                        controller.currentState.active_id = actionState.active_id;
                     }
                 }
                 if (actionState.model) {
@@ -199,7 +201,7 @@ export function makeActionManager(env, router = _router) {
                 if (actionState.resId) {
                     controller.action.type ||= "ir.actions.act_window";
                     controller.props.resId = actionState.resId;
-                    controller.resId = () => actionState.resId;
+                    controller.currentState.resId = actionState.resId;
                     controller.props.type = "form";
                 }
                 return controller;
@@ -555,19 +557,21 @@ export function makeActionManager(env, router = _router) {
      */
     function _getActionInfo(action, props) {
         const actionProps = Object.assign({}, props, { action, actionId: action.id });
-        actionProps.updateResId = (newId) => {
-            const changed = resId !== newId;
-            resId = newId;
-            if (changed && action.target !== "new") {
-                // It's possible that the ControllerComponent is not mounted yet, so we
-                // need to wait for the next microtask to push the state.
-                Promise.resolve().then(() => pushState());
+        actionProps.updateActionState = (controller, newState) => {
+            const copyState = { ...currentState, ...newState };
+            const changed = !shallowEqual(currentState, copyState);
+            Object.assign(currentState, copyState);
+            if (changed && action.target !== "new" && controller.isMounted) {
+                pushState();
             }
         };
-        let resId = actionProps.resId || false;
+        const currentState = {
+            resId: actionProps.resId || false,
+            active_id: action.context.active_id || false,
+        };
         return {
             props: actionProps,
-            resId: () => resId,
+            currentState,
             config: {
                 actionId: action.id,
                 actionType: "ir.actions.client",
@@ -650,10 +654,11 @@ export function makeActionManager(env, router = _router) {
         });
 
         if (view.type === "form") {
-            viewProps.updateResId = (newId) => {
-                const changed = resId !== newId;
-                resId = newId;
-                if (changed && target !== "new") {
+            viewProps.updateActionState = (controller, newState) => {
+                const copyState = { ...currentState, ...newState };
+                const changed = !shallowEqual(currentState, copyState);
+                Object.assign(currentState, copyState);
+                if (changed && target !== "new" && controller.isMounted) {
                     pushState();
                 }
             };
@@ -700,10 +705,13 @@ export function makeActionManager(env, router = _router) {
             "no_breadcrumbs" in action.context ? action.context.no_breadcrumbs : target === "new";
         delete action.context.no_breadcrumbs;
 
-        let resId = viewProps.resId;
+        const currentState = {
+            resId: viewProps.resI,
+            active_id: action.context.active_id || false,
+        };
         return {
             props: viewProps,
-            resId: () => resId,
+            currentState,
             config: {
                 actionId: action.id,
                 actionType: "ir.actions.act_window",
@@ -904,12 +912,18 @@ export function makeActionManager(env, router = _router) {
                 this.isMounted = true;
             }
             onWillUnmount() {
+                this.isMounted = false;
                 if (action.target === "new" && dialogCloseResolve) {
                     dialogCloseResolve();
                 }
             }
             get componentProps() {
                 const componentProps = { ...this.props };
+                const updateActionState = componentProps.updateActionState;
+                if (updateActionState) {
+                    componentProps.updateActionState = (newState) =>
+                        updateActionState(this, newState);
+                }
                 if (this.constructor.Component === View) {
                     componentProps.__beforeLeave__ = this.__beforeLeave__;
                     componentProps.__getGlobalState__ = this.__getGlobalState__;
@@ -1492,6 +1506,9 @@ export function makeActionManager(env, router = _router) {
     }
 
     function pushState() {
+        if (!controllerStack.length) {
+            return;
+        }
         const actions = controllerStack.map((controller) => {
             const { action, props, displayName } = controller;
             const actionState = { displayName };
@@ -1505,18 +1522,21 @@ export function makeActionManager(env, router = _router) {
             if (action.type === "ir.actions.act_window") {
                 actionState.view_type = props.type;
                 if (props.type === "form" && action.res_model !== "res.config.settings") {
-                    actionState.resId = controller.resId() || "new";
+                    actionState.resId = controller.currentState.resId || "new";
                 }
             }
-            if (action.type === "ir.actions.client" && controller.resId?.()) {
-                actionState.resId = controller.resId();
+            if (action.type === "ir.actions.client" && controller.currentState?.resId) {
+                actionState.resId = controller.currentState.resId;
             }
 
-            if (action.context) {
-                const activeId = action.context.active_id;
+            if (controller.currentState?.active_id) {
+                const activeId = controller.currentState.active_id;
                 if (activeId) {
                     actionState.active_id = activeId;
                 }
+            }
+            if (action.context) {
+                const activeId = action.context.active_id;
                 const activeIds = action.context.active_ids;
                 // we don't push active_ids if it's a single element array containing
                 // the active_id to make the url shorter in most cases
@@ -1524,19 +1544,22 @@ export function makeActionManager(env, router = _router) {
                     actionState.active_ids = activeIds.join(",");
                 }
             }
+            Object.assign(actionState, omit(controller.currentState || {}, ...PATH_KEYS));
             return actionState;
         });
-        const newState = {};
-        if (actions.length) {
-            newState.actionStack = actions;
-            const stateKeys = [...PATH_KEYS, "active_ids"];
-            const { action, props } = controllerStack.at(-1);
-            if (props.type !== "form" && props.type !== action.views?.[0][1]) {
-                // add view_type only when it's not already known implicitly
-                stateKeys.push("view_type");
-            }
-            Object.assign(newState, pick(newState.actionStack.at(-1), ...stateKeys));
+        const newState = {
+            actionStack: actions,
+        };
+        const stateKeys = [...PATH_KEYS, "active_ids"];
+        const { action, props, currentState } = controllerStack.at(-1);
+        if (props.type !== "form" && props.type !== action.views?.[0][1]) {
+            // add view_type only when it's not already known implicitly
+            stateKeys.push("view_type");
         }
+        if (currentState) {
+            stateKeys.push(...Object.keys(omit(currentState, ...PATH_KEYS)));
+        }
+        Object.assign(newState, pick(newState.actionStack.at(-1), ...stateKeys));
 
         controllerStack.at(-1).state = newState;
         router.pushState(newState, { replace: true });

@@ -1088,23 +1088,14 @@ export class Thread extends Record {
         return message;
     }
 
-    /** @param {boolean} pushState */
-    setAsDiscussThread(pushState) {
-        if (pushState === undefined) {
-            pushState = this.notEq(this.store.discuss.thread);
-        }
+    setAsDiscussThread() {
         this.store.discuss.thread = this;
-        const activeId =
-            typeof this.id === "string" ? `mail.box_${this.id}` : `discuss.channel_${this.id}`;
         this.store.discuss.activeTab =
             !this.store.env.services.ui.isSmall || this.model === "mail.box"
                 ? "main"
                 : ["chat", "group"].includes(this.channel_type)
                 ? "chat"
                 : "channel";
-        if (pushState) {
-            router.pushState({ active_id: activeId });
-        }
     }
 
     /** @param {number} index */

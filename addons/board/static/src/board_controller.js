@@ -19,7 +19,7 @@ export class BoardController extends Component {
     static props = {
         ...standardViewProps,
         board: Object,
-        updateResId: { type: Function, optional: true },
+        updateActionState: { type: Function, optional: true },
     };
 
     setup() {

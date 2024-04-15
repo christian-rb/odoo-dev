@@ -379,7 +379,7 @@ QUnit.module("ActionManager", (hooks) => {
         assert.verifySteps([], "pushState was not called");
     });
 
-    QUnit.test("properly load client actions with updateResId", async function (assert) {
+    QUnit.test("properly load client actions with updateActionState", async function (assert) {
         class ClientAction extends Component {
             static template = xml`<ControlPanel/><div class="o_client_action_test">Hello World</div>`;
             static props = ["*"];
@@ -388,7 +388,7 @@ QUnit.module("ActionManager", (hooks) => {
 
             setup() {
                 onMounted(() => {
-                    this.props.updateResId(12);
+                    this.props.updateActionState({ resId: 12 });
                 });
             }
         }
