@@ -14,6 +14,23 @@ import { Component } from "@odoo/owl";
 class AccountPaymentPopOver extends Component {
     static props = { "*": { optional: true } };
     static template = "account.AccountPaymentPopOver";
+
+    onMemoHover() {
+        const memo_content = document.querySelector('.memo_content');
+        const memo_tooltip = document.querySelector('.memo_tooltip');
+
+        const isTruncated = memo_content.scrollHeight > memo_content.clientHeight;
+        const isClamped = window.getComputedStyle(memo_content).getPropertyValue('-webkit-line-clamp') === '3';
+        if (isTruncated && isClamped) {
+            memo_tooltip.style.display = 'block';
+            memo_tooltip.style.opacity = '1';
+        }
+    }
+
+    onMemoLeave() {
+        const memo_tooltip = document.querySelector('.memo_tooltip');
+        memo_tooltip.style.display = 'none';
+    }
 }
 
 export class AccountPaymentField extends Component {
