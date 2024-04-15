@@ -931,7 +931,7 @@ class HolidaysRequest(models.Model):
                     values['date_from'] = self._get_start_or_end_from_attendance(hour_from, date_from.date(), employee)
                     values['date_to'] = self._get_start_or_end_from_attendance(hour_to, date_to.date(), employee)
                     values['request_date_from'], values['request_date_to'] = values['date_from'].date(), values['date_to'].date()
-                    values['number_of_days'] = employee_leave_date_duration[(date_from, date_to)][values['employee_id']]['days']
+                    values['number_of_days'] = values.get('number_of_days', employee_leave_date_duration[(date_from, date_to)][values['employee_id']]['days'])
 
         """ Override to avoid automatic logging of creation """
         if not self._context.get('leave_fast_create'):
@@ -1134,17 +1134,24 @@ class HolidaysRequest(models.Model):
 
     def _prepare_employees_holiday_values(self, employees):
         self.ensure_one()
-        work_days_data = employees._get_work_days_data_batch(self.date_from, self.date_to)
+        date_from = self.date_from
+        date_to = self.date_to
+        # include whole day in leave duration calculation if there are different schedules
+        if not self.request_unit_hours and not self.request_unit_half and len(employees.resource_calendar_id) > 1:
+            date_from = datetime.combine(date_from, time.min)
+            date_to = datetime.combine(date_to, time.max)
+        work_days_data = employees._get_work_days_data_batch(date_from, date_to)
+
         return [{
             'name': self.name,
             'holiday_type': 'employee',
             'holiday_status_id': self.holiday_status_id.id,
-            'date_from': self.date_from,
-            'date_to': self.date_to,
+            'date_from': date_from,
+            'date_to': date_to,
             'request_date_from': self.request_date_from,
             'request_date_to': self.request_date_to,
             'notes': self.notes,
-            'number_of_days': work_days_data[employee.id]['days'],
+            'number_of_days': 0.5 if self.request_unit_half else work_days_data[employee.id]['days'],
             'parent_id': self.id,
             'employee_id': employee.id,
             'employee_ids': employee,

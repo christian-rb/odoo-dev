@@ -334,3 +334,58 @@ class TestCompanyLeave(TransactionCase):
 
         leaves = self.env['hr.leave'].search([('holiday_status_id', '=', self.bank_holiday.id)])
         self.assertEqual(len(leaves), 102)
+
+    def test_leave_whole_company_08(self):
+        """
+        Give a company leave with employees on different schedules.
+        """
+        # employee on a different schedule
+        calendar = self.env['resource.calendar'].create({
+            'name': 'Different schedule',
+            'attendance_ids': [(5, 0, 0),
+                               (0, 0, {
+                                   'name': 'monday morning, earlier start',
+                                   'hour_from': 7.5,
+                                   'hour_to': 12,
+                                   'day_period': 'morning',
+                                   'dayofweek': '0',
+                               }),
+                               (0, 0, {
+                                   'name': 'monday afternoon, earlier finish',
+                                   'hour_from': 13,
+                                   'hour_to': 16.5,
+                                   'day_period': 'afternoon',
+                                   'dayofweek': '0',
+                               })]
+        })
+        self.employee.resource_calendar_id = calendar
+
+        # employee on default schedule
+        self.employee2 = self.env['hr.employee'].create({
+            'name': 'Employee2',
+            'company_id': self.company.id,
+            'tz': "Europe/Brussels",
+        })
+
+        company_leave = self.env['hr.leave'].create({
+            'name': 'Bank Holiday',
+            'holiday_type': 'company',
+            'mode_company_id': self.company.id,
+            'holiday_status_id': self.bank_holiday.id,
+            'date_from': date(2020, 1, 6),
+            'request_date_from': date(2020, 1, 6),
+            'date_to': date(2020, 1, 6),
+            'request_date_to': date(2020, 1, 6),
+            'number_of_days': 1,
+        })
+        company_leave._compute_date_from_to()
+        company_leave.action_validate()
+
+        employee_leave = self.env['hr.leave'].search([('employee_id', '=', self.employee.id)])
+        employee2_leave = self.env['hr.leave'].search([('employee_id', '=', self.employee2.id)])
+        self.assertEqual(employee_leave.date_from, datetime(2020, 1, 6, 6, 30))
+        self.assertEqual(employee_leave.date_to, datetime(2020, 1, 6, 15, 30))
+        self.assertEqual(employee_leave.number_of_days, 1)
+        self.assertEqual(employee_leave.number_of_hours_display, 8)
+        self.assertEqual(employee2_leave.date_from, datetime(2020, 1, 6, 7, 0))
+        self.assertEqual(employee2_leave.number_of_days, 1)
