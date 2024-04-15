@@ -76,9 +76,20 @@ export class ActivityListPopoverItem extends Component {
         return this.props.activity.state !== "done" && !this.hasFileUploader;
     }
 
+    get hasCancelButton() {
+        return this.props.activity.state !== "done";
+    }
+
     onClickEditActivityButton() {
         this.props.onClickEditActivityButton();
         this.props.activity.edit().then(() => this.props.onActivityChanged?.());
+    }
+
+    unlink() {
+        this.props.activity.remove();
+        this.env.services.orm
+            .unlink("mail.activity", [this.props.activity.id])
+            .then(() => this.props.onActivityChanged?.());
     }
 
     onClickMarkAsDone() {
