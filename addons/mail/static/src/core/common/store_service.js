@@ -23,8 +23,8 @@ export class Store extends BaseStore {
     CHAT_WINDOW_INBETWEEN_WIDTH = 5;
     CHAT_WINDOW_WIDTH = 360; // same value as $o-mail-ChatWindow-width
     CHAT_WINDOW_HIDDEN_WIDTH = 55;
-    CHAT_BUBBLE_SIZE = 56; // same value as $o-mail-ChatBubble-medium
-    CHAT_BUBBLE_PADDING = 20; // container has 10px padding, multiply by 2 for left and right together.
+    CHAT_BUBBLE_CONTAINER_WIDTH = 56; // same value as $o-mail-ChatBubbleContainer-width
+    CHAT_BUBBLE_CONTAINER_MARGIN = 10; // same value as $o-mail-ChatBubbleContainer-margin
     CHAT_BUBBLE_LIMIT = 7;
     isReady = new Deferred();
 
@@ -205,6 +205,8 @@ export class Store extends BaseStore {
     fetchSilent = true;
 
     cannedReponses = this.makeCachedFetchData({ canned_responses: true });
+    usingChatBubbles = false;
+    chatBubbleCompact = false;
 
     get initMessagingParams() {
         return {
@@ -221,7 +223,8 @@ export class Store extends BaseStore {
     }
 
     get maxVisibleChatWindows() {
-        const chatBubblesWidth = this.CHAT_BUBBLE_SIZE + this.CHAT_BUBBLE_PADDING;
+        const chatBubblesWidth =
+            this.CHAT_BUBBLE_CONTAINER_WIDTH + this.CHAT_BUBBLE_CONTAINER_MARGIN * 2;
         const startGap = this.env.services.ui.isSmall
             ? 0
             : this.hiddenChatWindows.length > 0
@@ -237,7 +240,8 @@ export class Store extends BaseStore {
     }
 
     get chatBubbleLimit() {
-        const chatBubbleSpace = this.CHAT_BUBBLE_SIZE + this.CHAT_BUBBLE_PADDING;
+        const chatBubbleSpace =
+            this.CHAT_BUBBLE_CONTAINER_WIDTH + this.CHAT_BUBBLE_CONTAINER_MARGIN * 2;
         return Math.min(this.CHAT_BUBBLE_LIMIT, Math.floor(browser.innerHeight / chatBubbleSpace));
     }
 

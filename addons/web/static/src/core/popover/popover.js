@@ -48,6 +48,7 @@ export class Popover extends Component {
         class: "",
         closeOnClickAway: () => true,
         closeOnEscape: true,
+        closeOnHoverAway: false,
         componentProps: {},
         fixedPosition: false,
         position: "bottom",
@@ -115,7 +116,8 @@ export class Popover extends Component {
         let shouldAnimate = this.props.animation;
         this.position = usePosition("ref", () => this.props.target, {
             onPositioned: (el, solution) => {
-                (this.props.onPositioned || this.onPositioned.bind(this))(el, solution);
+                this.props.onPositioned?.(el, solution);
+                this.onPositioned(el, solution);
 
                 // opening animation
                 if (shouldAnimate) {

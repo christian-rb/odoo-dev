@@ -1,14 +1,17 @@
 import { ChatWindow } from "@mail/core/common/chat_window";
+import { useHover } from "@mail/utils/common/hooks";
 import { Component, useExternalListener, useState, onMounted, useRef, useEffect } from "@odoo/owl";
 
 import { browser } from "@web/core/browser/browser";
 import { Dropdown } from "@web/core/dropdown/dropdown";
+import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
 import { localization } from "@web/core/l10n/localization";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
+import { ChatBubble } from "./chat_bubble";
 
 export class ChatWindowContainer extends Component {
-    static components = { ChatWindow, Dropdown };
+    static components = { ChatBubble, ChatWindow, Dropdown };
     static props = [];
     static template = "mail.ChatWindowContainer";
 
@@ -22,6 +25,13 @@ export class ChatWindowContainer extends Component {
             () => [this.store.hiddenChatWindows]
         );
         onMounted(() => this.setHiddenMenuOffset());
+        this.bubbleContainerHover = useHover("bubble-container");
+        this.moreHover = useHover(["more-button", "more-menu*"], () => {
+            this.more.isOpen = this.moreHover.isHover;
+        });
+        this.store.usingChatBubbles = true;
+        this.options = useDropdownState();
+        this.more = useDropdownState();
 
         this.onResize();
         useExternalListener(browser, "resize", this.onResize);
@@ -60,6 +70,35 @@ export class ChatWindowContainer extends Component {
             unreadCounter += chatWindow.thread.message_unread_counter;
         }
         return unreadCounter;
+    }
+
+    get visible() {
+        const chatBubbleLimit = this.store.chatBubbleLimit;
+        return this.store.discuss.chatBubbles.slice(-chatBubbleLimit).reverse();
+    }
+
+    get hidden() {
+        const chatBubbleLimit = this.store.chatBubbleLimit;
+        const count = this.store.discuss.chatBubbles.length - chatBubbleLimit;
+        if (count <= 0) {
+            return [];
+        }
+        return this.store.discuss.chatBubbles.slice(0, count);
+    }
+
+    closeBubbles() {
+        for (const bubble of this.store.discuss.chatBubbles) {
+            bubble.close();
+        }
+    }
+
+    hideBubbles() {
+        this.store.chatBubbleCompact = true;
+    }
+
+    showBubbles() {
+        this.store.chatBubbleCompact = false;
+        this.more.isOpen = this.hidden.length !== 0;
     }
 }
 

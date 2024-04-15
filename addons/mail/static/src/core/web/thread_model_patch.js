@@ -2,7 +2,6 @@ import { Thread } from "@mail/core/common/thread_model";
 
 import { patch } from "@web/core/utils/patch";
 import { Record } from "../common/record";
-import { assignDefined } from "@mail/utils/common/misc";
 
 patch(Thread.prototype, {
     /** @type {integer|undefined} */
