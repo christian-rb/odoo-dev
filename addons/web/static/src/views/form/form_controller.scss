@@ -934,6 +934,7 @@
 
             .o_inner_group {
                 margin-bottom: 0 !important;
+                gap: 0;
 
                 div[name="carrier_selection"] {
                     > div:not(.alert) {
@@ -1119,6 +1120,13 @@
 .o_form_view.o_xxs_form_view {
     .o_inner_group {
         @include form-break-table;
+        .o_wrap_field {
+            .o_cell {
+                .o_field_widget {
+                    margin-bottom: 0;
+                }
+            }
+        }
     }
 }
 
