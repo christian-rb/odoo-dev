@@ -45,10 +45,7 @@ export class KanbanCompiler extends ViewCompiler {
                 case "card-footer": {
                     if (!mainNode) {
                         mainNode = createElement("main");
-                        mainNode.setAttribute(
-                            "class",
-                            "o_kanban_card_main o_kanban_card_item"
-                        );
+                        mainNode.setAttribute("class", "o_kanban_card_main o_kanban_card_item");
                     }
                     append(mainNode, this.compileGroup(child, params));
                     break;
@@ -71,12 +68,11 @@ export class KanbanCompiler extends ViewCompiler {
         }
         if (asideNode && asidePosition === "end") {
             append(card, asideNode);
-            // TO DO: add o_kanban_aside_end on asideNode
         }
         if (asideNode || mainNode) {
             const direction = cardEl.getAttribute("direction");
-            if(direction === "column") {
-                combineAttributes(card, "t-att-class", `" o_kanban_card_${direction}"`, " + ");
+            if (direction === "column") {
+                combineAttributes(card, "class", " o_kanban_card_column", " + ");
             }
         }
         return card;
@@ -93,7 +89,6 @@ export class KanbanCompiler extends ViewCompiler {
         }
         aside.setAttribute("class", asideClass);
         aside.classList.toggle("o_kanban_aside_end", el.getAttribute("position") == "end");
-        el.removeAttribute("position"); // needed ?
 
         for (const child of el.childNodes) {
             append(aside, this.compileNode(child, params));
@@ -112,10 +107,13 @@ export class KanbanCompiler extends ViewCompiler {
             tagName = "footer";
         }
         const group = createElement(tagName);
-        const elClass = el.getAttribute("class") || "";
-        let groupClass = elClass;
+        let groupClass = el.getAttribute("class") || "";
         if (type === "card-group") {
             groupClass += " o_kanban_card_group o_kanban_card_item";
+            const direction = el.getAttribute("direction") || "column";
+            if (direction === "column") {
+                groupClass += " o_kanban_card_group_column";
+            }
         } else {
             groupClass += ` o_kanban_card_item o_kanban_card_${
                 type === "card-header" ? "header" : "footer"

@@ -150,15 +150,17 @@
             padding: var(--KanbanRecord-padding-v) var(--KanbanRecord-padding-h);
         }
 
-        .o_kanban_card_group {
+        // .o_kanban_card_group {
+        //     &:empty,                          // Hide empty groups
+        //     > *:empty,                        // Hide group's empty direct children
+        //     &:not(:has( > *:not(:empty))) {   // Hide groups that contain empty children only
+        //         display: none;
+        //     }
+        // }
+
+        .o_kanban_card_group_column {
             flex-direction: column;
             column-gap: var(--Card-Group-gap, #{map-get($spacers, 2)});
-
-            &:empty,                          // Hide empty groups
-            > *:empty,                        // Hide group's empty direct children
-            &:not(:has( > *:not(:empty))) {   // Hide groups that contain empty children only
-                display: none;
-            }
         }
 
         .o_kanban_card_footer {
