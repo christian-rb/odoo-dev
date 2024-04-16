@@ -117,6 +117,7 @@ class CustomerPortal(payment_portal.PaymentPortal):
         message=False,
         download=False,
         downpayment=None,
+        link_amount=None,
         **kw
     ):
         try:
@@ -166,6 +167,7 @@ class CustomerPortal(payment_portal.PaymentPortal):
             'report_type': 'html',
             'backend_url': backend_url,
             'res_company': order_sudo.company_id,  # Used to display correct company logo
+            'link_amount': link_amount,
         }
 
         # Payment values
@@ -185,7 +187,8 @@ class CustomerPortal(payment_portal.PaymentPortal):
         values = self._get_page_view_values(
             order_sudo, access_token, values, history_session_key, False)
 
-        return request.render('sale.sale_order_portal_template', values)
+        return request.render('sale.sale_order_portal_template', values) #here it renders the portal view, add the link_payment, amount and whatever there
+        # maybe in views add an if that if pratial_amount is specified then show the other modal
 
     def _get_payment_values(self, order_sudo, downpayment=False, **kwargs):
         """ Return the payment-specific QWeb context values.
@@ -462,3 +465,4 @@ class PaymentPortal(payment_portal.PaymentPortal):
                 'access_token': order_sudo.access_token, #here it changes the payment access token to SO access token
             })
         return form_values
+

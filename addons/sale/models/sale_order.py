@@ -1955,3 +1955,6 @@ class SaleOrder(models.Model):
             return self.partner_id.lang
 
         return self.env.lang
+
+    def amount_left(self):
+        return self.amount_total - self.amount_paid

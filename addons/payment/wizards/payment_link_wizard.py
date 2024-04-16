@@ -65,7 +65,7 @@ class PaymentLinkWizard(models.TransientModel):
             base_url = related_document.get_base_url()  # Don't generate links for the wrong website
             url_params = {
                 'amount': self.amount,
-                'access_token': related_document.access_token,
+                'access_token': self._get_access_token(),
                 **self._get_additional_link_values(),
             }
             payment_link.link = f'{base_url}/payment/pay?{urls.url_encode(url_params)}'

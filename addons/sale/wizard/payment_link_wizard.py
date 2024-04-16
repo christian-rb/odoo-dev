@@ -50,12 +50,12 @@ class PaymentLinkWizard(models.TransientModel):
 
     def _compute_link(self):  # ANKO here I would like to change link from payment/pay to going to Sale Order directly
         super()._compute_link()
-        for payment_link in self:
+        for payment_link in self.filtered(lambda s: self.res_model == 'sale.order'):
             related_document = self.env[payment_link.res_model].browse(payment_link.res_id)
             base_url = related_document.get_base_url()  # Don't generate links for the wrong website
             url_params = {
-                'amount': self.amount,
-                'access_token': related_document.access_token, #it can be the document access token
+                'access_token': related_document.access_token,
+                'link_amount': self.amount,
                 **self._get_additional_link_values(),
             }
             payment_link.link = f'{base_url}/my/orders/{related_document.id}?{urls.url_encode(url_params)}'

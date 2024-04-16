@@ -221,10 +221,20 @@
                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </header>
                                 <main class="modal-body" id="sign-dialog">
+                                    <div>
+                                        <t t-if="link_amount">
+                                            <t t-set="partial_amount" t-value="link_amount + sale_order.currency_id.symbol"/>
+                                            <button type="button" class="btn btn-primary">Instalment <div t-out="partial_amount"/>
+                                            </button>
+                                        </t>
+                                    </div>
                                     <span>
                                         By signing, you confirm acceptance on behalf of dupa dupa
                                         <b t-field="sale_order.partner_id.commercial_partner_id"/>
                                         for the <b data-id="total_amount" t-field="sale_order.amount_total"/> quote.
+                                        <t t-out="link_amount">
+                                            <span>DUPA</span>
+                                        </t>
                                     </span>
                                     <b t-if="sale_order.payment_term_id" t-field="sale_order.payment_term_id.note"/>
                                     <t t-call="portal.signature_form">
@@ -246,8 +256,8 @@
                                 <main class="modal-body" id="sign-dialog">
                                     <t t-set="prepayment_amount" t-value="sale_order._get_prepayment_required_amount()"/>
                                     <t t-set="prepayment_available" t-value="sale_order.prepayment_percent and sale_order.prepayment_percent != 1.0"/>
-                                    <!-- Display choices only if a pre payment can confirm the order. -->
-                                    <div t-if="prepayment_available"
+                                    <!-- Display choices only if a pre payment can confirm the order. --> <!-- -->
+                                    <div t-if="prepayment_available and not link_amount"
                                          id="o_sale_portal_prepayment_buttons"
                                          class="d-flex btn-group mb-3"
                                          role="group"
@@ -262,7 +272,32 @@
                                             <span class="fw-bold" t-field="sale_order.amount_total"/>
                                         </button>
                                     </div>
-                                    <div class="mb-3">
+                                    <t t-if="link_amount">
+                                        <div
+                                            id="o_sale_portal_link_buttons"
+                                            class="d-flex btn-group mb-3"
+                                            role="group">
+                                            <t t-set="amount_left" t-value="sale_order._get_prepayment_required_amount()"/>
+                                            <t t-set="installment_amount" t-value="float(link_amount) &lt; amount_left"/>
+                                            <t t-if="installment_amount">
+                                                <button name="o_sale_portal_amount_installment_button" class="btn btn-light active">
+                                                Installment <br/>
+                                                <span t-esc="float(link_amount)" class="fw-bold"
+                                                      t-options="{'widget': 'monetary', 'display_currency': sale_order.currency_id}"/>
+                                                </button>
+                                                <button name="o_sale_portal_amount_confirmation_button" class="btn btn-light">
+                                                    Full amount <br/>
+                                                    <span class="fw-bold" t-esc="amount_left"/>
+                                                </button>
+                                            </t>
+                                        </div>
+                                        <div>
+                                            Reference: <t t-esc="sale_order.name"></t>
+
+                                        </div>
+                                    </t>
+
+                                    <div t-if="not link_amount" class="mb-3">
                                         <!-- The widget associated with this modal will hide and show divs in function of the amount selected. -->
                                         <span t-if="prepayment_available">
                                             <span id="o_sale_portal_use_amount_prepayment">
