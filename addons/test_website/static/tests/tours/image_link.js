@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import wTourUtils from '@website/js/tours/tour_utils';
+import * as hoot from "@odoo/hoot-dom";
 
 /**
  * The purpose of this tour is to check the link on image flow.
@@ -34,7 +35,10 @@ wTourUtils.registerWebsitePreviewTour('test_image_link', {
     }, {
         content: "enter site URL",
         trigger: "#oe_snippets we-customizeblock-options:has(we-title:contains('Image')) we-input:contains(Your URL) input",
-        run: "edit odoo.com",
+        run(helpers) {
+            hoot.pointerDown(this.anchor);
+            hoot.edit("odoo.com", {confirm: "blur"});
+        },
     },
     ...selectImageSteps,
     {
@@ -44,7 +48,10 @@ wTourUtils.registerWebsitePreviewTour('test_image_link', {
     }, {
         content: "remove URL",
         trigger: "#oe_snippets we-customizeblock-options:has(we-title:contains('Image')) we-input:contains(Your URL) input",
-        run: "clear",
+        run(helpers) {
+            hoot.pointerDown(this.anchor);
+            hoot.clear({confirm: "blur"});
+        }
     },
     ...selectImageSteps,
     {
@@ -54,7 +61,10 @@ wTourUtils.registerWebsitePreviewTour('test_image_link', {
     }, {
         content: "enter email URL",
         trigger: "#oe_snippets we-customizeblock-options:has(we-title:contains('Image')) we-input:contains(Your URL) input",
-        run: "edit mailto:test@test.com",
+        run(helpers) {
+            hoot.pointerDown(this.anchor);
+            hoot.edit("mailto:test@test.com", {confirm: "blur"});
+        },
     },
     ...selectImageSteps,
     {
@@ -64,7 +74,10 @@ wTourUtils.registerWebsitePreviewTour('test_image_link', {
     }, {
         content: "enter phone URL",
         trigger: "#oe_snippets we-customizeblock-options:has(we-title:contains('Image')) we-input:contains(Your URL) input",
-        run: "edit tel:555-2368",
+        run(helpers) {
+            hoot.pointerDown(this.anchor);
+            hoot.edit("tel:555-2368", {confirm: "blur"});
+        },
     },
     ...selectImageSteps,
     {
@@ -74,7 +87,10 @@ wTourUtils.registerWebsitePreviewTour('test_image_link', {
     }, {
         content: "remove URL",
         trigger: "#oe_snippets we-customizeblock-options:has(we-title:contains('Image')) we-input:contains(Your URL) input",
-        run: "clear",
+        run(helpers) {
+            hoot.pointerDown(this.anchor);
+            hoot.clear({confirm: "blur"});
+        }
     },
     ...selectImageSteps,
     {
