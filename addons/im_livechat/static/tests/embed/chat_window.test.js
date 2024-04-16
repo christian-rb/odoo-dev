@@ -45,10 +45,11 @@ test("do not save fold state of temporary live chats", async () => {
     await contains(".o-mail-Message", { text: "Hello", count: 0 });
     await assertSteps(["fold - folded"]);
     await click("[title='Close Chat Window']");
+    await contains(".o-livechat-closeConfirmation-overlay");
+    await click("button", { text: "Leave conversation" });
     await click("button", { text: "Close conversation" });
     await click(".o-livechat-LivechatButton");
     await contains(".o-mail-Message", { text: "Hello, how may I help you?" });
-    await assertSteps([]);
     await click(".o-mail-ChatWindow-header");
     await assertSteps([]);
 });
