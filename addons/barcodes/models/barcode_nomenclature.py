@@ -1,6 +1,7 @@
 import re
 
-from odoo import models, fields, api
+from odoo import _, api, fields, models
+from odoo.exceptions import ValidationError
 from odoo.tools import check_barcode_encoding, get_barcode_check_digit
 
 
@@ -15,12 +16,32 @@ UPC_EAN_CONVERSIONS = [
 class BarcodeNomenclature(models.Model):
     _name = 'barcode.nomenclature'
     _description = 'Barcode Nomenclature'
+    _order = 'sequence asc, id'
 
+    sequence = fields.Integer(string='Sequence')
     name = fields.Char(string='Barcode Nomenclature', required=True, help='An internal identification of the barcode nomenclature')
     rule_ids = fields.One2many('barcode.rule', 'barcode_nomenclature_id', string='Rules', help='The list of barcode rules')
     upc_ean_conv = fields.Selection(
         UPC_EAN_CONVERSIONS, string='UPC/EAN Conversion', required=True, default='always',
         help="UPC Codes can be converted to EAN by prefixing them with a zero. This setting determines if a UPC/EAN barcode should be automatically converted in one way or another when trying to match a rule with the other encoding.")
+    is_combined = fields.Boolean(
+        string="Is Combined",
+        help="For a combined nomenclature, a single barcode can match multiple rules. "
+             "Otherwise, the full barcode can match only one single rule at the time.")
+    separator_expr = fields.Char(
+        string="FNC1 Separator", trim=False, default=r'(Alt029|#|\x1D)',
+        help="Alternative regex delimiter for the FNC1. The separator must not match the begin/end of any related rules pattern.")
+    pattern = fields.Char(string='Nomenclature Pattern', help="In addition of the rules, a barcode must match this pattern to be parsed by this nomenclature.")
+
+    @api.constrains('separator_expr')
+    def _check_pattern(self):
+        for nom in self:
+            if nom.is_combined and nom.separator_expr:
+                try:
+                    re.compile("(?:%s)?" % nom.separator_expr)
+                except re.error as error:
+                    error_message = _("The FNC1 Separator Alternative is not a valid Regex: ")
+                    raise ValidationError(error_message + str(error))
 
     @api.model
     def sanitize_ean(self, ean):

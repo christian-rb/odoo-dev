@@ -65,7 +65,7 @@ class TestBarcodeGS1Nomenclature(TransactionCase):
         # Configures a barcode GS1 nomenclature...
         barcode_nomenclature = self.env['barcode.nomenclature'].create({
             'name': "GS1 Nomenclature - Test",
-            'is_gs1_nomenclature': True,
+            'is_combined': True,
         })
         default_barcode_rule_vals = {
             'default_encoding': 'gs1-128',

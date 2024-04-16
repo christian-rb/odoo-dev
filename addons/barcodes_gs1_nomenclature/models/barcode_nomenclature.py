@@ -12,22 +12,6 @@ FNC1_CHAR = '\x1D'
 class BarcodeNomenclature(models.Model):
     _inherit = 'barcode.nomenclature'
 
-    is_gs1_nomenclature = fields.Boolean(
-        string="Is GS1 Nomenclature",
-        help="This Nomenclature use the GS1 specification, only GS1-128 encoding rules is accepted is this kind of nomenclature.")
-    gs1_separator_fnc1 = fields.Char(
-        string="FNC1 Separator", trim=False, default=r'(Alt029|#|\x1D)',
-        help="Alternative regex delimiter for the FNC1. The separator must not match the begin/end of any related rules pattern.")
-
-    @api.constrains('gs1_separator_fnc1')
-    def _check_pattern(self):
-        for nom in self:
-            if nom.is_gs1_nomenclature and nom.gs1_separator_fnc1:
-                try:
-                    re.compile("(?:%s)?" % nom.gs1_separator_fnc1)
-                except re.error as error:
-                    raise ValidationError(_("The FNC1 Separator Alternative is not a valid Regex: ") + str(error))
-
     @api.model
     def gs1_date_to_date(self, gs1_date):
         """ Converts a GS1 date into a datetime.date.
@@ -95,8 +79,8 @@ class BarcodeNomenclature(models.Model):
         """
         self.ensure_one()
         separator_group = FNC1_CHAR + "?"
-        if self.gs1_separator_fnc1:
-            separator_group = "(?:%s)?" % self.gs1_separator_fnc1
+        if self.separator_expr:
+            separator_group = "(?:%s)?" % self.separator_expr
         results = []
         gs1_rules = self.rule_ids.filtered(lambda r: r.encoding == 'gs1-128')
 
@@ -122,7 +106,7 @@ class BarcodeNomenclature(models.Model):
         return results
 
     def parse_barcode(self, barcode):
-        if self.is_gs1_nomenclature:
+        if self.is_combined:
             return self.gs1_decompose_extanded(barcode)
         return super().parse_barcode(barcode)
 
@@ -134,7 +118,7 @@ class BarcodeNomenclature(models.Model):
         is only digits to keep the original barcode part only.
         """
         nomenclature = self.env.company.nomenclature_id
-        if nomenclature.is_gs1_nomenclature:
+        if nomenclature.is_combined:
             for i, arg in enumerate(args):
                 if not isinstance(arg, (list, tuple)) or len(arg) != 3:
                     continue

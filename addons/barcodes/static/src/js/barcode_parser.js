@@ -1,9 +1,40 @@
 /** @odoo-module **/
 
+export const FNC1_CHAR = String.fromCharCode(29);
+export class BarcodeParserError extends Error {};
+import { _t } from "@web/core/l10n/translation";
+
 export class BarcodeParser {
-    static barcodeNomenclatureFields = ["name", "rule_ids", "upc_ean_conv"];
-    static barcodeRuleFields = ["name", "sequence", "type", "encoding", "pattern", "alias"];
+    static barcodeNomenclatureFields = [
+        "is_combined",
+        "name",
+        "rule_ids",
+        "separator_expr",
+        "upc_ean_conv",
+    ];
+    static barcodeRuleFields = [
+        "alias",
+        "encoding",
+        "name",
+        "pattern",
+        "rule_part_ids",
+        "sequence",
+        "type",
+        // TODO: remove following fields ?
+        "gs1_content_type",
+        "gs1_decimal_usage",
+        "associated_uom_id",
+    ];
+    static BarcodeRulePartsFields = [
+        "associated_uom_id",
+        "encoding",
+        "pattern",
+        "rule_id",
+        "sequence",
+        "type",
+    ];
     static async fetchNomenclature(orm, id) {
+        // Fetches the nomenclature fields.
         const [nomenclature] = await orm.read(
             "barcode.nomenclature",
             [id],
@@ -14,10 +45,27 @@ export class BarcodeParser {
             [["barcode_nomenclature_id", "=", id]],
             this.barcodeRuleFields
         );
+        // Fetches the nomenclature's rules.
         rules = rules.sort((a, b) => {
             return a.sequence - b.sequence;
         });
         nomenclature.rules = rules;
+        // Fetches the nomenclature rules' groups.
+        const groupsIds = new Set();
+        for (const rule of nomenclature.rules) {
+            rule.rule_part_ids.forEach(partId => groupsIds.add(partId));
+        }
+        const groups = await orm.searchRead(
+            "barcode.rule.part",
+            [["id", "in", [...groupsIds]]],
+            this.BarcodeRulePartsFields
+        );
+        // Assigns to each rules their groups.
+        for (const rule of nomenclature.rules) {
+            rule.groups = rule.rule_part_ids.length
+                ? groups.filter(g => rule.rule_part_ids.includes(g.id))
+                : [];
+        }
         return nomenclature;
     }
 
@@ -27,6 +75,9 @@ export class BarcodeParser {
 
     setup({ nomenclature }) {
         this.nomenclature = nomenclature;
+        // Use the nomenclature's separaor regex, else use an impossible one.
+        const nomenclatureSeparator = this.nomenclature.separator_expr;
+        this.separatorRegex = new RegExp(nomenclatureSeparator || '.^', 'g');
     }
 
     /**
@@ -177,6 +228,11 @@ export class BarcodeParser {
      *      - base_code: the barcode with all the encoding parts set to zero; the one put on the product in the backend
      */
     parse_barcode(barcode) {
+        // TODO: parse no more then one rule when not combined.
+        return this._parse_combined_barcode(barcode)
+    }
+
+    _parse_barcode(barcode) {
         var parsed_result = {
             encoding: '',
             type:'error',
@@ -232,5 +288,142 @@ export class BarcodeParser {
             }
         }
         return parsed_result;
+    }
+
+    /**
+     * Try to decompose the extanded barcode into several unit of information using nomenclature rules
+     *
+     * @param {string} barcode
+     * @returns {Array} Array of object
+     */
+    _parse_combined_barcode(barcode) {
+        const results = [];
+        const {rules} = this.nomenclature;
+        const separatorReg = `(?:${FNC1_CHAR}+)?`;
+        barcode = this._convertGS1Separators(barcode);
+
+        while (barcode.length > 0) {
+            const barcodeLength = barcode.length;
+            for (const rule of rules) {
+                const match = barcode.match("^" + rule.pattern + separatorReg);
+                if (match && match.length >= 3) {
+                    const res = this.parse_combined_rule_pattern(match, rule);
+                    if (res) {
+                        barcode = barcode.slice(match.index + match[0].length);
+                        results.push(...res);
+                        if (barcode.length === 0) {
+                            return results; // Barcode completly parsed, no need to keep looping.
+                        }
+                    } else {
+                        throw new BarcodeParserError(
+                            _t("This barcode can't be parsed by any barcode rules."));
+                    }
+                }
+            }
+            if (barcodeLength === barcode.length) {
+                throw new BarcodeParserError(
+                    _t("This barcode can't be partially or fully parsed."));
+            }
+        }
+
+        return results;
+    }
+
+    /**
+     * Convert YYMMDD GS1 date into a Date object
+     *
+     * @param {string} gs1Date YYMMDD string date, length must be 6
+     * @returns {Date}
+     */
+    gs1_date_to_date(gs1Date) {
+        // See 7.12 Determination of century in dates:
+        // https://www.gs1.org/sites/default/files/docs/barcodes/GS1_General_Specifications.pdfDetermination of century
+        const now = new Date();
+        const substractYear = parseInt(gs1Date.slice(0, 2)) - (now.getFullYear() % 100);
+        let century = Math.floor(now.getFullYear() / 100);
+        if (51 <= substractYear && substractYear <= 99) {
+            century--;
+        } else if (-99 <= substractYear && substractYear <= -50) {
+            century++;
+        }
+        const year = century * 100 + parseInt(gs1Date.slice(0, 2));
+        const date = new Date(year, parseInt(gs1Date.slice(2, 4) - 1));
+
+        if (gs1Date.slice(-2) === '00'){
+            // Day is not mandatory, when not set -> last day of the month
+            date.setDate(new Date(year, parseInt(gs1Date.slice(2, 4)), 0).getDate());
+        } else {
+            date.setDate(parseInt(gs1Date.slice(-2)));
+        }
+        return date;
+    }
+
+    /**
+     * Perform interpretation of the barcode value depending of the rule.gs1_content_type
+     *
+     * @param {Array} match Result of a regex match with atmost 2 groups (ia and value)
+     * @param {Object} rule Matched Barcode Rule
+     * @returns {Object|null}
+     */
+    parse_combined_rule_pattern(match, rule) {
+        let decimalPosition = 0;
+        const results = [];
+        // Defines result part's data for each match/rule group pair.
+        for (let i = 0; i < rule.groups.length; i++) {
+            const value = match[i + 1];
+            const group = rule.groups[i];
+            const result = {
+                rule: Object.assign({}, rule),
+                group: Object.assign({}, group),
+                string_value: value,
+                code: value,
+                value,
+                base_code: match[0],
+                type: group.type
+            };
+
+            if (group.type === "decimal_position") {
+                result.value = parseInt(value);
+                decimalPosition = result.value;
+            } else if (group.type === "measure") {
+                decimalPosition = decimalPosition || group.decimal_position;
+                if (decimalPosition > 0) {
+                    const integral = value.slice(0, value.length - decimalPosition);
+                    const decimal = value.slice(value.length - decimalPosition);
+                    result.value = parseFloat( integral + "." + decimal);
+                } else {
+                    result.value = parseInt(value);
+                }
+            } else if (group.type === "date") {
+                if (value.length !== 6) {
+                    // TODO: Adapt to more format then only YYMMDD.
+                    throw new Error(_t("Invalid barcode: can't be formated as date"));
+                }
+                result.value = this.gs1_date_to_date(value);
+            } else if (group.type === "product") {
+                if (rule.encoding === "ean13") {
+                    result.value = this.sanitize_ean(value.padEnd(13, "0"));
+                } else if (rule.encoding === "any" && group.encoding === "ean13") {
+                    result.value = this.sanitize_ean(value);
+                }
+            } else {
+                result.value = value;
+            }
+            results.push(result);
+        }
+        return results
+    }
+
+    /**
+     * The FNC1 is the default GS1 separator character, but through the field `separator_expr`,
+     * the user has the possibility to define one or multiple characters to use as separator as
+     * a regex. This method replaces all of the matches in the given barcode by the FNC1.
+     *
+     * @param {string} barcode
+     * @returns {string}
+     */
+    _convertGS1Separators(barcode) {
+        barcode = barcode.replace(this.separatorRegex, FNC1_CHAR);
+        return barcode;
     }
 }
