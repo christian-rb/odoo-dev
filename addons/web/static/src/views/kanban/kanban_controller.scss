@@ -158,9 +158,13 @@
         //     }
         // }
 
-        .o_kanban_card_group_column {
-            flex-direction: column;
+        .o_kanban_card_group {
             column-gap: var(--Card-Group-gap, #{map-get($spacers, 2)});
+            align-items: baseline;
+
+            &.o_kanban_card_group_column {
+                flex-direction: column;
+            }
         }
 
         .o_kanban_card_footer {

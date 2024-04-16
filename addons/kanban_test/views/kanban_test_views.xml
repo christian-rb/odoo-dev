@@ -149,16 +149,14 @@
                     <card-header>
                         <field name="name"/>
                     </card-header>
-                    <card-group>
-                        <div>
-                            <i class="fa fa-map-marker mt-1 me-2 text-center ps-1" title="Location"/>
-                            <field class="ms-1" name="address_id"/>
-                            <span invisible="address_id" class="ms-1">Online Event</span>
-                        </div>
-                        <div>
-                            <i class="fa fa-group mt-1 me-2 text-center" title="Attendees"/>
-                            <field name="seats_taken" class="me-1"/> Attendees
-                        </div>
+                    <card-group direction="row">
+                        <i class="fa fa-map-marker fa-fw text-center" title="Location"/>
+                        <field name="address_id" invisible="not address_id"/>
+                        <span invisible="address_id">Online Event</span>
+                    </card-group>
+                    <card-group direction="row">
+                        <i class="fa fa-group fa-fw text-center" title="Attendees"/>
+                        <span><field name="seats_taken"/> Attendees</span>
                     </card-group>
                     <card-footer>
                         <field name="activity_ids" widget="kanban_activity"/>
@@ -271,20 +269,20 @@
                         <card-header>
                             <field name="name"/>
                         </card-header>
+                        <field name="parent_id" invisible="not parent_id"/>
+                        <field name="project_id" invisible="not project_id"/>
+                        <field name="partner_id" invisible="not partner_id"/>
+                        <field name="milestone_id" options="{'no_open': True}" invisible="not milestone_id"/>
                     </card-group>
                     <card-group>
-                        <field name="parent_id" invisible="context.get('default_project_id', False)"/>
-                        <field name="project_id" invisible="context.get('default_parent_id', False)"/>
-                        <field name="partner_id"/>
-                        <field name="milestone_id" options="{'no_open': True}"/>
-                    </card-group>
-                    <card-group name="dates">
-                        <div class="d-flex flex-wrap align-items-center" invisible="not (planned_date_begin and date_deadline)">
-                            <field name="planned_date_begin"/>
+                        <card-group name="dates" direction="row" class="flex-wrap">
+                            <field name="planned_date_begin" invisible="not planned_date_begin"/>
                             <i class="fa fa-long-arrow-right mx-1" aria-label="Arrow icon" title="Arrow" invisible="not planned_date_begin"/>
-                            <field name="date_deadline"/>
-                        </div>
-                        <field name="date_deadline" widget="remaining_days" invisible="not date_deadline or planned_date_begin"/>
+                            <field name="date_deadline" invisible="not date_deadline"/>
+                        </card-group>
+                        <card-group>
+                            <field name="date_deadline" widget="remaining_days" invisible="not date_deadline or planned_date_begin"/>
+                        </card-group>
                     </card-group>
                     <card-group name="cover_image">
                         <field name="displayed_image_id" widget="attachment_image"/>
