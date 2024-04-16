@@ -1769,7 +1769,9 @@ class WebsiteSale(payment_portal.PaymentPortal):
             return request.redirect('/shop')
 
         if order and not order.amount_total and not tx_sudo:
-            order.with_context(send_email=True).with_user(SUPERUSER_ID).action_confirm()
+            if order.with_context(send_email=True).with_user(SUPERUSER_ID).process_zero_value_orders():
+                # clean context and session, then redirect to the confirmation page
+                request.website.sale_reset()
             return request.redirect(order.get_portal_url())
 
         # clean context and session, then redirect to the confirmation page

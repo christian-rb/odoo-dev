@@ -1269,6 +1269,20 @@ class SaleOrder(models.Model):
 
         return self.env['sale.order.line'].browse(invoiceable_line_ids + down_payment_line_ids)
 
+    def process_zero_value_orders(self):
+        """Processes sales orders when there is no payment transaction and zero amount total and creates invoices if necessary.
+        :return: True if invoice is generated automatically, False otherwise
+        :rtype: bool
+        """
+        self.with_context(send_email=True).action_confirm()
+        auto_invoice = self.env['ir.config_parameter'].get_param('sale.automatic_invoice')
+        if auto_invoice:
+            if not self.amount_to_invoice and not self.amount_paid and self.reward_amount:
+                invoice = self._create_invoices(final=True)
+                invoice.action_post()
+                return True
+        return False
+
     def _create_invoices(self, grouped=False, final=False, date=None):
         """ Create invoice(s) for the given Sales Order(s).
 
