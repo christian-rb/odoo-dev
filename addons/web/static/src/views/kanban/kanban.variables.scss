@@ -15,9 +15,8 @@ $o-kanban-group-padding: $o-horizontal-padding !default; // Cannot be higher tha
 $o-kanban-inside-hgutter-mobile: $o-horizontal-padding !default;
 
 // ------- Kanban cards variables -------
-$o-kanban-card-gap-v: 0.15em !default;
-$o-kanban-card-main-gap: $o-kanban-card-gap-v !default;
-$o-kanban-card-header-margin-bottom: $o-kanban-card-gap-v !default;
+$o-kanban-card-main-gap: .15em !default;
+$o-kanban-card-header-margin-bottom: .25em !default;
 
 // ------- Kanban dashboard variables -------
 
