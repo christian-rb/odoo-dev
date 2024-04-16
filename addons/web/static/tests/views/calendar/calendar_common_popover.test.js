@@ -1,8 +1,9 @@
 import { expect, test } from "@odoo/hoot";
-import { mountWithCleanup } from "../../web_test_helpers";
-import { CalendarCommonPopover } from "@web/views/calendar/calendar_common/calendar_common_popover";
-import { DEFAULT_DATE, FAKE_MODEL } from "./calendar_test_helpers";
 import { click } from "@odoo/hoot-dom";
+import { mountWithCleanup } from "@web/../tests/web_test_helpers";
+import { DEFAULT_DATE, FAKE_MODEL } from "./calendar_test_helpers";
+
+import { CalendarCommonPopover } from "@web/views/calendar/calendar_common/calendar_common_popover";
 
 function fakeRecord(data = {}) {
     return {
