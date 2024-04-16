@@ -4,7 +4,7 @@
             <div class="restaurant-scenarios row p-3 justify-content-center">
                 <t t-foreach="restaurantScenarios" t-as="item" t-key="item_index">
                     <div class="col-md-4">
-                        <div class="card mb-3 rounded-3 scenario-card" style="max-width: 540px;" t-on-click="() => this.loadScenarioData(item.function_name)">
+                        <div class="card mb-3 rounded-3 scenario-card" style="max-width: 540px;" t-on-click="() => this.loadScenario.call(item.function_name)">
                             <div class="row g-0">
                                 <div class="col-md-4">
                                     <div class="img-container m-2 d-flex align-items-center justify-content-center">

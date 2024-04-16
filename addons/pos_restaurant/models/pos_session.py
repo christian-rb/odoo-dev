@@ -7,15 +7,6 @@ import json
 class PosSession(models.Model):
     _inherit = 'pos.session'
 
-    def get_onboarding_data(self):
-        results = super().get_onboarding_data()
-
-        if self.config_id.module_pos_restaurant:
-            response = self.load_data(['restaurant.floor', 'restaurant.table'], True)
-            results.update(response['data'])
-
-        return results
-
     @api.model
     def _load_pos_data_models(self, config_id):
         data = super()._load_pos_data_models(config_id)

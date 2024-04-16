@@ -11,16 +11,18 @@
     <t t-name="point_of_sale.PosActionHelper">
         <div class="container">
             <div class="flex-grow-1 text-center mt-5">
-                <t t-if="!state.loadingDemo">
+                <t t-if="loadScenario.status !== 'loading' || loadConfig.status !== 'loading'">
                     <t t-if="!state.haveAvailableProducts">
-                        <p t-if="!props.hasChartTemplate" class="h1 text-primary">Please install a chart template for this company to install demo scenarios</p>
+                        <p t-if="!props.hasChartTemplate" class="h1 text-primary">
+                            Please install a chart template for this company to install demo scenarios
+                        </p>
                         <t t-else="">
                             <p class="h1 text-primary">No products defined yet !</p>
                             <p class="h2 m-3">Do you want to try our sample data ?</p>
                             <div class="shop-scenarios row p-3">
                                 <t t-foreach="shopScenarios" t-as="item" t-key="item_index">
                                     <div class="col-md-4">
-                                        <div class="card mb-3 rounded-3 scenario-card" style="max-width: 540px;" t-on-click="() => this.loadScenarioData(item.function_name)">
+                                        <div class="card mb-3 rounded-3 scenario-card" style="max-width: 540px;" t-on-click="() => this.loadScenario.call(item.function_name)">
                                             <div class="row g-0">
                                                 <div class="col-md-4">
                                                     <div class="img-container m-2 d-flex align-items-center justify-content-center">
@@ -59,7 +61,7 @@
                         <div class="row p-3 m-4 justify-content-center">
                             <t t-foreach="predefinedConfigs" t-as="item" t-key="item_index">
                                 <div class="col-md-4">
-                                    <div class="card mb-3 rounded-3 scenario-card" style="max-width: 540px;" t-on-click="() => this.loadPosConfig(item.function_name)">
+                                    <div class="card mb-3 rounded-3 scenario-card" style="max-width: 540px;" t-on-click="() => this.loadConfig.call(item.function_name)">
                                         <div class="row g-0">
                                             <div class="col-md-4">
                                                 <div class="img-container m-2 d-flex align-items-center justify-content-center">

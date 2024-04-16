@@ -50,7 +50,6 @@ export class ProductScreen extends Component {
         this.notification = useService("notification");
         this.numberBuffer = useService("number_buffer");
         this.state = useState({
-            loadingDemo: false,
             previousSearchWord: "",
             currentOffset: 0,
         });
@@ -317,12 +316,6 @@ export class ProductScreen extends Component {
         ].filter((id) => !this.pos.models["product.product"].get(id)?.available_in_pos);
     }
 
-    _showLoadDemoDataMissingDataError(missingData) {
-        console.error(
-            `Missing '${missingData}' in pos.session:load_product_frontend server answer.`
-        );
-    }
-
     async onPressEnterKey() {
         const { searchProductWord } = this.pos;
         if (!searchProductWord) {
@@ -375,10 +368,6 @@ export class ProductScreen extends Component {
         return product;
     }
 
-    createNewProducts() {
-        window.open("/web#action=point_of_sale.action_client_product_menu", "_self");
-    }
-
     async addProductToOrder(product) {
         await reactive(this.pos).addLineToCurrentOrder({ product_id: product }, {});
     }
@@ -386,10 +375,6 @@ export class ProductScreen extends Component {
     async onProductInfoClick(product) {
         const info = await reactive(this.pos).getProductInfo(product, 1);
         this.dialog.add(ProductInfoPopup, { info: info, product: product });
-    }
-
-    get isModulePosRestaurant() {
-        return this.pos.config.module_pos_restaurant;
     }
 }
 

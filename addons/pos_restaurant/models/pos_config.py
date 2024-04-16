@@ -110,7 +110,7 @@ class PosConfig(models.Model):
 
     @api.model
     def load_onboarding_bar_scenario(self):
-        convert.convert_file(self.env, 'pos_restaurant', 'data/scenarios/bar_data.xml', None, mode='init', kind='data')
+        convert.convert_file(self.env, 'pos_restaurant', 'data/scenarios/bar_data.xml', None, noupdate=True, mode='init', kind='data')
         journal, payment_methods_ids = self._create_journal_and_payment_methods()
         payment_methods_ids += self.env['pos.payment.method']._ensure_payment_methods([
             {'name': 'Cash bar', 'type': 'cash', 'ref': 'pos_restaurant.cash_payment_method_bar'}
@@ -137,7 +137,7 @@ class PosConfig(models.Model):
 
     @api.model
     def load_onboarding_restaurant_scenario(self):
-        convert.convert_file(self.env, 'pos_restaurant', 'data/scenarios/restaurant_data.xml', None, mode='init', kind='data')
+        convert.convert_file(self.env, 'pos_restaurant', 'data/scenarios/restaurant_data.xml', None, noupdate=True, mode='init', kind='data')
         journal, payment_methods_ids = self._create_journal_and_payment_methods()
         payment_methods_ids += self.env['pos.payment.method']._ensure_payment_methods([
             {'name': 'Cash restaurant', 'type': 'cash', 'ref': 'pos_restaurant.cash_payment_method_restaurant'}

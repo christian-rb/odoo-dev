@@ -5,6 +5,7 @@ import { kanbanView } from "@web/views/kanban/kanban_view";
 import { Component, useState, onWillStart } from "@odoo/owl";
 import { KanbanRenderer } from "@web/views/kanban/kanban_renderer";
 import { useService } from "@web/core/utils/hooks";
+import { useTrackedAsync } from "@point_of_sale/app/utils/hooks";
 
 export class PosActionHelper extends Component {
     static template = "point_of_sale.PosActionHelper";
@@ -12,12 +13,26 @@ export class PosActionHelper extends Component {
 
     setup() {
         this.orm = useService("orm");
-        this.state = useState({
-            loadingDemo: false,
-            haveAvailableProducts: false,
-        });
+        this.state = useState({ haveAvailableProducts: false });
         onWillStart(async () => {
-            this.state.haveAvailableProducts = await this.checkAvailableProducts();
+            this.state.haveAvailableProducts = await this.orm.call(
+                "pos.config",
+                "check_available_products"
+            );
+        });
+        this.loadScenario = useTrackedAsync(async (functionName) => {
+            try {
+                await this.orm.call("pos.config", functionName);
+            } finally {
+                this.env.searchModel.dispatchEvent(new CustomEvent("update"));
+            }
+        });
+        this.loadConfig = useTrackedAsync(async (functionName) => {
+            try {
+                await this.orm.call("pos.config", functionName);
+            } finally {
+                this.env.searchModel.dispatchEvent(new CustomEvent("update"));
+            }
         });
     }
 
@@ -55,28 +70,6 @@ export class PosActionHelper extends Component {
         ];
     }
 
-    async checkAvailableProducts() {
-        await this.orm.call("pos.config", "check_available_products");
-    }
-
-    async loadScenarioData(functionName) {
-        this.state.loadingDemo = true;
-        try {
-            await this.orm.call("pos.config", functionName);
-        } finally {
-            this.env.searchModel.dispatchEvent(new CustomEvent("update"));
-        }
-    }
-
-    async loadPosConfig(functionName) {
-        this.state.loadingDemo = true;
-        try {
-            await this.orm.call("pos.config", functionName);
-        } finally {
-            this.env.searchModel.dispatchEvent(new CustomEvent("update"));
-        }
-    }
-
     createNewProducts() {
         window.open("/web#action=point_of_sale.action_client_product_menu", "_self");
     }
@@ -92,14 +85,13 @@ export class PosKanbanRenderer extends KanbanRenderer {
     setup() {
         super.setup();
         onWillStart(async () => {
-            const { has_pos_config, has_chart_template } = await this.checkCompanyHasPosConfig();
+            const { has_pos_config, has_chart_template } = await this.env.services.orm.call(
+                "pos.config",
+                "check_company_has_pos_config"
+            );
             this.hasPosConfig = has_pos_config;
             this.hasChartTemplate = has_chart_template;
         });
-    }
-
-    async checkCompanyHasPosConfig() {
-        return await this.env.services.orm.call("pos.config", "check_company_has_pos_config");
     }
 }
 

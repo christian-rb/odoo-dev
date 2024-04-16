@@ -1643,10 +1643,6 @@ class PosSession(models.Model):
             for session in sessions
         ])
 
-    def get_onboarding_data(self):
-        response = self.load_data(['pos.category', 'product.product', 'pos.order'], True)
-        return response['data']
-
     def _get_attributes_by_ptal_id(self):
         # performance trick: prefetch fields with search_fetch() and fetch()
         product_attributes = self.env['product.attribute'].search_fetch(

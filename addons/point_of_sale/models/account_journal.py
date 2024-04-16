@@ -24,16 +24,15 @@ class AccountJournal(models.Model):
 
     @api.model
     def _ensure_company_account_journal(self):
-        journal = self.env['account.journal'].search([
+        journal = self.search([
             ('code', '=', 'POSS'),
             ('company_id', '=', self.env.company.id),
         ], limit=1)
         if not journal:
-            journal = self.env['account.journal'].create({
-                'name': f'PoS journal {self.env.company.name}',
+            journal = self.create({
+                'name': _('Point of Sale'),
                 'code': 'POSS',
                 'type': 'general',
                 'company_id': self.env.company.id,
             })
         return journal
-

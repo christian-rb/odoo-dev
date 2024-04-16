@@ -212,6 +212,7 @@ class PosPaymentMethod(models.Model):
 
         return payment_bank.with_context(is_online_qr=True).build_qr_code_base64(
             float(amount), free_communication, structured_communication, currency, debtor_partner, self.qr_code_method, silent_errors=False)
+
     @api.model
     def _ensure_payment_methods(self, vals_list):
         res = []

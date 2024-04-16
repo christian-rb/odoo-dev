@@ -837,10 +837,6 @@ class PosConfig(models.Model):
                 return pm
         return False
 
-    def _get_journal_type(self, journal_type):
-        return self.env['account.journal'].search(['&', ('type', '=', journal_type), ('company_id', '=', self.company_id.id)], limit=1)
-
-
     def _get_special_products(self):
         return self.env.ref('point_of_sale.product_product_tip', raise_if_not_found=False) or self.env['product.product']
 
@@ -854,7 +850,7 @@ class PosConfig(models.Model):
 
     @api.model
     def load_onboarding_clothes_scenario(self):
-        convert.convert_file(self.env, 'point_of_sale', 'data/scenarios/clothes_data.xml', None, mode='init', kind='data')
+        convert.convert_file(self.env, 'point_of_sale', 'data/scenarios/clothes_data.xml', None, noupdate=True, mode='init', kind='data')
         journal, payment_methods_ids = self._create_journal_and_payment_methods()
         payment_methods_ids += self.env['pos.payment.method']._ensure_payment_methods([
             {'name': 'Cash clothes', 'type': 'cash', 'ref': 'point_of_sale.cash_payment_method_clothes'}
@@ -875,7 +871,7 @@ class PosConfig(models.Model):
 
     @api.model
     def load_onboarding_bakery_scenario(self):
-        convert.convert_file(self.env, 'point_of_sale', 'data/scenarios/bakery_data.xml', None, mode='init', kind='data')
+        convert.convert_file(self.env, 'point_of_sale', 'data/scenarios/bakery_data.xml', None, mode='init', noupdate=True, kind='data')
         journal, payment_methods_ids = self._create_journal_and_payment_methods()
         payment_methods_ids += self.env['pos.payment.method']._ensure_payment_methods([
             {'name': 'Cash bakery', 'type': 'cash', 'ref': 'point_of_sale.cash_payment_method_bakery'}
@@ -895,7 +891,7 @@ class PosConfig(models.Model):
 
     @api.model
     def load_onboarding_furniture_scenario(self):
-        convert.convert_file(self.env, 'point_of_sale', 'data/scenarios/furniture_data.xml', None, mode='init', kind='data')
+        convert.convert_file(self.env, 'point_of_sale', 'data/scenarios/furniture_data.xml', None, noupdate=True, mode='init', kind='data')
         journal, payment_methods_ids = self._create_journal_and_payment_methods()
         payment_methods_ids += self.env['pos.payment.method']._ensure_payment_methods([
             {'name': 'Cash furniture', 'type': 'cash', 'ref': 'point_of_sale.cash_payment_method_furniture'}

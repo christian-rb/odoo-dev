@@ -74,6 +74,7 @@
             'point_of_sale/static/src/backend/tours/point_of_sale.js',
             'point_of_sale/static/src/backend/debug_manager.js',
             'point_of_sale/static/src/backend/pos_kanban_view/*',
+            'point_of_sale/static/src/app/utils/hooks.js',
         ],
         'web.assets_tests': [
             'point_of_sale/static/tests/tours/**/*',
