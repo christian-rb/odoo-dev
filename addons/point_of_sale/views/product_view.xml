@@ -66,6 +66,7 @@
         <field name="arch" type="xml">
             <xpath expr="//page[@name='sales']" position="attributes">
                 <attribute name="invisible" remove="1" separator="or"/>
+            </xpath>
             <xpath expr="//page[@name='sales']" position="after">
                 <page string="Point of Sales" name="pos" invisible="not available_in_pos">
                     <group>
