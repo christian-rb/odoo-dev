@@ -415,6 +415,10 @@ class AccountMoveLine(models.Model):
              "associated partner",
     )
     is_refund = fields.Boolean(compute='_compute_is_refund')
+    # === Check Info === #
+    check_number = fields.Char(
+        store=False,
+        compute='_get_check_number')
 
     _sql_constraints = [
         (
@@ -447,6 +451,14 @@ class AccountMoveLine(models.Model):
             "Forbidden balance or account on non-accountable line"
         ),
     ]
+
+    @api.depends('payment_id', 'company_id')
+    def _get_check_number(self):
+        is_account_check = hasattr(self.company_id, 'account_check_printing_date_label')
+        for record in self:
+            record.check_number = ''
+            if is_account_check and record.company_id.account_check_printing_date_label:
+                record.check_number = record.payment_id.check_number
 
     @api.model
     def get_views(self, views, options=None):
