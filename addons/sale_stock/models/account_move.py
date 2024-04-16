@@ -62,7 +62,7 @@ class AccountMove(models.Model):
         previous_qties_delivered = defaultdict(float)
         stock_move_lines = current_invoice_amls.sale_line_ids.move_ids.move_line_ids.filtered(lambda sml: sml.state == 'done' and sml.lot_id).sorted(lambda sml: (sml.date, sml.id))
         for sml in stock_move_lines:
-            if sml.product_id not in invoiced_products or 'customer' not in {sml.location_id.usage, sml.location_dest_id.usage}:
+            if sml.product_id not in invoiced_products or (not sml.move_id.repair_line_type and 'customer' not in {sml.location_id.usage, sml.location_dest_id.usage}):
                 continue
             product = sml.product_id
             product_uom = product.uom_id
