@@ -45,7 +45,10 @@ export class ReceiptScreen extends Component {
             case "loading":
                 return { class: "text-info", message: _t("Sending in progress.") };
             case "success": {
-                return { class: "successful text-success", message: _t("Email sent.") };
+                return {
+                    class: "successful text-success",
+                    message: _t("Email is sent successfully."),
+                };
             }
             case "error": {
                 return {
