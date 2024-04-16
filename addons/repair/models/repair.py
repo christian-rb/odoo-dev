@@ -53,7 +53,7 @@ class Repair(models.Model):
     priority = fields.Selection([('0', 'Normal'), ('1', 'Urgent')], default='0', string="Priority")
     partner_id = fields.Many2one(
         'res.partner', 'Customer',
-        index=True, check_company=True, change_default=True,
+        index=True, check_company=True, change_default=True, compute='_compute_partner_id', readonly=False, store=True,
         help='Choose partner for whom the order will be invoiced and delivered. You can find a partner by its Name, TIN, Email or Internal Reference.')
     user_id = fields.Many2one('res.users', string="Responsible", default=lambda self: self.env.user, check_company=True)
 
@@ -74,7 +74,7 @@ class Repair(models.Model):
         domain="[('type', 'in', ['product', 'consu']), '|', ('company_id', '=', company_id), ('company_id', '=', False), '|', ('id', 'in', picking_product_ids), ('id', '=?', picking_product_id)]",
         check_company=True)
     product_qty = fields.Float(
-        'Product Quantity',
+        'Product Quantity', compute='_compute_product_qty', readonly=False, store=True,
         default=1.0, digits='Product Unit of Measure')
     product_uom = fields.Many2one(
         'uom.uom', 'Product Unit of Measure',
@@ -85,7 +85,7 @@ class Repair(models.Model):
         'stock.lot', 'Lot/Serial',
         default=False,
         compute="compute_lot_id", store=True,
-        domain="[('product_id','=', product_id), '|', ('company_id', '=', False), ('company_id', '=', company_id)]", check_company=True,
+        domain="[('product_id','=', product_id), '|', ('company_id', '=', False), ('company_id', '=', company_id), '|', ('id', 'in', picking_lot_ids), ('id', '=?', picking_lot_id)]", check_company=True,
         help="Products repaired are all belonging to this lot")
     tracking = fields.Selection(string='Product Tracking', related="product_id.tracking", readonly=False)
 
@@ -164,6 +164,8 @@ class Repair(models.Model):
         help="True if this repair is linked to a Return Order and the order is 'Done'. False otherwise.")
     picking_product_ids = fields.One2many('product.product', compute='compute_picking_product_ids')
     picking_product_id = fields.Many2one(related="picking_id.product_id")
+    picking_lot_ids = fields.One2many('stock.lot', compute='compute_picking_lot_ids')
+    picking_lot_id = fields.Many2one(related="picking_id.lot_id")
     # UI Fields
     unreserve_visible = fields.Boolean(
         'Allowed to Unreserve Production', compute='_compute_unreserve_visible',
@@ -173,9 +175,30 @@ class Repair(models.Model):
         help='Technical field to check when we can reserve quantities')
 
     @api.depends('picking_id')
+    def _compute_partner_id(self):
+        for repair in self:
+            repair.partner_id = repair.picking_id.partner_id
+
+    @api.depends('product_id', 'picking_id', 'lot_id')
+    def _compute_product_qty(self):
+        for repair in self:
+            if repair.picking_id:
+                if repair.tracking in ['serial', 'lot'] and repair.lot_id:
+                    repair.product_qty = repair.picking_id.move_line_ids.filtered(lambda m: m.product_id == repair.product_id and m.lot_id == repair.lot_id).quantity
+                else:
+                    repair.product_qty = repair.picking_id.move_ids.filtered(lambda m: m.product_id == repair.product_id).quantity
+            else:
+                repair.product_qty = 1.0
+
+    @api.depends('picking_id')
     def compute_picking_product_ids(self):
         for repair in self:
             repair.picking_product_ids = repair.picking_id.move_ids.product_id
+
+    @api.depends('picking_id')
+    def compute_picking_lot_ids(self):
+        for repair in self:
+            repair.picking_lot_ids = repair.picking_id.move_ids.lot_ids
 
     @api.depends('product_id', 'product_id.uom_id.category_id', 'product_uom.category_id')
     def compute_product_uom(self):
@@ -190,6 +213,8 @@ class Repair(models.Model):
         for repair in self:
             if (repair.product_id and repair.lot_id and repair.lot_id.product_id != repair.product_id) or not repair.product_id:
                 repair.lot_id = False
+            elif len(repair.picking_lot_ids) == 1:
+                repair.lot_id = repair.picking_lot_ids
 
     @api.depends('user_id', 'company_id')
     def _compute_picking_type_id(self):
