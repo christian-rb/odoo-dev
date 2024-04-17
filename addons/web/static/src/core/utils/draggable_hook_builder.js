@@ -606,6 +606,7 @@ export function makeDraggableHook(hookParams) {
                 if (diff.x) {
                     ctx.current.scrollParentX.scrollBy({ left: diffToScroll(diff.x) });
                 }
+                callBuildHandler("onDrag");
             };
 
             /**
