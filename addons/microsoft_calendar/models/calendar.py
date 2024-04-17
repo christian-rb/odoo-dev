@@ -13,6 +13,8 @@ from odoo.exceptions import UserError, ValidationError
 from odoo.tools import is_html_empty, email_normalize
 from odoo.osv import expression
 
+from odoo.addons.microsoft_calendar.utils.microsoft_calendar import MicrosoftCalendarService
+
 ATTENDEE_CONVERTER_O2M = {
     'needsAction': 'notresponded',
     'tentative': 'tentativelyaccepted',
@@ -260,6 +262,17 @@ class Meeting(models.Model):
             state_update = state_by_partner.get(attendee.partner_id.id)
             if state_update:
                 attendee.state = state_update
+
+    def action_synchronize_microsoft_events(self, microsoft_service=MicrosoftCalendarService):
+        """ Synchronize events with Outlook Calendar. """
+        user_synchronized = self.env['calendar.event']._check_microsoft_sync_status()
+        recurrence_in_batch = any(event.recurrence_id or event.recurrency for event in self)
+        if not user_synchronized:
+            raise ValidationError(_('An active synchronization with Microsoft Calendar is needed for synchronizing events.'))
+        elif recurrence_in_batch:
+            self._forbid_recurrence_update()
+        self.with_context(dont_notify=True).write({'need_sync_m': True})
+        self._sync_odoo2microsoft()
 
     def action_mass_archive(self, recurrence_update_setting):
         # Do not allow archiving if recurrence is synced with Outlook. Suggest updating directly from Outlook.
