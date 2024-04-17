@@ -39,6 +39,12 @@ class TestUtm(TestUTMCommon):
         self.assertEqual(source_4.name, 'Source 4 [3]', 'FIXME: should not increment automatically, should be "Source 4"')
         # self.assertEqual(source_4.name, 'Source 4')
 
+        # Create a new record when there are already duplicates
+        self.env['utm.source'].create({'name': 'Source 5 [2]'})
+        source_5 = self.env['utm.mixin']._find_or_create_record('utm.source', 'Source 5')
+        self.assertNotIn(source_5, source_1 | source_2 | source_4)
+        self.assertEqual(source_5.name, 'Source 5')
+
     def test_name_generation(self):
         """Test that the name is always unique. A counter must be added at the
         end of the name if it's not the case."""
@@ -74,12 +80,8 @@ class TestUtm(TestUTMCommon):
             utm_6_multi = self.env[utm_model].create([{'name': 'UTM dup'} for _ in range(4)])
             self.assertListEqual(
                 utm_6_multi.mapped('name'),
-                ['UTM dup [5]', 'UTM dup [6]', 'UTM dup [7]', 'UTM dup [8]'],
-                'FIXME: Duplicate counters should be filled in order of missing.')
-            # self.assertListEqual(
-            #     utm_6_multi.mapped('name'),
-            #     ['UTM dup'] + [f'UTM dup [{counter}]' for counter in [2, 3, 5]],
-            #     'Duplicate counters should be filled in order of missing.')
+                ['UTM dup'] + [f'UTM dup [{counter}]' for counter in [2, 3, 5]],
+                'Duplicate counters should be filled in order of missing.')
 
             utm_7 = self.env[utm_model].create({'name': 'UTM d'})
             self.assertEqual(
