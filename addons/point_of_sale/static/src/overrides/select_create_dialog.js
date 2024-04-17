@@ -6,8 +6,9 @@ patch(SelectCreateDialog.prototype, {
     get viewProps() {
         return {
             ...super.viewProps,
-            type: "kanban",
-            forceGlobalClick: true,
+            // type: "kanban",
+            // forceGlobalClick: true,
+            vlad: "vlad123",
         };
     },
 });
