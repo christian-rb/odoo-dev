@@ -1,9 +1,9 @@
 import { expect, test } from "@odoo/hoot";
+import { queryAllTexts } from "@odoo/hoot-dom";
 import { contains, mountWithCleanup } from "@web/../tests/web_test_helpers";
 import { DEFAULT_DATE, FAKE_MODEL } from "./calendar_test_helpers";
 
 import { CalendarYearPopover } from "@web/views/calendar/calendar_year/calendar_year_popover";
-import { queryAllTexts } from "@odoo/hoot-dom";
 
 const FAKE_RECORDS = [
     {

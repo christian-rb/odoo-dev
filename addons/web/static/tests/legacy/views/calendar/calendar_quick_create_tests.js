@@ -1,3 +1,4 @@
+/* eslint-disable */
 /** @odoo-module alias=@web/../tests/views/calendar/calendar_quick_create_tests default=false */
 
 import { CalendarQuickCreate } from "@web/views/calendar/quick_create/calendar_quick_create";
@@ -30,13 +31,13 @@ QUnit.module("CalendarView - QuickCreate", ({ beforeEach }) => {
 
     QUnit.test("mount a CalendarQuickCreate", async (assert) => {
         await start({});
-        assert.containsOnce(target, ".o-calendar-quick-create");
-        assert.containsOnce(target, ".o_dialog .modal-sm");
+        expect(`.o-calendar-quick-create`).tohaveCount(1);
+        expect(`.o_dialog .modal-sm`).tohaveCount(1);
         assert.strictEqual(target.querySelector(".modal-title").textContent, "New Event");
         assert.strictEqual(target.querySelector(`input[name="title"]`), document.activeElement);
-        assert.containsOnce(target, ".o-calendar-quick-create--create-btn");
-        assert.containsOnce(target, ".o-calendar-quick-create--edit-btn");
-        assert.containsOnce(target, ".o-calendar-quick-create--cancel-btn");
+        expect(`.o-calendar-quick-create--create-btn`).tohaveCount(1);
+        expect(`.o-calendar-quick-create--edit-btn`).tohaveCount(1);
+        expect(`.o-calendar-quick-create--cancel-btn`).tohaveCount(1);
     });
 
     QUnit.test("click on create button", async (assert) => {
@@ -49,8 +50,8 @@ QUnit.module("CalendarView - QuickCreate", ({ beforeEach }) => {
                 createRecord: () => assert.step("create"),
             },
         });
-        await click(target, ".o-calendar-quick-create--create-btn");
-        assert.verifySteps([]);
+        await contains(`.o-calendar-quick-create--create-btn`).click();
+        expect([]).toVerifySteps();
         assert.hasClass(target.querySelector("input[name=title]"), "o_field_invalid");
     });
 
@@ -71,8 +72,8 @@ QUnit.module("CalendarView - QuickCreate", ({ beforeEach }) => {
         const input = target.querySelector(".o-calendar-quick-create--input");
         input.value = "TEST";
 
-        await click(target, ".o-calendar-quick-create--create-btn");
-        assert.verifySteps(["create", "close"]);
+        await contains(`.o-calendar-quick-create--create-btn`).click();
+        expect(["create", "close"]).toVerifySteps();
     });
 
     QUnit.test("click on edit button", async (assert) => {
@@ -83,8 +84,8 @@ QUnit.module("CalendarView - QuickCreate", ({ beforeEach }) => {
                 editRecord: () => assert.step("edit"),
             },
         });
-        await click(target, ".o-calendar-quick-create--edit-btn");
-        assert.verifySteps(["edit", "close"]);
+        await contains(`.o-calendar-quick-create--edit-btn`).click();
+        expect(["edit", "close"]).toVerifySteps();
     });
 
     QUnit.test("click on edit button (with name)", async (assert) => {
@@ -102,8 +103,8 @@ QUnit.module("CalendarView - QuickCreate", ({ beforeEach }) => {
         const input = target.querySelector(".o-calendar-quick-create--input");
         input.value = "TEST";
 
-        await click(target, ".o-calendar-quick-create--edit-btn");
-        assert.verifySteps(["edit", "close"]);
+        await contains(`.o-calendar-quick-create--edit-btn`).click();
+        expect(["edit", "close"]).toVerifySteps();
     });
 
     QUnit.test("click on cancel button", async (assert) => {
@@ -113,8 +114,8 @@ QUnit.module("CalendarView - QuickCreate", ({ beforeEach }) => {
                 close: () => assert.step("close"),
             },
         });
-        await click(target, ".o-calendar-quick-create--cancel-btn");
-        assert.verifySteps(["close"]);
+        await contains(`.o-calendar-quick-create--cancel-btn`).click();
+        expect(["close"]).toVerifySteps();
     });
 
     QUnit.test("check default title", async (assert) => {
