@@ -1,10 +1,10 @@
 import { expect, test } from "@odoo/hoot";
 import { queryAllTexts } from "@odoo/hoot-dom";
+import { mockTimeZone } from "@odoo/hoot-mock";
 import { mockService, mountWithCleanup } from "@web/../tests/web_test_helpers";
 import { FAKE_MODEL, clickDate, selectDateRange } from "./calendar_test_helpers";
 
 import { CalendarYearRenderer } from "@web/views/calendar/calendar_year/calendar_year_renderer";
-import { mockTimeZone } from "@odoo/hoot-mock";
 
 function fakeProps(props = {}) {
     return {
