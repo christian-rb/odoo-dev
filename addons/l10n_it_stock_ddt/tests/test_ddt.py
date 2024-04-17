@@ -58,7 +58,7 @@ class TestDDT(TestSaleCommon):
                                    'product_uom_qty': 5,
                                    'product_uom': p.uom_id.id,
                                    'price_unit': p.list_price,
-                                   'tax_id': self.company_data['default_tax_sale']})
+                                   'tax_ids': self.company_data['default_tax_sale']})
                            for p in (
                     self.company_data['product_order_no'],
                     self.company_data['product_service_delivery'],
@@ -119,7 +119,7 @@ class TestDDT(TestSaleCommon):
                                    'product_uom_qty': 3,
                                    'product_uom': self.product_a.uom_id.id,
                                    'price_unit': self.product_a.list_price,
-                                   'tax_id': self.company_data['default_tax_sale']
+                                    'tax_ids': self.company_data['default_tax_sale']
                                    }
                             )],
             'pricelist_id': self.company_data['default_pricelist'].id,

@@ -24,7 +24,7 @@ class AccountOrderLine(models.AbstractModel):
     order_id = fields.Many2one('account.order')
     qty_to_invoice = fields.Float()
     price_unit = fields.Float()
-    tax_id = fields.Many2many('account.tax')
+    tax_ids = fields.Many2many('account.tax')
     product_uom = fields.Many2one('uom.uom')
     discount = fields.Float()
 

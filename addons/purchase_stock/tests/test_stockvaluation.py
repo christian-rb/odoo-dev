@@ -658,7 +658,7 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
                 (0, 0, {
                     'name': self.product1.name,
                     'product_id': self.product1.id,
-                    'taxes_id': [(4, tax_with_no_account.id)],
+                    'tax_ids': [(4, tax_with_no_account.id)],
                     'product_qty': 10.0,
                     'product_uom': self.product1.uom_po_id.id,
                     'price_unit': 10.0,
@@ -890,7 +890,7 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
                     'product_qty': 1.0,
                     'product_uom': self.product1.uom_po_id.id,
                     'price_unit': 105.0,  # 50$
-                    'taxes_id': [(4, tax.id)],
+                    'tax_ids': [(4, tax.id)],
                     'date_planned': date_po,
                 }),
             ],
@@ -976,7 +976,7 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
                     'product_qty': 1.0,
                     'product_uom': self.product1.uom_po_id.id,
                     'price_unit': 100.0,  # 50$
-                    'taxes_id': [(4, tax_without_account.id)],
+                    'tax_ids': [(4, tax_without_account.id)],
                 }),
             ],
         })
@@ -2679,7 +2679,7 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
                     'product_qty': 1.0,
                     'product_uom': self.product1.uom_po_id.id,
                     'price_unit': 100.0,
-                    'taxes_id': False,
+                    'tax_ids': False,
                 }),
             ],
         })
@@ -2876,7 +2876,7 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
                     'product_qty': 1.0,
                     'product_uom': self.product1.uom_po_id.id,
                     'price_unit': 100.0,
-                    'taxes_id': False,
+                    'tax_ids': False,
                 }),
             ],
         })
@@ -2942,7 +2942,7 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
                         'product_id': self.product1.id,
                         'product_qty': 1.0,
                         'price_unit': purchase_price,
-                        'taxes_id': False,
+                        'tax_ids': False,
                     }),
                 ]
             })
@@ -3135,7 +3135,7 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
                         'product_qty': 1.0,
                         'product_uom': self.product1.uom_po_id.id,
                         'price_unit': 1000.0,
-                        'taxes_id': False,
+                        'tax_ids': False,
                     }),
                 ],
             })

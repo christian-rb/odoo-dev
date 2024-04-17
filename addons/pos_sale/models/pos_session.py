@@ -21,6 +21,6 @@ class PosSession(models.Model):
         params['sale.order.line'] = {
             'domain': lambda data: [('order_id', 'in', [order['id'] for order in data['sale.order']])],
             'fields': ['discount', 'display_name', 'price_total', 'price_unit', 'product_id', 'product_uom_qty', 'qty_delivered',
-                'qty_invoiced', 'qty_to_invoice', 'display_type', 'name', 'tax_id']
+                'qty_invoiced', 'qty_to_invoice', 'display_type', 'name', 'tax_ids']
         }
         return params

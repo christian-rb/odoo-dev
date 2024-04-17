@@ -127,7 +127,7 @@ class TestPurchaseToInvoice(TestPurchaseToInvoiceCommon):
             'product_uom': self.product_deliver.uom_id.id,
             'price_unit': self.product_deliver.list_price,
             'order_id': purchase_order.id,
-            'taxes_id': False,
+            'tax_ids': False,
         })
         pol_serv_deliver = PurchaseOrderLine.create({
             'name': self.service_deliver.name,
@@ -136,7 +136,7 @@ class TestPurchaseToInvoice(TestPurchaseToInvoiceCommon):
             'product_uom': self.service_deliver.uom_id.id,
             'price_unit': self.service_deliver.list_price,
             'order_id': purchase_order.id,
-            'taxes_id': False,
+            'tax_ids': False,
         })
         purchase_order.button_confirm()
 
@@ -171,7 +171,7 @@ class TestPurchaseToInvoice(TestPurchaseToInvoiceCommon):
             'product_uom': self.product_order.uom_id.id,
             'price_unit': self.product_order.list_price,
             'order_id': purchase_order.id,
-            'taxes_id': False,
+            'tax_ids': False,
         })
         pol_serv_order = PurchaseOrderLine.create({
             'name': self.service_order.name,
@@ -180,7 +180,7 @@ class TestPurchaseToInvoice(TestPurchaseToInvoiceCommon):
             'product_uom': self.service_order.uom_id.id,
             'price_unit': self.service_order.list_price,
             'order_id': purchase_order.id,
-            'taxes_id': False,
+            'tax_ids': False,
         })
         purchase_order.button_confirm()
 
@@ -215,7 +215,7 @@ class TestPurchaseToInvoice(TestPurchaseToInvoiceCommon):
             'product_uom': self.product_deliver.uom_id.id,
             'price_unit': self.product_deliver.list_price,
             'order_id': purchase_order.id,
-            'taxes_id': False,
+            'tax_ids': False,
         })
         pol_serv_deliver = PurchaseOrderLine.create({
             'name': self.service_deliver.name,
@@ -224,7 +224,7 @@ class TestPurchaseToInvoice(TestPurchaseToInvoiceCommon):
             'product_uom': self.service_deliver.uom_id.id,
             'price_unit': self.service_deliver.list_price,
             'order_id': purchase_order.id,
-            'taxes_id': False,
+            'tax_ids': False,
         })
         purchase_order.button_confirm()
 
@@ -260,7 +260,7 @@ class TestPurchaseToInvoice(TestPurchaseToInvoiceCommon):
             'product_uom': self.product_order.uom_id.id,
             'price_unit': self.product_order.list_price,
             'order_id': purchase_order.id,
-            'taxes_id': False,
+            'tax_ids': False,
         })
         pol_serv_order = PurchaseOrderLine.create({
             'name': self.service_order.name,
@@ -269,7 +269,7 @@ class TestPurchaseToInvoice(TestPurchaseToInvoiceCommon):
             'product_uom': self.service_order.uom_id.id,
             'price_unit': self.service_order.list_price,
             'order_id': purchase_order.id,
-            'taxes_id': False,
+            'tax_ids': False,
         })
         purchase_order.button_confirm()
 
@@ -313,7 +313,7 @@ class TestPurchaseToInvoice(TestPurchaseToInvoiceCommon):
                 'product_uom': self.product_order.uom_id.id,
                 'price_unit': 1000,
                 'order_id': po.id,
-                'taxes_id': False,
+                'tax_ids': False,
             })
             po.button_confirm()
             pol_prod_order.write({'qty_received': 1})
@@ -355,7 +355,7 @@ class TestPurchaseToInvoice(TestPurchaseToInvoiceCommon):
                 'product_qty': 12,
                 'product_uom': self.product_a.uom_id.id,
                 'price_unit': 0.001,
-                'taxes_id': False,
+                'tax_ids': False,
             })]
         })
         po.button_confirm()
@@ -492,7 +492,7 @@ class TestPurchaseToInvoice(TestPurchaseToInvoiceCommon):
                     'product_qty': 10.0,
                     'product_uom': self.product_order.uom_id.id,
                     'price_unit': self.product_order.list_price,
-                    'taxes_id': False,
+                    'tax_ids': False,
                     'sequence': sequence_number,
                 }) for sequence_number in range(10, 13)]
             purchase_order = self.env['purchase.order'].with_context(tracking_disable=True).create({
@@ -526,7 +526,7 @@ class TestPurchaseToInvoice(TestPurchaseToInvoiceCommon):
                     'product_qty': 10.0,
                     'product_uom': self.product_order.uom_id.id,
                     'price_unit': self.product_order.list_price,
-                    'taxes_id': False,
+                    'tax_ids': False,
                     'sequence': sequence_number,
                 }) for sequence_number in range(10, 13)]
             purchase_order = self.env['purchase.order'].with_context(tracking_disable=True).create({
@@ -568,7 +568,7 @@ class TestPurchaseToInvoice(TestPurchaseToInvoiceCommon):
                     'product_qty': 20.0,
                     'product_uom': self.product_deliver.uom_id.id,
                     'price_unit': self.product_deliver.list_price,
-                    'taxes_id': False,
+                    'tax_ids': False,
                 }),
             ],
         })
@@ -960,7 +960,7 @@ class TestInvoicePurchaseMatch(TestPurchaseToInvoiceCommon):
                         'product_id': self.product_order.id,
                         'product_qty': 1.0,
                         'price_unit': self.product_order.list_price,
-                        'taxes_id': False,
+                        'tax_ids': False,
                     }),
                 ]
             } for partner_ref in ('PO-001', False)
@@ -1011,7 +1011,7 @@ class TestInvoicePurchaseMatch(TestPurchaseToInvoiceCommon):
                     'product_id': self.product_order.id,
                     'product_qty': 1.0,
                     'price_unit': self.product_order.list_price,
-                    'taxes_id': False,
+                    'tax_ids': False,
                 }),
             ]
         })

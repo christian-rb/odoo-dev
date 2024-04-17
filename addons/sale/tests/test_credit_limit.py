@@ -46,7 +46,7 @@ class TestSaleOrderCreditLimit(TestSaleCommon):
                 'product_uom_qty': 1,
                 'product_uom': self.company_data['product_order_no'].uom_id.id,
                 'price_unit': 1000.0,
-                'tax_id': False,
+                'tax_ids': False,
             })]
         })
 
@@ -116,7 +116,7 @@ class TestSaleOrderCreditLimit(TestSaleCommon):
                     'product_id': self.company_data['product_order_no'].id,
                     'product_uom_qty': 1,
                     'price_unit': 45.0,
-                    'tax_id': False,
+                    'tax_ids': False,
                 })
             ]
         })
@@ -129,7 +129,7 @@ class TestSaleOrderCreditLimit(TestSaleCommon):
                     'product_id': self.company_data['product_order_no'].id,
                     'product_uom_qty': 1,
                     'price_unit': 65.0,
-                    'tax_id': False,
+                    'tax_ids': False,
                 })
             ],
         })
