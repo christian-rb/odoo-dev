@@ -100,10 +100,11 @@
             <search string="Event Tracks">
                 <field name="name"/>
                 <field name="tag_ids"/>
-                <field name="event_id"/>
+                <field name="partner_id" string="Speaker"
+                    filter_domain="['|', '|', '|', ('partner_id', 'ilike', self), ('partner_name', 'ilike', self), ('partner_email', 'ilike', self), ('partner_company_name', 'ilike', self)]"/>
                 <field name="location_id"/>
+                <field name="event_id"/>
                 <field name="stage_id"/>
-                <field name="partner_id"/>
                 <filter string="My Tracks" name="my_tracks" domain="[('user_id', '=', uid)]"/>
                 <separator/>
                 <filter string="Published" name="filter_published" domain="[('website_published', '=', True)]"/>
