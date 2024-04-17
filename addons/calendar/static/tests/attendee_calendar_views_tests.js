@@ -238,6 +238,14 @@ QUnit.module("CalendarView", ({ beforeEach }) => {
                     return Promise.resolve([]);
                 } else if (route === "/calendar/check_credentials") {
                     return Promise.resolve({});
+                } else if (route === "/web/dataset/call_kw/res.users/get_show_all_calendars_filter") {
+                    return Promise.resolve(true);
+                } else if (route === "/web/dataset/call_kw/res.users/set_show_all_calendars_filter") {
+                    return Promise.resolve();
+                } else if (route === "/web/dataset/call_kw/res.users/get_show_own_calendar_filter") {
+                    return Promise.resolve(true);
+                } else if (route === "/web/dataset/call_kw/res.users/set_show_own_calendar_filter") {
+                    return Promise.resolve();
                 } else if (route === "/web/dataset/call_kw/calendar.event/get_default_duration") {
                     return 3.25;
                 }
@@ -286,6 +294,14 @@ QUnit.module("CalendarView", ({ beforeEach }) => {
                     return Promise.resolve([]);
                 } else if (route === "/calendar/check_credentials") {
                     return Promise.resolve({});
+                } else if (route === "/web/dataset/call_kw/res.users/get_show_all_calendars_filter") {
+                    return Promise.resolve(true);
+                } else if (route === "/web/dataset/call_kw/res.users/set_show_all_calendars_filter") {
+                    return Promise.resolve();
+                } else if (route === "/web/dataset/call_kw/res.users/get_show_own_calendar_filter") {
+                    return Promise.resolve(true);
+                } else if (route === "/web/dataset/call_kw/res.users/set_show_own_calendar_filter") {
+                    return Promise.resolve();
                 } else if (route === "/web/dataset/call_kw/calendar.event/get_default_duration") {
                     return 3.25;
                 }

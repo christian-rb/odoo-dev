@@ -65,7 +65,46 @@ export class AttendeeCalendarModel extends CalendarModel {
 
     /**
      * @override
+     * Load the "Everybody's calendar" filter status and update it.
      */
+    async loadFilterSection(fieldName, filterInfo, previousSection) {
+        const currentState = await this.orm.call("res.users", "get_show_all_calendars_filter", [[user.userId]]);
+        if (previousSection === undefined) {
+            // On build, set the own user's calendar filter state as active.
+            await this.orm.call("res.users", "set_show_own_calendar_filter", [user.userId, true]);
+
+            // Load the "Everybody's calendar" filter status.
+            previousSection = {
+                'filters': [
+                    {
+                        "type": "all",
+                        "recordId": null,
+                        "value": "all",
+                        "label": "Everybody's calendars",
+                        "active": currentState,
+                        "canRemove": false,
+                        "colorIndex": null,
+                        "hasAvatar": false
+                    }
+                ]
+            }
+        } else if (previousSection.hasOwnProperty('filters')) {
+            // Get the current state for the "Everybody's calendar" and own user calendar's filters.
+            const calendarFilters = {
+                'ownCalendar': previousSection.filters.find(filter => filter.type === "user")?.active ?? 'none',
+                'everybody': previousSection.filters.find(filter => filter.type === "all")?.active ?? 'none',
+            }
+
+            if (calendarFilters['ownCalendar'] !== 'none' && calendarFilters['everybody' !== 'none']) {
+                // Save the "Everybody's calendar" and own user calendar's filters state.
+                await Promise.all([
+                    this.orm.call("res.users", "set_show_own_calendar_filter", [user.userId, calendarFilters['ownCalendar']]),
+                    this.orm.call("res.users", "set_show_all_calendars_filter", [user.userId, calendarFilters['everybody']]),
+                ])
+            }
+        }
+        return await super.loadFilterSection(fieldName, filterInfo, previousSection);
+    }
 
     /**
      * @override
@@ -82,12 +121,10 @@ export class AttendeeCalendarModel extends CalendarModel {
      */
     async updateAttendeeData(data) {
         const attendeeFilters = data.filterSections.partner_ids;
-        let isEveryoneFilterActive = false;
+        let isEveryoneFilterActive = await this.orm.call("res.users", "get_show_all_calendars_filter", [[user.userId]]);
         let attendeeIds = [];
         const eventIds = Object.keys(data.records).map((id) => Number.parseInt(id));
         if (attendeeFilters) {
-            const allFilter = attendeeFilters.filters.find((filter) => filter.type === "all");
-            isEveryoneFilterActive = (allFilter && allFilter.active) || false;
             attendeeIds = attendeeFilters.filters
                 .filter((filter) => filter.type !== "all" && filter.value)
                 .map((filter) => filter.value);

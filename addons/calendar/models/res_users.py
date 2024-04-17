@@ -11,10 +11,44 @@ class Users(models.Model):
     _inherit = 'res.users'
 
     calendar_default_privacy = fields.Selection(related='res_users_settings_id.calendar_default_privacy', readonly=False, required=True)
+    show_own_calendar_filter = fields.Boolean(related='res_users_settings_id.show_own_calendar_filter', groups="base.group_system")
+    show_all_calendars_filter = fields.Boolean(related='res_users_settings_id.show_all_calendars_filter', groups="base.group_system")
 
     @property
     def SELF_READABLE_FIELDS(self):
         return super().SELF_READABLE_FIELDS + ['calendar_default_privacy']
+
+    def get_show_own_calendar_filter(self):
+        """ Get the state of the filter to show its own calendar events. """
+        self.ensure_one()
+        return self.res_users_settings_id.sudo().show_own_calendar_filter
+
+    def set_show_own_calendar_filter(self, state):
+        """ Set the state of the filter to show its own calendar events. """
+        self.ensure_one()
+        self.res_users_settings_id.sudo().show_own_calendar_filter = state
+
+    def get_show_all_calendars_filter(self):
+        """ Get the state of the filter to show everybody's calendar events. """
+        self.ensure_one()
+        return self.res_users_settings_id.sudo().show_all_calendars_filter
+
+    def set_show_all_calendars_filter(self, state):
+        """ Set the state of the filter to show everybody's calendar events. """
+        self.ensure_one()
+        self.res_users_settings_id.sudo().show_all_calendars_filter = state
+
+    def get_selected_calendars_partner_ids(self):
+        """
+        Get the partner_id of the calendar view's selected attendees including the current user.
+        Since there is no calendar.filter record for the current user, we must add it as default.
+        """
+        self.ensure_one()
+        partner_ids = self.env['calendar.filters'].search([('user_id', '=', self.id), ('partner_checked', '=', True)]).partner_id.ids
+        # Add the current user's partner id if its own calendar filter is checked.
+        if self.show_own_calendar_filter:
+            partner_ids += [self.env.user.partner_id.id]
+        return partner_ids
 
     def _systray_get_calendar_event_domain(self):
         # Determine the domain for which the users should be notified. This method sends notification to

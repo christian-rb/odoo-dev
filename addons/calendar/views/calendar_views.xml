@@ -72,7 +72,7 @@
         <field name="name">calendar.event.tree</field>
         <field name="model">calendar.event</field>
         <field name="arch" type="xml">
-            <tree string="Meetings" sample="1" multi_edit="1">
+            <tree string="Meetings" sample="1" multi_edit="1" js_class="calendar_list_view">
                 <header>
                     <button name="action_open_composer" type="object" context="{'default_composition_mode':'mass_mail'}"
                             string="Send Mail"/>
@@ -386,6 +386,8 @@
                 <field name="categ_ids"/>
                 <field name="description"/>
                 <filter string="My Meetings" help="My Meetings" name="mymeetings" domain="[('partner_ids.user_ids', 'in', [uid])]"/>
+                <separator/>
+                <filter string="All Meetings" help="My Meetings" name="allmeetings" domain="[('user_id', '!=', -1)]"/>
                 <separator/>
                 <filter string="Date" name="filter_start_date" date="start"/>
                 <separator/>
