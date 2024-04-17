@@ -165,6 +165,10 @@
 
             &.o_kanban_card_group_column {
                 flex-direction: column;
+
+                > * {
+                    max-width: 100%;
+                }
             }
         }
 
