@@ -86,7 +86,7 @@ QUnit.module('Google Calendar', {
 }, function () {
 
     QUnit.test('sync google calendar', async function (assert) {
-        assert.expect(13);
+        assert.expect(11);
 
         let id = 7;
         await makeView({
@@ -120,15 +120,24 @@ QUnit.module('Google Calendar', {
                     return Promise.resolve({
                         google_calendar: true,
                     });
+                } else if (route === "/web/dataset/call_kw/res.users/get_show_all_calendars_filter") {
+                    return Promise.resolve(true);
+                } else if (route === "/web/dataset/call_kw/res.users/set_show_all_calendars_filter") {
+                    return Promise.resolve();
+                } else if (route === "/web/dataset/call_kw/res.users/get_show_own_calendar_filter") {
+                    return Promise.resolve(true);
+                } else if (route === "/web/dataset/call_kw/res.users/set_show_own_calendar_filter") {
+                    return Promise.resolve();
                 } else if (route === "/web/dataset/call_kw/calendar.event/get_default_duration") {
                     return 3.25;
                 }
             },
         });
-        // select the partner filter
-        await click(target.querySelector('.o_calendar_filter_item[data-value=all] input'));
+        // Click on "everybody's calendar" checkbox.
+        let all_calendars_checkbox = target.querySelector('.o_calendar_filter_item[data-value=all] input');
+        all_calendars_checkbox.checked = true;
         // sync_data was called a first time without filter, event from google calendar was created twice
-        assert.containsN(target, '.fc-event', 4, "should display 4 events on the month");
+        assert.containsN(target, '.fc-event', 3, "should display 3 events on the month");
 
         await click(target.querySelector('.o_datetime_picker_header .o_next'));
         await click(target.querySelector('.o_datetime_picker .o_date_item_cell'));
@@ -145,10 +154,12 @@ QUnit.module('Google Calendar', {
             '/web/dataset/call_kw/calendar.event/search_read',
             '/google_calendar/sync_data',
             '/web/dataset/call_kw/calendar.event/search_read',
-            "/google_calendar/sync_data",
-            "/web/dataset/call_kw/calendar.event/search_read",
         ], 'should do a search_read before and after the call to sync_data');
 
-        assert.containsN(target, '.fc-event', 7, "should now display 7 events on the month");
+        // Click on own calendar filter checkbox.
+        let own_calendar_checkbox = target.querySelector('.o_cw_filter_input_bg:not(.o_remove ~ .o_cw_filter_input_bg)');
+        own_calendar_checkbox.checked = true;
+
+        assert.containsN(target, '.fc-event', 6, "should now display 6 events on the month");
     });
 });
