@@ -7116,7 +7116,7 @@ def itemgetter_tuple(items):
 
 def convert_pgerror_not_null(model, fields, info, e):
     if e.diag.table_name != model._table:
-        return {'message': _(u"Missing required value for the field '%s'", e.diag.column_name)}
+        return {'message': _("Missing required value for the field '%s' [%s]", e.diag.column_name, e.diag.table_name)}
 
     field_name = e.diag.column_name
     field = fields[field_name]

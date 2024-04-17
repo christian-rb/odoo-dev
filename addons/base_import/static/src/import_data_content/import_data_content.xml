@@ -81,6 +81,7 @@
 
                                     <t t-set-slot="choice" t-slot-scope="choice">
                                         <div t-att-class="`${choice.data.value and choice.data.value.required ? 'fw-bolder text-decoration-underline' : ''}`">
+                                            <i t-att-class="`o_import_field_icon o_import_field_icon_${this.getFieldInfo(column, choice.data.value).type} d-inline-block align-middle mb-1`"/>
                                             <t t-esc="choice.data.label" />
                                         </div>
                                     </t>

@@ -84,14 +84,17 @@ export class ImportDataContent extends Component {
         return `alert-${comment.type} ${index < column.comments.length - 1 ? "mb-2" : "mb-0"}`;
     }
 
-    onFieldChanged(column, fieldPath) {
+    getFieldInfo(column, fieldPath) {
         const fields = [
             ...column.fields.basic,
             ...column.fields.suggested,
             ...column.fields.additional,
             ...column.fields.relational,
         ];
-        const fieldInfo = fields.find((f) => f.fieldPath === fieldPath);
-        this.props.onFieldChanged(column, fieldInfo);
+        return fields.find((f) => f.fieldPath === fieldPath);
+    }
+
+    onFieldChanged(column, fieldPath) {
+        this.props.onFieldChanged(column, this.getFieldInfo(column, fieldPath));
     }
 }
