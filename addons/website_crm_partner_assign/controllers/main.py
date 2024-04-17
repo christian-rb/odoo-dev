@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import datetime
 import werkzeug.urls
 
 from collections import OrderedDict
@@ -99,14 +98,14 @@ class WebsiteAccount(CustomerPortal):
         domain = self.get_domain_my_opp(request.env.user)
 
         today = fields.Date.today()
-        this_week_end_date = fields.Date.to_string(fields.Date.from_string(today) + datetime.timedelta(days=7))
 
         searchbar_filters = {
             'all': {'label': _('Active'), 'domain': []},
+            'no_activities': {'label': _('No Activities'),
+                              'domain': ['|', ('activity_date_deadline', '=', False), ('activity_user_id', '!=', request.env.user.id)]},
+            'overdue': {'label': _('Late Activities'), 'domain': [('activity_date_deadline', '<', today)]},
             'today': {'label': _('Today Activities'), 'domain': [('activity_date_deadline', '=', today)]},
-            'week': {'label': _('This Week Activities'),
-                     'domain': [('activity_date_deadline', '>=', today), ('activity_date_deadline', '<=', this_week_end_date)]},
-            'overdue': {'label': _('Overdue Activities'), 'domain': [('activity_date_deadline', '<', today)]},
+            'future': {'label': _('Future Activities'), 'domain': [('activity_date_deadline', '>=', today)]},
             'won': {'label': _('Won'), 'domain': [('stage_id.is_won', '=', True)]},
             'lost': {'label': _('Lost'), 'domain': [('active', '=', False), ('probability', '=', 0)]},
         }
@@ -154,7 +153,7 @@ class WebsiteAccount(CustomerPortal):
             'pager': pager,
             'searchbar_sortings': searchbar_sortings,
             'sortby': sortby,
-            'searchbar_filters': OrderedDict(sorted(searchbar_filters.items())),
+            'searchbar_filters': OrderedDict(searchbar_filters.items()),
             'filterby': filterby,
         })
         return request.render("website_crm_partner_assign.portal_my_opportunities", values)
