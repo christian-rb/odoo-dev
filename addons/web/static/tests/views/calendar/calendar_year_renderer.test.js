@@ -113,7 +113,7 @@ test(`select a range of date`, async () => {
     expect(["create"]).toVerifySteps();
 });
 
-test("display correct column header for days, independent of the timezone", async () => {
+test(`display correct column header for days, independent of the timezone`, async () => {
     // Regression test: when the system tz is somewhere in a negative GMT (in our example Alaska)
     // the day headers of a months were incorrectly set. (S S M T W T F) instead of (S M T W T F S)
     // if the first day of the week is Sunday.

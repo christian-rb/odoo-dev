@@ -1,15 +1,12 @@
 import { describe, expect, test } from "@odoo/hoot";
+import { FAKE_FIELDS } from "./calendar_test_helpers";
 
 import { CalendarArchParser } from "@web/views/calendar/calendar_arch_parser";
 
 describe.current.tags("headless");
 
 const parser = new CalendarArchParser();
-const fields = {
-    id: { type: "integer" },
-    start_date: { type: "date" },
-};
-const defaultArchResults = {
+const DEFAULT_ARCH_RESULTS = {
     canCreate: true,
     canDelete: true,
     eventLimit: 5,
@@ -31,7 +28,7 @@ const defaultArchResults = {
 };
 
 function parseArch(arch) {
-    return parser.parse(arch, { fake: { fields } }, "fake");
+    return parser.parse(arch, { fake: { fields: FAKE_FIELDS } }, "fake");
 }
 
 function parseWith(attrs) {
@@ -48,7 +45,7 @@ test(`throw if date_start is not set`, () => {
 });
 
 test(`defaults`, () => {
-    expect(parseArch(`<calendar date_start="start_date"/>`)).toEqual(defaultArchResults);
+    expect(parseArch(`<calendar date_start="start_date"/>`)).toEqual(DEFAULT_ARCH_RESULTS);
 });
 
 test("canCreate", () => {
@@ -111,17 +108,17 @@ test("quickCreate", () => {
 
 test("quickCreateViewId", () => {
     expect(parseWith({ quick_create: "0", quick_create_view_id: "12" })).toEqual({
-        ...defaultArchResults,
+        ...DEFAULT_ARCH_RESULTS,
         quickCreate: false,
         quickCreateViewId: null,
     });
     expect(parseWith({ quick_create: "1", quick_create_view_id: "12" })).toEqual({
-        ...defaultArchResults,
+        ...DEFAULT_ARCH_RESULTS,
         quickCreate: true,
         quickCreateViewId: 12,
     });
     expect(parseWith({ quick_create: "1" })).toEqual({
-        ...defaultArchResults,
+        ...DEFAULT_ARCH_RESULTS,
         quickCreate: true,
         quickCreateViewId: null,
     });

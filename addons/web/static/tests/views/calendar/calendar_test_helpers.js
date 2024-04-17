@@ -1,4 +1,4 @@
-import { queryFirst } from "@odoo/hoot-dom";
+import { queryAll, queryFirst } from "@odoo/hoot-dom";
 import { createElement } from "@web/core/utils/xml";
 import { Field } from "@web/views/fields/field";
 import { contains } from "@web/../tests/web_test_helpers";
@@ -248,6 +248,10 @@ export const FAKE_MODEL = {
 //     } while (!tmpElement.classList.contains("o_view_controller"));
 // }
 
+/**
+ * @param {string} date
+ * @returns {HTMLElement}
+ */
 export function findAllDaySlot(date) {
     return queryFirst(`.fc-daygrid-body .fc-day[data-date="${date}"]`);
 }
@@ -260,92 +264,94 @@ export function findDateCell(date) {
     return queryFirst(`.fc-day[data-date="${date}"]`);
 }
 
+/**
+ * @param {number} eventId
+ * @returns {HTMLElement}
+ */
 export function findEvent(eventId) {
     return queryFirst(`.o_event[data-event-id="${eventId}"]`);
 }
 
-export function findDateCol(date) {
+/**
+ * @param {string} date
+ * @returns {HTMLElement}
+ */
+export function findDateColumn(date) {
     return queryFirst(`.fc-col-header-cell.fc-day[data-date="${date}"]`);
 }
 
+/**
+ * @param {string} time
+ * @returns {HTMLElement}
+ */
 export function findTimeRow(time) {
     return queryFirst(`.fc-timegrid-slot[data-time="${time}"]`);
 }
 
-// export async function triggerEventForCalendar(el, type, position = {}) {
-//     const rect = el.getBoundingClientRect();
-//     const x = position.x || rect.x + rect.width / 2;
-//     const y = position.y || rect.y + rect.height / 2;
-//     const attrs = {
-//         which: 1,
-//         clientX: x,
-//         clientY: y,
-//     };
-//     await triggerEvent(el, null, type, attrs);
-// }
+/**
+ * @param {string} date
+ * @returns {Promise<void>}
+ */
+export async function clickAllDaySlot(date) {
+    const slot = findAllDaySlot(date);
+    slot.scrollIntoView({ behavior: "instant" });
+    await contains(slot).click();
+}
 
-// export async function clickAllDaySlot(target, date) {
-//     const el = findAllDaySlot(target, date);
-//     await scrollTo(el);
-//     await triggerEventForCalendar(el, "mousedown");
-//     await triggerEventForCalendar(el, "mouseup");
-//     await animationFrame();
-// }
-
+/**
+ * @param {string} date
+ * @returns {Promise<void>}
+ */
 export async function clickDate(date) {
     const cell = findDateCell(date);
     cell.scrollIntoView({ behavior: "instant" });
     await contains(cell).click();
 }
 
-// export async function clickEvent(target, eventId) {
-//     const el = findEvent(target, eventId);
-//     await scrollTo(el);
-//     await click(el);
-//     await animationFrame();
-// }
+/**
+ * @param {number} eventId
+ * @returns {Promise<void>}
+ */
+export async function clickEvent(eventId) {
+    const event = findEvent(eventId);
+    event.scrollIntoView({ behavior: "instant" });
+    await contains(event).click();
+}
 
-// export async function selectTimeRange(target, startDateTime, endDateTime) {
-//     const [startDate, startTime] = startDateTime.split(" ");
-//     const [endDate, endTime] = endDateTime.split(" ");
+/**
+ * @param {string} startDateTime
+ * @param {string} endDateTime
+ * @returns {Promise<void>}
+ */
+export async function selectTimeRange(startDateTime, endDateTime) {
+    const [startDate, startTime] = startDateTime.split(" ");
+    const [endDate, endTime] = endDateTime.split(" ");
 
-//     const startCol = findDateCol(target, startDate);
-//     const endCol = findDateCol(target, endDate);
-//     const startRow = findTimeRow(target, startTime);
-//     const endRow = findTimeRow(target, endTime);
+    const columns = queryAll(`.fc-col-header-cell.fc-day`);
+    const startColumnIndex = columns.indexOf(
+        queryFirst(`.fc-col-header-cell.fc-day[data-date="${startDate}"]`)
+    );
+    const endColumnIndex = columns.indexOf(
+        queryFirst(`.fc-col-header-cell.fc-day[data-date="${endDate}"]`)
+    );
+    const startRow = queryAll(`.fc-timegrid-slot[data-time="${startTime}"]`)[1 + startColumnIndex];
+    const endRow = queryAll(`.fc-timegrid-slot[data-time="${endTime}"]`)[1 + endColumnIndex];
 
-//     await scrollTo(startRow);
-//     const startColRect = startCol.getBoundingClientRect();
-//     const startRowRect = startRow.getBoundingClientRect();
+    startRow.scrollIntoView({ behavior: "instant" });
+    await contains(startRow).dragAndDrop(endRow, { position: "top-top" });
+}
 
-//     await triggerEventForCalendar(startRow, "mousedown", {
-//         x: startColRect.x + startColRect.width / 2,
-//         y: startRowRect.y + 2,
-//     });
-
-//     await scrollTo(endRow, false);
-//     const endColRect = endCol.getBoundingClientRect();
-//     const endRowRect = endRow.getBoundingClientRect();
-
-//     await triggerEventForCalendar(endRow, "mousemove", {
-//         x: endColRect.x + endColRect.width / 2,
-//         y: endRowRect.y - 2,
-//     });
-//     await triggerEventForCalendar(endRow, "mouseup", {
-//         x: endColRect.x + endColRect.width / 2,
-//         y: endRowRect.y - 2,
-//     });
-//     await animationFrame();
-// }
-
+/**
+ * @param {string} startDate
+ * @param {string} endDate
+ * @returns {Promise<void>}
+ */
 export async function selectDateRange(startDate, endDate) {
     const startCell = findDateCell(startDate);
     const endCell = findDateCell(endDate);
 
     startCell.scrollIntoView({ behavior: "instant" });
-    const { drop, moveTo } = await contains(startCell).drag();
-    await moveTo(endCell);
-    await drop();
+    await contains(startCell).dragAndDrop(endCell);
 }
 
 // export async function selectAllDayRange(target, startDate, endDate) {
