@@ -40,6 +40,19 @@
             padding: ($spacer * .5) $card-spacer-x;
             transform: translateY(-50%);
         }
+        .o_wevent_event_country_flag {
+            top: $card-spacer-x + 1rem;
+            right: $card-spacer-x + 5rem;
+            height: 2rem;
+            width: 2rem;
+            border-radius: 50%;
+
+            // Put the flag after the date pill in List mode
+            &.left {
+                left: $card-spacer-x + 5rem;
+                right: $card-spacer-x;
+            }
+        }
         .o_wevent_event_date {
             top: $card-spacer-x;
             right: $card-spacer-x;
@@ -95,5 +108,10 @@
     .o_half_screen_height {
         // Set min-height to the same value as the header
         min-height: 200px !important;
+    }
+    .o_wevent_search {
+        @include media-breakpoint-up(lg) {
+            max-width: 300px;
+        }
     }
 }
