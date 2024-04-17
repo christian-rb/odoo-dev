@@ -14,11 +14,14 @@
                     </h1>
                     <group>
                         <field name="type" readonly="datas or id" class="oe_inline"/>
-                        <field name="datas"
-                               filename="name"
-                               invisible="type == 'url'"
-                               required="type == 'binary'"
-                               class="oe_inline"/>
+                        <label for="datas"/>
+                        <div class="o_row">
+                            <field name="datas"
+                                   filename="name"
+                                   invisible="type == 'url'"
+                                   required="type == 'binary'"
+                                   class="oe_inline"/>
+                        </div>
                         <field name="url" widget="url" invisible="type == 'binary'" required="type == 'url'"/>
                         <field name="res_name" string="Product Variant" invisible="res_model != 'product.product'"/>
                     </group>
