@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_invoice_document" inherit_id="account.report_invoice_document">
+        <t t-set="o" t-value="o.with_context(lang=lang)"/>
+
+        <!--
+            ADDRESS BLOCK
+        -->
+
+        <!-- Remove original margin -->
+        <xpath expr="//t[@t-set='address']/address" position="attributes">
+            <attribute name="class">mb-0</attribute>
+        </xpath>
+
+        <!-- SIRET/SIREN -->
+        <xpath expr="(//t[@t-set='address'])[last()]" position="after">
+            <t t-set="address" t-if="o.company_id.country_code == 'FR' and o.partner_id.siret">
+                <t t-out="address"/>
+
+                SIRET : <t t-esc="o.partner_id.siret"/>
+            </t>
+        </xpath>
+
+        <!-- Add final margin -->
+        <xpath expr="(//t[@t-set='address'])[last()]" position="after">
+            <t t-set="address">
+                <t t-out="address"/>
+                <div class="mb-3"/>
+            </t>
+        </xpath>
+
+        <!--
+            INFORMATIONS BLOCK
+        -->
+
+        <!-- Billing Address -->
+        <xpath expr="(//div[@id='informations']/*)[last()]" position="after">
+            <t t-if="o.company_id.country_code == 'FR' and o.invoice_partner_id">
+                <t t-set="company_address">
+                    <address t-field="o.partner_id" class="m-0"
+                        t-options='{"widget": "contact", "fields": ["address"], "no_marker": True}'/>
+                </t>
+
+                <t t-set="billing_address">
+                    <address t-field="o.invoice_partner_id" class="m-0"
+                        t-options='{"widget": "contact", "fields": ["address"], "no_marker": True}'/>
+                </t>
+
+                <t t-if="company_address != billing_address">
+                    <div class="col-auto col-3 mw-100 mb-2">
+                        <strong>Adresse de facturation&#160;:</strong> <!-- EN: Billing address -->
+                        <p class="m-0" t-out="billing_address"/>
+                    </div>
+                </t>
+            </t>
+        </xpath>
+
+        <!-- Delivery address -->
+        <xpath expr="(//div[@id='informations']/*)[last()]" position="after">
+            <t t-if="o.company_id.country_code == 'FR' and o.delivery_partner_id">
+                <t t-set="billing_address">
+                    <address t-field="o.invoice_partner_id" class="m-0"
+                        t-options='{"widget": "contact", "fields": ["address"], "no_marker": True}'/>
+                </t>
+
+                <t t-set="delivery_address">
+                    <address t-field="o.delivery_partner_id" class="m-0"
+                        t-options='{"widget": "contact", "fields": ["address"], "no_marker": True}'/>
+                </t>
+
+                <t t-if="billing_address != delivery_address">
+                    <div class="col-auto col-3 mw-100 mb-2">
+                        <strong>Adresse de livraison :</strong> <!-- EN: Delivery address -->
+                        <p class="m-0" t-out="delivery_address"/>
+                    </div>
+                </t>
+            </t>
+        </xpath>
+
+        <!-- Product types -->
+        <xpath expr="(//div[@id='informations']/*)[last()]" position="after">
+            <t t-if="o.company_id.country_code == 'FR'">
+                <t t-set="tax_scopes" t-value="o.invoice_line_ids.mapped('tax_ids.tax_scope')"/>
+                <t t-set="has_service" t-value="'service' in tax_scopes"/>
+                <t t-set="has_consu" t-value="'consu' in tax_scopes"/>
+
+                <t t-if="has_service or has_consu">
+                    <div class="col-auto col-3 mw-100 mb-2">
+                        <strong>Type d'opération :</strong> <!-- EN: Operation type -->
+                        <t t-if="has_service and has_consu">
+                            <p class="m-0">Opération mixte</p> <!-- EN: Mixed operation -->
+                        </t>
+                        <t t-elif="has_service and not has_consu">
+                            <p class="m-0">Prestation de services</p> <!-- EN: Service delivery -->
+                        </t>
+                        <t t-else="">
+                            <p class="m-0">Livraison de biens</p> <!-- EN: Goods delivery -->
+                        </t>
+                    </div>
+                </t>
+            </t>
+        </xpath>
+
+        <!-- Payment according to debits mention -->
+        <xpath expr="//p[@name='payment_communication']" position="after">
+            <t t-if="o.company_id.country_code == 'FR'">
+                <t t-set="payment_option_debit" t-value=""/>
+
+                <t t-if="'on_invoice' in o.invoice_line_ids.mapped('tax_ids.tax_exigibility')">
+                    <p>Option pour le paiement de la taxe d'après les débits</p> <!-- EN: Option to pay tax on debits -->
+                </t>
+            </t>
+        </xpath>
+    </template>
+</odoo>

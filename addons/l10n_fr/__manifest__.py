@@ -40,6 +40,8 @@ configuration of their taxes and fiscal positions manually.
         'data/account.group.template.csv',
         'data/account_chart_template_data.xml',
         'views/l10n_fr_view.xml',
+        'views/report_invoice.xml',
+        'views/account_move_views.xml',
         'data/account_tax_group_data.xml',
         'data/tax_report_data.xml',
         'data/account_tax_data.xml',

@@ -4289,3 +4289,16 @@ msgstr ""
 msgid "Études et recherches"
 msgstr ""
 
+#. module: l10n_fr
+#: model:ir.model.fields,field_description:l10n_fr.field_account_bank_statement_line__delivery_partner_id
+#: model:ir.model.fields,field_description:l10n_fr.field_account_move__delivery_partner_id
+#: model:ir.model.fields,field_description:l10n_fr.field_account_payment__delivery_partner_id
+msgid "Delivery Address"
+msgstr ""
+
+#. module: l10n_fr
+#: model:ir.model.fields,field_description:l10n_fr.field_account_bank_statement_line__invoice_partner_id
+#: model:ir.model.fields,field_description:l10n_fr.field_account_move__invoice_partner_id
+#: model:ir.model.fields,field_description:l10n_fr.field_account_payment__invoice_partner_id
+msgid "Invoice Address"
+msgstr ""
