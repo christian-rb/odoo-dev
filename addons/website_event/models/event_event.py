@@ -515,7 +515,7 @@ class Event(models.Model):
             'text': self.name,
             'dates': f'{url_date_start}/{url_date_stop}',
             'ctz': self.date_tz,
-            'details': self.name,
+            'details': self._get_event_description(),
         }
         if self.address_id:
             params.update(location=self.address_inline)

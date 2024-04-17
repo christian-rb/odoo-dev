@@ -5,12 +5,14 @@ import logging
 import pytz
 
 from datetime import timedelta
+from markupsafe import Markup
 
 from odoo import _, api, Command, fields, models, tools
 from odoo.addons.base.models.res_partner import _tz_get
+from odoo.addons.http_routing.models.ir_http import slug
 from odoo.exceptions import UserError, ValidationError
 from odoo.osv import expression
-from odoo.tools import format_datetime, is_html_empty
+from odoo.tools import format_datetime, html_to_inner_content, is_html_empty
 from odoo.tools.misc import formatLang
 from odoo.tools.translate import html_translate
 
@@ -644,6 +646,13 @@ class EventEvent(models.Model):
             for attendee in event.registration_ids.filtered(filter_func):
                 self.env['mail.template'].browse(template_id).send_mail(attendee.id, force_send=force_send)
 
+    def _get_event_description(self):
+        """ Returns the event description with a link to the event registration page. """
+        max_length = 2000
+        event_url = Markup('<a href="%s/event/%s/register">%s</a>') % (self.get_base_url(), slug(self), self.name)
+        description = event_url + '\n' + html_to_inner_content(self.description)
+        return (description[:max_length] + '...') if len(description) > max_length else description
+
     def _get_ics_file(self):
         """ Returns iCalendar file for the event invitation.
             :returns a dict of .ics file content for each event
@@ -660,6 +669,7 @@ class EventEvent(models.Model):
             cal_event.add('dtstart').value = event.date_begin.astimezone(pytz.timezone(event.date_tz))
             cal_event.add('dtend').value = event.date_end.astimezone(pytz.timezone(event.date_tz))
             cal_event.add('summary').value = event.name
+            cal_event.add('description').value = event._get_event_description()
             if event.address_id:
                 cal_event.add('location').value = event.address_inline
 
