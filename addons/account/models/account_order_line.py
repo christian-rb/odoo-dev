@@ -14,7 +14,7 @@ class AccountOrderLine(models.AbstractModel):
                                          " They are not copied when duplicating an order.")
 
     # To override
-    invoice_lines = fields.One2many('account.move.line')
+    move_line_ids = fields.One2many('account.move.line')
     display_type = fields.Selection(
         [('line_section', "Section"), ('line_note', "Note")],
         default=False,
@@ -54,11 +54,11 @@ class AccountOrderLine(models.AbstractModel):
     def _get_invoice_lines(self):
         self.ensure_one()
         if self._context.get('accrual_entry_date'):
-            return self.invoice_lines.filtered(
+            return self.move_line_ids.filtered(
                 lambda l: l.move_id.invoice_date and l.move_id.invoice_date <= self._context['accrual_entry_date']
             )
         else:
-            return self.invoice_lines
+            return self.move_line_ids
 
     def _get_downpayment_state(self):
         self.ensure_one()

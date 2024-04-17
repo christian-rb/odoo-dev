@@ -225,7 +225,7 @@ class AccountMoveLine(models.Model):
 
     def _get_downpayment_lines(self):
         # OVERRIDE
-        return self.sale_line_ids.filtered('is_downpayment').invoice_lines.filtered(lambda line: line.move_id._is_downpayment())
+        return self.sale_line_ids.filtered('is_downpayment').move_line_ids.filtered(lambda line: line.move_id._is_downpayment())
 
     def _get_order_lines(self):
         return self.sale_line_ids if self.sale_line_ids else super()._get_order_lines()

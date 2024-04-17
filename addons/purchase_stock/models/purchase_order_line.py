@@ -168,7 +168,7 @@ class PurchaseOrderLine(models.Model):
                 if float_compare(line.product_qty, line.qty_invoiced, line.product_uom.rounding) == -1:
                     # If the quantity is now below the invoiced quantity, create an activity on the vendor bill
                     # inviting the user to create a refund.
-                    line.invoice_lines[0].move_id.activity_schedule(
+                    line.move_line_ids[0].move_id.activity_schedule(
                         'mail.mail_activity_data_warning',
                         note=_('The quantities on your purchase order indicate less than billed. You should ask for a refund.'))
 

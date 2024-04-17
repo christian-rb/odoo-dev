@@ -48,7 +48,7 @@ class PurchaseOrderLine(models.Model):
     company_id = fields.Many2one('res.company', related='order_id.company_id', string='Company', store=True, readonly=True)
     state = fields.Selection(related='order_id.state', store=True)
 
-    invoice_lines = fields.One2many('account.move.line', 'purchase_line_id', string="Bill Lines", readonly=True, copy=False)
+    move_line_ids = fields.One2many('account.move.line', 'purchase_line_id', string="Bill Lines", readonly=True, copy=False)
 
     # Replace by invoiced Qty
     qty_invoiced = fields.Float(compute='_compute_qty_invoiced', string="Billed Qty", digits='Product Unit of Measure', store=True)
@@ -133,7 +133,7 @@ class PurchaseOrderLine(models.Model):
         for line in self:
             line.price_unit_discounted = line.price_unit * (1 - line.discount / 100)
 
-    @api.depends('invoice_lines.move_id.state', 'invoice_lines.quantity', 'qty_received', 'product_uom_qty', 'order_id.state')
+    @api.depends('move_line_ids.move_id.state', 'move_line_ids.quantity', 'qty_received', 'product_uom_qty', 'order_id.state')
     def _compute_qty_invoiced(self):
         for line in self:
             # compute qty_invoiced
@@ -241,7 +241,7 @@ class PurchaseOrderLine(models.Model):
         return self.filtered(
             lambda line:
                 line.state in ['purchase', 'done']
-                and (line.invoice_lines or not line.is_downpayment)
+                and (line.move_line_ids or not line.is_downpayment)
                 and not line.display_type
         )
 
@@ -327,7 +327,7 @@ class PurchaseOrderLine(models.Model):
     @api.depends('product_qty', 'product_uom', 'company_id')
     def _compute_price_unit_and_date_planned_and_name(self):
         for line in self:
-            if not line.product_id or line.invoice_lines or not line.company_id:
+            if not line.product_id or line.move_line_ids or not line.company_id:
                 continue
             params = {'order_id': line.order_id}
             seller = line.product_id._select_seller(
