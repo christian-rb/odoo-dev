@@ -43,43 +43,40 @@ const FAKE_RECORDS = [
     },
 ];
 
-function fakeProps(props = {}) {
-    return {
-        model: FAKE_MODEL,
-        date: DEFAULT_DATE,
-        records: FAKE_RECORDS,
-        createRecord() {},
-        deleteRecord() {},
-        editRecord() {},
-        close() {},
-        ...props,
-    };
+const FAKE_PROPS = {
+    model: FAKE_MODEL,
+    date: DEFAULT_DATE,
+    records: FAKE_RECORDS,
+    createRecord() {},
+    deleteRecord() {},
+    editRecord() {},
+    close() {},
+};
+
+async function start(props = {}) {
+    await mountWithCleanup(CalendarYearPopover, {
+        props: { ...FAKE_PROPS, ...props },
+    });
 }
 
 test(`canCreate is true`, async () => {
-    await mountWithCleanup(CalendarYearPopover, {
-        props: fakeProps({
-            model: { ...FAKE_MODEL, canCreate: true },
-        }),
+    await start({
+        model: { ...FAKE_MODEL, canCreate: true },
     });
     expect(`.o_cw_popover_create`).toHaveCount(1);
 });
 
 test(`canCreate is false`, async () => {
-    await mountWithCleanup(CalendarYearPopover, {
-        props: fakeProps({
-            model: { ...FAKE_MODEL, canCreate: false },
-        }),
+    await start({
+        model: { ...FAKE_MODEL, canCreate: false },
     });
     expect(`.o_cw_popover_create`).toHaveCount(0);
 });
 
 test(`click on create button`, async () => {
-    await mountWithCleanup(CalendarYearPopover, {
-        props: fakeProps({
-            createRecord: () => expect.step("create"),
-            model: { ...FAKE_MODEL, canCreate: true },
-        }),
+    await start({
+        createRecord: () => expect.step("create"),
+        model: { ...FAKE_MODEL, canCreate: true },
     });
     expect(`.o_cw_popover_create`).toHaveCount(1);
 
@@ -88,9 +85,7 @@ test(`click on create button`, async () => {
 });
 
 test(`group records`, async () => {
-    await mountWithCleanup(CalendarYearPopover, {
-        props: fakeProps(),
-    });
+    await start();
     expect(`.o_cw_body > div`).toHaveCount(4);
     expect(`.o_cw_body > a`).toHaveCount(1);
     expect(queryAllTexts`.o_cw_body > div`).toEqual([
@@ -105,11 +100,9 @@ test(`group records`, async () => {
 });
 
 test(`click on record`, async () => {
-    await mountWithCleanup(CalendarYearPopover, {
-        props: fakeProps({
-            records: [FAKE_RECORDS[3]],
-            editRecord: () => expect.step("edit"),
-        }),
+    await start({
+        records: [FAKE_RECORDS[3]],
+        editRecord: () => expect.step("edit"),
     });
     expect(`.o_cw_body a.o_cw_popover_link`).toHaveCount(1);
 

@@ -6,21 +6,21 @@ import { FAKE_MODEL, clickDate, selectDateRange } from "./calendar_test_helpers"
 
 import { CalendarYearRenderer } from "@web/views/calendar/calendar_year/calendar_year_renderer";
 
-function fakeProps(props = {}) {
-    return {
-        model: FAKE_MODEL,
-        createRecord() {},
-        deleteRecord() {},
-        editRecord() {},
-        ...props,
-    };
+const FAKE_PROPS = {
+    model: FAKE_MODEL,
+    createRecord() {},
+    deleteRecord() {},
+    editRecord() {},
+};
+
+async function start(props = {}) {
+    await mountWithCleanup(CalendarYearRenderer, {
+        props: { ...FAKE_PROPS, ...props },
+    });
 }
 
 test(`mount a CalendarYearRenderer`, async () => {
-    await mountWithCleanup(CalendarYearRenderer, {
-        props: fakeProps(),
-    });
-
+    await start();
     expect(`.fc-month-container`).toHaveCount(12);
 
     // check "title format"
@@ -64,12 +64,10 @@ test(`display events`, async () => {
         },
     }));
 
-    await mountWithCleanup(CalendarYearRenderer, {
-        props: fakeProps({
-            createRecord(record) {
-                expect.step(`${record.start.toISODate()} allDay:${record.isAllDay} no event`);
-            },
-        }),
+    await start({
+        createRecord(record) {
+            expect.step(`${record.start.toISODate()} allDay:${record.isAllDay} no event`);
+        },
     });
 
     await clickDate("2021-07-15");
@@ -103,15 +101,13 @@ test(`display events`, async () => {
 });
 
 test(`select a range of date`, async () => {
-    await mountWithCleanup(CalendarYearRenderer, {
-        props: fakeProps({
-            createRecord({ isAllDay, start, end }) {
-                expect.step("create");
-                expect(isAllDay).toBe(true);
-                expect(start.toSQL()).toBe("2021-07-02 00:00:00.000 +01:00");
-                expect(end.toSQL()).toBe("2021-07-05 00:00:00.000 +01:00");
-            },
-        }),
+    await start({
+        createRecord({ isAllDay, start, end }) {
+            expect.step("create");
+            expect(isAllDay).toBe(true);
+            expect(start.toSQL()).toBe("2021-07-02 00:00:00.000 +01:00");
+            expect(end.toSQL()).toBe("2021-07-05 00:00:00.000 +01:00");
+        },
     });
     await selectDateRange("2021-07-02", "2021-07-05");
     expect(["create"]).toVerifySteps();
@@ -122,9 +118,7 @@ test("display correct column header for days, independent of the timezone", asyn
     // the day headers of a months were incorrectly set. (S S M T W T F) instead of (S M T W T F S)
     // if the first day of the week is Sunday.
     mockTimeZone(-9);
-    await mountWithCleanup(CalendarYearRenderer, {
-        props: fakeProps(),
-    });
+    await start();
     expect(queryAllTexts`.fc-month:eq(0) .fc-col-header-cell`).toEqual([
         "S",
         "M",
