@@ -12,6 +12,7 @@ import logging
 import os
 import time
 from collections import defaultdict
+from dateutil.relativedelta import relativedelta
 from functools import wraps
 from hashlib import sha256
 from itertools import chain, repeat
@@ -24,12 +25,13 @@ from lxml.builder import E
 from passlib.context import CryptContext
 from psycopg2 import sql
 
+import odoo
 from odoo import api, fields, models, tools, SUPERUSER_ID, _, Command
 from odoo.addons.base.models.ir_model import MODULE_UNINSTALL_FLAG
 from odoo.exceptions import AccessDenied, AccessError, UserError, ValidationError
 from odoo.http import request, DEFAULT_LANG
 from odoo.osv import expression
-from odoo.tools import is_html_empty, partition, collections, frozendict, lazy_property, SetDefinitions
+from odoo.tools import is_html_empty, partition, collections, frozendict, lazy_property, SetDefinitions, SQL
 
 _logger = logging.getLogger(__name__)
 
@@ -330,6 +332,7 @@ class Users(models.Model):
         help="If specified, this action will be opened at log on for this user, in addition to the standard menu.")
     groups_id = fields.Many2many('res.groups', 'res_groups_users_rel', 'uid', 'gid', string='Groups', default=lambda s: s._default_groups())
     log_ids = fields.One2many('res.users.log', 'create_uid', string='User log entries')
+    active_device_ids = fields.One2many('res.users.device', 'user_id', string='User devices', compute='_compute_active_device_ids')
     login_date = fields.Datetime(related='log_ids.create_date', string='Latest authentication', readonly=False)
     share = fields.Boolean(compute='_compute_share', compute_sudo=True, string='Share User', store=True,
          help="External user with limited access, created only for the purpose of sharing data.")
@@ -482,6 +485,10 @@ class Users(models.Model):
     def _compute_res_users_settings_id(self):
         for user in self:
             user.res_users_settings_id = user.res_users_settings_ids and user.res_users_settings_ids[0]
+
+    def _compute_active_device_ids(self):
+        for user in self:
+            user.active_device_ids = self.env['res.users.device'].search([('is_active', '=', True)])
 
     @api.model
     def _search_res_users_settings_id(self, operator, operand):
@@ -1036,6 +1043,24 @@ class Users(models.Model):
             'view_mode': 'form',
             'view_id': self.env.ref('base.res_users_identitycheck_view_form_revokedevices').id,
             'context': ctx,
+        }
+
+    def action_view_devices(self):
+        context = {
+            **self._context,
+            'search_default_filter_active_device': True,
+        }
+        return {
+            'name': _('Connected devices'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'res.users.device',
+            'view_mode': 'tree,gantt,form',
+            'context': context,
+            'views': [
+                [self.env.ref('base.res_users_device_view_tree').id, 'tree'],
+                [self.env.ref('base.res_users_device_view_gantt').id, 'gantt'],
+                [self.env.ref('base.res_users_device_view_form').id, 'form'],
+            ],
         }
 
     def has_groups(self, group_spec: str) -> bool:
@@ -2298,3 +2323,132 @@ class APIKeyShow(models.AbstractModel):
     # the field 'id' is necessary for the onchange that returns the value of 'key'
     id = fields.Id()
     key = fields.Char(readonly=True)
+
+class Device(models.Model):
+    _name = 'res.users.device'
+    _description = 'Devices'
+
+    name = fields.Char("Device", required=True)
+    session_identifier = fields.Char("Session Identifier")
+    plateform = fields.Char("Plateform")
+    browser = fields.Char("Browser")
+    ip_address = fields.Char("IP Address")
+    address = fields.Char("Address")
+    device_type = fields.Selection([('laptop', 'Laptop'), ('mobile', 'Mobile')], "Device Type")
+    first_activity = fields.Datetime("First Activity")
+    last_activity = fields.Datetime("Last Activity")
+    user_id = fields.Many2one("res.users", index=True)
+    on_disk = fields.Boolean("On Disk")  # if `False`, we are sure that the session no longer exists on the filesystem
+
+    is_active = fields.Boolean("Active Device", search="_search_is_active", store=False)
+    is_current = fields.Boolean("Current Device", compute="_compute_is_current")
+    last_activity_display = fields.Char("Last Activity Display", compute="_compute_last_activity_display")
+
+    def _search_is_active(self, operator, value):
+        # Returns last device inserted record for each device
+        # identified corresponding to the current user.
+        if operator != '=' or not value:
+            return [('id', 'in', [])]
+
+        device_group = self.read_group(
+            domain=[('user_id', '=', self.env.user.id), ('on_disk', '=', True)],
+            fields=['id:max'],
+            groupby=['name'],
+        )
+        device_ids = [device['id'] for device in device_group]
+        return [('id', 'in', device_ids)]
+
+    def _compute_is_current(self):
+        for device in self:
+            device.is_current = request.session.sid.startswith(device.session_identifier)
+
+    def _compute_last_activity_display(self):
+        for device in self:
+            delta_hours = (datetime.datetime.now() - device.last_activity).seconds // 3600
+            if delta_hours < 1:
+                device.last_activity_display = _("Less than an hour ago")
+            elif 1 <= delta_hours < 24:
+                device.last_activity_display = str(delta_hours) + _(" hours ago")
+            elif delta_hours >= 24:
+                device.last_activity_display = str(delta_hours // 24) + _(" days ago")
+            else:
+                device.last_activity_display = ''
+
+    @api.model
+    def _update_device(self, request):
+        """
+            Must be called when we want to update the device for the current request.
+            Passage through this method must leave a "trace" in the session,
+            as the cursor may be readonly.
+            When the cursor is not readonly, it is necessary to ensure
+            that the devices are correctly encoded in the database.
+
+            :param request: Request or WebsocketRequest object
+        """
+        user_agent = request.httprequest.user_agent
+        plateform = user_agent.platform
+        browser = user_agent.browser
+        ip_address = request.httprequest.remote_addr
+
+        current_device = [plateform, browser, ip_address]
+
+        now = int(datetime.datetime.now().timestamp())
+        for trace in request.session._trace:
+            device, time, sync = trace
+            if current_device == device:
+                if sync[0] or bool(now - time[1] >= 3600):
+                    time[1] = now
+                    sync[0] = True
+                    request.session.is_dirty = True
+                break
+        else:
+            # Device doesn't exist in the session
+            trace = device, time, sync = [current_device, [now, now], [True]]
+            request.session._trace.append(trace)
+            request.session.is_dirty = True
+
+        if not sync[0] or self.env.cr.readonly:
+            return
+
+        sync[0] = False
+        self.env.cr.execute(SQL("""
+            INSERT INTO res_users_device (name, session_identifier, plateform, browser, ip_address, address, device_type, first_activity, last_activity, user_id, on_disk)
+            VALUES (%(name)s, %(session_identifier)s, %(plateform)s, %(browser)s, %(ip_address)s, %(address)s, %(device_type)s, %(first_activity)s, %(last_activity)s, %(user_id)s, %(on_disk)s)
+        """,
+            name=f"{device[0].capitalize()} {device[1].capitalize()}",
+            session_identifier=request.session.sid[:42],
+            plateform=plateform,
+            browser=browser,
+            ip_address=ip_address,
+            address=' '.join(part for part in [request.geoip.get('city'), request.geoip.get('region_name'), request.geoip.get('country')] if part),
+            device_type='laptop' if plateform.lower() not in ['android', 'iphone', 'ipad', 'ipod', 'blackberry', 'windows phone', 'webos'] else 'mobile',
+            first_activity=datetime.datetime.fromtimestamp(time[0]),
+            last_activity=datetime.datetime.fromtimestamp(time[1]),
+            user_id=request.session.uid,
+            on_disk=True
+        ))
+
+    @api.autovacuum
+    def _gc_user_devices(self):
+        """ Keep only the most recent devices. """
+        self.env.cr.execute(SQL("""
+            DELETE FROM res_users_device
+            WHERE last_activity <= %s
+        """,
+            datetime.datetime.now(datetime.timezone.utc) - relativedelta(months=6)
+        ))
+        _logger.info("GC user devices delete %d entries", self.env.cr.rowcount)
+
+    @check_identity
+    def revoke(self):
+        return self._revoke()
+
+    def _revoke(self):
+        self_sudo = self.sudo()
+        must_logout = bool(self.filtered('is_current'))
+        session_identifiers = list({device.session_identifier for device in self_sudo})
+        odoo.http.root.session_store.delete_from_identifiers(session_identifiers)
+        self_sudo.search([('session_identifier', 'in', session_identifiers)]).on_disk = False
+        _logger.info("User %d revokes user devices %s", self.env.uid, ','.join(map(str, self.ids)))
+        if must_logout:
+            request.session.logout()

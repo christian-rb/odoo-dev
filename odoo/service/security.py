@@ -18,3 +18,7 @@ def check_session(session, env):
     if expected and odoo.tools.misc.consteq(expected, session.session_token):
         return True
     return False
+
+def check_device(request):
+    request.env['res.users.device']._update_device(request)
+    return True

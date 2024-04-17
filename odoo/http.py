@@ -250,6 +250,7 @@ def get_default_session():
         'login': None,
         'uid': None,
         'session_token': None,
+        '_trace': [],  # item = [device:list, time:list, sync_flag:list] (list type to be able to edit them by reference)
     }
 
 DEFAULT_MAX_CONTENT_LENGTH = 128 * 1024 * 1024  # 128MiB
@@ -918,7 +919,7 @@ def _check_and_complete_route_definition(controller_cls, submethod, merged_routi
 class FilesystemSessionStore(sessions.FilesystemSessionStore):
     """ Place where to load and save session objects. """
     def get_session_filename(self, sid):
-        # scatter sessions across 256 directories
+        # scatter sessions across 4096 (64^2) directories
         sha_dir = sid[:2]
         dirname = os.path.join(self.path, sha_dir)
         session_path = os.path.join(dirname, sid)

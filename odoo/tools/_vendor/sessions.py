@@ -20,7 +20,9 @@ import os
 import re
 import json
 import tempfile
-from hashlib import sha1
+import base64
+import glob
+from hashlib import sha512
 from os import path, replace as rename
 from time import time
 
@@ -28,12 +30,11 @@ from werkzeug.datastructures import CallbackDict
 
 _logger = logging.getLogger(__name__)
 _sha1_re = re.compile(r"^[a-f0-9]{40}$")
+_base64_urlsafe_re = re.compile(r'^[A-Za-z0-9_-]+$')
 
 
 def generate_key(salt=None):
-    if salt is None:
-        salt = repr(salt).encode("ascii")
-    return sha1(b"".join([salt, str(time()).encode("ascii"), os.urandom(30)])).hexdigest()
+    return base64.urlsafe_b64encode(sha512(str(time()).encode() + os.urandom(64)).digest()[:-1]).decode('utf-8')
 
 
 class ModificationTrackingDict(CallbackDict):
@@ -188,6 +189,9 @@ class FilesystemSessionStore(SessionStore):
         # arbitrary string.
         return path.join(self.path, self.filename_template % sid)
 
+    def is_valid_key(self, key):
+        return _base64_urlsafe_re.match(key) is not None
+
     def save(self, session):
         fn = self.get_session_filename(session.sid)
         fd, tmp = tempfile.mkstemp(suffix=_fs_transaction_suffix, dir=self.path)
@@ -208,6 +212,18 @@ class FilesystemSessionStore(SessionStore):
             os.unlink(fn)
         except OSError:
             pass
+
+    def delete_from_identifiers(self, identifiers):
+        invalid_pattern = re.compile(r'[\s\\./]')
+        for identifier in identifiers:
+            if re.search(invalid_pattern, identifier):
+                continue
+            prefix = os.path.join(self.path, identifier[:2], identifier + '*')
+            for fn in glob.glob(prefix):
+                try:
+                    os.unlink(fn)
+                except OSError:
+                    pass
 
     def get(self, sid):
         if not self.is_valid_key(sid):
