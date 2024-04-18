@@ -164,9 +164,10 @@ class TestCRMPLS(TransactionCase):
             self._get_lead_values(False, 'no_team_%s' % str(13), country_ids[0], state_ids[1], state_values[2], state_values[0], source_ids[2], stage_ids[1]))
 
         leads = Lead.create(leads_to_create)
+        Lead.sudo().with_context(active_test=False).search([('id', 'not in', leads.ids)]).unlink()
 
-        # assign team 3 to all leads with no teams (also take data into account).
-        leads_with_no_team = self.env['crm.lead'].sudo().search([('team_id', '=', False)])
+        # assign team 3 to all leads with no teams
+        leads_with_no_team = leads.sudo().filtered(lambda lead: not lead.team_id)
         leads_with_no_team.write({'team_id': team_ids[2]})
 
         # Set the PLS config
@@ -207,12 +208,7 @@ class TestCRMPLS(TransactionCase):
         leads.invalidate_cache()
         lead_13_no_team_proba = leads[13].automated_probability
         self.assertTrue(lead_13_team_3_proba != leads[13].automated_probability, "Probability for leads with no team should be different than if they where in their own team.")
-        # Todo: Make this test fully independent from demo data
-        if not loaded_demo_data(self.env):
-            expected_proba = 35.19
-        else:
-            expected_proba = 36.65
-        self.assertAlmostEqual(lead_13_no_team_proba, expected_proba, places=2)
+        self.assertAlmostEqual(lead_13_no_team_proba, 35.19, places=2)
 
         # Test frequencies
         lead_4_stage_0_freq = LeadScoringFrequency.search([('team_id', '=', leads[4].team_id.id), ('variable', '=', 'stage_id'), ('value', '=', stage_ids[0])])
