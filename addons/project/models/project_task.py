@@ -495,6 +495,7 @@ class Task(models.Model):
         if tasks_with_dependency:
             group_dependent = self.env['project.task']._read_group([
                 ('depend_on_ids', 'in', tasks_with_dependency.ids),
+                ('state', 'not in', list(CLOSED_STATES)),
             ], ['depend_on_ids'], ['__count'])
             dependent_tasks_count_dict = {
                 depend_on.id: count
@@ -1797,10 +1798,10 @@ class Task(models.Model):
         }
         if self.dependent_tasks_count == 1:
             action['view_mode'] = 'form'
-            action['res_id'] = self.dependent_ids.id
+            action['res_id'] = self.dependent_ids.filtered(lambda t: t.state not in CLOSED_STATES).id
             action['views'] = [(False, 'form')]
         else:
-            action['domain'] = [('depend_on_ids', '=', self.id)]
+            action['domain'] = [('depend_on_ids', '=', self.id), ('state', 'not in', list(CLOSED_STATES))]
             action['name'] = _('Dependent Tasks')
             action['view_mode'] = 'tree,form,kanban,calendar,pivot,graph,activity'
         return action
