@@ -1509,7 +1509,7 @@ class Field(MetaField('DummyField', (object,), {})):
             # in order to ease the retrieval of those values to flush them
             env.cache.update(self, None, records._ids, values, dirty=False, check_dirty=False)
 
-    def insert_cache(self, records, values):
+    def insert_cache_from_db(self, records, values):
         """ insert missing cache values without marking cache dirty """
         context_key = records.env.cache_key(self)
         records.env.cache.update(self, context_key, records._ids, values, check_dirty=False, updater=dict.setdefault)
@@ -1951,23 +1951,20 @@ class _String(Field):
             self.update_cache(records, [dict(cache_value) for _id in records._ids], dirty=False)
             return
 
-        # flush dirty None values
-        dirty_records = records & records.browse(cache.get_dirty_ids(self))
-        if any(v is None for v in cache.get_values(self, None, dirty_records._ids)):
-            dirty_records.flush_recordset([self.name])
-
         lang = (records.env.lang or 'en_US') if self.translate is True else records.env._lang
-        assert not lang.startswith('_')
+        assert not lang.startswith('_')  # technical '_' languages are readonly
 
         # model translation
         if not callable(self.translate):
-            # invalidate clean fields because them may contain fallback value
-            clean_records = records - records.browse(cache.get_dirty_ids(self))
-            clean_records.invalidate_recordset([self.name])
+            new_translations_list = []
             if lang != 'en_US' and not records.env['res.lang']._get_data(code='en_US'):
                 # if 'en_US' is not active, we always write en_US to make sure value_en is meaningful
                 cache_value['en_US'] = next(iter(cache_value.values()))
-            self.update_cache(records, itertools.repeat(cache_value), dirty=True)
+            for record in records:
+                stored_translations = self._get_stored_translations(record) or TranslatedCacheValue({'en_US': next(iter(cache_value.values()))})
+                stored_translations.update(cache_value)
+                new_translations_list.append(stored_translations)
+            self.update_cache(records, new_translations_list, dirty=True)
             return
 
         value = next(iter(cache_value.values()))
@@ -2035,31 +2032,24 @@ class _String(Field):
         self.update_cache(records, new_translations_list, dirty=True)
 
     # cache operations
-    def set_cache(self, record, value, dirty=False, check_dirty=True):
-        env = record.env
-        context_key = env.cache_key(self)
-        setter = self._translation_updater if self.translate is True else None
-        env.cache.set(self, context_key, record._ids[0], value, dirty=dirty, check_dirty=check_dirty, setter=setter)
-        if check_dirty and dirty and context_key is not None:
-            env.cache.set(self, None, record._ids[0], value, dirty=False, check_dirty=False, setter=setter)
-
-    def update_cache(self, records, values, dirty=False, check_dirty=True):
-        env = records.env
-        context_key = env.cache_key(self)
-        updater = self._translation_updater if self.translate is True else None
-        env.cache.update(self, context_key, records._ids, values, dirty=dirty, check_dirty=check_dirty, updater=updater)
-        if check_dirty and dirty and context_key is not None:
-            env.cache.update(self, None, records._ids, values, dirty=False, check_dirty=False, updater=updater)
-
-    def insert_cache(self, records, values):
+    def insert_cache_from_db(self, records, values):
+        if not self.translate:
+            return super().insert_cache_from_db(records, values)
         context_key = records.env.cache_key(self)
-        if self.translate:
-            prefetch_langs = records.env.context.get('prefetch_langs')
-            lang = None if prefetch_langs else (records.env.lang or 'en_US') if self.translate is True else records.env._lang
-            inserter = self._get_translation_inserter(prefetch_langs, lang)
+        field_cache = records.env.cache._set_field_cache(self, context_key)
+        if records.env.context.get('prefetch_langs'):
+            for id_, value in zip(records._ids, values):
+                cur_value = field_cache.get(id_, False)
+                if not (cur_value is None or isinstance(cur_value, TranslatedCacheValue)):
+                    field_cache[id_] = None if value is None else TranslatedCacheValue(value)
         else:
-            inserter = dict.setdefault
-        records.env.cache.update(self, context_key, records._ids, values, check_dirty=False, updater=inserter)
+            lang = (records.env.lang or 'en_US') if self.translate is True else records.env._lang
+            for id_, value in zip(records._ids, values):
+                cur_value = field_cache.get(id_, False)
+                if cur_value is False:
+                    field_cache[id_] = None if value is None else {lang: value}
+                elif not (cur_value is None or isinstance(cur_value, TranslatedCacheValue)):
+                    field_cache[id_].setdefault(lang, value)
 
     def get_cache_miss_ids(self, records):
         if not self.translate:
@@ -2067,13 +2057,17 @@ class _String(Field):
             return
         context_key = records.env.cache_key(self)
         field_cache = records.env.cache._get_field_cache(self, context_key)
-        lang = (records.env.lang or 'en_US') if self.translate is True else records.env._lang
-        for id_ in records._ids:
-            value = field_cache.get(id_, False)
-            if value is False:
-                yield id_
-            elif not (value is None or lang in value or isinstance(value, TranslatedCacheValue)):
-                yield id_
+        if records.env.context.get('prefetch_langs'):
+            for id_ in records._ids:
+                value = field_cache.get(id_, False)
+                if value is False or not (value is None or isinstance(value, TranslatedCacheValue)):
+                    yield id_
+        else:
+            lang = (records.env.lang or 'en_US') if self.translate is True else records.env._lang
+            for id_ in records._ids:
+                value = field_cache.get(id_, False)
+                if value is False or not (value is None or lang in value or isinstance(value, TranslatedCacheValue)):
+                    yield id_
 
     def get_ids_different_from(self, records, value):
         if not self.translate:
@@ -2091,36 +2085,6 @@ class _String(Field):
             elif not (value.items() <= value_.items()):
                 ids_.append(id_)
         return ids_
-
-    # cache hooks
-    @staticmethod
-    def _translation_updater(field_cache, id_, value):
-        if value is None:
-            field_cache[id_] = None
-            return
-        if id_ not in field_cache or field_cache[id_] is None:
-            field_cache[id_] = value
-            return
-        field_cache[id_].update(value)
-
-    @staticmethod
-    @lru_cache(maxsize=256)  # 256 > 89 languages * 2
-    def _get_translation_inserter(prefetch_langs, lang):
-        # the dirty translated cache_value should already been flushed before insert
-        if prefetch_langs:
-            def inserter(field_cache, _id, value):
-                field_cache[_id] = None if value is None else TranslatedCacheValue(value)
-        else:
-
-            def inserter(field_cache, _id, value):
-                if value is None:
-                    field_cache[_id] = None
-                if _id not in field_cache:
-                    field_cache[_id] = {lang: value}
-                elif record_cache := field_cache[_id]:
-                    record_cache.setdefault(lang, value)
-
-        return inserter
 
 
 class Char(_String):

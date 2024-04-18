@@ -3971,7 +3971,7 @@ class BaseModel(metaclass=MetaModel):
             for field in column_fields:
                 values = next(column_values)
                 # store values in cache, but without overwriting
-                field.insert_cache(fetched, values)
+                field.insert_cache_from_db(fetched, values)
         else:
             fetched = self.browse(query)
 
@@ -4527,28 +4527,11 @@ class BaseModel(metaclass=MetaModel):
             columns = []
             assignments = []
             for fname in fnames:
-                if force_raw := fname.startswith('__'):
-                    fname = fname.removeprefix('__')
                 field = self._fields[fname]
                 assert field.store and field.column_type
                 column = SQL.identifier(fname)
                 # the type cast is necessary for some values, like NULLs
                 expr = SQL('"__tmp".%s::%s', column, SQL(field.column_type[1]))
-                if field.translate is True and not force_raw:
-                    # this is the SQL equivalent of:
-                    # None if expr is None else (
-                    #     (column or {'en_US': next(iter(expr.values()))}) | expr
-                    # )
-                    expr = SQL(
-                        """CASE WHEN %(expr)s IS NULL THEN NULL ELSE
-                            COALESCE(%(table)s.%(column)s, jsonb_build_object(
-                                'en_US', jsonb_path_query_first(%(expr)s, '$.*')
-                            )) || %(expr)s
-                        END""",
-                        table=SQL.identifier(self._table),
-                        column=column,
-                        expr=expr,
-                    )
                 columns.append(column)
                 assignments.append(SQL("%s = %s", column, expr))
 
@@ -6343,8 +6326,7 @@ class BaseModel(metaclass=MetaModel):
                     value = field.convert_to_column(value, record)
                 else:
                     value = field._convert_from_cache_to_column(value)
-                fname = f'__{field.name}' if field.translate is True and value and isinstance(value.adapted, odoo.fields.TranslatedCacheValue) else field.name
-                id_vals[record.id][fname] = value
+                id_vals[record.id][field.name] = value
 
         # update all records
         self.browse(id_vals)._write_multi(id_vals.values())
