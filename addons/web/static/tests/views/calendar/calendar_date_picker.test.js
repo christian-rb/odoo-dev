@@ -1,4 +1,4 @@
-import { beforeEach, expect, test } from "@odoo/hoot";
+import { beforeEach, describe, expect, test } from "@odoo/hoot";
 import { queryAllTexts } from "@odoo/hoot-dom";
 import { mockDate } from "@odoo/hoot-mock";
 import {
@@ -14,6 +14,8 @@ import {
 
 import { CalendarController } from "@web/views/calendar/calendar_controller";
 import { changeScale } from "./calendar_test_helpers";
+
+describe.current.tags("desktop");
 
 class Event extends models.Model {
     name = fields.Char();

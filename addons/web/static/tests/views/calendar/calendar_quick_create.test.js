@@ -28,7 +28,7 @@ async function start(params = {}) {
     await waitFor(`.o_dialog`);
 }
 
-test(`mount a CalendarQuickCreate`, async () => {
+test.tags("desktop")(`mount a CalendarQuickCreate`, async () => {
     await start();
     expect(`.o-calendar-quick-create`).toHaveCount(1);
     expect(`.o_dialog .modal-sm`).toHaveCount(1);

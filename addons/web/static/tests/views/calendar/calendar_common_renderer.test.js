@@ -54,7 +54,7 @@ test(`Month: mount a CalendarCommonRenderer`, async () => {
 test(`Day: check week number`, async () => {
     await start({ model: { ...FAKE_MODEL, scale: "day" } });
     expect(`[aria-label^="Week "]`).toHaveCount(1);
-    expect(`[aria-label^="Week "]`).toHaveText("Week 28");
+    expect(`[aria-label^="Week "]`).toHaveText(/(Week )?28/);
 });
 
 test(`Day: check date`, async () => {
@@ -77,7 +77,7 @@ test(`Day: click all day slot`, async () => {
     expect(["create"]).toVerifySteps();
 });
 
-test(`Day: select range`, async () => {
+test.tags("desktop")(`Day: select range`, async () => {
     await start({
         model: { ...FAKE_MODEL, scale: "day" },
         createRecord(record) {
@@ -97,7 +97,7 @@ test(`Day: check event`, async () => {
     expect(`.o_event`).toHaveAttribute("data-event-id", "1");
 });
 
-test(`Day: click on event`, async () => {
+test.tags("desktop")(`Day: click on event`, async () => {
     mockService("popover", () => ({
         add(target, component, { record }) {
             expect.step("popover");
@@ -114,7 +114,7 @@ test(`Day: click on event`, async () => {
 test(`Week: check week number`, async () => {
     await start({ model: { ...FAKE_MODEL, scale: "week" } });
     expect(`.fc-scrollgrid-section-header .fc-timegrid-axis-cushion`).toHaveCount(1);
-    expect(`.fc-scrollgrid-section-header .fc-timegrid-axis-cushion`).toHaveText("Week 28");
+    expect(`.fc-scrollgrid-section-header .fc-timegrid-axis-cushion`).toHaveText(/(Week )?28/);
 });
 
 test(`Week: check dates`, async () => {
