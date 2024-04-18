@@ -3906,7 +3906,7 @@ class BaseModel(metaclass=MetaModel):
             field = self._fields.get(field_name)
             if not field:
                 raise ValueError(f"Invalid field {field_name!r} on model {self._name!r}")
-            if ignore_when_in_cache and not any(field.get_cache_miss_ids(self)):
+            if ignore_when_in_cache and not any(field.get_cache_ids_missing(self)):
                 # field is already in cache: don't fetch it
                 continue
             if field.store:
@@ -3971,7 +3971,7 @@ class BaseModel(metaclass=MetaModel):
             for field in column_fields:
                 values = next(column_values)
                 # store values in cache, but without overwriting
-                field.insert_cache_from_db(fetched, values)
+                field.impute_cache(fetched, values)
         else:
             fetched = self.browse(query)
 
@@ -4464,7 +4464,7 @@ class BaseModel(metaclass=MetaModel):
             for fields in determine_inverses.values():
                 # write again on non-stored fields that have been invalidated from cache
                 for field in fields:
-                    if not field.store and any(field.get_cache_miss_ids(real_recs)):
+                    if not field.store and any(field.get_cache_ids_missing(real_recs)):
                         field.write(real_recs, vals[field.name])
 
                 # inverse records that are not being computed
@@ -6576,7 +6576,7 @@ class BaseModel(metaclass=MetaModel):
             Return at most ``limit`` records.
         """
         ids = expand_ids(self.id, self._prefetch_ids)
-        ids = field.get_cache_miss_ids(self.browse(ids))
+        ids = field.get_cache_ids_missing(self.browse(ids))
         if limit:
             ids = itertools.islice(ids, limit)
         # Those records are aimed at being either fetched, or computed.  But the

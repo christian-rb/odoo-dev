@@ -317,7 +317,7 @@ class HrEmployeePrivate(models.Model):
         for fname in field_names:
             field = self._fields[fname]
             public_field = public._fields[fname]
-            if any(public_field.get_cache_miss_ids(public)):
+            if any(public_field.get_cache_ids_missing(public)):
                 continue
             values = public_field.get_cache_values(public)
             if field.translate:

@@ -1174,7 +1174,7 @@ class Field(MetaField('DummyField', (object,), {})):
 
         # discard the records that are not modified
         cache_value = self.convert_to_cache(value, records)
-        ids = self.get_ids_different_from(records, cache_value)
+        ids = self.get_cache_ids_different_from(records, cache_value)
         if not ids:
             return
 
@@ -1276,7 +1276,7 @@ class Field(MetaField('DummyField', (object,), {})):
                     self.compute_value(record)
                     recs = record
 
-                missing_recs_ids = tuple(self.get_cache_miss_ids(recs))
+                missing_recs_ids = tuple(self.get_cache_ids_missing(recs))
                 if missing_recs_ids:
                     missing_recs = record.browse(missing_recs_ids)
                     if self.readonly and not self.store:
@@ -1509,12 +1509,12 @@ class Field(MetaField('DummyField', (object,), {})):
             # in order to ease the retrieval of those values to flush them
             env.cache.update(self, None, records._ids, values, dirty=False, check_dirty=False)
 
-    def insert_cache_from_db(self, records, values):
+    def impute_cache(self, records, values):
         """ insert missing cache values without marking cache dirty """
         context_key = records.env.cache_key(self)
         records.env.cache.update(self, context_key, records._ids, values, check_dirty=False, updater=dict.setdefault)
 
-    def get_cache_miss_ids(self, records):
+    def get_cache_ids_missing(self, records):
         """ Return the ids of ``records`` that have no value for ``field``. """
         context_key = records.env.cache_key(self)
         field_cache = records.env.cache._get_field_cache(self, context_key)
@@ -1522,7 +1522,7 @@ class Field(MetaField('DummyField', (object,), {})):
             if id_ not in field_cache:
                 yield id_
 
-    def get_ids_different_from(self, records, value):
+    def get_cache_ids_different_from(self, records, value):
         cache = records.env.cache
         context_key = records.env.cache_key(self)
         field_cache = cache._get_field_cache(self, context_key)
@@ -1912,7 +1912,7 @@ class _String(Field):
 
     def _get_stored_translations(self, record):
         """
-        : return: {'en_US': 'value_en_US', 'fr_FR': 'French'}
+        : return: {'en_US': 'value_en_US', 'fr_FR': 'French'} # cache format
         """
         # assert (self.translate and self.store and record)
         record._recompute_recordset([self.name])  # for stored computed translated fields
@@ -1941,9 +1941,8 @@ class _String(Field):
         if not self.translate or value is False or value is None:
             super().write(records, value)
             return
-        cache = records.env.cache
         cache_value = self.convert_to_cache(value, records)
-        records = records.browse(self.get_ids_different_from(records, cache_value))
+        records = records.browse(self.get_cache_ids_different_from(records, cache_value))
         if not records:
             return
 
@@ -2032,9 +2031,9 @@ class _String(Field):
         self.update_cache(records, new_translations_list, dirty=True)
 
     # cache operations
-    def insert_cache_from_db(self, records, values):
+    def impute_cache(self, records, values):
         if not self.translate:
-            return super().insert_cache_from_db(records, values)
+            return super().impute_cache(records, values)
         context_key = records.env.cache_key(self)
         field_cache = records.env.cache._set_field_cache(self, context_key)
         if records.env.context.get('prefetch_langs'):
@@ -2051,9 +2050,9 @@ class _String(Field):
                 elif not (cur_value is None or isinstance(cur_value, TranslatedCacheValue)):
                     field_cache[id_].setdefault(lang, value)
 
-    def get_cache_miss_ids(self, records):
+    def get_cache_ids_missing(self, records):
         if not self.translate:
-            yield from super().get_cache_miss_ids(records)
+            yield from super().get_cache_ids_missing(records)
             return
         context_key = records.env.cache_key(self)
         field_cache = records.env.cache._get_field_cache(self, context_key)
@@ -2069,9 +2068,9 @@ class _String(Field):
                 if value is False or not (value is None or lang in value or isinstance(value, TranslatedCacheValue)):
                     yield id_
 
-    def get_ids_different_from(self, records, value):
+    def get_cache_ids_different_from(self, records, value):
         if not self.translate:
-            return super().get_ids_different_from(records, value)
+            return super().get_cache_ids_different_from(records, value)
         cache = records.env.cache
         context_key = records.env.cache_key(self)
         field_cache = cache._get_field_cache(self, context_key)
@@ -2666,13 +2665,13 @@ class Binary(Field):
 
         # update the cache, and discard the records that are not modified
         cache_value = self.convert_to_cache(value, records)
-        ids = self.get_ids_different_from(records, cache_value)
+        ids = self.get_cache_ids_different_from(records, cache_value)
         if not ids:
             return
         records = records.browse(ids)
         if self.store:
             # determine records that are known to be not null
-            not_null_ids = self.get_ids_different_from(records, None)
+            not_null_ids = self.get_cache_ids_different_from(records, None)
 
         self.update_cache(records, itertools.repeat(cache_value))
 
@@ -3327,7 +3326,7 @@ class Many2one(_Relational):
 
         # discard the records that are not modified
         cache_value = self.convert_to_cache(value, records)
-        ids = self.get_ids_different_from(records, cache_value)
+        ids = self.get_cache_ids_different_from(records, cache_value)
         if not ids:
             return
 
@@ -5088,7 +5087,7 @@ class Many2many(_RelationalMulti):
             # is not in cache: one that actually checks access rules for
             # records, and the other one fetching the actual data. We use
             # `self.read` instead to shortcut the first query.
-            missing_ids = list(self.get_cache_miss_ids(records))
+            missing_ids = list(self.get_cache_ids_missing(records))
             if missing_ids:
                 self.read(records.browse(missing_ids))
 

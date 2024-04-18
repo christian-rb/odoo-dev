@@ -53,8 +53,8 @@ class TestRecordCache(TransactionCaseWithUserDemo):
         check(bar1, None, None)
         check(bar2, None, None)
 
-        self.assertCountEqual(name.get_cache_miss_ids(foo1 + bar1), [1, 2])
-        self.assertCountEqual(name.get_cache_miss_ids(foo2 + bar2), [1, 2])
+        self.assertCountEqual(name.get_cache_ids_missing(foo1 + bar1), [1, 2])
+        self.assertCountEqual(name.get_cache_ids_missing(foo2 + bar2), [1, 2])
 
         # set values in one environment only
         cache.set(name, foo1.env.cache_key(name), foo1.id, 'FOO1_NAME')
@@ -65,8 +65,8 @@ class TestRecordCache(TransactionCaseWithUserDemo):
         check(foo2, 'FOO1_NAME', 'FOO1_REF')
         check(bar1, 'BAR1_NAME', 'BAR1_REF')
         check(bar2, 'BAR1_NAME', 'BAR1_REF')
-        self.assertCountEqual(name.get_cache_miss_ids(foo1 + bar1), [])
-        self.assertCountEqual(name.get_cache_miss_ids(foo2 + bar2), [])
+        self.assertCountEqual(name.get_cache_ids_missing(foo1 + bar1), [])
+        self.assertCountEqual(name.get_cache_ids_missing(foo2 + bar2), [])
 
         # set values in both environments
         cache.set(name, foo2.env.cache_key(name), foo2.id, 'FOO2_NAME')
@@ -77,8 +77,8 @@ class TestRecordCache(TransactionCaseWithUserDemo):
         check(foo2, 'FOO2_NAME', 'FOO2_REF')
         check(bar1, 'BAR2_NAME', 'BAR2_REF')
         check(bar2, 'BAR2_NAME', 'BAR2_REF')
-        self.assertCountEqual(name.get_cache_miss_ids(foo1 + bar1), [])
-        self.assertCountEqual(name.get_cache_miss_ids(foo2 + bar2), [])
+        self.assertCountEqual(name.get_cache_ids_missing(foo1 + bar1), [])
+        self.assertCountEqual(name.get_cache_ids_missing(foo2 + bar2), [])
 
         # remove value in one environment
         cache.remove(name, foo1.env.cache_key(name), foo1.id)
@@ -86,8 +86,8 @@ class TestRecordCache(TransactionCaseWithUserDemo):
         check(foo2, None, 'FOO2_REF')
         check(bar1, 'BAR2_NAME', 'BAR2_REF')
         check(bar2, 'BAR2_NAME', 'BAR2_REF')
-        self.assertCountEqual(name.get_cache_miss_ids(foo1 + bar1), [1])
-        self.assertCountEqual(name.get_cache_miss_ids(foo2 + bar2), [1])
+        self.assertCountEqual(name.get_cache_ids_missing(foo1 + bar1), [1])
+        self.assertCountEqual(name.get_cache_ids_missing(foo2 + bar2), [1])
 
         # partial invalidation
         cache.invalidate([(name, None), (ref, foo1.ids)])
