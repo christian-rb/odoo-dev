@@ -16,6 +16,25 @@ class Users(models.Model):
     def SELF_READABLE_FIELDS(self):
         return super().SELF_READABLE_FIELDS + ['calendar_default_privacy']
 
+    @property
+    def SELF_WRITEABLE_FIELDS(self):
+        return super().SELF_WRITEABLE_FIELDS + ['calendar_default_privacy']
+
+    def onchange(self, values, field_names, fields_spec):
+        # Get calendar default privacy from the default user when it is defined.
+        default_user = self.env.ref('base.default_user', raise_if_not_found=False)
+        calendar_default_privacy = 'public'
+        if default_user and default_user.calendar_default_privacy:
+            calendar_default_privacy = default_user.calendar_default_privacy
+
+        result = super().onchange(values, field_names, fields_spec)
+
+        # Set the calendar default privacy in the new user.
+        result_value = result.get('value')
+        if result_value and not result_value.get('calendar_default_privacy'):
+            result['value']['calendar_default_privacy'] = calendar_default_privacy
+        return result
+
     def _systray_get_calendar_event_domain(self):
         # Determine the domain for which the users should be notified. This method sends notification to
         # events occurring between now and the end of the day. Note that "now" needs to be computed in the
