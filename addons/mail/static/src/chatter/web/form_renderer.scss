@@ -35,6 +35,10 @@
         --formView-sheetBg-padding-right: #{map-get($spacers, 2)};
     }
 }
+// Prevent reducing the spacing for form in dialog
+div.modal-dialog .o_form_sheet_bg {
+    padding-right: var(--formView-sheetBg-padding-x) !important;
+}
 
 // ------------------------------------------------------------------
 // Style
