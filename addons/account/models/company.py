@@ -190,6 +190,10 @@ class ResCompany(models.Model):
     account_discount_income_allocation_id = fields.Many2one(comodel_name='account.account', string='Separate account for income discount')
     account_discount_expense_allocation_id = fields.Many2one(comodel_name='account.account', string='Separate account for expense discount')
 
+    # Internally set by the localization packages
+    # False if the localization want to hide the taxes column
+    show_taxes = fields.Boolean(store=False, default=True, check_company=True)
+
     def _get_company_root_delegated_field_names(self):
         return super()._get_company_root_delegated_field_names() + [
             'fiscalyear_last_day',
