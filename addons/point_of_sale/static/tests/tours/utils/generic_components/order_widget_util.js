@@ -94,11 +94,3 @@ export function hasTax(amount) {
         isCheck: true,
     };
 }
-
-export function debug(){
-    return {
-        content: `order total amount is `,
-        trigger: `.product-screens .order-summasry .total:contains("")`,
-        run: () =>{}
-    };
-}
