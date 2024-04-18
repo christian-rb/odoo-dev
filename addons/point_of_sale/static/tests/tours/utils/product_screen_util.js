@@ -142,7 +142,7 @@ export function clickPartnerButton() {
     ];
 }
 export function clickCustomer(name) {
-    return [PartnerList.clickPartner(name), goBackToMainScreen()];
+    return [PartnerList.clickPartner(name), { ...back(), mobile: true }];
 }
 export function customerIsSelected(name) {
     return [
@@ -274,13 +274,7 @@ export function clickFiscalPosition(name, checkIsNeeded = false) {
         );
     }
 
-    step.push({
-        content: "go back to the products",
-        trigger: ".pos-rightheader .floor-button",
-        mobile: true,
-    });
-
-    return step;
+    return [...step, { ...back(), mobile: true }];
 }
 export function closeWithCashAmount(val) {
     return [
@@ -314,11 +308,10 @@ export function scan_ean13_barcode(barcode) {
         },
     ];
 }
-export function goBackToMainScreen() {
+export function back() {
     return {
         content: "go back to the products",
-        trigger: ".pos-rightheader .floor-button",
-        mobile: true,
+        trigger: ".pos-rightheader .back-button",
     };
 }
 export function clickLotIcon() {

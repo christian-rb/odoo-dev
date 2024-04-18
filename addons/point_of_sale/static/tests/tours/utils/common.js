@@ -9,7 +9,7 @@ export function inLeftSide(steps) {
         ...[steps].flat(),
         {
             content: "go back to the products",
-            trigger: ".pos-rightheader .floor-button",
+            trigger: ".pos-rightheader .back-button",
             mobile: true,
         },
     ];

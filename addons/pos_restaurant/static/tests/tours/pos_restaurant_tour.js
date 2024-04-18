@@ -146,7 +146,7 @@ registry.category("web_tour.tours").add("pos_restaurant_sync", {
             TicketScreen.clickNewTicket(),
             ProductScreen.clickDisplayedProduct("Coca-Cola", true),
             ProductScreen.clickDisplayedProduct("Minute Maid", true),
-            FloorScreen.backToFloor(),
+            ProductScreen.back(),
 
             // At floor screen, there should be 2 synced draft orders
             FloorScreen.orderCountSyncedInTableIs("5", "2"),
@@ -166,7 +166,7 @@ registry.category("web_tour.tours").add("pos_restaurant_sync", {
             TicketScreen.selectOrder("-0004"),
             TicketScreen.loadSelectedOrder(),
             ProductScreen.isShown(),
-            FloorScreen.backToFloor(),
+            ProductScreen.back(),
 
             // There should be 1 synced draft order.
             FloorScreen.orderCountSyncedInTableIs("5", "2"),
@@ -214,7 +214,7 @@ registry.category("web_tour.tours").add("pos_restaurant_sync_second_login", {
             FloorScreen.clickTable("4"),
             ProductScreen.clickDisplayedProduct("Coca-Cola"),
             ProductScreen.totalAmountIs("2.20"),
-            FloorScreen.backToFloor(),
+            ProductScreen.back(),
             FloorScreen.orderCountSyncedInTableIs("4", "1"),
         ].flat(),
 });
@@ -228,7 +228,7 @@ registry.category("web_tour.tours").add("SaveLastPreparationChangesTour", {
             ProductScreen.clickDisplayedProduct("Coca-Cola", true, "1.0"),
             ProductScreen.clickOrderButton(),
             ProductScreen.orderlinesHaveNoChange(),
-            FloorScreen.backToFloor(),
+            ProductScreen.back(),
         ].flat(),
 });
 

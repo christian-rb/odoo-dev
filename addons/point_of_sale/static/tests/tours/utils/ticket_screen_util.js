@@ -13,7 +13,7 @@ export function clickDiscard() {
             trigger: ".ticket-screen button.discard",
             mobile: false,
         },
-        ProductScreen.goBackToMainScreen(),
+        { ...ProductScreen.back(), mobile: true },
     ];
 }
 export function selectOrder(orderName) {
@@ -97,15 +97,6 @@ export function clickControlButton(name) {
         ProductScreen.clickReview(),
         {
             trigger: `.ticket-screen ${ProductScreen.controlButtonTrigger(name)}`,
-        },
-    ];
-}
-export function clickBackToMainTicketScreen() {
-    return [
-        {
-            content: "Go back to main TicketScreen when in mobile",
-            trigger: ".pos-rightheader .floor-button",
-            mobile: true,
         },
     ];
 }
