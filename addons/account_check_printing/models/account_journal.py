@@ -34,6 +34,16 @@ class AccountJournal(models.Model):
         help="Sequence number of the next printed check.",
     )
 
+    bank_check_printing_layout = fields.Selection(
+        selection='_get_check_printing_layouts',
+        string='Check Layout'
+    )
+
+    def _get_check_printing_layouts(self):
+        selection = self.company_id._fields['account_check_printing_layout'].selection
+        selection = [(value, label) for value, label in selection if value != 'disabled']
+        return selection
+
     @api.depends('check_manual_sequencing')
     def _compute_check_next_number(self):
         for journal in self:
