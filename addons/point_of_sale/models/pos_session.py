@@ -281,7 +281,7 @@ class PosSession(models.Model):
             },
             'pos.note': {
                 'domain': [('id', '=', config_id.note_ids.ids)] if config_id.note_ids else [],
-                'fields': ['name'],
+                'fields': ['name', 'color'],
             },
         }
 

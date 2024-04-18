@@ -619,7 +619,7 @@ export class PosOrderline extends Base {
                 : "",
             discount: this.get_discount_str(),
             customerNote: this.get_customer_note(),
-            internalNote: this.getNote(),
+            internalNote: this.getNotes(),
             combo_parent_id: this.combo_parent_id
                 ? this.combo_parent_id.get_full_product_name()
                 : "",
@@ -659,6 +659,21 @@ export class PosOrderline extends Base {
     }
     setNote(note) {
         this.note = note;
+    }
+    getNotes() {
+        const defaultNotes = new Map(
+            this.models["pos.note"].getAll().map((note) => [note.name.trim(), note.color])
+        );
+
+        const notes = (
+            this.note ? this.note.split("\n").filter((note) => note.trim() !== "") : []
+        ).map((noteLine) => {
+            const trimmedNote = noteLine.trim();
+            const color = defaultNotes.get(trimmedNote) || Math.floor(Math.random() * 11);
+            return { note: trimmedNote, color };
+        });
+
+        return notes;
     }
     setHasChange(isChange) {
         this.uiState.hasChange = isChange;

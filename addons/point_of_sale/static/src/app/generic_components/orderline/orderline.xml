@@ -31,13 +31,19 @@
                     <i class="fa fa-sticky-note me-1" role="img" aria-label="Customer Note" title="Customer Note"/>
                     <t t-esc="line.customerNote" />
                 </li>
-                <t t-if="line.internalNote" class="list-inline">
-                    <t t-foreach="line.internalNote.split('\n')" t-as="note" t-key="note_index">
-                        <li t-if="note.trim() !== ''" class="internal-note ms-1 p-2 badge rounded-pill bg-info text-info bg-opacity-25" style="font-size: 0.85rem;">
-                            <t t-esc="note" />
-                        </li>
+                <div class="d-flex flex-wrap">
+                    <t t-if="line.internalNote" class="list-inline">
+                        <t t-foreach="line.internalNote" t-as="note" t-key="note_index">
+                            <div t-if="note.note.trim() !== ''"
+                                class="internal-note ms-1 mb-1 px-2 py-1 bg-info text-info bg-opacity-25"
+                                style="font-size: 0.85rem; border-radius: 1rem;"
+                                t-attf-class="{{note.color ? `o_colorlist_item_color_${note.color}` : ''}}"
+                            >
+                                <t t-esc="note.note" />
+                            </div>
+                        </t>
                     </t>
-                </t>
+                </div>
             </ul>
         </li>
     </t>
