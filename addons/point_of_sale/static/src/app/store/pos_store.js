@@ -159,7 +159,8 @@ export class PosStore extends Reactive {
         }
         this.closeOtherTabs();
         this.preloadImages();
-        this.showScreen("ProductScreen");
+        // this.showScreen("ProductScreen");
+        this.showScreen("TicketScreen");
     }
 
     useProxy() {

@@ -19,6 +19,7 @@ import { Numpad, getButtons } from "@point_of_sale/app/generic_components/numpad
 import { ask } from "@point_of_sale/app/store/make_awaitable_dialog";
 import { PosOrderLineRefund } from "@point_of_sale/app/models/pos_order_line_refund";
 import { fuzzyLookup } from "@web/core/utils/search";
+import { View } from "@web/views/view";
 
 const { DateTime } = luxon;
 const NBR_BY_PAGE = 30;
@@ -35,6 +36,7 @@ export class TicketScreen extends Component {
         ReprintReceiptButton,
         SearchBar,
         Numpad,
+        View,
     };
     static props = {
         destinationOrder: { type: Object, optional: true },
