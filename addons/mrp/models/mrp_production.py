@@ -792,12 +792,13 @@ class MrpProduction(models.Model):
                     record.date_deadline and (record.date_deadline < datetime.datetime.now() or record.date_deadline < record.date_finished))
             )
 
-    @api.onchange('qty_producing', 'lot_producing_id')
-    def _onchange_producing(self):
-        self._set_qty_producing(False)
+    @api.onchange('qty_producing')
+    def _onchange_qty_producing(self):
+        self._set_qty_producing(False, True)
 
     @api.onchange('lot_producing_id')
     def _onchange_lot_producing(self):
+        self._set_qty_producing(False)
         res = self._can_produce_serial_number()
         if res is not True:
             return res
@@ -1208,10 +1209,12 @@ class MrpProduction(models.Model):
             origin = '%s,%s' % (origin, self.name)
         return origin
 
-    def _set_qty_producing(self, pick_manual_consumption_moves=True):
+    def _set_qty_producing(self, pick_manual_consumption_moves=True, user_changed=False):
         if self.product_id.tracking == 'serial':
             qty_producing_uom = self.product_uom_id._compute_quantity(self.qty_producing, self.product_id.uom_id, rounding_method='HALF-UP')
-            if qty_producing_uom != 1:
+            if qty_producing_uom == 0 and user_changed:
+                self.qty_producing = self.product_id.uom_id._compute_quantity(0, self.product_uom_id, rounding_method='HALF-UP')
+            elif qty_producing_uom != 1:
                 self.qty_producing = self.product_id.uom_id._compute_quantity(1, self.product_uom_id, rounding_method='HALF-UP')
         for move in (self.move_raw_ids | self.move_finished_ids.filtered(lambda m: m.product_id != self.product_id)):
             # picked + manual means the user set the quantity manually

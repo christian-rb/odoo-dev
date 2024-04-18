@@ -243,6 +243,20 @@
             </field>
         </record>
 
+        <record id="product_view_search_catalog_bom" model="ir.ui.view">
+            <field name="name">product.view.search.catalog.inherit.mrp.bom</field>
+            <field name="inherit_id" ref="product.product_view_search_catalog"/>
+            <field name="model">product.product</field>
+            <field name="arch" type="xml">
+                <filter name="products" position="after">
+                    <filter string="In the BoM"
+                            invisible="context.get('active_model', '') != 'mrp.bom.line'"
+                            name="products_in_bom"
+                            domain="[('product_catalog_product_is_in_bom', '=', True)]"/>
+                </filter>
+            </field>
+        </record>
+
         <record id="mrp_bom_form_action" model="ir.actions.act_window">
             <field name="name">Bills of Materials</field>
             <field name="res_model">mrp.bom</field>

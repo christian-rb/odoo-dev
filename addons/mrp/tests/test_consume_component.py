@@ -213,7 +213,7 @@ class TestConsumeComponentCommon(common.TransactionCase):
         self.assertTrue(countOk, "The number of MOs passed to the executeConsumptionTriggers method does not match the associated TRIGGERS_COUNT")
 
         mrp_productions[0].qty_producing = mrp_productions[0].product_qty
-        mrp_productions[0]._onchange_producing()
+        mrp_productions[0]._onchange_qty_producing()
 
         i = 1
         if isSerial:

@@ -9,6 +9,7 @@ import json
 from odoo import api, fields, models, _, SUPERUSER_ID
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools import float_compare, float_round, format_datetime
+from odoo.tools.float_utils import float_is_zero
 
 
 class MrpWorkorder(models.Model):
@@ -220,6 +221,11 @@ class MrpWorkorder(models.Model):
     def _compute_qty_producing(self):
         for workorder in self:
             workorder.qty_producing = workorder.production_id.qty_producing
+            for move in workorder.move_raw_ids:
+                if not move.picked and not float_is_zero(workorder.production_id.product_qty, 2):
+                    next_quantity = (move.product_qty * workorder.qty_producing) / workorder.production_id.product_qty
+                    if not float_is_zero(next_quantity, 2):
+                        move.quantity = next_quantity
 
     def _set_qty_producing(self):
         for workorder in self:
@@ -652,6 +658,8 @@ class MrpWorkorder(models.Model):
             if not workorder.date_start or date_finished < workorder.date_start:
                 vals['date_start'] = date_finished
             workorder.with_context(bypass_duration_calculation=True).write(vals)
+            for move in self.move_raw_ids:
+                move.picked = True
         return True
 
     def end_previous(self, doall=False):

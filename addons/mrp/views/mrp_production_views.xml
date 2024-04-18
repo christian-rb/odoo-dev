@@ -707,6 +707,21 @@
             </field>
         </record>
 
+        <record id="product_view_search_catalog_production" model="ir.ui.view">
+            <field name="name">product.view.search.catalog.inherit.mrp.production</field>
+            <field name="inherit_id" ref="product.product_view_search_catalog"/>
+            <field name="model">product.product</field>
+            <field name="arch" type="xml">
+                <filter name="products" position="after">
+                    <filter string="In the MO"
+                            invisible="context.get('active_model', '') != 'stock.move' or
+                                       context.get('product_catalog_order_model', '') != 'mrp.production'"
+                            name="products_in_mo"
+                            domain="[('product_catalog_product_is_in_mo', '=', True)]"/>
+                </filter>
+            </field>
+        </record>
+
         <menuitem action="mrp_production_action"
             id="menu_mrp_production_action"
             parent="menu_mrp_manufacturing"
