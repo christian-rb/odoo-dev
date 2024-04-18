@@ -188,6 +188,10 @@
             --Favorite-font-size: 1em;
             --Priority-font-size: 1em;
 
+            .o_card_align_right:first-child, :not(.o_card_align_right) + .o_card_align_right {
+                margin-left: auto;
+            }
+
             .o_field_many2many_tags_avatar {
                 --img-text-gap-v: 0;
             }
@@ -209,10 +213,6 @@
         &:hover .o_dropdown_kanban,
         .o_dropdown_kanban:has(.show) {
             visibility: visible;
-        }
-
-        .o_kanban_card_spacer {
-            flex-grow: 1;
         }
 
         .o_attachment_image > img {

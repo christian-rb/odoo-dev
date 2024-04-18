@@ -16,8 +16,7 @@
                     </card-aside>
                     <card-header>
                         <field name="name"/>
-                        <spacer/>
-                        <field name="is_favorite" widget="boolean_favorite" nolabel="1"/>
+                        <field class="o_card_align_right" name="is_favorite" widget="boolean_favorite" nolabel="1"/>
                     </card-header>
                     <card-group>
                         <span invisible="not default_code">
@@ -107,8 +106,7 @@
                                 <field name="sale_order_count"/>
                             </span>
                         </a>
-                        <spacer/>
-                        <field name="activity_ids" widget="kanban_activity"/>
+                        <field class="o_card_align_right" name="activity_ids" widget="kanban_activity"/>
                     </card-footer>
                 </card>
             </kanban>
@@ -158,9 +156,8 @@
                     </card-group>
                     <card-footer>
                         <field name="activity_ids" widget="kanban_activity"/>
-                        <spacer/>
-                        <field name="kanban_state" widget="state_selection"/>
-                        <field name="user_id" widget="many2one_avatar_user"/>
+                        <field class="o_card_align_right" name="kanban_state" widget="state_selection"/>
+                        <field class="o_card_align_right" name="user_id" widget="many2one_avatar_user"/>
                     </card-footer>
                 </card>
             </kanban>
@@ -219,8 +216,7 @@
                     <card-footer>
                         <field name="priority" widget="priority"/>
                         <field name="activity_ids" widget="kanban_activity"/>
-                        <spacer/>
-                        <field name="user_id" widget="many2one_avatar_user" domain="[('share', '=', False)]" on_change="1"/>
+                        <field class="o_card_align_right" name="user_id" widget="many2one_avatar_user" domain="[('share', '=', False)]" on_change="1"/>
                     </card-footer>
                 </card>
             </kanban>
@@ -291,9 +287,8 @@
                         <div invisible="not subtask_count">
                             <widget name="subtask_counter"/>
                         </div>
-                        <spacer/>
-                        <field name="user_ids" widget="many2many_avatar_user" domain="[('share', '=', False)]"/>
-                        <field name="state" widget="project_task_state_selection" options="{'is_toggle_mode': false}"/>
+                        <field class="o_card_align_right" name="user_ids" widget="many2many_avatar_user" domain="[('share', '=', False)]"/>
+                        <field class="o_card_align_right" name="state" widget="project_task_state_selection" options="{'is_toggle_mode': false}"/>
                     </card-footer>
                 </card>
             </kanban>

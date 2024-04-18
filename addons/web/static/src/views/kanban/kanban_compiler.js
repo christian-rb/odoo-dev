@@ -1,3 +1,4 @@
+import { groupBy } from "@web/core/utils/arrays";
 import { append, combineAttributes, createElement, getTag } from "@web/core/utils/xml";
 import { archParseBoolean } from "@web/views/utils";
 import { ViewCompiler } from "@web/views/view_compiler";
@@ -107,10 +108,10 @@ export class KanbanCompiler extends ViewCompiler {
             tagName = "footer";
         }
         const group = createElement(tagName);
+        const direction = el.getAttribute("direction") || "column";
         let groupClass = el.getAttribute("class") || "";
         if (type === "card-group") {
             groupClass += " o_kanban_card_group o_kanban_card_item";
-            const direction = el.getAttribute("direction") || "column";
             if (direction === "column") {
                 groupClass += " o_kanban_card_group_column";
             }
@@ -120,15 +121,18 @@ export class KanbanCompiler extends ViewCompiler {
             }`;
         }
         group.setAttribute("class", groupClass);
-        for (const child of el.childNodes) {
-            if (getTag(child) == "spacer") {
-                const spacerEl = createElement("span");
 
-                spacerEl.classList.add("o_kanban_card_spacer", ...child.classList);
-                append(group, spacerEl);
-            } else {
-                append(group, this.compileNode(child, params));
-            }
+        // move right aligned elements to the right
+        let childNodes = [...el.childNodes];
+        if (direction === "column" || ["footer", "header"].includes(tagName)) {
+            const { left, right } = groupBy(childNodes, (n) => {
+                return n.classList?.contains("o_card_align_right") ? "right" : "left";
+            });
+            childNodes = [left || [], right || []].flat();
+        }
+
+        for (const child of childNodes) {
+            append(group, this.compileNode(child, params));
         }
         return group;
     }
