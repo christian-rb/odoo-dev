@@ -678,6 +678,11 @@ export function getTraversedNodes(editable, range = getDeepRange(editable)) {
         node = iterator.nextNode();
         node && traversedNodes.add(node);
     }
+    if (node) {
+        for (const descendant of descendants(node)) {
+            traversedNodes.add(descendant);
+        }
+    }
     return [...traversedNodes];
 }
 /**
