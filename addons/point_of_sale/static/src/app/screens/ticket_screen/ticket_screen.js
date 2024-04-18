@@ -12,17 +12,14 @@ import { Orderline } from "@point_of_sale/app/generic_components/orderline/order
 import { OrderWidget } from "@point_of_sale/app/generic_components/order_widget/order_widget";
 import { CenteredIcon } from "@point_of_sale/app/generic_components/centered_icon/centered_icon";
 import { ReprintReceiptButton } from "@point_of_sale/app/screens/ticket_screen/reprint_receipt_button/reprint_receipt_button";
-import { SearchBar } from "@point_of_sale/app/screens/ticket_screen/search_bar/search_bar";
 import { usePos } from "@point_of_sale/app/store/pos_hook";
 import { Component, onMounted, useState } from "@odoo/owl";
 import { Numpad, getButtons } from "@point_of_sale/app/generic_components/numpad/numpad";
 import { ask } from "@point_of_sale/app/store/make_awaitable_dialog";
 import { PosOrderLineRefund } from "@point_of_sale/app/models/pos_order_line_refund";
-import { fuzzyLookup } from "@web/core/utils/search";
 import { View } from "@web/views/view";
 
 const { DateTime } = luxon;
-const NBR_BY_PAGE = 30;
 
 export class TicketScreen extends Component {
     static storeOnOrder = false;
@@ -34,7 +31,6 @@ export class TicketScreen extends Component {
         OrderWidget,
         CenteredIcon,
         ReprintReceiptButton,
-        SearchBar,
         Numpad,
         View,
     };
@@ -352,61 +348,7 @@ export class TicketScreen extends Component {
         const oScreen = o.get_screen_data();
         return (!o.finalized || screen.includes(oScreen.name)) && o.uiState.displayed;
     }
-    getFilteredOrderList() {
-        const orderModel = this.pos.models["pos.order"];
-        let orders =
-            this.state.filter === "SYNCED"
-                ? orderModel.filter((o) => o.finalized && o.uiState.displayed)
-                : orderModel.filter(this.activeOrderFilter);
 
-        if (this.state.filter && !["ACTIVE_ORDERS", "SYNCED"].includes(this.state.filter)) {
-            orders = orders.filter((order) => {
-                const screen = order.get_screen_data();
-                return this._getScreenToStatusMap()[screen.name] === this.state.filter;
-            });
-        }
-
-        if (this.state.search.searchTerm) {
-            const repr = this._getSearchFields()[this.state.search.fieldName].repr;
-            orders = fuzzyLookup(this.state.search.searchTerm, orders, repr);
-        }
-
-        if (this.state.filter === "SYNCED") {
-            console.log(
-                "PAID ORDER RANGE:",
-                (this.state.page - 1) * NBR_BY_PAGE,
-                this.state.page * NBR_BY_PAGE
-            );
-            return orders
-                .sort((a, b) => {
-                    const dateA = DateTime.fromFormat(a.date_order, "yyyy-MM-dd HH:mm:ss");
-                    const dateB = DateTime.fromFormat(b.date_order, "yyyy-MM-dd HH:mm:ss");
-
-                    if (b.date_order !== a.date_order) {
-                        return dateB - dateA;
-                    } else {
-                        return (
-                            parseInt(b.name.replace(/\D/g, "")) -
-                            parseInt(a.name.replace(/\D/g, ""))
-                        );
-                    }
-                })
-                .slice((this.state.page - 1) * NBR_BY_PAGE, this.state.page * NBR_BY_PAGE);
-        } else {
-            return orders.sort((a, b) => {
-                const dateA = DateTime.fromFormat(b.date_order, "yyyy-MM-dd HH:mm:ss");
-                const dateB = DateTime.fromFormat(a.date_order, "yyyy-MM-dd HH:mm:ss");
-
-                if (b.date_order !== a.date_order) {
-                    return dateB - dateA;
-                } else {
-                    return (
-                        parseInt(a.name.replace(/\D/g, "")) - parseInt(b.name.replace(/\D/g, ""))
-                    );
-                }
-            });
-        }
-    }
     getDate(order) {
         return DateTime.fromFormat(order.date_order, "yyyy-MM-dd HH:mm:ss").toFormat(
             "MM/dd/yyyy HH:mm:ss"
@@ -476,16 +418,6 @@ export class TicketScreen extends Component {
             defaultSearchDetails: this.state.search,
             defaultFilter: this.state.filter,
         };
-    }
-    getNbrPages() {
-        return Math.ceil(this.pos.ticketScreenState.totalCount / NBR_BY_PAGE);
-    }
-    getPageNumber() {
-        if (!this.pos.ticketScreenState.totalCount) {
-            return `1/1`;
-        } else {
-            return `${this.state.page}/${this.getNbrPages()}`;
-        }
     }
     getHasItemsToRefund() {
         const order = this.getSelectedOrder();
