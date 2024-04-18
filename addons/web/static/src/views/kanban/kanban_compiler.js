@@ -5,6 +5,12 @@ import { ViewCompiler } from "@web/views/view_compiler";
 
 const SPECIAL_TYPES = ["edit", "delete", "archive", "unarchive", "set_cover"];
 
+const ITEMS_TO_TAG = {
+    group: "section",
+    title: "header",
+    footer: "footer",
+};
+
 export class KanbanCompiler extends ViewCompiler {
     setup() {
         this.compilers.push(
@@ -13,7 +19,7 @@ export class KanbanCompiler extends ViewCompiler {
                 fn: this.compileKanban,
                 doNotCopyAttributes: true,
             },
-            { selector: "card-group, card-header, card-footer", fn: this.compileGroup }
+            { selector: "group, title, footer", fn: this.compileGroup }
         );
     }
 
@@ -36,17 +42,17 @@ export class KanbanCompiler extends ViewCompiler {
         let mainNode;
         for (const child of cardEl.childNodes) {
             switch (getTag(child)) {
-                case "card-aside": {
+                case "aside": {
                     asidePosition = child.getAttribute("position") || "start";
                     asideNode = this.compileAside(child, params);
                     break;
                 }
-                case "card-group":
-                case "card-header":
-                case "card-footer": {
+                case "group":
+                case "title":
+                case "footer": {
                     if (!mainNode) {
                         mainNode = createElement("main");
-                        mainNode.setAttribute("class", "o_kanban_card_main o_kanban_card_item");
+                        mainNode.setAttribute("class", "o_kanban_card_main");
                     }
                     append(mainNode, this.compileGroup(child, params));
                     break;
@@ -99,34 +105,22 @@ export class KanbanCompiler extends ViewCompiler {
 
     compileGroup(el, params) {
         const type = getTag(el);
-        let tagName;
-        if (type === "card-group") {
-            tagName = "section";
-        } else if (type === "card-header") {
-            tagName = "header";
-        } else {
-            tagName = "footer";
-        }
+        const tagName = ITEMS_TO_TAG[type];
         const group = createElement(tagName);
         const direction = el.getAttribute("direction") || "column";
-        let groupClass = el.getAttribute("class") || "";
-        if (type === "card-group") {
-            groupClass += " o_kanban_card_group o_kanban_card_item";
-            if (direction === "column") {
-                groupClass += " o_kanban_card_group_column";
-            }
-        } else {
-            groupClass += ` o_kanban_card_item o_kanban_card_${
-                type === "card-header" ? "header" : "footer"
-            }`;
+        let groupClass = `${
+            el.getAttribute("class") || ""
+        } o_kanban_card_item o_kanban_card_${type}`;
+        if (type === "group" && direction === "row") {
+            groupClass += " o_kanban_card_group_row";
         }
         group.setAttribute("class", groupClass);
 
         // move right aligned elements to the right
         let childNodes = [...el.childNodes];
-        if (direction === "column" || ["footer", "header"].includes(tagName)) {
+        if (direction === "column" || ["foot", "head"].includes(type)) {
             const { left, right } = groupBy(childNodes, (n) => {
-                return n.classList?.contains("o_card_align_right") ? "right" : "left";
+                return n.classList?.contains("o_card_align_end") ? "right" : "left";
             });
             childNodes = [left || [], right || []].flat();
         }

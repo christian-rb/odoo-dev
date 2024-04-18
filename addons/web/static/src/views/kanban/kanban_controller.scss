@@ -127,7 +127,7 @@
             flex-grow: 1;
         }
 
-        .o_kanban_card_header {
+        .o_kanban_card_title {
             font-weight: var(--Card-Header-color, #{$headings-font-weight});
             line-height: var(--Card-Header-line-height, #{$headings-line-height});
             font-size: var(--Card-Header-font-size, #{$h5-font-size});
@@ -135,7 +135,7 @@
             margin-bottom: var(--Card-Header-margin-bottom, #{$o-kanban-card-header-margin-bottom});
         }
 
-        .o_kanban_card_group:has(.o_kanban_card_header) {
+        .o_kanban_card_group:has(.o_kanban_card_title) {
             --Card-Header-margin-bottom: #{$o-kanban-card-header-margin-bottom * .5};
 
             color: var(--Card-Subtitle-color, #{$text-muted});
@@ -144,6 +144,7 @@
         }
 
         .o_kanban_card_main {
+            display: flex;
             flex-direction: column;
             row-gap: var(--Card-Main-gap, #{$o-kanban-card-main-gap});
             min-width: 0; // prevent from overflowing
@@ -162,10 +163,10 @@
         .o_kanban_card_group {
             column-gap: var(--Card-Group-gap, #{map-get($spacers, 2)});
             align-items: baseline;
-
-            &.o_kanban_card_group_column {
-                flex-direction: column;
-
+            flex-direction: column;
+            
+            &.o_kanban_card_group_row {
+                flex-direction: row;
                 > * {
                     max-width: 100%;
                 }
@@ -181,14 +182,14 @@
             line-height: 1;
         }
 
-        .o_kanban_card_header, .o_kanban_card_footer {
+        .o_kanban_card_title, .o_kanban_card_footer {
             --Tag-font-size: 1em;
             --Status-size: 1.5em;
             --Avatar-size: 1.5em;
             --Favorite-font-size: 1em;
             --Priority-font-size: 1em;
 
-            .o_card_align_right:first-child, :not(.o_card_align_right) + .o_card_align_right {
+            .o_card_align_end:first-child, :not(.o_card_align_end) + .o_card_align_end {
                 margin-left: auto;
             }
 
