@@ -1,0 +1,8 @@
+<odoo>
+    <template id="jp_contact_name" inherit_id="base.contact_name">
+        <span t-esc="name" position="after">
+            <!-- if available, use the shortcut. In Japan both would be the same, but just in case we want to avoid long titles there. -->
+            <span itemprop="title" t-esc="object.title.shortcut or object.title.name" t-if="object.country_code == 'JP'"/>
+        </span>
+    </template>
+</odoo>

@@ -29,6 +29,9 @@ Note:
     'auto_install': ['account'],
     'data': [
         'data/account_tax_report_data.xml',
+        'data/res_partner_title_data.xml',
+        'views/ir_qweb_widget_templates.xml',
+        'views/res_partner_views.xml',
     ],
     'demo': [
         'demo/demo_company.xml',
