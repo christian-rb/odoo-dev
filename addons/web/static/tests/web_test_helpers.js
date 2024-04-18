@@ -119,13 +119,16 @@ export { installLanguages, patchTranslations } from "./_framework/translation_te
 export {
     clickButton,
     clickCancel,
+    clickDropdown,
     clickModalButton,
+    clickOpenedDropdownItem,
     clickSave,
     clickViewButton,
     expectMarkup,
     fieldInput,
     mountView,
     mountViewInDialog,
+    selectDropdownItem,
 } from "./_framework/view_test_helpers";
 export { useTestClientAction } from "./_framework/webclient_test_helpers";
 

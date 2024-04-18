@@ -1,5 +1,5 @@
 import { expect } from "@odoo/hoot";
-import { formatXml, waitFor } from "@odoo/hoot-dom";
+import { formatXml, queryAll, waitFor } from "@odoo/hoot-dom";
 import { Component, useSubEnv, xml } from "@odoo/owl";
 import { Dialog } from "@web/core/dialog/dialog";
 import { MainComponentsContainer } from "@web/core/main_components_container";
@@ -119,10 +119,42 @@ export async function clickCancel(options) {
 }
 
 /**
+ * @param {string} fieldName
+ * @param {SelectorOptions} [options]
+ */
+export async function clickDropdown(fieldName, options) {
+    await contains(buildSelector(`[name='${fieldName}'] .dropdown input`, options)).click();
+}
+
+/**
  * @param {SelectorOptions} [options]
  */
 export async function clickModalButton(options) {
     await contains(buildSelector(`.modal .btn:enabled`, options)).click();
+}
+
+/**
+ * @param {string} fieldName
+ * @param {string} itemContent
+ * @param {SelectorOptions} [options]
+ */
+export async function clickOpenedDropdownItem(fieldName, itemContent, options) {
+    const dropdowns = queryAll(
+        buildSelector(`[name='${fieldName}'] .dropdown .dropdown-menu`, options)
+    );
+    if (dropdowns.length === 0) {
+        throw new Error(`No dropdown found for field ${fieldName}`);
+    } else if (dropdowns.length > 1) {
+        throw new Error(`Found ${dropdowns.length} dropdowns for field ${fieldName}`);
+    }
+    const dropdownItems = queryAll(buildSelector("li", options), { root: dropdowns[0] });
+    const indexToClick = Array.from(dropdownItems)
+        .map((html) => html.textContent)
+        .indexOf(itemContent);
+    if (indexToClick === -1) {
+        throw new Error(`The element '${itemContent}' does not exist in the dropdown`);
+    }
+    await contains(dropdownItems[indexToClick]).click();
 }
 
 /**
@@ -224,4 +256,14 @@ export function parseViewProps(params) {
     delete viewProps.searchViewArch;
 
     return viewProps;
+}
+
+/**
+ * @param {string} fieldName
+ * @param {string} itemContent
+ * @param {SelectorOptions} [options]
+ */
+export async function selectDropdownItem(fieldName, itemContent, options) {
+    await clickDropdown(fieldName, options);
+    await clickOpenedDropdownItem(fieldName, itemContent);
 }
