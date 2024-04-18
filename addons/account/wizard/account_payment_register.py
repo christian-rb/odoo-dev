@@ -147,15 +147,6 @@ class AccountPaymentRegister(models.TransientModel):
     # -------------------------------------------------------------------------
 
     @api.model
-    def _get_batch_communication(self, batch_result):
-        ''' Helper to compute the communication based on the batch.
-        :param batch_result:    A batch returned by '_get_batches'.
-        :return:                A string representing a communication to be set on payment.
-        '''
-        labels = set(line.name or line.move_id.ref or line.move_id.name for line in batch_result['lines'])
-        return ' '.join(sorted(labels))
-
-    @api.model
     def _get_batch_available_journals(self, batch_result):
         """ Helper to compute the available journals based on the batch.
 
@@ -402,14 +393,42 @@ class AccountPaymentRegister(models.TransientModel):
                 wizard.can_edit_wizard = False
                 wizard.can_group_payments = any(len(batch_result['lines']) != 1 for batch_result in batches)
 
-    @api.depends('can_edit_wizard')
+    def get_next_batch_communication(self, date=None, batch=None):
+        '''
+        Generates next batch payment communication reference
+        The communication reference is = move name if the batch contains only a single move
+        If the batch contains multiple moves, the reference = BATCH/{payment year}/{payment sequence number}
+        e.g., BATCH/2024/00001
+        :param date:            batch payment date.
+        :param batch:           batch move lines
+        :return:                batch communication reference.
+        '''
+        last_sequence_number = 0
+        sequence_date = date or self.payment_date
+        batch_lines = batch or self.line_ids
+        moves = batch_lines.mapped('move_id')
+        if len(moves) == 1:
+            return moves[0].name
+
+        sequence_year = sequence_date.year
+        last_payment = self.env['account.payment'].sudo().search([
+            ('date', '>=', f'{sequence_year}-01-01'),
+            ('date', '<=', f'{sequence_year}-12-31'),
+        ], limit=1)
+
+        if last_payment:
+            last_sequence_number = last_payment.sequence_number
+
+        sequence_number = str(last_sequence_number + 1).zfill(5)
+        return f'BATCH/{sequence_year}/{sequence_number}'
+
+    @api.depends('can_edit_wizard', 'payment_date')
     def _compute_communication(self):
         # The communication can't be computed in '_compute_from_lines' because
         # it's a compute editable field and then, should be computed in a separated method.
         for wizard in self:
             if wizard.can_edit_wizard:
-                batches = wizard._get_batches()
-                wizard.communication = wizard._get_batch_communication(batches[0])
+                wizard.communication = wizard.get_next_batch_communication()
             else:
                 wizard.communication = False
 
@@ -792,7 +811,7 @@ class AccountPaymentRegister(models.TransientModel):
             'amount': batch_values['source_amount_currency'],
             'payment_type': batch_values['payment_type'],
             'partner_type': batch_values['partner_type'],
-            'ref': self._get_batch_communication(batch_result),
+            'ref': self.get_next_batch_communication(batch=batch_result['lines']),
             'journal_id': self.journal_id.id,
             'company_id': self.company_id.id,
             'currency_id': batch_values['source_currency_id'],

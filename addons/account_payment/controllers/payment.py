@@ -11,12 +11,14 @@ from odoo.addons.payment.controllers import portal as payment_portal
 
 class PaymentPortal(payment_portal.PaymentPortal):
 
-    @route('/invoice/transaction/<int:invoice_id>', type='json', auth='public')
-    def invoice_transaction(self, invoice_id, access_token, **kwargs):
+    @route('/invoice/transaction', type='json', auth='public')
+    def invoice_transaction(self, invoice_ids, access_token, payment_reference=None, sudo_payment=False, **kwargs):
         """ Create a draft transaction and return its processing values.
 
-        :param int invoice_id: The invoice to pay, as an `account.move` id
+        :param int invoice_ids: The invoices to pay, as an `account.move` ids
         :param str access_token: The access token used to authenticate the request
+        :param str payment_reference: The reference to the current payment
+        :param bool sudo_payment: if true, the invoices are not validated against the token
         :param dict kwargs: Locally unused data passed to `_create_transaction`
         :return: The mandatory values for the processing of the transaction
         :rtype: dict
@@ -24,21 +26,28 @@ class PaymentPortal(payment_portal.PaymentPortal):
         """
         # Check the invoice id and the access token
         try:
-            invoice_sudo = self._document_check_access('account.move', invoice_id, access_token)
-        except MissingError as error:
-            raise error
+            invoice_sudo = None
+            if sudo_payment:
+                invoice_sudo = request.env['account.move'].sudo().search([('id', '=', invoice_ids[0])])
+            else:
+                for invoice_id in invoice_ids:
+                    invoice_sudo = self._document_check_access('account.move', invoice_id, access_token)
+        except MissingError:
+            raise
         except AccessError:
             raise ValidationError(_("The access token is invalid."))
 
         logged_in = not request.env.user._is_public()
+        # It is assumed that all invoices have the same partner
         partner_sudo = request.env.user.partner_id if logged_in else invoice_sudo.partner_id
         self._validate_transaction_kwargs(kwargs)
         kwargs.update({
+            # It is assumed that all invoices have the same currency
             'currency_id': invoice_sudo.currency_id.id,
             'partner_id': partner_sudo.id,
-        })  # Inject the create values taken from the invoice into the kwargs.
+        })  # Inject the create values taken from the invoices into the kwargs.
         tx_sudo = self._create_transaction(
-            custom_create_values={'invoice_ids': [Command.set([invoice_id])]}, **kwargs,
+            custom_create_values={'invoice_ids': [Command.set(invoice_ids)], 'reference': payment_reference}, **kwargs,
         )
 
         return tx_sudo._get_processing_values()
@@ -116,7 +125,8 @@ class PaymentPortal(payment_portal.PaymentPortal):
 
             # Reroute the next steps of the payment flow to the portal view of the invoice.
             form_values.update({
-                'transaction_route': f'/invoice/transaction/{invoice_id}',
+                'transaction_route': '/invoice/transaction/',
+                'post_params': {'invoice_ids': [invoice_id]},
                 'landing_route': f'{invoice_sudo.access_url}'
                                  f'?access_token={invoice_sudo._portal_ensure_token()}',
                 'access_token': invoice_sudo.access_token,

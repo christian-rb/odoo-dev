@@ -18,11 +18,32 @@
         </xpath>
     </template>
 
+    <template id="sale.portal_docs_entry" inherit_id="portal.portal_docs_entry">
+        <xpath expr="//a" position="inside">
+            <t t-out="html_children"/>
+        </xpath>
+    </template>
+
     <template id="portal_my_home_sale" name="Show Quotations / Sales Orders" customize_show="True" inherit_id="portal.portal_my_home" priority="20">
         <xpath expr="//div[hasclass('o_portal_docs')]" position="before">
             <t t-set="portal_client_category_enable" t-value="True"/>
             <t t-set="portal_alert_category_enable" t-value="True"/>
         </xpath>
+        <div id="portal_alert_category" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="bg_color" t-value="'alert alert-primary'"/>
+                <t t-set="placeholder_count" t-value="'overdue_invoice_count'"/>
+                <t t-set="title">Invoices to pay</t>
+                <t t-set="url" t-value="'/my/invoices?filterby=overdue_invoices'"/>
+                <t t-set="show_count" t-value="True"/>
+                <t t-set="html_children">
+                    <div class="flex-grow-1"></div>
+                    <button onclick="event.preventDefault(); window.location.href='/my/invoices/overdue'" class="btn btn-secondary">
+                        Pay Now
+                    </button>
+                </t>
+            </t>
+        </div>
         <div id="portal_alert_category" position="inside">
             <t t-call="portal.portal_docs_entry">
                 <t t-set="bg_color" t-value="'alert alert-primary'"/>
