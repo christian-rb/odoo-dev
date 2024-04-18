@@ -522,6 +522,8 @@ function enforceTablesResponsivity(editable) {
         commonTable.style.height = '100%';
         const commonTr = document.createElement('tr');
         const commonTd = document.createElement('td');
+        commonTd.style.display = "flex";
+        commonTd.style.flexWrap = "wrap";
         commonTr.appendChild(commonTd);
         commonTable.appendChild(commonTr);
         const tds = [...tr.children].filter(child => child.nodeName === 'TD');
@@ -535,6 +537,7 @@ function enforceTablesResponsivity(editable) {
             commonTd.appendChild(div);
             const newTable = _createTable();
             newTable.style.width = width;
+            newTable.style.height = "100%";
             newTable.classList.add('o_stacking_wrapper');
             div.appendChild(newTable);
             const newTr = document.createElement('tr');
