@@ -64,7 +64,6 @@ class WebsiteEventController(http.Controller):
             limit=page * step, order=order, options=options)
         event_details = details[0]
         events = event_details.get('results', Event)
-        events = events[(page - 1) * step:page * step]
 
         # count by domains without self search
         domain_search = [('name', 'ilike', fuzzy_search_term or searches['search'])] if searches['search'] else []
@@ -94,6 +93,14 @@ class WebsiteEventController(http.Controller):
         if searches["country"] != 'all' and searches["country"] != 'online':
             current_country = request.env['res.country'].browse(int(searches['country']))
 
+        # If country filter is present, show events of request / customer country first
+        if searches["country"] == 'all' and website.is_view_active('website_event.event_location'):
+            if customer_country := self._get_customer_country():
+                events_customer_country = events.filtered(lambda event: event.country_id.id == customer_country.id)
+                events -= events_customer_country
+                events = events_customer_country + events
+
+        events = events[(page - 1) * step:page * step]
         pager = website.pager(
             url="/event",
             url_args=searches,
@@ -405,3 +412,16 @@ class WebsiteEventController(http.Controller):
                 # perform a search to filter on existing / valid tags implicitely + apply rules on color
                 tags = request.env['event.tag'].search([('id', 'in', tag_ids)])
         return tags
+
+    @staticmethod
+    def _get_customer_country():
+        """ Find the country from the geoip lib or fallback on the user, then the visitor """
+        country = request.env['res.country']
+        if request.geoip.country_code:
+            country = country.search([('code', '=', request.geoip.country_code)])
+        if not country and not request.env.user._is_public():
+            country = request.env.user.country_id
+        if not country:
+            visitor = request.env['website.visitor']._get_visitor_from_request()
+            country = visitor.country_id
+        return country
