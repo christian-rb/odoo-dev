@@ -475,11 +475,10 @@ export async function selectDateRange(startDate, endDate) {
 //     await animationFrame();
 // }
 
-// export async function changeScale(target, scale) {
-//     await click(target, `.o_view_scale_selector .scale_button_selection`);
-//     await click(target, `.o-dropdown--menu .o_scale_button_${scale}`);
-//     await animationFrame();
-// }
+export async function changeScale(scale) {
+    await contains(`.o_view_scale_selector .scale_button_selection`).click();
+    await contains(`.o-dropdown--menu .o_scale_button_${scale}`).click();
+}
 
 // export async function navigate(target, direction) {
 //     await click(target, `.o_calendar_navigation_buttons .o_calendar_button_${direction}`);
