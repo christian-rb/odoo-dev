@@ -11,11 +11,13 @@ import { SyncNotification } from "@point_of_sale/app/navbar/sync_notification/sy
 import { CashMovePopup } from "@point_of_sale/app/navbar/cash_move_popup/cash_move_popup";
 import { TicketScreen } from "@point_of_sale/app/screens/ticket_screen/ticket_screen";
 import { BackButton } from "@point_of_sale/app/navbar/back_button/back_button";
-import { Component, useState, useExternalListener } from "@odoo/owl";
+import { Component, useState } from "@odoo/owl";
 import { ClosePosPopup } from "@point_of_sale/app/navbar/closing_popup/closing_popup";
 import { _t } from "@web/core/l10n/translation";
 import { ProductScreen } from "@point_of_sale/app/screens/product_screen/product_screen";
 import { Input } from "@point_of_sale/app/generic_components/inputs/input/input";
+import { Dropdown } from "@web/core/dropdown/dropdown";
+import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 
 export class Navbar extends Component {
     static template = "point_of_sale.Navbar";
@@ -28,6 +30,8 @@ export class Navbar extends Component {
         SyncNotification,
         BackButton,
         Input,
+        Dropdown,
+        DropdownItem,
     };
     static props = {};
     setup() {
@@ -37,15 +41,7 @@ export class Navbar extends Component {
         this.dialog = useService("dialog");
         this.notification = useService("notification");
         this.hardwareProxy = useService("hardware_proxy");
-        this.state = useState({ isMenuOpened: false });
-        useExternalListener(window, "mouseup", this.onOutsideClick);
     }
-    onOutsideClick() {
-        if (this.state.isMenuOpened) {
-            this.state.isMenuOpened = false;
-        }
-    }
-
     get customerFacingDisplayButtonIsShown() {
         return this.pos.config.iface_customer_facing_display;
     }
@@ -91,18 +87,6 @@ export class Navbar extends Component {
 
     get orderCount() {
         return this.pos.get_order_list().length;
-    }
-
-    isBurgerMenuClosed() {
-        return !this.state.isMenuOpened;
-    }
-
-    closeMenu() {
-        this.state.isMenuOpened = false;
-    }
-
-    openMenu() {
-        this.state.isMenuOpened = true;
     }
 
     async closeSession() {
