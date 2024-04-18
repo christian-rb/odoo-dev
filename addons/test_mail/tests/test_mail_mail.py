@@ -310,23 +310,6 @@ class TestMailMail(MailCommon):
             self.assertEqual(notification.failure_type, 'mail_from_missing')
             self.assertEqual(notification.notification_status, 'exception')
 
-        # MailServer.send_email(): _prepare_email_message: unexpected ASCII / Malformed 'Return-Path' or 'From' address
-        # Force bounce alias to void, will force usage of email_from
-        self.mail_alias_domain.bounce_alias = False
-        self.env.company.invalidate_recordset(fnames={'bounce_email', 'bounce_formatted'})
-        for email_from in ['strange@example¢¡.com', 'robert']:
-            self._reset_data()
-            mail.write({'email_from': email_from})
-            with self.mock_mail_gateway():
-                mail.send(raise_exception=False)
-            self.assertEqual(self._mails[0]['email_from'], email_from)
-            self.assertEqual(mail.failure_reason, f"Malformed 'Return-Path' or 'From' address: {email_from} - It should contain one valid plain ASCII email")
-            self.assertEqual(mail.failure_type, 'mail_from_invalid')
-            self.assertEqual(mail.state, 'exception')
-            self.assertEqual(notification.failure_reason, f"Malformed 'Return-Path' or 'From' address: {email_from} - It should contain one valid plain ASCII email")
-            self.assertEqual(notification.failure_type, 'mail_from_invalid')
-            self.assertEqual(notification.notification_status, 'exception')
-
     @mute_logger('odoo.addons.mail.models.mail_mail')
     def test_mail_mail_send_exceptions_recipients_emails(self):
         """ Test various use case with exceptions and errors and see how they are

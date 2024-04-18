@@ -4333,6 +4333,8 @@ class BaseModel(metaclass=MetaModel):
             field = self._fields.get(fname)
             if not field:
                 raise ValueError("Invalid field %r on model %r" % (fname, self._name))
+            if field.required and (value is None or (value is False and field.type != 'boolean')):
+                raise ValidationError(_("%s must have a value.", field._description_string(self.env)))
             field_values.append((field, value))
             if field.inverse:
                 if field.type in ('one2many', 'many2many'):
