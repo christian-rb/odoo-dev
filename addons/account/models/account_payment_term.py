@@ -64,7 +64,11 @@ class AccountPaymentTerm(models.Model):
             if self.early_pay_discount_computation in ('excluded', 'mixed'):
                 discount_amount_currency = self.currency_id.round((total_amount - untaxed_amount) * percentage)
             else:
-                discount_amount_currency = self.currency_id.round(total_amount - (total_amount * (1 - (percentage))))
+                discount_amount_currency = float_round(
+                    total_amount - (total_amount * (1 - percentage)),
+                    precision_rounding=self.currency_id.rounding,
+                    rounding_method='HALF-DOWN',  # complement of HALF-UP rounding of end price
+                )
             return total_amount - discount_amount_currency
         return total_amount
 
