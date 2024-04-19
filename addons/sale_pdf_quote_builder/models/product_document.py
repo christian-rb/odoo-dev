@@ -124,8 +124,32 @@ class ProductDocument(models.Model):
             # But in compute and onchange, setting that context will empty the datas.
             doc = doc if doc.datas.startswith(b'JVBERi0') else doc.with_context(bin_size=False)
             reader = pdf.PdfFileReader(io.BytesIO(base64.b64decode(doc.datas)))
-            pdf_fields = reader.getFields() or {}
-            whitelisted_fields = {}  # TODO edm
-            restricted_fields |= {f for f in pdf_fields if f not in whitelisted_fields}
+            raw_pdf_fields = reader.getFields() or set()
+            pdf_fields = doc._get_model_and_fields(raw_pdf_fields)
+            whitelisted_fields = self.env['pdf.quote.builder.form.field.whitelist'].search([])
+            # restricted_fields |= {f for f in pdf_fields if f not in whitelisted_fields}
             # TODO edm: sanitize fields
         return restricted_fields
+
+    def _get_model_and_fields(self, field_names):
+        model_and_fields = set()
+        for name in field_names:  # TODO edm: deque?
+            chain = name.split('__')
+            # chain = collections.deque(chain)
+            Model = self.env['sale.order']
+            field = ''
+            if chain[0] == 'line':
+                Model = self.env['sale.order.line']
+                del chain[0]
+            for elem in chain:
+                if elem == chain[-1]:
+                    field = elem
+                    field_info = Model.fields_get()[elem]
+                    print(field_info)
+                else:
+                    Model = Model[elem]
+            model_and_fields.add((Model._name, field))
+        print(model_and_fields)
+
+
+
