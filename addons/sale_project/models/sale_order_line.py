@@ -255,6 +255,7 @@ class SaleOrderLine(models.Model):
             res.update({
                 'planned_date_begin': self.calendar_event_id.start,
                 'date_deadline': self.calendar_event_id.stop,
+                'allocated_hours': self.calendar_event_id.duration,
             })
         return res
 
