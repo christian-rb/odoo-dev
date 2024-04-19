@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, fields, models, _
+from odoo import api, fields, models, _, Command
 from odoo.tools import float_compare, float_is_zero
 
 
@@ -37,6 +37,12 @@ class PosOrder(models.Model):
         if sale_orders and sale_orders[0].payment_term_id:
             invoice_vals['invoice_payment_term_id'] = sale_orders[0].payment_term_id.id,
         return invoice_vals
+
+    def _prepare_invoice_line(self, order_line):
+        vals = super()._prepare_invoice_line(order_line)
+        if order_line.sale_order_line_id:
+            vals['sale_line_ids'] = [Command.link(order_line.sale_order_line_id.id)]
+        return vals
 
     @api.model
     def create_from_ui(self, orders, draft=False):
