@@ -239,6 +239,10 @@ class IrActionsReport(models.Model):
     def get_paperformat(self):
         return self.paperformat_id or self.env.company.paperformat_id
 
+    def get_xml_id_of_paperformat(self):
+        paperformat_id = self.get_paperformat().id
+        return self.env['ir.model.data'].search([('model', '=', 'report.paperformat'), ('res_id', '=', paperformat_id)]).name
+
     @api.model
     def _build_wkhtmltopdf_args(
             self,
