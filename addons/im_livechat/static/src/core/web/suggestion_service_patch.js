@@ -5,22 +5,26 @@ import { patch } from "@web/core/utils/patch";
 
 patch(SuggestionService.prototype, {
     /** @override */
-    getSupportedDelimiters(thread) {
+    getSupportedDelimiters(thread, composer) {
         const res = super.getSupportedDelimiters(...arguments);
-        return thread.channel_type === "livechat"
-            ? [...res, [" ", 4]].filter((delimiter) => delimiter.at(0) !== "#")
-            : res;
+        if (thread.channel_type === "livechat") {
+            if (composer.command?.hasSubCommand) {
+                res.push([" ", composer.command.endPosition]);
+            }
+            return res.filter((delimiter) => delimiter.at(0) !== "#");
+        }
+        return res;
     },
     /** @override */
-    async fetchSuggestions({ delimiter, term }, { thread } = {}) {
-        if (delimiter === " ") {
+    async fetchSuggestions({ delimiter, term }, { composer, thread } = {}) {
+        if (delimiter === " " && composer.command?.name === "bot") {
             return await this.store.chatbotData.fetch();
         }
         await super.fetchSuggestions(...arguments);
     },
     /** @override */
     searchSuggestions({ delimiter, term }, { thread, composer, sort = false } = {}) {
-        if (delimiter === " " && composer?.subCommandParent === "bot") {
+        if (delimiter === " " && composer.command?.name === "bot") {
             return this.searchChatbotSuggestions(cleanTerm(term));
         }
         return super.searchSuggestions(...arguments);

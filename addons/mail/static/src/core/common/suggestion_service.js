@@ -14,7 +14,7 @@ export class SuggestionService {
         this.store = services["mail.store"];
     }
 
-    getSupportedDelimiters(thread) {
+    getSupportedDelimiters(thread, composer) {
         return [["@"], ["#"], [":"]];
     }
 

@@ -16,7 +16,6 @@ patch(Composer.prototype, {
                             label: item.name,
                             bot_id: item.id,
                             classList: "o-mail-Composer-suggestion",
-                            isSubCommand: true,
                         };
                     });
                     props.optionTemplate = "mail.Composer.suggestionChannelCommand";
@@ -40,13 +39,6 @@ patch(Composer.prototype, {
                 // one.
                 ev.stopPropagation();
             }
-        }
-    },
-
-    onSelectSuggestion(ev, option) {
-        super.onSelectSuggestion(ev, option);
-        if (option.label === "bot") {
-            this.props.composer.subCommandParent = "bot";
         }
     },
 

@@ -605,12 +605,12 @@ export class Thread extends Record {
             .length;
     }
 
-    executeCommand(command, body = "", params = {}) {
+    executeCommand(command, body = "") {
         return this.store.env.services.orm.call(
             "discuss.channel",
             command.methodName,
             [[this.id]],
-            { body, ...params }
+            { body, ...command.params }
         );
     }
 

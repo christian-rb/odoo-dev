@@ -4,7 +4,7 @@ import { startServer } from "@bus/../tests/helpers/mock_python_environment";
 
 import { openDiscuss, start } from "@mail/../tests/helpers/test_utils";
 
-import { click, insertText } from "@web/../tests/utils";
+import { click, contains, insertText } from "@web/../tests/utils";
 
 QUnit.module("composer");
 
@@ -21,7 +21,10 @@ QUnit.test("Can execute lead command", async function (assert) {
         },
     });
     await openDiscuss(channelId);
-    await insertText(".o-mail-Composer-input", "/lead great lead");
+    await insertText(".o-mail-Composer-input", "/lead");
+    await click(".o-mail-Composer-suggestion");
+    await contains(".o-mail-Composer-input", { value: "/lead " });
+    await insertText(".o-mail-Composer-input", "great lead");
     await click(".o-mail-Composer-send:enabled");
     assert.verifySteps(["execute_command_lead"]);
 });

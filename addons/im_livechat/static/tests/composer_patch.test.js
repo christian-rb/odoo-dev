@@ -40,6 +40,7 @@ test("Can execute help command on livechat channels", async () => {
     await start();
     await openDiscuss(channelId);
     await insertText(".o-mail-Composer-input", "/help");
+    await click(".o-mail-Composer-suggestion");
     await click(".o-mail-Composer-send:enabled");
     await assertSteps(["execute_command_help"]);
 });

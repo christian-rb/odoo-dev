@@ -1,7 +1,11 @@
 import { useSequential } from "@mail/utils/common/hooks";
 import { status, useComponent, useEffect, useState } from "@odoo/owl";
+import { ChannelCommand } from "@mail/core/common/channel_command_model";
 
+import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
+
+const commandRegistry = registry.category("discuss.channel_commands");
 
 class UseSuggestion {
     constructor(comp) {
@@ -21,6 +25,7 @@ class UseSuggestion {
                         return; // ignore obsolete call
                     }
                     await this.suggestionService.fetchSuggestions(this.search, {
+                        composer: this.composer,
                         thread: this.thread,
                     });
                     if (status(comp) === "destroyed") {
@@ -64,6 +69,9 @@ class UseSuggestion {
         position: undefined,
         term: "",
     };
+    clearCommand() {
+        this.composer.command = undefined;
+    }
     clearRawMentions() {
         this.composer.mentionedChannels.length = 0;
         this.composer.mentionedPartners.length = 0;
@@ -79,10 +87,6 @@ class UseSuggestion {
         });
         this.state.items = undefined;
     }
-    clearSubCommand() {
-        this.composer.subCommandParent = false;
-        this.composer.subCommand = undefined;
-    }
     detect() {
         const { start, end } = this.composer.selection;
         const text = this.composer.text;
@@ -90,6 +94,9 @@ class UseSuggestion {
             // avoid interfering with multi-char selection
             this.clearSearch();
             return;
+        }
+        if (text.length < this.composer.command?.endPosition) {
+            this.clearCommand();
         }
         const candidatePositions = [];
         // consider the chars before the current cursor position
@@ -111,7 +118,10 @@ class UseSuggestion {
         if (this.search.position !== undefined && this.search.position < start) {
             candidatePositions.push(this.search.position);
         }
-        const supportedDelimiters = this.suggestionService.getSupportedDelimiters(this.thread);
+        const supportedDelimiters = this.suggestionService.getSupportedDelimiters(
+            this.thread,
+            this.composer
+        );
         for (const candidatePosition of candidatePositions) {
             if (candidatePosition < 0 || candidatePosition >= text.length) {
                 continue;
@@ -130,7 +140,7 @@ class UseSuggestion {
             if (
                 charBeforeCandidate &&
                 !/\s/.test(charBeforeCandidate) &&
-                !this.composer.subCommandParent
+                !this.composer.command?.hasSubCommand
             ) {
                 continue;
             }
@@ -171,8 +181,14 @@ class UseSuggestion {
         if (option.cannedResponse) {
             this.composer.cannedResponses.push(option.cannedResponse);
         }
-        if (option.isSubCommand) {
-            this.composer.subCommand = option;
+        if (this.search.delimiter === " ") {
+            this.composer.command.subCommandData = option;
+        } else if (this.search.delimiter === "/") {
+            this.composer.command = new ChannelCommand({
+                endPosition: before.length + option.label.length,
+                name: option.label,
+                ...commandRegistry.get(option.label),
+            });
         }
         this.clearSearch();
         this.composer.text = before + option.label + " " + after;

@@ -1005,6 +1005,7 @@ test("Transient messages are added at the end of the thread", async () => {
     await click(".o-mail-Composer-send:enabled");
     await contains(".o-mail-Message");
     await insertText(".o-mail-Composer-input", "/help");
+    await click(".o-mail-Composer-suggestion");
     await click(".o-mail-Composer-send:enabled");
     await contains(".o-mail-Message", { count: 2 });
     await contains(":nth-child(1 of .o-mail-Message)", { text: "Mitchell Admin" });

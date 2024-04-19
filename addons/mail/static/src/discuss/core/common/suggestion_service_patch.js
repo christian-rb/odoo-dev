@@ -7,8 +7,8 @@ import { patch } from "@web/core/utils/patch";
 const commandRegistry = registry.category("discuss.channel_commands");
 
 patch(SuggestionService.prototype, {
-    getSupportedDelimiters(thread) {
-        const res = super.getSupportedDelimiters(thread);
+    getSupportedDelimiters(thread, composer) {
+        const res = super.getSupportedDelimiters(thread, composer);
         return thread?.model === "discuss.channel" ? [...res, ["/", 0]] : res;
     },
     /**

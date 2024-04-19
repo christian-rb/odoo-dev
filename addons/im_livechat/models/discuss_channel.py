@@ -112,7 +112,8 @@ class DiscussChannel(models.Model):
     def execute_command_bot(self, bot_id, **kwargs):
         chatbot_script = self.env['chatbot.script'].browse(bot_id)
         if not self or not chatbot_script.exists():
-            return None
+            self._send_transient_message(self.env.user.partner_id, _("Please select a chatbot"))
+            return
         if self.livechat_operator_id != chatbot_script.operator_partner_id:
             bot_member = next((m for m in self.channel_member_ids.filtered(
                 lambda m: m.partner_id in self.livechat_channel_id.rule_ids.mapped('chatbot_script_id.operator_partner_id')
