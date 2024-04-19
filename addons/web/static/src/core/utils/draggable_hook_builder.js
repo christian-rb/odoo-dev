@@ -582,21 +582,25 @@ export function makeDraggableHook(hookParams) {
                 const correctedSpeed = (speed / 16) * deltaTime;
 
                 const diff = {};
-
+                ctx.current.scrollingEdge = null;
                 if (xRect) {
                     const maxWidth = xRect.x + xRect.width;
                     if (pointerX - xRect.x < threshold) {
                         diff.x = [pointerX - xRect.x, -1];
+                        ctx.current.scrollingEdge = "left";
                     } else if (maxWidth - pointerX < threshold) {
                         diff.x = [maxWidth - pointerX, 1];
+                        ctx.current.scrollingEdge = "right";
                     }
                 }
                 if (yRect) {
                     const maxHeight = yRect.y + yRect.height;
                     if (pointerY - yRect.y < threshold) {
                         diff.y = [pointerY - yRect.y, -1];
+                        ctx.current.scrollingEdge = "top";
                     } else if (maxHeight - pointerY < threshold) {
                         diff.y = [maxHeight - pointerY, 1];
+                        ctx.current.scrollingEdge = "bottom";
                     }
                 }
 
@@ -921,9 +925,12 @@ export function makeDraggableHook(hookParams) {
             setupHooks.setup(
                 (...deps) => {
                     const params = Object.fromEntries(deps);
-                    const actualParams = { ...defaultParams, ...omit(params, "edgeScrolling" )};
+                    const actualParams = { ...defaultParams, ...omit(params, "edgeScrolling") };
                     if (params.edgeScrolling) {
-                        actualParams.edgeScrolling = { ...actualParams.edgeScrolling, ...params.edgeScrolling }
+                        actualParams.edgeScrolling = {
+                            ...actualParams.edgeScrolling,
+                            ...params.edgeScrolling,
+                        };
                     }
 
                     if (!ctx.ref.el) {
