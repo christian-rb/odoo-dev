@@ -211,9 +211,13 @@ class Project(models.Model):
             })
         return res
 
+    def _possibly_updated_timesheets(self):
+        self.ensure_one()
+        return self.mapped('timesheet_ids').filtered(lambda t: not t.is_so_line_edited and t._is_not_billed())
+
     def _update_timesheets_sale_line_id(self):
         for project in self.filtered(lambda p: p.allow_billable and p.allow_timesheets):
-            timesheet_ids = project.sudo(False).mapped('timesheet_ids').filtered(lambda t: not t.is_so_line_edited and t._is_not_billed())
+            timesheet_ids = project.sudo(False)._possibly_updated_timesheets()
             if not timesheet_ids:
                 continue
             for employee_id in project.sale_line_employee_ids.filtered(lambda l: l.project_id == project).employee_id:
