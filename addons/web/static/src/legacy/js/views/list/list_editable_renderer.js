@@ -616,13 +616,14 @@ ListRenderer.include({
             } else {
                 const width = this._getColumnWidth(column);
                 if (width.match(/[a-zA-Z]/)) { // absolute width with measure unit (e.g. 100px)
-                    if (isListEmpty) {
+                    if (column.attrs.width) {
                         th.style.width = width;
                     } else {
                         // If there are records, we force a min-width for fields with an absolute
                         // width to ensure a correct rendering in edition
                         th.style.minWidth = width;
                     }
+
                     relativeWidths.push(false);
                 } else { // relative width expressed as a weight (e.g. 1.5)
                     relativeWidths.push(parseFloat(width, 10));
