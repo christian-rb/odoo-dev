@@ -60,7 +60,7 @@ class ResPartner(models.Model):
     def _compute_opportunity_count(self):
         super()._compute_opportunity_count()
         opportunity_data = self.env['crm.lead'].with_context(active_test=False)._read_group(
-            [('partner_assigned_id', 'in', self.ids)],
+            [('partner_assigned_id', 'in', self.ids), ('partner_id', 'not in', self.ids)],
             ['partner_assigned_id'], ['__count']
         )
         assign_counts = {partner_assigned.id: count for partner_assigned, count in opportunity_data}

@@ -150,6 +150,12 @@ class TestPartnerAssign(TransactionCase):
         except:
             pass
 
+    def test_partner_opportunity_count(self):
+        """ Test that if opportunity is both created and assigned to the same partner.
+            then the opportunity count should be considered as one only.
+        """
+        self.lead_uk.write({"partner_assigned_id": self.customer_uk.id})
+        self.assertEqual(self.customer_uk.opportunity_count, 1)
 
 class TestPartnerLeadPortal(TestCrmCommon):
 
