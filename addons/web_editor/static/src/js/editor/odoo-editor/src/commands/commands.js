@@ -187,6 +187,7 @@ export const editorCommands = {
         const shouldUnwrapBlock = (node) => (
             block.nodeName === node.nodeName || ['BLOCKQUOTE', 'PRE'].includes(block.nodeName)
         );
+        const direction = block.getAttribute('dir');
 
         // Empty block must contain a br element.
         if (
@@ -317,11 +318,13 @@ export const editorCommands = {
                     }
                 }
             }
-            if (
-                ['BLOCKQUOTE', 'PRE'].includes(block.nodeName) &&
-                paragraphRelatedElements.includes(nodeToInsert.nodeName)
-            ) {
-                setTagName(nodeToInsert, block.nodeName);
+            if (paragraphRelatedElements.includes(nodeToInsert.nodeName)) {
+                if (['BLOCKQUOTE', 'PRE'].includes(block.nodeName)) {
+                    setTagName(nodeToInsert, block.nodeName);
+                }
+                if (direction) {
+                    nodeToInsert.setAttribute('dir', direction);
+                }
             }
             if (insertBefore) {
                 currentNode.before(nodeToInsert);
