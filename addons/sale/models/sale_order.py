@@ -1900,11 +1900,22 @@ class SaleOrder(models.Model):
         return self._filter_product_documents(documents).sorted()
 
     def _filter_product_documents(self, documents):
-        return documents.filtered(
-            lambda document:
-                document.attached_on == 'quotation'
-                or (self.state == 'sale' and document.attached_on == 'sale_order')
+        customer_lang = self.partner_id.lang
+        customer_company_lang = self.partner_id.parent_id.lang
+        company_lang = self.company_id.partner_id.lang
+        attached_docs = documents.filtered(
+            lambda document: (document.attached_on == 'quotation') or
+                            (self.state == 'sale' and document.attached_on == 'sale_order')
         )
+        if not customer_lang and customer_company_lang:
+            lang_filtered_docs = attached_docs.filtered(lambda doc: not doc.doc_lang or doc.doc_lang == customer_company_lang)
+        else:
+            lang_filtered_docs = attached_docs.filtered(lambda doc: not doc.doc_lang or doc.doc_lang == customer_lang)
+        if not lang_filtered_docs:
+            lang_filtered_docs = attached_docs.filtered(
+                lambda doc: not doc.doc_lang or doc.doc_lang == company_lang
+            )
+        return lang_filtered_docs
 
     def _update_order_line_info(self, product_id, quantity, **kwargs):
         """ Update sale order line information for a given product or create a

@@ -19,6 +19,7 @@
                                invisible="type == 'url'"
                                required="type == 'binary'"
                                class="oe_inline"/>
+                        <field name="doc_lang" string="Language"/>
                         <field name="url" widget="url" invisible="type == 'binary'" required="type == 'url'"/>
                         <field name="res_name" string="Product Variant" invisible="res_model != 'product.product'"/>
                     </group>
@@ -92,6 +93,10 @@
                                         <div class="mt-2" invisible="res_model != 'product.product'">
                                             <field name="res_name" style="font-style: italic; text-decoration-line: underline;"/>
                                         </div>
+                                        <div class="mt-2" name="language">
+                                            <span>Language</span>
+                                            <field name="doc_lang" class="o_required_modifier ms-2" widget="selection" style="width: 133px;"/>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -111,6 +116,7 @@
                 <field name="sequence" widget="handle"/>
                 <field name="name"/>
                 <field name="company_id" groups="base.group_multi_company" optional="show"/>
+                <field name="doc_lang" optional="hide"/>
             </tree>
         </field>
     </record>

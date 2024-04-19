@@ -30,13 +30,27 @@ class IrActionsReport(models.Model):
                 has_footer = bool(footer_record.sale_footer)
                 included_product_docs = self.env['product.document']
                 doc_line_id_mapping = {}
+                customer_lang = order.partner_id.lang
+                customer_company_lang = order.partner_id.parent_id.lang
+                company_lang = order.company_id.partner_id.lang
                 for line in order.order_line:
                     product_product_docs = line.product_id.product_document_ids
                     product_template_docs = line.product_template_id.product_document_ids
-                    doc_to_include = (
-                        product_product_docs.filtered(lambda d: d.attached_on == 'inside')
-                        or product_template_docs.filtered(lambda d: d.attached_on == 'inside')
-                    )
+                    if (not customer_lang and customer_company_lang):
+                        doc_to_include = (
+                        product_product_docs.filtered(lambda d: d.attached_on == 'inside' and (d.doc_lang == customer_company_lang or not d.doc_lang))
+                        or product_template_docs.filtered(lambda d: d.attached_on == 'inside' and (d.doc_lang == customer_company_lang or not d.doc_lang))
+                        )
+                    else:
+                        doc_to_include = (
+                            product_product_docs.filtered(lambda d: d.attached_on == 'inside' and (d.doc_lang == customer_lang or not d.doc_lang))
+                            or product_template_docs.filtered(lambda d: d.attached_on == 'inside' and (d.doc_lang == customer_lang or not d.doc_lang))
+                        )
+                    if not doc_to_include:
+                        doc_to_include = (
+                            product_product_docs.filtered(lambda d: d.doc_lang == company_lang) or
+                            product_template_docs.filtered(lambda d: d.doc_lang == company_lang)
+                        )
                     included_product_docs = included_product_docs | doc_to_include
                     doc_line_id_mapping.update({doc.id: line.id for doc in doc_to_include})
 
