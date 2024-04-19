@@ -98,14 +98,14 @@ describe('List', () => {
                                 <table class="table table-bordered o_selected_table">
                                     <tbody>
                                         <tr>
-                                            <td class="o_selected_td">[<ul><li placeholder="List" class="oe-hint"><br></li></ul></td>
-                                            <td class="o_selected_td"><ul><li placeholder="List" class="oe-hint"><br></li></ul></td>
-                                            <td class="o_selected_td"><ul><li placeholder="List" class="oe-hint"><br></li></ul></td>
+                                            <td class="o_selected_td">[<ul><li><br></li></ul></td>
+                                            <td class="o_selected_td"><ul><li><br></li></ul></td>
+                                            <td class="o_selected_td"><ul><li><br></li></ul></td>
                                         </tr>
                                         <tr>
-                                            <td class="o_selected_td"><ul><li placeholder="List" class="oe-hint"><br></li></ul></td>
-                                            <td class="o_selected_td"><ul><li placeholder="List" class="oe-hint"><br></li></ul></td>
-                                            <td class="o_selected_td"><ul><li placeholder="List" class="oe-hint"><br></li></ul>]</td>
+                                            <td class="o_selected_td"><ul><li><br></li></ul></td>
+                                            <td class="o_selected_td"><ul><li><br></li></ul></td>
+                                            <td class="o_selected_td"><ul><li><br></li></ul>]</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -381,14 +381,14 @@ describe('List', () => {
                                 <table class="table table-bordered o_selected_table">
                                     <tbody>
                                         <tr>
-                                            <td class="o_selected_td">[<ol><li placeholder="List" class="oe-hint"><br></li></ol></td>
-                                            <td class="o_selected_td"><ol><li placeholder="List" class="oe-hint"><br></li></ol></td>
-                                            <td class="o_selected_td"><ol><li placeholder="List" class="oe-hint"><br></li></ol></td>
+                                            <td class="o_selected_td">[<ol><li><br></li></ol></td>
+                                            <td class="o_selected_td"><ol><li><br></li></ol></td>
+                                            <td class="o_selected_td"><ol><li><br></li></ol></td>
                                         </tr>
                                         <tr>
-                                            <td class="o_selected_td"><ol><li placeholder="List" class="oe-hint"><br></li></ol></td>
-                                            <td class="o_selected_td"><ol><li placeholder="List" class="oe-hint"><br></li></ol></td>
-                                            <td class="o_selected_td"><ol><li placeholder="List" class="oe-hint"><br></li></ol>]</td>
+                                            <td class="o_selected_td"><ol><li><br></li></ol></td>
+                                            <td class="o_selected_td"><ol><li><br></li></ol></td>
+                                            <td class="o_selected_td"><ol><li><br></li></ol>]</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -744,14 +744,14 @@ describe('List', () => {
                                 <table class="table table-bordered o_selected_table">
                                     <tbody>
                                         <tr>
-                                            <td class="o_selected_td">[<ul class="o_checklist"><li placeholder="List" class="oe-hint"><br></li></ul></td>
-                                            <td class="o_selected_td"><ul class="o_checklist"><li placeholder="List" class="oe-hint"><br></li></ul></td>
-                                            <td class="o_selected_td"><ul class="o_checklist"><li placeholder="List" class="oe-hint"><br></li></ul></td>
+                                            <td class="o_selected_td">[<ul class="o_checklist"><li><br></li></ul></td>
+                                            <td class="o_selected_td"><ul class="o_checklist"><li><br></li></ul></td>
+                                            <td class="o_selected_td"><ul class="o_checklist"><li><br></li></ul></td>
                                         </tr>
                                         <tr>
-                                            <td class="o_selected_td"><ul class="o_checklist"><li placeholder="List" class="oe-hint"><br></li></ul></td>
-                                            <td class="o_selected_td"><ul class="o_checklist"><li placeholder="List" class="oe-hint"><br></li></ul></td>
-                                            <td class="o_selected_td"><ul class="o_checklist"><li placeholder="List" class="oe-hint"><br></li></ul>]</td>
+                                            <td class="o_selected_td"><ul class="o_checklist"><li><br></li></ul></td>
+                                            <td class="o_selected_td"><ul class="o_checklist"><li><br></li></ul></td>
+                                            <td class="o_selected_td"><ul class="o_checklist"><li><br></li></ul>]</td>
                                         </tr>
                                     </tbody>
                                 </table>
