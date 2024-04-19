@@ -225,6 +225,13 @@ export const FAKE_MODEL = {
 // DOM Utils
 //------------------------------------------------------------------------------
 
+/**
+ * @param {HTMLElement} element
+ */
+function instantScrollTo(element) {
+    element.scrollIntoView({ behavior: "instant" });
+}
+
 // export function findPickedDate(target) {
 //     return target.querySelector(".o_datetime_picker .o_selected");
 // }
@@ -294,7 +301,7 @@ export function findTimeRow(time) {
  */
 export async function clickAllDaySlot(date) {
     const slot = findAllDaySlot(date);
-    slot.scrollIntoView({ behavior: "instant" });
+    instantScrollTo(slot);
     await contains(slot).click();
 }
 
@@ -304,7 +311,7 @@ export async function clickAllDaySlot(date) {
  */
 export async function clickDate(date) {
     const cell = findDateCell(date);
-    cell.scrollIntoView({ behavior: "instant" });
+    instantScrollTo(cell);
     await contains(cell).click();
 }
 
@@ -314,7 +321,7 @@ export async function clickDate(date) {
  */
 export async function clickEvent(eventId) {
     const event = findEvent(eventId);
-    event.scrollIntoView({ behavior: "instant" });
+    instantScrollTo(event);
     await contains(event).click();
 }
 
@@ -337,7 +344,7 @@ export async function selectTimeRange(startDateTime, endDateTime) {
     const startRow = queryAll(`.fc-timegrid-slot[data-time="${startTime}"]`)[1 + startColumnIndex];
     const endRow = queryAll(`.fc-timegrid-slot[data-time="${endTime}"]`)[1 + endColumnIndex];
 
-    startRow.scrollIntoView({ behavior: "instant" });
+    instantScrollTo(startRow);
     await contains(startRow).dragAndDrop(endRow, { position: "top-top" });
 }
 
@@ -350,7 +357,7 @@ export async function selectDateRange(startDate, endDate) {
     const startCell = findDateCell(startDate);
     const endCell = findDateCell(endDate);
 
-    startCell.scrollIntoView({ behavior: "instant" });
+    instantScrollTo(startCell);
     await contains(startCell).dragAndDrop(endCell);
 }
 
@@ -484,15 +491,24 @@ export async function changeScale(scale) {
 //     await click(target, `.o_calendar_navigation_buttons .o_calendar_button_${direction}`);
 // }
 
-// export function findFilterPanelSection(target, sectionName) {
-//     return target.querySelector(`.o_calendar_filter[data-name="${sectionName}"]`);
-// }
+/**
+ * @param {string} sectionName
+ * @returns {HTMLElement}
+ */
+export function findFilterPanelSection(sectionName) {
+    return queryFirst(`.o_calendar_filter[data-name="${sectionName}"]`);
+}
 
-// export function findFilterPanelFilter(target, sectionName, filterValue) {
-//     return findFilterPanelSection(target, sectionName).querySelector(
-//         `.o_calendar_filter_item[data-value="${filterValue}"]`
-//     );
-// }
+/**
+ * @param {string} sectionName
+ * @param {string} filterValue
+ * @returns {HTMLElement}
+ */
+export function findFilterPanelFilter(sectionName, filterValue) {
+    return queryFirst(`.o_calendar_filter_item[data-value="${filterValue}"]`, {
+        root: findFilterPanelSection(sectionName),
+    });
+}
 
 // export function findFilterPanelSectionFilter(target, sectionName) {
 //     return findFilterPanelSection(target, sectionName).querySelector(
@@ -500,14 +516,19 @@ export async function changeScale(scale) {
 //     );
 // }
 
-// export async function toggleFilter(target, sectionName, filterValue) {
-//     const el = findFilterPanelFilter(target, sectionName, filterValue).querySelector(`input`);
-//     await scrollTo(el);
-//     await click(el);
-// }
+export async function toggleFilter(sectionName, filterValue) {
+    const input = queryFirst(`input`, { root: findFilterPanelFilter(sectionName, filterValue) });
+    instantScrollTo(input);
+    await contains(input).click();
+}
 
 // export async function toggleSectionFilter(target, sectionName) {
 //     const el = findFilterPanelSectionFilter(target, sectionName).querySelector(`input`);
 //     await scrollTo(el);
 //     await click(el);
 // }
+
+export async function removeFilter(sectionName, filterValue) {
+    const filter = findFilterPanelFilter(sectionName, filterValue);
+    await contains(`.o_remove`, { root: filter }).click();
+}

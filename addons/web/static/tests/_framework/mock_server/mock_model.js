@@ -2654,25 +2654,24 @@ export class Model extends Array {
      * @param {string[]} fieldNames
      */
     _followRelation(record, fieldNames) {
-        let currentModel = this;
-        let currentRecord = record;
-        let currentField;
-        let value;
-        for (const fieldName of fieldNames) {
-            currentField = currentModel._fields[fieldName];
-            if (!currentField) {
+        const [fieldName, ...nextFieldNames] = fieldNames;
+        const currentField = this._fields[fieldName];
+        if (!currentField) {
+            return FIELD_NOT_FOUND;
+        }
+
+        if (nextFieldNames.length) {
+            const relation = getRelation(currentField, record);
+            if (!relation) {
                 return FIELD_NOT_FOUND;
             }
-            const relation = getRelation(currentField, currentRecord);
-            if (relation) {
-                const ids = ensureArray(currentRecord?.[fieldName]);
-                currentModel = relation;
-                currentRecord = currentModel.find((r) => ids.includes(r.id));
-            } else {
-                value = currentRecord?.[fieldName];
-            }
+
+            const ids = ensureArray(record[fieldName]);
+            const relatedRecord = relation.find((r) => ids.includes(r.id));
+            return relation._followRelation(relatedRecord, nextFieldNames);
         }
-        return value ?? DEFAULT_FIELD_VALUES[currentField.type]();
+
+        return record?.[fieldName] ?? DEFAULT_FIELD_VALUES[currentField.type]();
     }
 
     _getNextId() {
