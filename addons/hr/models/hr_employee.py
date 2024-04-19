@@ -343,19 +343,16 @@ class HrEmployeePrivate(models.Model):
 
     @api.model
     def get_view(self, view_id=None, view_type='form', **options):
-        print("helo les amis")
         if self.check_access_rights('read', raise_exception=False):
             return super().get_view(view_id, view_type, **options)
         return self.env['hr.employee.public'].get_view(view_id, view_type, **options)
 
     @api.model
     def get_views(self, views, options=None):
-        print(" yoi dhfsjgfs")
         if self.check_access_rights('read', raise_exception=False):
             return super().get_views(views, options)
         res = self.env['hr.employee.public'].get_views(views, options)
         res['models'].update({'hr.employee': res['models']['hr.employee.public']})
-        print(res)
         return res
 
     @api.model

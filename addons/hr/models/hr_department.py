@@ -45,7 +45,8 @@ class Department(models.Model):
             raise NotImplementedError()
         if self.env['hr.employee'].check_access_rights('read', raise_exception=False):
             return [(1, "=", 1)]
-        return [('manager_id', 'in', self.env.user.employee_ids.ids)]
+        departments_ids = self.env['hr.department'].sudo().search([('manager_id', 'in', self.env.user.employee_ids.ids)]).ids
+        return [('id', 'child_of', departments_ids)]
 
     @api.model
     def name_create(self, name):

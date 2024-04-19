@@ -39,6 +39,7 @@ class LeaveReport(models.Model):
     date_from = fields.Datetime('Start Date', readonly=True)
     date_to = fields.Datetime('End Date', readonly=True)
     company_id = fields.Many2one('res.company', string="Company", readonly=True)
+    has_department_manager_access = fields.Boolean(search="_search_has_department_manager_access", store=False)
 
     def init(self):
         tools.drop_view_if_exists(self._cr, 'hr_leave_report')
@@ -57,7 +58,7 @@ class LeaveReport(models.Model):
                 leaves.date_to as date_to, leaves.company_id
                 from (select
                     allocation.id as allocation_id,
-                    null as leave_id,
+                    NULL as leave_id,
                     allocation.employee_id as employee_id,
                     allocation.private_name as name,
                     allocation.number_of_days as number_of_days,
@@ -66,7 +67,7 @@ class LeaveReport(models.Model):
                     allocation.department_id as department_id,
                     allocation.holiday_status_id as holiday_status_id,
                     allocation.state as state,
-                    allocation.holiday_type,
+                    allocation.holiday_type as holiday_type,
                     allocation.date_from as date_from,
                     allocation.date_to as date_to,
                     'allocation' as leave_type,
@@ -76,7 +77,7 @@ class LeaveReport(models.Model):
                 where employee.active IS True
                 union all select
                     request.id as leave_id,
-                    null as allocation_id,
+                    NULL as allocation_id,
                     request.employee_id as employee_id,
                     request.private_name as name,
                     (request.number_of_days * -1) as number_of_days,
@@ -85,7 +86,7 @@ class LeaveReport(models.Model):
                     request.department_id as department_id,
                     request.holiday_status_id as holiday_status_id,
                     request.state as state,
-                    request.holiday_type,
+                    request.holiday_type as holiday_type,
                     request.date_from as date_from,
                     request.date_to as date_to,
                     'request' as leave_type,
@@ -106,3 +107,15 @@ class LeaveReport(models.Model):
             'res_id': self.leave_id.id if self.leave_id else self.allocation_id.id,
             'res_model': 'hr.leave' if self.leave_id else 'hr.leave.allocation',
         }
+
+    def _search_has_department_manager_access(self, operator, value):
+        supported_operators = ["!=", "="]
+        if operator not in supported_operators or not isinstance(value, bool):
+            raise NotImplementedError()
+        return [
+                '|',
+                    ('employee_id.user_id', '=', self.env.user.id),
+                    ('employee_id.department_id', 'child_of',
+                        self.env['hr.department']._search([('manager_id', 'in', self.env.user.employee_ids.ids)])
+                    ),
+                ]
