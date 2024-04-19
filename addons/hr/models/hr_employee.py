@@ -319,7 +319,7 @@ class HrEmployeePrivate(models.Model):
             public_field = public._fields[fname]
             if any(public_field.get_cache_ids_missing(public)):
                 continue
-            values = public_field.get_cache_values(public)
+            values = public_field._get_cache_values(public)
             if field.translate:
                 values = [(value.copy() if value else None) for value in values]
             field.update_cache(self, values)

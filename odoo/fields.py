@@ -1329,7 +1329,7 @@ class Field(MetaField('DummyField', (object,), {})):
         This method is meant to be used internally and has very little benefit
         over a simple call to `~odoo.models.BaseModel.mapped()` on a recordset.
         """
-        vals = self.get_cache_values(records)
+        vals = self._get_cache_values(records)
         return self.convert_to_record_multi(vals, records)
 
     def __set__(self, records, value):
@@ -1454,11 +1454,13 @@ class Field(MetaField('DummyField', (object,), {})):
     def get_cache_mapping(self, env):
         return env.cache._get_field_cache(self, env.cache_key(self)).keys().mapping
 
-    def get_cache_values(self, records):
-        """ return cache values and fetch missing ones"""
+    def _get_cache_values(self, records, getter=None):
+        """ return cache values and fetch missing ones
+        """
         if self.name == 'id':
             # not stored in cache
-            return list(records._ids)
+            yield from records._ids
+            return
 
         if self.compute and self.store:
             # process pending computations
@@ -1473,20 +1475,12 @@ class Field(MetaField('DummyField', (object,), {})):
             # query per record in `recs`!
             record = records.__class__(records.env, (record_id,), records._prefetch_ids)
             return self._get(record)
-        getter = dict.get
-        if self.translate:
-            lang = (records.env.lang or 'en_US') if self.translate is True else records.env._lang
 
-            def _getter(field_cache, record_id, default):
-                cache_value = field_cache.get(record_id, default)
-                if (cache_value is not default and cache_value is not None and
-                        not isinstance(cache_value, TranslatedCacheValue) and lang not in cache_value):
-                    return default
-                return cache_value
-            getter = _getter
+        if getter is None:
+            getter = dict.get
         context_key = records.env.cache_key(self)
         vals = records.env.cache.get_values(self, context_key, records._ids, getter=getter, on_cache_miss=on_cache_miss)
-        return vals
+        yield from vals
 
     def set_cache(self, record, value, dirty=False, check_dirty=True):
         # when storing the value of a content dependent(binary) field, it will be stored once under the context value
@@ -1792,6 +1786,12 @@ class TranslatedCacheValue(dict):
                 return res
         return dict.__getitem__(self, 'en_US')
 
+    def __contains__(self, item):
+        return True
+
+    def copy(self):
+        return TranslatedCacheValue(super().copy())
+
 
 class _String(Field):
     """ Abstract class for string fields. """
@@ -1915,16 +1915,10 @@ class _String(Field):
         : return: {'en_US': 'value_en_US', 'fr_FR': 'French'} # cache format
         """
         # assert (self.translate and self.store and record)
-        record._recompute_recordset([self.name])  # for stored computed translated fields
-        context_key = record.env.cache_key(self)
-        cache_value = record.env.cache.get(self, context_key, record._ids[0], default={})
-        if not (cache_value is None or isinstance(cache_value, TranslatedCacheValue)):
-            # invalidate prefetch_ids records so the data will be flushed and the in_cache_without will miss
-            record.browse(record._prefetch_ids).invalidate_recordset([self.name])
-            try:
-                cache_value = self._get(record.with_context(prefetch_langs=True))
-            except MissingError:
-                return None
+        try:
+            cache_value = list(self._get_cache_values(record.with_context(prefetch_langs=True)))[0]
+        except MissingError:
+            return None
         return dict(cache_value) if cache_value else None
 
     def get_translation_fallback_langs(self, env):
@@ -2031,6 +2025,24 @@ class _String(Field):
         self.update_cache(records, new_translations_list, dirty=True)
 
     # cache operations
+    def _get_cache_values(self, records, getter=None):
+        """ return cache values and fetch missing ones"""
+        if not self.translate or getter:
+            yield from super()._get_cache_values(records, getter)
+            return
+
+        lang = '__dummy' if records.env.context.get('prefetch_langs') \
+            else (records.env.lang or 'en_US') if self.translate is True \
+            else records.env._lang
+
+        def _getter(field_cache, record_id, nothing):
+            cache_value = field_cache.get(record_id, nothing)
+            if (cache_value is not nothing and cache_value is not None and lang not in cache_value):
+                return nothing
+            return cache_value
+
+        yield from super()._get_cache_values(records, _getter)
+
     def impute_cache(self, records, values):
         if not self.translate:
             return super().impute_cache(records, values)
@@ -2056,17 +2068,13 @@ class _String(Field):
             return
         context_key = records.env.cache_key(self)
         field_cache = records.env.cache._get_field_cache(self, context_key)
-        if records.env.context.get('prefetch_langs'):
-            for id_ in records._ids:
-                value = field_cache.get(id_, False)
-                if value is False or not (value is None or isinstance(value, TranslatedCacheValue)):
-                    yield id_
-        else:
-            lang = (records.env.lang or 'en_US') if self.translate is True else records.env._lang
-            for id_ in records._ids:
-                value = field_cache.get(id_, False)
-                if value is False or not (value is None or lang in value or isinstance(value, TranslatedCacheValue)):
-                    yield id_
+        lang = '__dummy' if records.env.context.get('prefetch_langs') \
+            else (records.env.lang or 'en_US') if self.translate is True \
+            else records.env._lang
+        for id_ in records._ids:
+            value = field_cache.get(id_, False)
+            if value is False or not (value is None or lang in value):
+                yield id_
 
     def get_cache_ids_different_from(self, records, value):
         if not self.translate:
