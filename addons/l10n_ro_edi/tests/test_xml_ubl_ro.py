@@ -1,3 +1,5 @@
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
+
 from odoo import Command
 from odoo.addons.l10n_account_edi_ubl_cii_tests.tests.common import TestUBLCommon
 from odoo.exceptions import UserError
@@ -20,6 +22,7 @@ class TestUBLRO(TestUBLCommon):
             'phone': '+40 123 456 789',
             'street': "Strada Kunst, 3",
             'invoice_is_ubl_cii': True,
+            'l10n_ro_edi_access_token': '123',
         })
 
         cls.currency_data['currency'] = cls.env.ref('base.RON')

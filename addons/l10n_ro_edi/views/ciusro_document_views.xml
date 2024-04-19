@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="l10n_gr_mydata_document_form" model="ir.ui.view">
+        <field name="name">ciusro.document.form</field>
+        <field name="model">ciusro.document</field>
+        <field name="arch" type="xml">
+            <form string="E-Factura Document Info">
+                <sheet>
+                    <group>
+                        <field name="state" readonly="1"/>
+                        <field name="datetime" readonly="1"/>
+                        <field name="message" readonly="1" widget="text" invisible="not message"/>
+                        <field name="attachment_id" invisible="1"/>
+                        <button name="action_l10n_ro_edi_download_zip"
+                                type="object"
+                                class="btn btn-primary"
+                                string="Download E-Factura Attachment"
+                                invisible="not attachment_id"/>
+                    </group>
+                </sheet>
+                <footer/>
+            </form>
+        </field>
+    </record>
+</odoo>

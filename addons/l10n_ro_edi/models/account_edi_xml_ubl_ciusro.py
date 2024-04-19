@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import models, _
 
@@ -51,7 +51,7 @@ class AccountEdiXmlUBLRO(models.AbstractModel):
         # We have to handle their cases by changing the TaxScheme/ID to 'something other than VAT',
         # preventing the trigger of the rule and allow Romanian companies without prefixed VAT to use CIUS-RO.
         for vals in vals_list:
-            if partner.country_code == 'RO' and not vals['company_id'].upper().startswith('RO'):
+            if partner.country_code == 'RO' and vals['company_id'] and not vals['company_id'].upper().startswith('RO'):
                 vals['tax_scheme_vals']['id'] = 'NO_VAT'
 
         return vals_list
