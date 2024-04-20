@@ -28,7 +28,7 @@ class Bank(models.Model):
     email = fields.Char()
     phone = fields.Char()
     active = fields.Boolean(default=True)
-    bic = fields.Char('Bank Identifier Code', index=True, help="Sometimes called BIC or Swift.")
+    bic = fields.Char('Bank Identifier Code', index='trigram', help="Sometimes called BIC or Swift.")
 
     @api.depends('bic')
     def _compute_display_name(self):
@@ -61,7 +61,7 @@ class ResPartnerBank(models.Model):
     _name = 'res.partner.bank'
     _rec_name = 'acc_number'
     _description = 'Bank Accounts'
-    _order = 'sequence, id'
+    _order = 'sequence, id desc'
 
     @api.model
     def get_supported_account_types(self):

@@ -23,21 +23,25 @@ class TestAccountPayment(AccountTestInvoicingCommon):
             'acc_number': "0123456789",
             'partner_id': cls.partner_a.id,
             'acc_type': 'bank',
+            'sequence': 10,
         })
         cls.partner_bank_account2 = cls.env['res.partner.bank'].create({
             'acc_number': "9876543210",
             'partner_id': cls.partner_a.id,
             'acc_type': 'bank',
+            'sequence': 20,
         })
         cls.comp_bank_account1 = cls.env['res.partner.bank'].create({
             'acc_number': "985632147",
             'partner_id': cls.env.company.partner_id.id,
             'acc_type': 'bank',
+            'sequence': 10,
         })
         cls.comp_bank_account2 = cls.env['res.partner.bank'].create({
             'acc_number': "741258963",
             'partner_id': cls.env.company.partner_id.id,
             'acc_type': 'bank',
+            'sequence': 20,
         })
 
         company.write({
