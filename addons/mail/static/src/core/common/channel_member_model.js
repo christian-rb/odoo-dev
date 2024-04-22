@@ -22,6 +22,7 @@ export class ChannelMember extends Record {
     id;
     /** @type {luxon.DateTime} */
     last_interest_dt = Record.attr(undefined, { type: "datetime" });
+    localSeenMessage = Record.one("Message");
     persona = Record.one("Persona", { inverse: "channelMembers" });
     rtcSession = Record.one("RtcSession");
     thread = Record.one("Thread", { inverse: "channelMembers" });
