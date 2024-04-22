@@ -29,7 +29,7 @@ from odoo import _, api, exceptions, fields, models, tools, registry, SUPERUSER_
 from odoo.exceptions import MissingError, AccessError
 from odoo.osv import expression
 from odoo.tools import is_html_empty, html_escape, html2plaintext
-from odoo.tools.misc import clean_context, split_every
+from odoo.tools.misc import clean_context, OrderedSet, split_every, topological_sort
 
 _logger = logging.getLogger(__name__)
 
@@ -573,8 +573,10 @@ class MailThread(models.AbstractModel):
             for name, field in self._fields.items()
             if getattr(field, 'tracking', None) or getattr(field, 'track_visibility', None)
         }
-
-        return model_fields and set(self.fields_get(model_fields, attributes=()))
+        if model_fields:
+            model_fields = self.fields_get(model_fields, ('depends'))
+            return OrderedSet(topological_sort(model_fields))
+        return set()
 
     def _track_subtype(self, initial_values):
         """ Give the subtypes triggered by the changes on the record according
