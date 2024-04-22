@@ -82,11 +82,12 @@ class Meeting(models.Model):
         if self._check_microsoft_sync_status() and not notify_context and recurrency_in_batch:
             self._forbid_recurrence_creation()
 
-        for vals in vals_list:
-            # If event has a different organizer, check its sync status and verify if the user is listed as attendee.
-            sender_user, partner_ids = self._get_organizer_user_change_info(vals)
-            partner_included = partner_ids and len(partner_ids) > 0 and sender_user.partner_id.id in partner_ids
-            self._check_organizer_validation(sender_user, partner_included)
+        if self._check_organizer_validation_conditions(vals_list):
+            for vals in vals_list:
+                # If event has a different organizer, check its sync status and verify if the user is listed as attendee.
+                sender_user, partner_ids = self._get_organizer_user_change_info(vals)
+                partner_included = partner_ids and len(partner_ids) > 0 and sender_user.partner_id.id in partner_ids
+                self._check_organizer_validation(sender_user, partner_included)
 
         # for a recurrent event, we do not create events separately but we directly
         # create the recurrency from the corresponding calendar.recurrence.
