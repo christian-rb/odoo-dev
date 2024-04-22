@@ -3258,6 +3258,13 @@ export class Wysiwyg extends Component {
                 }
             }
         }
+        if (node?.querySelectorAll) {
+            for (const div of node?.querySelectorAll('div.oe_structure:empty')) {
+                const p = document.createElement("p");
+                div.appendChild(p);
+                OdooEditorLib.fillEmpty(p);
+            }
+        }
     }
     _attachHistoryIds(editable = this.odooEditor.editable) {
         if (this.options.collaborative) {
