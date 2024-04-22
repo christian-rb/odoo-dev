@@ -93,7 +93,7 @@
                                 <label class="fw-bold" for="effective_hours" string="Days Spent" invisible="not encode_uom_in_days"/>
                             </span>
                             <field name="effective_hours" widget="timesheet_uom" nolabel="1"/>
-                            <button name="action_view_subtask_timesheet" type="object" class="ps-0 border-0 oe_inline oe_link mb-2 o_td_label float-start" invisible="subtask_effective_hours == 0.0">
+                            <button name="project_sharing_action_view_subtask_timesheet" type="object" class="ps-0 border-0 oe_inline oe_link mb-2 o_td_label float-start" invisible="subtask_effective_hours == 0.0">
                                 <span class="text-nowrap" invisible="encode_uom_in_days">Hours Spent on Sub-tasks:</span>
                                 <span class="text-nowrap" invisible="not encode_uom_in_days">Days Spent on Sub-tasks:</span>
                             </button>
