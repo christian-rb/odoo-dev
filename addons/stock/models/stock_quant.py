@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import heapq
 import logging
@@ -873,7 +872,7 @@ class StockQuant(models.Model):
             quantity = uom_id._compute_quantity(quantity_move_uom, product_id.uom_id, rounding_method='HALF-UP')
 
         if self.product_id.tracking == 'serial':
-            if float_compare(quantity, int(quantity), precision_digits=rounding) != 0:
+            if float_compare(quantity, int(quantity), precision_rounding=rounding) != 0:
                 quantity = 0
 
         reserved_quants = []

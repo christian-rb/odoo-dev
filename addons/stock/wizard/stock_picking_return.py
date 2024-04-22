@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import _, api, fields, models
@@ -144,7 +143,7 @@ class ReturnPicking(models.TransientModel):
         for return_line in self.product_return_moves:
             if not return_line.move_id:
                 raise UserError(_("You have manually created product lines, please delete them to proceed."))
-            if not float_is_zero(return_line.quantity, return_line.uom_id.rounding):
+            if not float_is_zero(return_line.quantity, precision_rounding=return_line.uom_id.rounding):
                 returned_lines += 1
                 vals = self._prepare_move_default_values(return_line, new_picking)
                 r = return_line.move_id.copy(vals)

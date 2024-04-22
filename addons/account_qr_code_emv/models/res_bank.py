@@ -52,7 +52,7 @@ class ResPartnerBank(models.Model):
     def _get_qr_code_vals_list(self, qr_method, amount, currency, debtor_partner, free_communication, structured_communication):
         tag, merchant_account_info = self._get_merchant_account_info()
         currency_code = CURRENCY_MAPPING[currency.name]
-        if not float_is_zero(amount, currency.rounding):
+        if not float_is_zero(amount, precision_rounding=currency.rounding):
             amount = amount.is_integer() and int(amount) or amount
         else:
             amount = None

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from collections import defaultdict, OrderedDict
 from datetime import date, timedelta
 import json
@@ -27,7 +25,10 @@ class ReportBomStructure(models.AbstractModel):
         components_qty_to_produce = defaultdict(lambda: 0)
         components_qty_available = {}
         for comp in bom_data.get('components', []):
-            if comp['product'].type != 'product' or float_is_zero(comp['base_bom_line_qty'], precision_digits=comp['uom'].rounding):
+            if comp['product'].type != 'product' or float_is_zero(
+                    comp['base_bom_line_qty'],
+                    precision_rounding=comp['uom'].rounding,
+            ):
                 continue
             components_qty_to_produce[comp['product_id']] += comp['base_bom_line_qty']
             components_qty_available[comp['product_id']] = comp['free_to_manufacture_qty']

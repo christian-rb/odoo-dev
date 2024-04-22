@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from collections import Counter, defaultdict
@@ -143,8 +142,11 @@ class StockMoveLine(models.Model):
             if not record.quant_id or record.quantity:
                 continue
             origin_move = record.move_id._origin
-            if float_compare(record.move_id.product_qty, origin_move.quantity, record.move_id.product_uom.rounding) > 0:
-                record.quantity = max(0, min(record.quant_id.available_quantity, record.move_id.product_qty - origin_move.quantity))
+            product_qty = record.move_id.product_qty
+            prec = record.move_id.product_uom.rounding
+            if float_compare(product_qty, origin_move.quantity, precision_rounding=prec) > 0:
+                qty_diff = product_qty - origin_move.quantity
+                record.quantity = max(0, min(record.quant_id.available_quantity, qty_diff))
             else:
                 record.quantity = max(0, record.quant_id.available_quantity)
 
@@ -932,7 +934,10 @@ class StockMoveLine(models.Model):
         self = self.with_context(inventory_mode=False)
         processed_move_line = self.env['stock.move.line']
         for move_line in self:
-            if move_line.is_inventory and not float_is_zero(move_line.quantity, precision_digits=move_line.product_uom_id.rounding):
+            if move_line.is_inventory and not float_is_zero(
+                    move_line.quantity,
+                    precision_rounding=move_line.product_uom_id.rounding,
+            ):
                 processed_move_line += move_line
                 move_vals.append(move_line._get_revert_inventory_move_values())
         if not processed_move_line:
