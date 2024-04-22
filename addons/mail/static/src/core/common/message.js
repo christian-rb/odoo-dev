@@ -77,9 +77,9 @@ export class Message extends Component {
         showDates: true,
     };
     static props = [
+        "forwardRefToParent?",
         "hasActions?",
         "isInChatWindow?",
-        "highlighted?",
         "onParentMessageClick?",
         "message",
         "messageEdition?",
@@ -108,6 +108,7 @@ export class Message extends Component {
         /** @type {ShadowRoot} */
         this.shadowRoot;
         this.root = useRef("root");
+        this.props.forwardRefToParent?.(this.props.message, this.root);
         this.hasTouch = hasTouch;
         this.messageBody = useRef("body");
         this.messageActions = useMessageActions();
@@ -128,14 +129,6 @@ export class Message extends Component {
                 }
             },
             () => [this.props.messageEdition?.editingMessage]
-        );
-        useEffect(
-            (highlighted) => {
-                if (highlighted) {
-                    this.root.el.scrollIntoView({ behavior: "smooth", block: "center" });
-                }
-            },
-            () => [this.props.highlighted]
         );
         onMounted(() => {
             if (this.messageBody.el) {
@@ -192,7 +185,6 @@ export class Message extends Component {
     get attClass() {
         return {
             [this.props.className]: true,
-            "o-highlighted bg-view shadow-lg": this.props.highlighted,
             "o-selfAuthored": this.message.isSelfAuthored && !this.env.messageCard,
             "o-selected": this.props.messageToReplyTo?.isSelected(
                 this.props.thread,
