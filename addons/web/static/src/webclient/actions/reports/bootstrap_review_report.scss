@@ -83,6 +83,12 @@ $report-extended-theme-colors: map-merge(
     padding-left: $container-padding-x;
 }
 
+//BS5.3 adapt
+.table > :not(caption) > * > * {
+    color: $table-color;
+    background-color: $table-bg;
+}
+
 // Removes borders within a table-borderless as its new definition in Boostrap 5 still has its borders visible in PDFs 
 .table-borderless {
     tbody, thead, tfoot, tr, td, th {
