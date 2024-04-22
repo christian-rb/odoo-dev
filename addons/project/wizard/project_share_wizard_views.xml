@@ -27,8 +27,15 @@
                     </div>
                     <field name="partner_ids" widget="many2many_tags_email" options="{'no_quick_create': True}" placeholder="Add the contacts you would like to share the project with..." invisible="not send_email and access_mode == 'read'" nolabel="1" context="{'form_view_ref': 'base.view_partner_simple_form'}"/>
                 </group>
+                <field name="collaborator_ids" nolabel="1" invisible="hide_collaborator">
+                    <tree string="Collaborators" editable="bottom" create="0">
+                        <field name="partner_id" options="{'no_create': True, 'no_open': True}" readonly="1" force_save="1"/>
+                        <field name="access_mode"/>
+                    </tree>
+                </field>
                 <footer>
-                    <button string="Send invitation" name="action_share_record" type="object" class="btn-primary" data-hotkey="q"/>
+                    <button string="Save" special="save" class="btn-primary" data-hotkey="q" invisible="partner_ids"/>
+                    <button string="Send invitation" name="action_share_record" type="object" class="btn-primary" data-hotkey="s"/>
                     <button string="Discard" class="btn-secondary" special="cancel" data-hotkey="x" />
                 </footer>
             </form>

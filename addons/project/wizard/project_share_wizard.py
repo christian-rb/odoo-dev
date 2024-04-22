@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, fields, models, _
+from odoo import Command, api, fields, models, _
 
 
 class ProjectShareWizard(models.TransientModel):
@@ -21,9 +20,27 @@ class ProjectShareWizard(models.TransientModel):
             active_id = self._context.get('default_project_id', False)
         result = super(ProjectShareWizard, self.with_context(active_model=active_model, active_id=active_id)).default_get(fields)
         if not result.get('access_mode'):
-            result.update(
-                access_mode='read',
-            )
+            result['access_mode'] = 'read'
+        if result['res_model'] and result['res_id']:
+            project = self.env[result['res_model']].browse(result['res_id'])
+            collaborator_vals_list = []
+            collaborator_ids = []
+            for collaborator in project.collaborator_ids:
+                collaborator_ids.append(collaborator.partner_id.id)
+                collaborator_vals_list.append(Command.create({
+                    'partner_id': collaborator.partner_id.id,
+                    'access_mode': 'edit',
+                }))
+            for follower in project.message_partner_ids:
+                if follower.partner_share and follower.id not in collaborator_ids:
+                    collaborator_vals_list.append(Command.create({
+                        'partner_id': follower.id,
+                        'access_mode': 'read',
+                    }))
+            if collaborator_vals_list:
+                result['collaborator_ids'] = collaborator_vals_list
+            else:
+                result['hide_collaborator'] = True
         return result
 
     @api.model
@@ -33,6 +50,8 @@ class ProjectShareWizard(models.TransientModel):
 
     access_mode = fields.Selection([('read', 'Read-only'), ('edit', 'Edit')])
     send_email = fields.Boolean(string="Send by Email")
+    collaborator_ids = fields.One2many('project.share.collaborator.wizard', 'parent_wizard_id', string='Collaborators')
+    hide_collaborator = fields.Boolean(export_string_translation=False, store=False, readonly=True)
 
     @api.depends('res_model', 'res_id')
     def _compute_resource_ref(self):
@@ -41,6 +60,26 @@ class ProjectShareWizard(models.TransientModel):
                 wizard.resource_ref = '%s,%s' % (wizard.res_model, wizard.res_id or 0)
             else:
                 wizard.resource_ref = None
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        wizards = super().create(vals_list)
+        for wizard in wizards:
+            collaborator_ids_to_add = []
+            collaborator_ids_to_remove = []
+            project = wizard.resource_ref
+            for collaborator in wizard.collaborator_ids:
+                if collaborator.access_mode == "edit" and collaborator.partner_id not in project.collaborator_ids.partner_id:
+                    collaborator_ids_to_add.append(collaborator.partner_id.id)
+                elif collaborator.access_mode == "read" and collaborator.partner_id in project.collaborator_ids.partner_id:
+                    collaborator_ids_to_remove.append(collaborator.partner_id.id)
+            if collaborator_ids_to_add:
+                project._add_collaborators(self.env['res.partner'].browse(collaborator_ids_to_add))
+            collaborator_ids_to_remove += project.collaborator_ids.partner_id.filtered(lambda p: p not in wizard.collaborator_ids.partner_id).ids
+            project.message_partner_ids = project.message_partner_ids.filtered(lambda p: not p.partner_share or p in wizard.collaborator_ids.partner_id)
+            if collaborator_ids_to_remove:
+                project.collaborator_ids.filtered(lambda c: c.partner_id.id in collaborator_ids_to_remove).unlink()
+        return wizards
 
     def action_share_record(self):
         # Confirmation dialog is only opened if new portal user(s) need to be created in a 'on invitation' website
