@@ -2707,7 +2707,7 @@ class Model(models.AbstractModel):
         if len(self) == 0:
             length_dependent = {'views': [(False, 'form')]}
         elif len(self) == 1:
-            length_dependent = {'views': [(False, 'form')], 'res_id': self.id}
+            length_dependent = {'views': [(False, 'form')], 'res_id': self.ids[0]}
         else:
             length_dependent = {
                 'views': [(False, 'list'), (False, 'form')],
