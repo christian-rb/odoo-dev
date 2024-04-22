@@ -264,6 +264,7 @@ This module provides the core of the Odoo Web Client.
             'web/static/lib/bootstrap/scss/_maps.scss',
 
             ('include', 'web._assets_bootstrap_backend'),
+            ('after', 'web/static/src/scss/utilities_custom.scss', 'web/static/src/webclient/actions/reports/report_custom_utilities.scss'),
 
             'web/static/lib/popper/popper.js',
             'web/static/lib/bootstrap/js/dist/util/index.js',
