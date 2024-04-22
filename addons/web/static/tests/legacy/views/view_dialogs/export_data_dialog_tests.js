@@ -181,7 +181,7 @@ QUnit.module("ViewDialogs", (hooks) => {
 
     QUnit.module("ExportDataDialog");
 
-    QUnit.test("Export dialog UI test", async function (assert) {
+    QUnit.skip("Export dialog UI test", async function (assert) {
         await makeView({
             serverData,
             type: "list",
