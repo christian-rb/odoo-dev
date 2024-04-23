@@ -35,6 +35,7 @@ Print product labels with barcode.
         'views/product_views.xml',  # To keep after product_tag_views.xml because it depends on it.
 
         'views/res_config_settings_views.xml',
+        'views/product_template_attribute_line_view.xml',
         'views/product_attribute_views.xml',
         'views/product_attribute_value_views.xml',
         'views/product_category_views.xml',

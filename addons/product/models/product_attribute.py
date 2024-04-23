@@ -28,6 +28,9 @@ class ProductAttribute(models.Model):
         ],
         default='always',
         string="Variants Creation Mode",
+        store=True,
+        readonly=False,
+        compute="_compute_create_variant",
         help="""- Instantly: All possible variants are created as soon as the attribute and its values are added to a product.
         - Dynamically: Each variant is created only when its corresponding attributes and values are added to a sales order.
         - Never: Variants are never created for the attribute.
@@ -78,11 +81,11 @@ class ProductAttribute(models.Model):
     def _without_no_variant_attributes(self):
         return self.filtered(lambda pa: pa.create_variant != 'no_variant')
 
-    @api.onchange("display_type", "number_related_products")
-    def _onchange_display_type(self):
-        self.ensure_one()
-        if self.display_type == "multi" and self.number_related_products == 0:
-            self.create_variant = "no_variant"
+    @api.depends("display_type", "number_related_products")
+    def _compute_create_variant(self):
+        for record in self:
+            if record.display_type == "multi" and record.number_related_products == 0:
+                record.create_variant = "no_variant"
 
     def write(self, vals):
         """Override to make sure attribute type can't be changed if it's used on
@@ -127,5 +130,5 @@ class ProductAttribute(models.Model):
             'name': _("Products"),
             'res_model': 'product.template.attribute.line',
             'view_mode': 'tree,form',
-            'domain': [('product_tmpl_id.id', 'in', self.product_tmpl_ids.ids), ('attribute_id.id', '=', self.id)],
+            'domain': [('attribute_id.id', '=', self.id)],
         }

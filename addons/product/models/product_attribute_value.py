@@ -36,8 +36,8 @@ class ProductAttributeValue(models.Model):
 
     default_extra_price = fields.Float()
     is_custom = fields.Boolean(
-        string="Is custom value",
-        help="Allow users to input custom values for this attribute value")
+        string="Free text",
+        help="Allow customers to set their own value")
     html_color = fields.Char(
         string="Color",
         help="Here you can set a specific HTML color index (e.g. #ff0000)"

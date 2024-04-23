@@ -61,7 +61,9 @@ class ProductTemplateAttributeValue(models.Model):
     display_type = fields.Selection(related='product_attribute_value_id.display_type')
     color = fields.Integer(string="Color", default=_get_default_color)
     image = fields.Image(related='product_attribute_value_id.image')
-    default_extra_price = fields.Float(string="Default Extra Price", related="product_attribute_value_id.default_extra_price")
+    default_extra_price = fields.Float(
+        string="Default Extra Price",
+        related="product_attribute_value_id.default_extra_price")
 
     _sql_constraints = [
         ('attribute_value_unique',
