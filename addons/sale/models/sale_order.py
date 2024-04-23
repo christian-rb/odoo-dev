@@ -1671,7 +1671,7 @@ class SaleOrder(models.Model):
         - its state is 'draft' or `sent`;
         - it's not expired;
         - it requires a payment;
-        - the last transaction's state isn't `done`;
+        - the last transaction's state isn't `done`; why though?
         - the total amount is strictly positive.
 
         Note: self.ensure_one()
@@ -1685,7 +1685,7 @@ class SaleOrder(models.Model):
             self.state in ['draft', 'sent']
             and not self.is_expired
             and self.require_payment
-            and transaction.state != 'done'
+            and transaction.state != 'done' #the problem, because of that it says that it does not need to be payed
             and self.amount_total > 0
         )
 
@@ -1955,6 +1955,3 @@ class SaleOrder(models.Model):
             return self.partner_id.lang
 
         return self.env.lang
-
-    def amount_left(self):
-        return self.amount_total - self.amount_paid

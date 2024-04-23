@@ -118,6 +118,7 @@ class CustomerPortal(payment_portal.PaymentPortal):
         download=False,
         downpayment=None,
         link_amount=None,
+        installment=None,
         **kw
     ):
         try:
@@ -169,15 +170,18 @@ class CustomerPortal(payment_portal.PaymentPortal):
             'res_company': order_sudo.company_id,  # Used to display correct company logo
             'link_amount': link_amount,
         }
-
+        x = order_sudo._has_to_be_paid()
         # Payment values
         if order_sudo._has_to_be_paid():
             values.update(
                 self._get_payment_values(
                     order_sudo,
-                    downpayment=downpayment == 'true' if downpayment is not None else order_sudo.prepayment_percent < 1.0
+                    downpayment=downpayment == 'true' if downpayment is not None else order_sudo.prepayment_percent < 1.0,
+                    installment=installment == 'true' if installment is not None else float(link_amount) < order_sudo._get_prepayment_required_amount(),
+                    link_amount=link_amount,
                 )
             )
+            #anko do something similar so the link_amount will be send, remember about the installment
 
         if order_sudo.state in ('draft', 'sent', 'cancel'):
             history_session_key = 'my_quotations_history'
@@ -190,7 +194,7 @@ class CustomerPortal(payment_portal.PaymentPortal):
         return request.render('sale.sale_order_portal_template', values) #here it renders the portal view, add the link_payment, amount and whatever there
         # maybe in views add an if that if pratial_amount is specified then show the other modal
 
-    def _get_payment_values(self, order_sudo, downpayment=False, **kwargs):
+    def _get_payment_values(self, order_sudo, downpayment=False, installment=False, link_amount=None, **kwargs):
         """ Return the payment-specific QWeb context values.
 
         :param sale.order order_sudo: The sales order being paid.
@@ -200,14 +204,25 @@ class CustomerPortal(payment_portal.PaymentPortal):
         :return: The payment-specific values.
         :rtype: dict
         """
+        #zrobić coś podobnego do tego dla link amount
         logged_in = not request.env.user._is_public()
         partner_sudo = request.env.user.partner_id if logged_in else order_sudo.partner_id
         company = order_sudo.company_id
-        if downpayment:
-            amount = order_sudo._get_prepayment_required_amount()
+        if not link_amount:
+            if downpayment:
+                amount = order_sudo._get_prepayment_required_amount()
+            else:
+                amount = order_sudo.amount_total - order_sudo.amount_paid
         else:
-            amount = order_sudo.amount_total - order_sudo.amount_paid
+            if installment:
+                amount = float(link_amount)
+            else:
+                amount = order_sudo._get_prepayment_required_amount()
+
         currency = order_sudo.currency_id
+
+        # jeżeli installment to amount powinna być taka jak w linku a jak nie to prepayment kwota, jak to połączyć z downpayment??
+        # przekazać link_amount?? nie widze innego rozwiązania
 
         availability_report = {}
         # Select all the payment methods and tokens that match the payment context.
@@ -462,7 +477,7 @@ class PaymentPortal(payment_portal.PaymentPortal):
             form_values.update({
                 'transaction_route': order_sudo.get_portal_url(suffix='/transaction'),
                 'landing_route': order_sudo.get_portal_url(),
-                'access_token': order_sudo.access_token, #here it changes the payment access token to SO access token
+                'access_token': order_sudo.access_token,
             })
         return form_values
 

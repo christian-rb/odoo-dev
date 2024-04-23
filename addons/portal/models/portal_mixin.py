@@ -127,7 +127,7 @@ class PortalMixin(models.AbstractModel):
         self.ensure_one() #ANKO
         url = self.access_url + '%s?access_token=%s%s%s%s%s' % (
             suffix if suffix else '',
-            self._portal_ensure_token(),
+            self._portal_ensure_token(), #here it creates a token
             '&report_type=%s' % report_type if report_type else '',
             '&download=true' if download else '',
             query_string if query_string else '',
