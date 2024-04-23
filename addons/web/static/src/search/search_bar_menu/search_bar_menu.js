@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { Component } from "@odoo/owl";
+import { Component, useExternalListener } from "@odoo/owl";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { DomainSelectorDialog } from "../../core/domain_selector_dialog/domain_selector_dialog";
 import { Dropdown } from "@web/core/dropdown/dropdown";
@@ -49,8 +49,55 @@ export class SearchBarMenu extends Component {
         this.fields = sortBy(fields, "string");
         // Favorite
         this.dialogService = useService("dialog");
-
         useBus(this.env.searchModel, "update", this.render);
+        useExternalListener(window, "resize", this.resizePanel);
+    }
+
+    resizePanel() {
+        function getAutoWidth(element) {
+            const clone = element.cloneNode(true);
+            clone.style.position = 'absolute';
+            clone.style.visibility = 'hidden';
+            clone.style.display = 'block';
+            clone.style.whiteSpace = 'nowrap';
+            clone.style.width = 'auto';
+
+            document.body.appendChild(clone);
+            const autoWidth = clone.offsetWidth;
+            document.body.removeChild(clone);
+
+            return autoWidth;
+        }
+
+        let togglerXpos = 0;
+        const toggler = document.querySelector('.o_searchview_dropdown_toggler');
+        const searchpanel = document.querySelector('.o_search_bar_menu');
+
+        if (toggler) {
+            const rect = toggler.getBoundingClientRect();
+            togglerXpos = rect.x;
+            const containers = document.querySelectorAll(".o_dropdown_container");
+            const noOfDivs = containers.length;
+            let sumofwidths = 0;
+            if (noOfDivs > 0) {
+                for (let i = 0; i < noOfDivs; i++) {
+                    const width = getAutoWidth(containers[i]);
+                    sumofwidths = sumofwidths + width;
+                }
+                if (sumofwidths > togglerXpos) {
+                    searchpanel.style.width = togglerXpos + 'px';
+                    for (let i = 0; i < noOfDivs; i++) {
+                        containers[i].style.width = '100%';
+                    }
+                    searchpanel.style.left=rect.right-parseInt(searchpanel.style.width) + 'px';
+                } else {
+                    searchpanel.style.width = 'auto';
+                    for (let i = 0; i < noOfDivs; i++) {
+                        containers[i].style.width = 'auto';
+                    }
+                }
+            }
+        }
     }
 
     // Filter Panel

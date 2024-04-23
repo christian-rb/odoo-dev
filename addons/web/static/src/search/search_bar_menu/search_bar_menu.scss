@@ -4,8 +4,11 @@
     $-menu-max-width: calc(100vw - #{map-get($spacers, 3) * 2 });
 
     max-width: $-menu-max-width;
+    width: auto;
+
     .o_dropdown_container {
         border-color: $dropdown-divider-bg !important;
+        width:auto;
     }
 
     @include media-breakpoint-up(lg) {
@@ -17,4 +20,6 @@
             max-width: calc(#{$-menu-max-width} / 4);
         }
     }
+
+    flex-wrap: wrap;
 }

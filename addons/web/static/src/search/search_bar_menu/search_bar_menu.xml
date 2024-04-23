@@ -3,16 +3,17 @@
 
     <t t-name="web.SearchBarMenu" owl="1">
         <Dropdown togglerClass="'o_searchview_dropdown_toggler d-print-none btn btn-outline-secondary o-no-caret rounded-start-0 h-100'"
-                  menuClass="'o_search_bar_menu d-flex flex-wrap flex-lg-nowrap w-100 w-md-auto mx-md-auto mt-2 py-3'"
+                  menuClass="'o_search_bar_menu d-flex mx-md-auto mt-2 py-3'"
                   position="'bottom-end'"
                   holdOnHover="true"
-                  t-if="this.env.searchModel.searchMenuTypes.size">
+                  t-if="this.env.searchModel.searchMenuTypes.size"
+                  onOpened="resizePanel">
             <t t-set-slot="toggler" t-slot-scope="scope">
                 <i class="fa fa-caret-down" aria-hidden="true" data-hotkey="shift+q" title="Toggle Search Panel"/>
             </t>
             <!-- Filter -->
             <t t-if="this.env.searchModel.searchMenuTypes.has('filter')">
-                <div class="o_dropdown_container o_filter_menu w-100 w-lg-auto px-3 mb-4 mb-lg-0 border-end">
+                <div class="o_dropdown_container o_filter_menu px-3 mb-4 mb-lg-0 border-end">
                     <div class="px-3 fs-5 mb-2">
                         <i class="me-2 text-primary" t-att-class="facet_icons.filter"/>
                         <h5 class="o_dropdown_title d-inline">Filters</h5>
@@ -60,7 +61,7 @@
             </t>
             <!-- GroupBy -->
             <t t-if="this.env.searchModel.searchMenuTypes.has('groupBy')">
-                <div class="o_dropdown_container o_group_by_menu w-100 w-lg-auto px-3 mb-4 mb-lg-0 border-end">
+                <div class="o_dropdown_container o_group_by_menu px-3 mb-4 mb-lg-0 border-end">
                     <div class="px-3 fs-5 mb-2">
                         <i class="me-2 text-action" t-att-class="facet_icons.groupBy"/>
                         <h5 class="o_dropdown_title d-inline">Group By</h5>
@@ -108,7 +109,7 @@
             </t>
             <!-- Comparison -->
             <t t-if="showComparisonMenu">
-                <div class="o_dropdown_container o_comparison_menu w-100 w-lg-auto px-3 border-end">
+                <div class="o_dropdown_container o_comparison_menu px-3 border-end">
                     <div class="px-3 fs-5 mb-2">
                         <i class="me-2 text-danger" t-att-class="facet_icons.comparison"/>
                         <h5 class="o_dropdown_title d-inline">Comparison</h5>
@@ -125,7 +126,7 @@
             </t>
             <!-- Favorite -->
             <t t-if="this.env.searchModel.searchMenuTypes.has('favorite')">
-                <div class="o_dropdown_container o_favorite_menu w-100 w-lg-auto px-3">
+                <div class="o_dropdown_container o_favorite_menu px-3">
                     <div class="px-3 fs-5 mb-2">
                         <i class="me-2 text-favourite" t-att-class="facet_icons.favorite"/>
                         <h5 class="o_dropdown_title d-inline">Favorites</h5>
