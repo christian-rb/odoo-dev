@@ -5,9 +5,8 @@ import io
 import re
 
 from odoo import _
-from odoo.exceptions import UserError, ValidationError
-from odoo.tools import pdf
-
+from odoo.exceptions import ValidationError
+from odoo.tools import format_amount, format_date, format_datetime, pdf
 
 def _ensure_names_follows_pattern(names):
     """TODO edm (alphanum or -) once or more (. (alphanum or -) once or more) zero or more
@@ -53,32 +52,55 @@ def _get_restricted_form_fields(BaseModel, docs):
 def _get_model_and_fields(BaseModel, field_names):
     model_and_fields = set()
     for name in field_names:  # TODO edm: deque?
-        chain = name.split('__')
+        path = name.split('__')
         # chain = collections.deque(chain)
         Model = BaseModel
         field = ''
-        for elem in chain:
-            if elem == chain[-1]:
+        for elem in path:
+            if elem == path[-1]:
                 field = elem
             else:
                 Model = Model[elem]
         model_and_fields.add((Model._name, field))
     return model_and_fields
 
-def _get_field_format(field, order):
+def _get_field_format(field, order, env, tz, lang_code):
     # TODO edm: sol names are prefixed by the sol id
     # TODO edm: but if 100+ elem ==> this is done a hundred times... =/
-    chain = field.split('__')
-    is_sol = chain[0].startswith('sol_id_')
-    BaseModel = order.env['sale.order'] if not is_sol else order.env['sale.order.line']
-    chain = chain if not is_sol else chain[1:]
+    path = field.split('__')
+    is_sol = path[0].startswith('sol_id_')
+
+    if not is_sol:  # Header or footer
+        BaseModel = order.env['sale.order']
+        value = order
+    else:  # Product document
+        BaseModel = order.env['sale.order.line']
+        value = order.order_line.browse(path[0].strip('sol_id_'))
+        path = path[1:]
+
     Model = BaseModel
-    res_field = ''
-    field_type = None
-    for elem in chain:
-        if elem == chain[-1]:
-            res_field = elem
-            field_type = _get_existing_field_info(res_field, Model)['type']
-            print(field_type)
-        else:
-            Model = Model[elem]
+
+    for elem in path[:-1]:
+        Model, value = Model[elem], value[elem]
+        # TODO edm: isn't it possible to get the model from the value while it's not the end value?
+        # TODO edm: would it be possible to pass the path minus last and get the needed information?
+
+    value = value[path[-1]]
+    field_type = _get_existing_field_info(path[-1], Model)['type']
+    print(field_type)
+
+    if field_type == 'char':
+        formatted_value = value
+    elif field_type == 'text':
+        formatted_value = value  # translated?
+    elif field_type == 'date':
+        formatted_value = format_date(env, value, lang_code=lang_code)
+    elif field_type == 'datetime':
+        formatted_value = format_datetime(env, value, tz=tz)
+    elif field_type == 'amount':
+        formatted_value = format_amount(env, value, order.currency_id),
+    else:
+        formatted_value = value
+        # TODO edm: everything else
+
+    return formatted_value or ''

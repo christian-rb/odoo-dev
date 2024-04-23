@@ -78,7 +78,7 @@ class IrActionsReport(models.Model):
         return result
 
     def _add_pages_to_writer(self, writer, document, all_form_fields=None, sol_id=None):
-        prefix = f'sol_id_{sol_id}_' if sol_id else ''
+        prefix = f'sol_id_{sol_id}__' if sol_id else ''
         reader = PdfFileReader(io.BytesIO(document), strict=False)
 
         field_names = set()
@@ -133,7 +133,7 @@ class IrActionsReport(models.Model):
 
         print("here comes the mapping")
         form_fields_mapping = {
-            field: utils._get_field_format(field, order) for field in all_form_fields
+            field: utils._get_field_format(field, order, env, tz, lang_code) for field in all_form_fields
         }
 
 
