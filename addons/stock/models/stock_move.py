@@ -846,6 +846,12 @@ Please change the quantity done or the rounding precision of your unit of measur
         split_lines = lots.split(breaking_char)
         split_lines = list(filter(None, split_lines))
         move_lines_vals = []
+
+        context = self.env.context.get('lots_context', {})
+        picking_type = self.env['stock.picking.type'].browse(context.get('picking_type_id', None))
+        product = self.env['product.product'].browse(context.get('default_product_id', None))
+        company = self.env['res.company'].browse(context.get('company_id', None))
+
         for lot_text in split_lines:
             move_line_vals = {
                 'lot_name': lot_text,
@@ -869,17 +875,17 @@ Please change the quantity done or the rounding precision of your unit of measur
                     # don't try to guess and simply use the full string as the lot name.
                     move_line_vals['lot_name'] = lot_text
                     break
-            if self.picking_type_id.use_existing_lots:
+            if picking_type.use_existing_lots:
                 lot_id = self.env['stock.lot'].search([
-                    ('product_id', '=', self.product_id.id),
+                    ('product_id', '=', product.id),
                     ('name', '=', lot_text),
-                    ('company_id', '=', self.company_id.id),
+                    ('company_id', '=', company.id),
                 ])
                 if not lot_id:
                     lot_id = self.env['stock.lot'].create({
-                        'product_id': self.product_id.id,
+                        'product_id': product.id,
                         'name': lot_text,
-                        'company_id': self.company_id.id,
+                        'company_id': company.id,
                     })
                 move_line_vals['lot_id'] = lot_id.id
             move_lines_vals.append(move_line_vals)
@@ -902,7 +908,7 @@ Please change the quantity done or the rounding precision of your unit of measur
         if mode == 'serial':
             lot_names = self.env['stock.lot'].generate_lot_names(first_lot, count)
         elif mode == 'import':
-            lot_names = self.split_lots(lot_text)
+            lot_names = self.with_context(lots_context=context).split_lots(lot_text)
         for lot in lot_names:
             if not lot.get('quantity'):
                 lot['quantity'] = 1
