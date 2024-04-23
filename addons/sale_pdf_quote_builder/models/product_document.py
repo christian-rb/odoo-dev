@@ -1,11 +1,10 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import base64
-import io
 
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
-from odoo.tools import pdf
+
+from odoo.addons.sale_pdf_quote_builder import utils
 
 
 class ProductDocument(models.Model):
@@ -30,6 +29,7 @@ class ProductDocument(models.Model):
 
     @api.depends('datas')
     def _compute_has_restricted_form_fields(self):
+        BaseModel = self.env['sale.order.line']
         for doc in self:
             # When loading a file, the mimetype isn't set yet, as it's set when saving.
             mimetype = doc.mimetype or (doc.datas and self.env['ir.attachment']._compute_mimetype(
@@ -40,7 +40,7 @@ class ProductDocument(models.Model):
                 doc.has_restricted_form_fields = False
                 continue
 
-            restricted_fields = doc._get_restricted_form_fields()
+            restricted_fields = utils._get_restricted_form_fields(BaseModel, doc)
             doc.has_restricted_form_fields = bool(restricted_fields)
 
     # === ONCHANGE METHODS ===#
@@ -81,9 +81,12 @@ class ProductDocument(models.Model):
 
     @api.constrains('attached_on', 'datas')
     def _ensure_no_restricted_fields(self):
+        BaseModel = self.env['sale.order.line']
         inside_docs = self.filtered(lambda d: d.attached_on == 'inside')
         has_admin_rights = self.env.user.has_group('base.group_system')
-        has_restricted_inside_docs = any([doc._get_restricted_form_fields() for doc in inside_docs])
+        has_restricted_inside_docs = any(
+            [utils._get_restricted_form_fields(BaseModel, doc) for doc in inside_docs]
+        )
         if has_restricted_inside_docs and not has_admin_rights:
             raise ValidationError(_(
                 "Only PDF documents without restricted form fields can be attached inside a"
@@ -101,7 +104,8 @@ class ProductDocument(models.Model):
 
     def action_open_whitelisting_wizard(self):
         self.ensure_one()
-        restricted_fields = self._get_restricted_form_fields()
+        BaseModel = self.env['sale.order.line']
+        restricted_fields = utils._get_restricted_form_fields(BaseModel, self)
         return {
             'name': _("Whitelisting PDF Form Fields"),
             'type': 'ir.actions.act_window',
@@ -116,40 +120,7 @@ class ProductDocument(models.Model):
 
     # === BUSINESS METHODS ===#
 
-    def _get_restricted_form_fields(self):
-        # TODO edm docstring, ensure mimetypde can't be done here because of the onchange where the mimetype has to be manually computed.
-        restricted_fields = set()
-        for doc in self:
-            # Without bin_size=False, size is returned instead of content when saving the file.
-            # But in compute and onchange, setting that context will empty the datas.
-            doc = doc if doc.datas.startswith(b'JVBERi0') else doc.with_context(bin_size=False)
-            reader = pdf.PdfFileReader(io.BytesIO(base64.b64decode(doc.datas)))
-            raw_pdf_fields = reader.getFields() or set()
-            pdf_fields = doc._get_model_and_fields(raw_pdf_fields)
-            whitelisted_fields = self.env['pdf.quote.builder.form.field.whitelist'].search([])
-            # restricted_fields |= {f for f in pdf_fields if f not in whitelisted_fields}
-            # TODO edm: sanitize fields
-        return restricted_fields
 
-    def _get_model_and_fields(self, field_names):
-        model_and_fields = set()
-        for name in field_names:  # TODO edm: deque?
-            chain = name.split('__')
-            # chain = collections.deque(chain)
-            Model = self.env['sale.order']
-            field = ''
-            if chain[0] == 'line':
-                Model = self.env['sale.order.line']
-                del chain[0]
-            for elem in chain:
-                if elem == chain[-1]:
-                    field = elem
-                    field_info = Model.fields_get()[elem]
-                    print(field_info)
-                else:
-                    Model = Model[elem]
-            model_and_fields.add((Model._name, field))
-        print(model_and_fields)
 
 
 
