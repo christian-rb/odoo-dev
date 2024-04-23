@@ -561,6 +561,129 @@ class SaleOrder(models.Model):
                 access_opt['url'] = '%s/shop/cart?access_token=%s' % (self.get_base_url(), self.access_token)
         return groups
 
+<<<<<<< HEAD
+||||||| parent of dcbc22356833 (temp)
+    def action_confirm(self):
+        res = super().action_confirm()
+        for order in self:
+            if not order.transaction_ids and not order.amount_total and self._context.get('send_email'):
+                order._send_order_confirmation_mail()
+        return res
+
+    def _action_confirm(self):
+        for order in self:
+            order_location = order.access_point_address
+
+            if not order_location:
+                continue
+
+            # retrieve all the data :
+            # name, street, city, state, zip, country
+            name = order.partner_shipping_id.name
+            street = order_location['pick_up_point_address']
+            city = order_location['pick_up_point_town']
+            zip_code = order_location['pick_up_point_postal_code']
+            country = order.env['res.country'].search([('code', '=', order_location['pick_up_point_country'])]).id
+            state = order.env['res.country.state'].search(['&', ('code', '=', order_location['pick_up_point_state']), ('country_id.id', '=', country)]).id if (order_location['pick_up_point_state'] and country) else None
+            parent_id = order.partner_shipping_id.id
+            email = order.partner_shipping_id.email
+            phone = order.partner_shipping_id.phone
+
+            # we can check if the current partner has a partner of type "delivery" that has the same address
+            existing_partner = order.env['res.partner'].search(['&', '&', '&', '&',
+                                                                ('street', '=', street),
+                                                                ('city', '=', city),
+                                                                ('state_id', '=', state),
+                                                                ('country_id', '=', country),
+                                                                ('type', '=', 'delivery')], limit=1)
+
+            if existing_partner:
+                order.partner_shipping_id = existing_partner
+            else:
+                # if not, we create that res.partner
+                order.partner_shipping_id = order.env['res.partner'].create({
+                    'parent_id': parent_id,
+                    'type': 'delivery',
+                    'name': name,
+                    'street': street,
+                    'city': city,
+                    'state_id': state,
+                    'zip': zip_code,
+                    'country_id': country,
+                    'email': email,
+                    'phone': phone
+                })
+        return super()._action_confirm()
+
+    def _get_shop_warning(self, clear=True):
+        self.ensure_one()
+        warn = self.shop_warning
+        if clear:
+            self.shop_warning = ''
+        return warn
+
+=======
+    def action_confirm(self):
+        res = super().action_confirm()
+        for order in self:
+            if not order.transaction_ids and not order.amount_total and self._context.get('send_email'):
+                order._send_order_confirmation_mail()
+        return res
+
+    def _action_confirm(self):
+        for order in self:
+            order_location = order.access_point_address
+
+            if not order_location:
+                continue
+
+            # retrieve all the data :
+            # name, street, city, state, zip, country
+            name = order.partner_shipping_id.name
+            street = order_location['pick_up_point_address']
+            city = order_location['pick_up_point_town']
+            zip_code = order_location['pick_up_point_postal_code']
+            country = order.env['res.country'].search([('code', '=', order_location['pick_up_point_country'])]).id
+            state = order.env['res.country.state'].search(['&', ('code', '=', order_location['pick_up_point_state']), ('country_id.id', '=', country)]).id if (order_location['pick_up_point_state'] and country) else None
+            parent_id = order.partner_shipping_id.id
+            email = order.partner_shipping_id.email
+            phone = order.partner_shipping_id.phone
+
+            # we can check if the current partner has a partner of type "delivery" that has the same address
+            existing_partner = order.env['res.partner'].search(['&', '&', '&', '&', '&',
+                                                                ('street', '=', street),
+                                                                ('city', '=', city),
+                                                                ('state_id', '=', state),
+                                                                ('country_id', '=', country),
+                                                                ('parent_id', '=', parent_id),
+                                                                ('type', '=', 'delivery')], limit=1)
+
+            if existing_partner:
+                order.partner_shipping_id = existing_partner
+            else:
+                # if not, we create that res.partner
+                order.partner_shipping_id = order.env['res.partner'].create({
+                    'parent_id': parent_id,
+                    'type': 'delivery',
+                    'name': name,
+                    'street': street,
+                    'city': city,
+                    'state_id': state,
+                    'zip': zip_code,
+                    'country_id': country,
+                    'email': email,
+                    'phone': phone
+                })
+        return super()._action_confirm()
+
+    def _get_shop_warning(self, clear=True):
+        self.ensure_one()
+        warn = self.shop_warning
+        if clear:
+            self.shop_warning = ''
+        return warn
+
+>>>>>>> dcbc22356833 (temp)
     def _is_reorder_allowed(self):
         self.ensure_one()
         return self.state == 'sale' and any(line._is_reorder_allowed() for line in self.order_line if not line.display_type)
