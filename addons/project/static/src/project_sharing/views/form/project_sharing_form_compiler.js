@@ -21,6 +21,8 @@ function compileChatter(node, params) {
         resModel: params.resModel,
         resId: params.resId,
         projectSharingId: params.projectSharingId,
+        isFollower: params.isFollower,
+        displayFollowButton: params.displayFollowButton,
     });
     const chatterContainerHookXml = createElement('div');
     chatterContainerHookXml.classList.add("o-mail-ChatterContainer", 'o-mail-Form-chatter');
@@ -35,6 +37,8 @@ registry.category("form_compilers").add("portal_chatter_compiler", {
             resId: "__comp__.props.record.resId or undefined",
             resModel: "__comp__.props.record.resModel",
             projectSharingId: "__comp__.props.record.context.active_id_chatter",
+            isFollower: "__comp__.props.record.data.message_is_follower",
+            displayFollowButton: "__comp__.props.record.data.display_follow_button",
         }),
 });
 

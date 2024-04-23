@@ -49,6 +49,8 @@ PROJECT_TASK_READABLE_FIELDS = {
     'repeat_until',
     'recurrence_id',
     'recurring_count',
+    'message_is_follower',
+    'display_follow_button',
 }
 
 PROJECT_TASK_WRITABLE_FIELDS = {
@@ -256,6 +258,7 @@ class Task(models.Model):
     # Project sharing fields
     display_parent_task_button = fields.Boolean(compute='_compute_display_parent_task_button', compute_sudo=True)
     current_user_same_company_partner = fields.Boolean(compute='_compute_current_user_same_company_partner', compute_sudo=True)
+    display_follow_button = fields.Boolean(compute='_compute_display_follow_button', compute_sudo=True)
 
     # recurrence fields
     recurring_task = fields.Boolean(string="Recurrent")
@@ -645,6 +648,19 @@ class Task(models.Model):
         commercial_partner_id = self.env.user.partner_id.commercial_partner_id
         for task in self:
             task.current_user_same_company_partner = task.partner_id and commercial_partner_id == task.partner_id.commercial_partner_id
+
+    def _compute_display_follow_button(self):
+        if not self.env.user.share:
+            self.display_follow_button = False
+            return
+        project_collaborator_read_group = self.env['project.collaborator']._read_group(
+            [('project_id', 'in', self.project_id.ids), ('partner_id', '=', self.env.user.partner_id.id)],
+            ['project_id'],
+            ['limited_access:bool_and'],
+        )
+        limited_access_per_project_id = dict(project_collaborator_read_group)
+        for task in self:
+            task.display_follow_button = not limited_access_per_project_id.get(task.project_id, True)
 
     def _get_group_pattern(self):
         return {
@@ -2014,3 +2030,16 @@ class Task(models.Model):
                 for record_id, record_vals in vals_per_record_id:
                     co_model.browse(record_id).project_sharing_write(record_vals)
         return result
+
+    def project_sharing_toggle_is_follower(self) -> bool:
+        self.ensure_one()
+        self.check_access_rights('write')
+        self.check_access_rule('write')
+        is_follower = self.message_is_follower
+        self.sudo().write({
+            'message_partner_ids': [
+                Command.unlink(self.env.user.partner_id.id) if self.message_is_follower
+                else Command.link(self.env.user.partner_id.id)
+            ]
+        })
+        return not is_follower
