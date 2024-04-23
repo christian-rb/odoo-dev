@@ -11,3 +11,4 @@ class ResConfigSettings(models.TransientModel):
     module_l10n_in_edi = fields.Boolean('Indian Electronic Invoicing')
     module_l10n_in_edi_ewaybill = fields.Boolean('Indian Electronic Waybill')
     l10n_in_hsn_code_digit = fields.Selection(related='company_id.l10n_in_hsn_code_digit', readonly=False)
+    l10n_in_gstin_status_api_service = fields.Boolean(config_parameter="l10n_in.gstin_status_api_service")

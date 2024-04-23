@@ -35,6 +35,11 @@
                        groups="l10n_in.group_l10n_in_reseller"
                        invisible="move_type not in ('out_invoice', 'out_refund') or country_code != 'IN' or move_type == 'entry'"
                        readonly="state != 'draft'"/>
+                <field name="l10n_in_partner_gstin_status"
+                       readonly="1"
+                       invisible="not partner_id or country_code != 'IN' or move_type not in ['in_invoice', 'in_refund'] or not l10n_in_gstin_status_api_service"
+                       decoration-success="l10n_in_partner_gstin_status == 'Active'"
+                       decoration-danger="l10n_in_partner_gstin_status != 'Active'"/>
             </xpath>
             <xpath expr="//field[@name='invoice_line_ids']/tree//field[@name='product_id']" position="after">
                 <field name="l10n_in_hsn_code" optional="hide" column_invisible="parent.country_code != 'IN'"/>

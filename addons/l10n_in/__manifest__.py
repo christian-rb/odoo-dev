@@ -24,6 +24,7 @@ Sheet, now only Vertical format has been permitted Which is Supported By Odoo.
         'account_debit_note',
         'account',
         'account_audit_trail',
+        'iap',
     ],
     'auto_install': ['account'],
     'data': [
@@ -49,6 +50,7 @@ Sheet, now only Vertical format has been permitted Which is Supported By Odoo.
         'views/res_partner_views.xml',
         'views/account_tax_views.xml',
         'views/uom_uom_views.xml',
+        'views/res_partner_base_vat_views.xml',
     ],
     'demo': [
         'demo/product_demo.xml',

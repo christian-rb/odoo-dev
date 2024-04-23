@@ -23,6 +23,8 @@ class AccountMove(models.Model):
         ], string="GST Treatment", compute="_compute_l10n_in_gst_treatment", store=True, readonly=False, copy=True)
     l10n_in_state_id = fields.Many2one('res.country.state', string="Place of supply", compute="_compute_l10n_in_state_id", store=True, readonly=False)
     l10n_in_gstin = fields.Char(string="GSTIN")
+    l10n_in_partner_gstin_status = fields.Char(string='GSTIN Status', compute='_compute_l10n_in_partner_gstin_status')
+    l10n_in_gstin_status_api_service = fields.Boolean(compute='_compute_l10n_in_gstin_status_api_service')
     # For Export invoice this data is need in GSTR report
     l10n_in_shipping_bill_number = fields.Char('Shipping bill number')
     l10n_in_shipping_bill_date = fields.Date('Shipping bill date')
@@ -60,6 +62,19 @@ class AccountMove(models.Model):
                 move.l10n_in_state_id = move.company_id.state_id
             else:
                 move.l10n_in_state_id = False
+
+    @api.depends('partner_id')
+    def _compute_l10n_in_partner_gstin_status(self):
+        for move in self:
+            if move.partner_id.l10n_in_gstin_verified_status:
+                move.l10n_in_partner_gstin_status = move.partner_id.l10n_in_gstin_verified_status
+            else:
+                move.l10n_in_partner_gstin_status = 'Not Checked'
+
+    @api.depends('partner_id')
+    def _compute_l10n_in_gstin_status_api_service(self):
+        gstin_api_status = self.env['ir.config_parameter'].sudo().get_param('l10n_in.gstin_status_api_service', default=False)
+        self.l10n_in_gstin_status_api_service = gstin_api_status
 
     @api.onchange('name')
     def _onchange_name_warning(self):
