@@ -10,7 +10,8 @@
                 <setting id="address_newsletter"
                          string="Newsletter"
                          help="Show guest users checkbox to sign up for the selected newsletter"
-                         groups="mass_mailing.group_mass_mailing_user">
+                         groups="mass_mailing.group_mass_mailing_user"
+                >
                     <field name="is_newsletter_enabled"/>
                     <div class="content-group" invisible="not is_newsletter_enabled">
                         <div class="mt16">

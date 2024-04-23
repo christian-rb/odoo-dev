@@ -7,7 +7,7 @@ class ResConfigSettings(models.TransientModel):
     _inherit = 'res.config.settings'
 
     is_newsletter_enabled = fields.Boolean(string="Newsletter Button")
-    newsletter_id = fields.Many2one(related="website_id.newsletter_id", readonly=False)
+    newsletter_id = fields.Many2one(related='website_id.newsletter_id', readonly=False)
 
     # === CRUD METHODS ===#
 

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+
     <template
         id="website_sale_mass_mailing.newsletter"
         inherit_id="website_sale.address"
@@ -20,4 +21,5 @@
             </div>
         </xpath>
     </template>
+
 </odoo>
