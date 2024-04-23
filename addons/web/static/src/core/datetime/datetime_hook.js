@@ -3,7 +3,9 @@ import { usePopover } from "@web/core/popover/popover_hook";
 import { useService } from "@web/core/utils/hooks";
 
 /**
- * @param {import("./datetimepicker_service").DateTimePickerHookParams} hookParams
+ * @param {import("./datetimepicker_service").DateTimePickerHookParams & {
+ *  asDialogWhenSmall?: boolean
+ * }} hookParams
  */
 export function useDateTimePicker(hookParams) {
     const datetimePicker = useService("datetime_picker");
@@ -16,10 +18,12 @@ export function useDateTimePicker(hookParams) {
         });
     }
     const inputRefs = [useRef("start-date"), useRef("end-date")];
+    const asDialogWhenSmall = hookParams.asDialogWhenSmall ?? false;
+    delete hookParams.asDialogWhenSmall;
     const { computeBasePickerProps, state, open, focusIfNeeded, enable } = datetimePicker.create(
         hookParams,
         () => inputRefs.map((ref) => ref?.el),
-        usePopover
+        (component, options) => usePopover(component, { ...options, responsive: asDialogWhenSmall })
     );
     onWillRender(computeBasePickerProps);
     useEffect(enable);
