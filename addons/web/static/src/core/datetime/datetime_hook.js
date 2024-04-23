@@ -1,5 +1,5 @@
 import { onPatched, onWillRender, useEffect, useRef } from "@odoo/owl";
-import { usePopover } from "@web/core/popover/popover_hook";
+import { useResponsivePopover } from "@web/core/popover/popover_hook";
 import { useService } from "@web/core/utils/hooks";
 
 /**
@@ -19,7 +19,7 @@ export function useDateTimePicker(hookParams) {
     const { computeBasePickerProps, state, open, focusIfNeeded, enable } = datetimePicker.create(
         hookParams,
         () => inputRefs.map((ref) => ref?.el),
-        usePopover
+        useResponsivePopover
     );
     onWillRender(computeBasePickerProps);
     useEffect(enable);
