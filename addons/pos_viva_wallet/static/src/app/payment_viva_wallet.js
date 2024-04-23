@@ -44,11 +44,13 @@ export class PaymentVivaWallet extends PaymentInterface {
         if (line) {
             line.set_payment_status("retry");
         }
-        this._show_error(
-            _t(
-                "Could not connect to the Odoo server, please check your internet connection and try again."
-            )
-        );
+        if (this.payment_method.viva_wallet_bearer_token !== "Bearer Token"){
+            this._show_error(
+                _t(
+                    "Could not connect to the Odoo server, please check your internet connection and try again."
+                )
+            );
+        }
 
         return Promise.reject(data); // prevent subsequent onFullFilled's from being called
     }
@@ -88,7 +90,7 @@ export class PaymentVivaWallet extends PaymentInterface {
             "cashRegisterId": this.pos.get_cashier().name,
             "amount": line.amount * 100,
             "currencyCode": 978, // Viva wallet only uses EUR 978 need add a new field numeric_code in res.currency
-            "merchantReference": line.sessionId + '/' + this.pos.pos_session.id,
+            "merchantReference": line.sessionId + '/' + this.pos.session.id,
             "customerTrns": customerTrns,
             "preauth": false,
             "maxInstalments": 0,
