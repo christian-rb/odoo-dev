@@ -4,7 +4,7 @@ from lxml import etree
 
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
-from odoo.tools import float_compare, frozendict
+from odoo.tools.float_utils import float_is_zero
 
 
 class AccountPaymentRegister(models.TransientModel):
@@ -21,6 +21,7 @@ class AccountPaymentRegister(models.TransientModel):
     group_payment = fields.Boolean(string="Group Payments", store=True, readonly=False,
         compute='_compute_group_payment',
         help="Only one payment will be created by partner (bank)/ currency.")
+    old_currency_id = fields.Many2one('res.currency', string='Old Currency', store=False)
     currency_id = fields.Many2one('res.currency', string='Currency', store=True, readonly=False,
         compute='_compute_currency_id',
         help="The payment's currency.")
@@ -318,6 +319,7 @@ class AccountPaymentRegister(models.TransientModel):
     def _compute_currency_id(self):
         for wizard in self:
             wizard.currency_id = wizard.journal_id.currency_id or wizard.source_currency_id or wizard.company_id.currency_id
+            wizard.old_currency_id = wizard.currency_id
 
     @api.depends('can_edit_wizard', 'company_id')
     def _compute_journal_id(self):
@@ -388,11 +390,11 @@ class AccountPaymentRegister(models.TransientModel):
     @api.depends('source_amount', 'source_amount_currency', 'source_currency_id', 'company_id', 'currency_id', 'payment_date')
     def _compute_amount(self):
         for wizard in self:
-            if wizard.source_currency_id == wizard.currency_id:
-                # Same currency.
-                wizard.amount = wizard.source_amount_currency
-            else:
+            if wizard.old_currency_id != wizard.currency_id:
                 wizard.amount = wizard.source_currency_id._convert(wizard.source_amount_currency, wizard.currency_id, wizard.company_id, wizard.payment_date or fields.Date.today())
+                wizard.old_currency_id = wizard.currency_id
+            elif float_is_zero(wizard.amount, precision_rounding=2):
+                wizard.amount = wizard.source_amount_currency
 
     @api.depends('amount')
     def _compute_payment_difference(self):

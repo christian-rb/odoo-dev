@@ -26,6 +26,7 @@
                     <field name="available_payment_method_line_ids" invisible="1"/>
                     <field name="available_partner_bank_ids" invisible="1"/>
                     <field name="company_currency_id" invisible="1"/>
+                    <field name="old_currency_id" invisible="1"/>
 
                     <group>
                         <group name="group1">
