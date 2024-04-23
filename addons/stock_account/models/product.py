@@ -252,7 +252,11 @@ class ProductProduct(models.Model):
             svl_vals = {
                 'company_id': company_id.id,
                 'product_id': product.id,
-                'description': _('Product value manually modified (from %s to %s)', product.standard_price, rounded_new_price),
+                'description': _(
+                    'Product value manually modified (from %(original_price)s to %(new_price)s)',
+                    original_price=product.standard_price,
+                    new_price=rounded_new_price,
+                ),
                 'value': value,
                 'quantity': 0,
             }
@@ -739,9 +743,7 @@ class ProductCategory(models.Model):
         help="""Standard Price: The products are valued at their standard cost defined on the product.
         Average Cost (AVCO): The products are valued at weighted average cost.
         First In First Out (FIFO): The products are valued supposing those that enter the company first will also leave it first.
-        """,
-        tracking=True,
-    )
+        """)
     property_stock_journal = fields.Many2one(
         'account.journal', 'Stock Journal', company_dependent=True,
         help="When doing automated inventory valuation, this is the Accounting Journal in which entries will be automatically posted when stock moves are processed.")

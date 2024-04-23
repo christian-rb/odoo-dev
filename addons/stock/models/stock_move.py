@@ -581,7 +581,12 @@ Please change the quantity done or the rounding precision of your unit of measur
             user_warnings = [
                 _('You cannot perform the move because the unit of measure has a different category as the product unit of measure.'),
                 *(
-                    _('%s --> Product UoM is %s (%s) - Move UoM is %s (%s)', move.product_id.display_name, move.product_id.uom_id.name, move.product_id.uom_id.category_id.name, move.product_uom.name, move.product_uom.category_id.name)
+                    _('%(product_name)s --> Product UoM is %(product_uom)s (%(product_uom_category)s) - Move UoM is %(move_uom)s (%(move_uom_category)s)',
+                      product_name=move.product_id.display_name,
+                      product_uom=move.product_id.uom_id.name,
+                      product_uom_category=move.product_id.uom_id.category_id.name,
+                      move_uom=move.product_uom.name,
+                      move_uom_category=move.product_uom.category_id.name)
                     for move in moves_error
                 ),
                 _('Blocking: %s', ' ,'.join(moves_error.mapped('name')))
@@ -1205,7 +1210,7 @@ Please change the quantity done or the rounding precision of your unit of measur
         if quants:
             sn_to_location = ""
             for quant in quants:
-                sn_to_location += _("\n(%s) exists in location %s", quant.lot_id.display_name, quant.location_id.display_name)
+                sn_to_location += _("\n(%(lot)s) exists in location %(location)s", lot=quant.lot_id.display_name, location=quant.location_id.display_name)
             return {
                 'warning': {'title': _('Warning'), 'message': _('Unavailable Serial numbers. Please correct the serial numbers encoded:') + sn_to_location}
             }

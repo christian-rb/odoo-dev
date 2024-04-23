@@ -5,7 +5,7 @@ from collections import Counter, defaultdict
 
 from odoo import _, api, fields, tools, models, Command
 from odoo.exceptions import UserError, ValidationError
-from odoo.tools import OrderedSet, groupby
+from odoo.tools import OrderedSet, format_list, groupby
 from odoo.tools.float_utils import float_compare, float_is_zero, float_round
 
 
@@ -202,7 +202,11 @@ class StockMoveLine(models.Model):
                                                              '|', ('company_id', '=', False), ('company_id', '=', self.company_id.id)])
                         quants = lots.quant_ids.filtered(lambda q: q.quantity != 0 and q.location_id.usage in ['customer', 'internal', 'transit'])
                         if quants:
-                            message = _('Serial number (%s) already exists in location(s): %s. Please correct the serial number encoded.', self.lot_name, ', '.join(quants.location_id.mapped('display_name')))
+                            message = _(
+                                'Serial number (%(lot)s) already exists in location(s): %(location_list)s. Please correct the serial number encoded.',
+                                lot=self.lot_name,
+                                location_list=format_list(self.env, quants.location_id.mapped('display_name'))
+                            )
                 elif self.lot_id:
                     counter = Counter([line.lot_id.id for line in move_lines_to_check])
                     if counter.get(self.lot_id.id) and counter[self.lot_id.id] > 1:

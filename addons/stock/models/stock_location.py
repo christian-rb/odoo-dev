@@ -514,4 +514,9 @@ class StockRoute(models.Model):
 
             for rule in route.rule_ids:
                 if route.company_id.id != rule.company_id.id:
-                    raise ValidationError(_("Rule %s belongs to %s while the route belongs to %s.", rule.display_name, rule.company_id.display_name, route.company_id.display_name))
+                    raise ValidationError(_(
+                        "Rule %(rule)s belongs to %(rule_company)s while the route belongs to %(route_company)s.",
+                        rule=rule.display_name,
+                        rule_company=rule.company_id.display_name,
+                        route_company=route.company_id.display_name,
+                    ))

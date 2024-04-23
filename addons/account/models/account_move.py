@@ -3537,7 +3537,11 @@ class AccountMove(models.Model):
                 except RedirectWarning:
                     raise
                 except Exception:
-                    message = _("Error importing attachment '%s' as invoice (decoder=%s)", file_data['filename'], decoder.__name__)
+                    message = _(
+                        "Error importing attachment '%(file_name)s' as invoice (decoder=%(decoder)s)",
+                        file_name=file_data['filename'],
+                        decoder=decoder.__name__,
+                    )
                     invoice.sudo().message_post(body=message)
                     _logger.exception(message)
 
@@ -4201,7 +4205,7 @@ class AccountMove(models.Model):
 
         for move in self:
             if move.state in ['posted', 'cancel']:
-                validation_msgs.add(_('The entry %s (id %s) must be in draft.', move.name, move.id))
+                validation_msgs.add(_('The entry %(name)s (id %(id)s) must be in draft.', name=move.name, id=move.id))
             if not move.line_ids.filtered(lambda line: line.display_type not in ('line_section', 'line_note')):
                 validation_msgs.add(_('You need to add a line before posting.'))
             if not soft and move.auto_post != 'no' and move.date > fields.Date.context_today(self):

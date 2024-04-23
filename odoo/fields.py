@@ -1242,7 +1242,7 @@ class Field(MetaField('DummyField', (object,), {})):
             if not env.cache.contains(record, self):
                 raise MissingError("\n".join([
                     _("Record does not exist or has been deleted."),
-                    _("(Record: %s, User: %s)", record, env.uid),
+                    _("(Record: %(record)s, User: %(user)s)", record=record, user=env.uid),
                 ])) from None
             value = env.cache.get(record, self)
 

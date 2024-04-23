@@ -984,7 +984,7 @@ class IrModelFields(models.Model):
                     ('model', '=', vals['relation']),
                     ('name', '=', vals['relation_field']),
                 ]):
-                    raise UserError(_("Many2one %s on model %s does not exist!", vals['relation_field'], vals['relation']))
+                    raise UserError(_("Many2one %(field)s on model %(model)s does not exist!", field=vals['relation_field'], model=vals['relation']))
 
         if any(model in self.pool for model in models):
             # setup models; this re-initializes model in registry

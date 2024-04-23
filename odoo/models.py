@@ -7177,7 +7177,7 @@ def convert_pgerror_not_null(model, fields, info, e):
 
     field_name = e.diag.column_name
     field = fields[field_name]
-    message = _(u"Missing required value for the field '%s' (%s)", field['string'], field_name)
+    message = _("Missing required value for the field '%(name)s' (%(technical_name)s)", name=field['string'], technical_name=field_name)
     return {
         'message': message,
         'field': field_name,

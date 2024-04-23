@@ -230,9 +230,9 @@ class PosOrder(models.Model):
             invoice_lines.append((0, None, invoice_lines_values))
             if line.order_id.pricelist_id.discount_policy == 'without_discount' and float_compare(line.price_unit, line.product_id.lst_price, precision_rounding=self.currency_id.rounding) < 0:
                 invoice_lines.append((0, None, {
-                    'name': _('Price discount from %s -> %s',
-                              float_repr(line.product_id.lst_price, self.currency_id.decimal_places),
-                              float_repr(line.price_unit, self.currency_id.decimal_places)),
+                    'name': _('Price discount from %(original_price)s -> %(discounted_price)s',
+                              original_price=float_repr(line.product_id.lst_price, self.currency_id.decimal_places),
+                              discounted_price=float_repr(line.price_unit, self.currency_id.decimal_places)),
                     'display_type': 'line_note',
                 }))
             if line.customer_note:

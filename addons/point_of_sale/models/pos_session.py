@@ -839,7 +839,7 @@ class PosSession(models.Model):
         diff_move._post()
 
     def _get_diff_account_move_ref(self, payment_method):
-        return _('Closing difference in %s (%s)', payment_method.name, self.name)
+        return _('Closing difference in %(payment_method)s (%(session)s)', payment_method=payment_method.name, session=self.name)
 
     def _get_diff_vals(self, payment_method_id, diff_amount):
         payment_method = self.env['pos.payment.method'].browse(payment_method_id)
@@ -1297,7 +1297,7 @@ class PosSession(models.Model):
             'journal_id': payment_method.journal_id.id,
             'force_outstanding_account_id': outstanding_account.id,
             'destination_account_id':  destination_account.id,
-            'ref': _('Combine %s POS payments from %s', payment_method.name, self.name),
+            'ref': _('Combine %(payment_method)s POS payments from %(session)s', payment_method=payment_method.name, session=self.name),
             'pos_payment_method_id': payment_method.id,
             'pos_session_id': self.id,
             'company_id': self.company_id.id,

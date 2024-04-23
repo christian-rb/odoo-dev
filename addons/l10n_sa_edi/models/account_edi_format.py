@@ -5,6 +5,7 @@ from lxml import etree
 from datetime import datetime
 from odoo import models, fields, _, api
 from odoo.exceptions import UserError
+from odoo.tools import format_list
 from cryptography.hazmat.primitives.serialization import load_pem_private_key
 from cryptography.hazmat.primitives.asymmetric.ec import ECDSA
 from cryptography.hazmat.primitives import hashes
@@ -399,7 +400,11 @@ class AccountEdiFormat(models.Model):
         """
 
         def _set_missing_partner_fields(missing_fields, name):
-            return _("- Please, set the following fields on the %s: %s", name, ', '.join(missing_fields))
+            return _(
+                "- Please, set the following fields on the %(name)s: %(missing_fields)s",
+                name=name,
+                missing_fields=format_list(self.env, missing_fields),
+            )
 
         journal = invoice.journal_id
         company = invoice.company_id

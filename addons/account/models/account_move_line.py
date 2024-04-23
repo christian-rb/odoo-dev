@@ -503,7 +503,7 @@ class AccountMoveLine(models.Model):
                 name = line.move_id.payment_reference or ''
                 if n_terms > 1:
                     index = term_lines._ids.index(line.id) if line in term_lines else len(term_lines)
-                    name = _('%s installment #%s', name, index+1).lstrip()
+                    name = _('%(name)s installment #%(number)s', name=name, number=index + 1).lstrip()
                 line.name = name
             if not line.product_id or line.display_type in ('line_section', 'line_note'):
                 continue
@@ -1254,7 +1254,7 @@ class AccountMoveLine(models.Model):
             journal = line.move_id.journal_id
 
             if account.deprecated and not self.env.context.get('skip_account_deprecation_check'):
-                raise UserError(_('The account %s (%s) is deprecated.', account.name, account.code))
+                raise UserError(_('The account %(name)s (%(code)s) is deprecated.', name=account.name, code=account.code))
 
             account_currency = account.currency_id
             if account_currency and account_currency != line.company_currency_id and account_currency != line.currency_id:
