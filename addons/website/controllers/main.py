@@ -733,6 +733,9 @@ class Website(Home):
         values = {}
         if 'website_published' in Model._fields:
             values['website_published'] = not record.website_published
+            # Unschedule a possible scheduled publication
+            if record.publish_at:
+                values["publish_at"] = False
             record.write(values)
             return bool(record.website_published)
         return False

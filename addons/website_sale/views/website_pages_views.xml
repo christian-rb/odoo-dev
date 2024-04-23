@@ -31,13 +31,36 @@
             </field>
             <xpath expr="//tree">
                 <field name="is_seo_optimized"/>
-                <field name="is_published"/>
-
+                <field name="scheduled" column_invisible="1"/>
+                <field name="website_published" invisible="scheduled and website_published"/>
+                <field name="publish_at" string="Scheduled" invisible="not scheduled"/>
                 <field name="website_id" position="move"/>
             </xpath>
         </field>
     </record>
-
+    <record id="product_pages_form_view" model="ir.ui.view">
+        <field name="name">Product pages form view</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_only_form_view"/>
+        <field name="arch" type="xml">
+            <notebook position="inside">
+                <page name="publishing" string="Publish">
+                    <group>
+                        <field name="scheduled" invisible="1"/>
+                        <field string="Published" name="website_published" widget="boolean_toggle" readonly="scheduled"></field>
+                        <label invisible="website_published" for="publish_at" string="Publish at"/>
+                        <div invisible="website_published" name="publish_at_div" class="o_row">
+                            <field name="publish_at" widget="datetime" options="{'min_date': datetime.datetime.now().to_utc().strftime('%Y-%m-%d %H:%M:%S')}"/>
+                            <button name="action_unschedule" type="object" invisible="not publish_at">Unschedule</button>
+                        </div>
+                    </group>
+                    <div class="alert alert-info w-100" invisible="not scheduled" role="alert">
+                        <small>This product will automatically go live on the specified date</small>
+                    </div>
+                </page>
+            </notebook>
+        </field>
+    </record>
     <record id="product_pages_kanban_view" model="ir.ui.view">
         <field name="name">Product Pages Kanban</field>
         <field name="model">product.template</field>
@@ -52,6 +75,7 @@
             </kanban>
             <kanban position="inside">
                 <field name="website_url"/>
+                <field name="scheduled"/>
             </kanban>
             <field name="name" position="after">
                 <div class="text-muted" t-if="record.website_id.value" groups="website.group_multi_website">
@@ -63,9 +87,10 @@
             <xpath expr="//div[hasclass('oe_kanban_details')]" position="inside">
                 <div class="o_kanban_footer">
                     <div class="position-absolute bottom-0 end-0 m-1">
-                        <t t-if="record.is_published.raw_value">Published </t>
-                        <t t-else="">Not Published </t>
-                        <field name="is_published" widget="boolean_toggle"/>
+                        <t t-if="record.scheduled.raw_value">Scheduled</t>
+                        <t t-elif="record.website_published.raw_value">Published</t>
+                        <t t-else="">Not Published</t>
+                        <field class="ms-2" name="website_published" widget="boolean_toggle"/>
                     </div>
                 </div>
             </xpath>

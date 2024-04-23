@@ -53,6 +53,7 @@ class Event(models.Model):
         help="""Defines the Visibility of the Event on the Website and searches.\n
             Note that the Event is however always available via its link.""")
     website_published = fields.Boolean(tracking=True)
+    scheduled = fields.Boolean(tracking=True)
     website_menu = fields.Boolean(
         string='Website Menu',
         compute='_compute_website_menu', precompute=True, readonly=False, store=True,
@@ -501,6 +502,10 @@ class Event(models.Model):
 
     def _track_subtype(self, init_values):
         self.ensure_one()
+        if init_values.keys() & {'scheduled'}:
+            if self.scheduled:
+                return self.env.ref('website_event.mt_event_scheduled', raise_if_not_found=False)
+            return self.env.ref('website_event.mt_event_unscheduled', raise_if_not_found=False)
         if init_values.keys() & {'is_published', 'website_published'}:
             if self.is_published:
                 return self.env.ref('website_event.mt_event_published', raise_if_not_found=False)

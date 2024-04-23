@@ -31,7 +31,7 @@
             </xpath>
             <div name="button_box" position="inside">
                 <field name="website_url" invisible="1"/>
-                <field name="is_published" widget="website_redirect_button"/>
+                <field name="website_published" widget="website_redirect_button"/>
             </div>
             <xpath expr="//div[hasclass('oe_title')]" position="after">
                 <div name="event_menu_configuration" groups="base.group_no_one">
@@ -45,6 +45,22 @@
                     <field name="community_menu" invisible="1"/>
                 </div>
             </xpath>
+            <page name="event_notes" position="after">
+                <page name="publishing" string="Publish">
+                    <group>
+                        <field name="scheduled" invisible="1"/>
+                        <field string="Published" name="website_published" widget="boolean_toggle" readonly="scheduled"></field>
+                        <label invisible="website_published" for="publish_at" string="Publish at"/>
+                        <div invisible="website_published" name="publish_at_div" class="o_row">
+                            <field name="publish_at" widget="datetime" options="{'min_date': datetime.datetime.now().to_utc().strftime('%Y-%m-%d %H:%M:%S')}"/>
+                            <button name="action_unschedule" type="object" invisible="not publish_at">Unschedule</button>
+                        </div>
+                    </group>
+                    <div class="alert alert-info w-100" invisible="not scheduled" role="alert">
+                        <small>This event page will automatically go live on the specified date</small>
+                    </div>
+                </page>
+            </page>
             <page name="event_notes" position="before">
                 <page string="Questions" name="questions">
                     <field name="question_ids" string="Question" nolabel="1">
