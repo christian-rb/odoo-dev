@@ -151,9 +151,10 @@ publicWidget.registry.SurveySessionChart = publicWidget.Widget.extend({
                     },
                     x: {
                         ticks: {
-                            maxRotation: 0,
+                            minRotation: 20,
+                            maxRotation: 90,
                             font: {
-                                size :"35",
+                                size :"30",
                                 weight:"bold"
                             },
                             color : '#212529'
