@@ -2,24 +2,24 @@
 <templates xml:space="preserve">
     <t t-name="mail.ChatBubble">
         <Dropdown state="preview" position="'left-middle'" menuClass="'bg-view border-0 p-0 m-0 overflow-visible rounded-3'" manual="true" arrow="true">
-            <button class="position-relative o-mail-ChatBubble" t-att-name="props.bubble.thread.displayName" t-on-click="() => this.props.bubble.thread.openChatWindow()" t-ref="root">
-                <div t-if="props.bubble.thread.importantCounter > 0" class="o-mail-ChatBubble-counter position-absolute badge rounded-pill fw-bold o-discuss-badge">
-                    <t t-out="props.bubble.thread.importantCounter"/>
+            <button class="position-relative o-mail-ChatBubble" t-att-name="thread.displayName" t-on-click="() => this.thread.openChatWindow()" t-ref="root">
+                <div t-if="thread.importantCounter > 0" class="o-mail-ChatBubble-counter position-absolute badge rounded-pill fw-bold o-discuss-badge">
+                    <t t-out="thread.importantCounter"/>
                 </div>
-                <button class="o-mail-ChatBubble-close position-absolute border-0 shadow rounded-pill fw-bold fa fa-close bg-view" t-on-click.stop="() => this.props.bubble.close()"/>
-                <ImStatus t-if="props.bubble.thread.correspondent and props.bubble.thread.correspondent.im_status != 'offline'" className="'o-mail-ChatBubble-status position-absolute'" persona="props.bubble.thread.correspondent" thread="props.bubble.thread"/>
+                <button class="o-mail-ChatBubble-close position-absolute border-0 shadow rounded-pill fw-bold fa fa-close bg-view" t-on-click.stop="() => this.props.chatWindow.close()"/>
+                <ImStatus t-if="thread.correspondent and thread.correspondent.im_status != 'offline'" className="'o-mail-ChatBubble-status position-absolute'" persona="thread.correspondent" thread="thread"/>
                 <button class="btn o-mail-ChatBubbleContainer-btn">
-                    <img class="o-mail-ChatBubble-avatar rounded-circle shadow" t-att-src="props.bubble.thread.avatarUrl" alt="Thread image"/>
+                    <img class="o-mail-ChatBubble-avatar rounded-circle shadow" t-att-src="thread.avatarUrl" alt="Thread image"/>
                 </button>
             </button>
             <t t-set-slot="content">
                 <div class="o-mail-ChatBubblePreview px-0 py-1" t-ref="preview">
-                    <div class="text-truncate fw-bold mb-0 mx-2" t-esc="props.bubble.thread.displayName"/>
+                    <div class="text-truncate fw-bold mb-0 mx-2" t-esc="thread.displayName"/>
                     <div t-if="previewContent" class="text-truncate small mx-2 text-muted">
                         <t t-call="mail.message_preview_prefix">
-                            <t t-set="message" t-value="props.bubble.thread.newestPersistentNotEmptyOfAllMessage"/>
+                            <t t-set="message" t-value="thread.newestPersistentNotEmptyOfAllMessage"/>
                         </t>
-                        <t t-esc="props.bubble.thread.newestPersistentNotEmptyOfAllMessage.inlineBody"/>
+                        <t t-esc="thread.newestPersistentNotEmptyOfAllMessage.inlineBody"/>
                     </div>
                 </div>
             </t>

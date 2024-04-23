@@ -9,11 +9,11 @@ registry.category("web_tour.tours").add("website_livechat_chatbot_test_page_tour
         {
             trigger: messagesContain("Hello! I'm a bot!"),
             async run() {
-                const chatWindowContainer = this.anchor.closest(".o-mail-ChatWindowContainer");
+                const ChatHub = this.anchor.closest(".o-mail-ChatHub");
                 await contains(".o-mail-ChatWindow", {
                     text: "Testing Bot",
                     count: 1,
-                    target: chatWindowContainer,
+                    target: ChatHub,
                 });
             },
         },
@@ -36,11 +36,11 @@ registry.category("web_tour.tours").add("website_livechat_chatbot_test_page_tour
         {
             trigger: messagesContain("Hello! I'm a bot!"),
             async run() {
-                const chatWindowContainer = this.anchor.closest(".o-mail-ChatWindowContainer");
+                const ChatHub = this.anchor.closest(".o-mail-ChatHub");
                 await contains(".o-mail-ChatWindow", {
                     text: "Testing Bot",
                     count: 1,
-                    target: chatWindowContainer,
+                    target: ChatHub,
                 });
             },
         },

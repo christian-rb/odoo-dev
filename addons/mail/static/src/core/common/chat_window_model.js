@@ -28,32 +28,32 @@ export class ChatWindow extends Record {
      * @returns {import("models").ChatWindow}
      */
     static _insert(data = {}) {
-        const chatWindow = this.store.discuss.chatWindows.find((c) => c.thread?.eq(data.thread));
+        const chatWindow = this.store.chatHub.windows.find((w) => w.thread?.eq(data.thread));
         if (!chatWindow) {
             /** @type {import("models").ChatWindow} */
             const chatWindow = this.preinsert(data);
             assignDefined(chatWindow, data);
             let index;
-            const visible = this.store.visibleChatWindows;
+            const visible = this.store.chatHub.visible;
             const maxVisible = this.store.maxVisibleChatWindows;
             if (!data.replaceNewMessageChatWindow) {
-                if (maxVisible <= this.store.discuss.chatWindows.length) {
+                if (maxVisible <= this.store.chatHub.windows.length) {
                     const swaped = visible[visible.length - 1];
                     index = visible.length - 1;
                     swaped.toggleFold();
                 } else {
-                    index = this.store.discuss.chatWindows.length;
+                    index = this.store.chatHub.windows.length;
                 }
             } else {
-                const newMessageChatWindowIndex = this.store.discuss.chatWindows.findIndex(
-                    (cw) => !cw.thread
+                const newMessageChatWindowIndex = this.store.chatHub.windows.findIndex(
+                    (w) => !w.thread
                 );
                 index =
                     newMessageChatWindowIndex !== -1
                         ? newMessageChatWindowIndex
-                        : this.store.discuss.chatWindows.length;
+                        : this.store.chatHub.windows.length;
             }
-            this.store.discuss.chatWindows.splice(
+            this.store.chatHub.windows.splice(
                 index,
                 data.replaceNewMessageChatWindow ? 1 : 0,
                 chatWindow
@@ -83,24 +83,21 @@ export class ChatWindow extends Record {
 
     async close(options = {}) {
         const { escape = false } = options;
-        if (
-            !this.hidden &&
-            this.store.maxVisibleChatWindows < this.store.discuss.chatWindows.length
-        ) {
+        if (!this.hidden && this.store.maxVisibleChatWindows < this.store.chatHub.windows.length) {
             const swaped = this.store.hiddenChatWindows[0];
             swaped.hidden = false;
             swaped.folded = false;
         }
-        const index = this.store.discuss.chatWindows.findIndex((c) => c.eq(this));
+        const index = this.store.chatHub.windows.findIndex((w) => w.eq(this));
         if (index > -1) {
-            this.store.discuss.chatWindows.splice(index, 1);
+            this.store.chatHub.windows.splice(index, 1);
         }
         const thread = this.thread;
         if (thread) {
             thread.state = "closed";
         }
-        if (escape && this.store.discuss.chatWindows.length > 0) {
-            this.store.discuss.chatWindows.at(index - 1).focus();
+        if (escape && this.store.chatHub.windows.length > 0) {
+            this.store.chatHub.windows.at(index - 1).focus();
         }
         await this._onClose(options);
         this.delete();
@@ -115,7 +112,7 @@ export class ChatWindow extends Record {
     }
 
     makeVisible() {
-        const swaped = this.store.visibleChatWindows.at(-1);
+        const swaped = this.store.chatHub.visible.at(-1);
         swaped.hide();
         this.show({ notifyState: false });
     }

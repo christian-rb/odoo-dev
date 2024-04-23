@@ -54,7 +54,7 @@ test("livechat not available", async () => {
     onRpc("/im_livechat/init", () => ({ available_for_me: false }));
     await start({ authenticateAs: false });
     await mountWithCleanup(LivechatButton);
-    await contains(".o-mail-ChatWindowContainer");
+    await contains(".o-mail-ChatHub");
     await contains(".o-livechat-LivechatButton", { count: 0 });
 });
 

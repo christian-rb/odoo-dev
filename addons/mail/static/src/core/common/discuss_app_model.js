@@ -42,7 +42,6 @@ export class DiscussApp extends Record {
 
     /** @type {'main'|'channel'|'chat'|'livechat'} */
     activeTab = "main";
-    chatWindows = Record.many("ChatWindow");
     chatBubbles = Record.many("ChatBubble");
     isActive = false;
     allCategories = Record.many("DiscussAppCategory", {

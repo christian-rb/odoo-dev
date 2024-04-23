@@ -598,7 +598,7 @@ test("chat window should not open when receiving a new DM from odoobot", async (
     });
     const env = await start();
     rpc = rpcWithEnv(env);
-    await contains(".o-mail-ChatWindowContainer");
+    await contains(".o-mail-ChatHub");
     withUser(userId, () =>
         rpc("/mail/message/post", {
             post_data: { body: "Hello, I'm new", message_type: "comment" },
@@ -910,7 +910,7 @@ test("Server-synced chat windows should not open at page load on mobile", async 
     });
     patchUiSize({ size: SIZES.SM });
     await start();
-    await contains(".o-mail-ChatWindowContainer");
+    await contains(".o-mail-ChatHub");
     await contains(".o-mail-ChatWindow", { count: 0 });
 });
 

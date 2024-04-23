@@ -121,7 +121,7 @@ export class LivechatService {
         const temporaryThread = this.thread;
         await this._createThread({ persist: true });
         if (temporaryThread) {
-            const chatWindow = this.store.discuss.chatWindows.find(
+            const chatWindow = this.store.chatHub.windows.find(
                 (c) => c.thread?.id === temporaryThread.id
             );
             temporaryThread.delete();

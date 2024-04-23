@@ -14,7 +14,7 @@ import { Dropdown } from "@web/core/dropdown/dropdown";
  */
 export class ChatBubble extends Component {
     static components = { ImStatus, Dropdown };
-    static props = ["bubble"];
+    static props = ["chatWindow"];
     static template = "mail.ChatBubble";
 
     setup() {
@@ -28,8 +28,13 @@ export class ChatBubble extends Component {
         });
     }
 
+    /** @returns {import("models").Thread} */
+    get thread() {
+        return this.props.chatWindow.thread;
+    }
+
     get previewContent() {
-        const lastMessage = this.props.bubble.thread.newestPersistentNotEmptyOfAllMessage;
+        const lastMessage = this.thread.newestPersistentNotEmptyOfAllMessage;
         if (!lastMessage) {
             return false;
         }

@@ -1134,12 +1134,6 @@ export class Thread extends Record {
     }
 
     updateDisplay() {
-        if (!this.store.usingChatBubbles) {
-            return this.store.ChatWindow.insert({
-                thread: this,
-                folded: this.state === "folded",
-            });
-        }
         if (this.state === "open" && !this.store.env.services.ui.isSmall) {
             this.store.ChatBubble.get({ thread: this })?.delete();
             this.store.ChatWindow.insert({ thread: this });

@@ -1,6 +1,6 @@
 import { LivechatButton } from "@im_livechat/embed/common/livechat_button";
 
-import { ChatWindowContainer } from "@mail/core/common/chat_window_container";
+import { ChatHub } from "@mail/core/common/chat_hub";
 
 import { Component, xml } from "@odoo/owl";
 
@@ -10,11 +10,11 @@ import { OverlayContainer } from "@web/core/overlay/overlay_container";
 
 export class LivechatRoot extends Component {
     static template = xml`
-        <ChatWindowContainer/>
+        <ChatHub/>
         <LivechatButton/>
         <OverlayContainer overlays="overlayService.overlays"/>
     `;
-    static components = { ChatWindowContainer, LivechatButton, OverlayContainer };
+    static components = { ChatHub, LivechatButton, OverlayContainer };
     static props = {};
 
     setup() {

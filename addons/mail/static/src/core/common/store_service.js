@@ -188,6 +188,7 @@ export class Store extends BaseStore {
             return b.localId > a.localId ? 1 : -1;
         },
     });
+    chatHub = Record.one("ChatHub", { compute: () => ({}) });
     discuss = Record.one("DiscussApp");
     failures = Record.many("Failure", {
         /**
@@ -205,8 +206,6 @@ export class Store extends BaseStore {
     fetchSilent = true;
 
     cannedReponses = this.makeCachedFetchData({ canned_responses: true });
-    usingChatBubbles = false;
-    chatBubbleCompact = false;
 
     get initMessagingParams() {
         return {
@@ -214,12 +213,8 @@ export class Store extends BaseStore {
         };
     }
 
-    get visibleChatWindows() {
-        return this.discuss.chatWindows.filter((chatWindow) => !chatWindow.hidden);
-    }
-
     get hiddenChatWindows() {
-        return this.discuss.chatWindows.filter((chatWindow) => chatWindow.hidden);
+        return this.chatHub.windows.filter((w) => w.hidden);
     }
 
     get maxVisibleChatWindows() {
@@ -246,7 +241,7 @@ export class Store extends BaseStore {
     }
 
     closeNewMessage() {
-        const newMessageChatWindow = this.discuss.chatWindows.find(({ thread }) => !thread);
+        const newMessageChatWindow = this.chatHub.windows.find(({ thread }) => !thread);
         newMessageChatWindow?.close();
     }
 
@@ -630,7 +625,7 @@ export class Store extends BaseStore {
     }
 
     openNewMessage({ openMessagingMenuOnClose } = {}) {
-        if (this.discuss.chatWindows.some(({ thread }) => !thread)) {
+        if (this.chatHub.windows.some(({ thread }) => !thread)) {
             // New message chat window is already opened.
             return;
         }
