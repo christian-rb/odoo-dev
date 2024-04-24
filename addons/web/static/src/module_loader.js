@@ -250,4 +250,5 @@
     const loader = new ModuleLoader();
     odoo.define = loader.define.bind(loader);
     odoo.loader = loader;
+    document.dispatchEvent(new Event("odoo:module_loader_ready"));
 })();

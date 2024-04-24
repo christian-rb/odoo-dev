@@ -357,10 +357,10 @@ class AssetsBundle(object):
                         {self.generate_xml_bundle()}
                     }});
                 }};
-                if (document.readyState === "loading") {{
-                    document.addEventListener("DOMContentLoaded", loadXmlTemplates);
-                }} else {{
+                if (globalThis.odoo?.define) {{
                     loadXmlTemplates();
+                }} else {{
+                    document.addEventListener("odoo:module_loader_ready", loadXmlTemplates);
                 }}
             }}
         """)
