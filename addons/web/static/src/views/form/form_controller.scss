@@ -235,6 +235,10 @@
     .o_form_sheet_bg {
         --formView-sheetBg-padding-x: #{map-get($spacers, 3)};
 
+        @include media-only(print) {
+            --formView-sheetBg-padding-x: 0;
+        }
+
         padding-top: map-get($spacers, 2);
         padding-left: var(--formView-sheetBg-padding-x);
         padding-right: var(--formView-sheetBg-padding-right, var(--formView-sheetBg-padding-x));

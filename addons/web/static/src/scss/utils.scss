@@ -382,3 +382,20 @@
         }
     }
 }
+
+
+// ----------------------------------------------------------------------------
+// Media Type
+// ----------------------------------------------------------------------------
+
+// Apply styles only for a particular media type, such as 'screen' or 'print'.
+
+@mixin media-only($-media) {
+    @if ($-media != null and type-of($-media) == 'string') {
+        @if $-media == $o-webclient-media {
+            @content;
+        }
+    } @else {
+        @warn "The 'media-only' mixin requires either 'screen' or 'print' arguments."
+    }
+}
