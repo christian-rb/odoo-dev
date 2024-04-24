@@ -24,6 +24,20 @@ class TestPackingCommon(TransactionCase):
 
         cls.productA = cls.env['product.product'].create({'name': 'Product A', 'type': 'product'})
         cls.productB = cls.env['product.product'].create({'name': 'Product B', 'type': 'product'})
+        # cls.seller_partner = cls.env['res.partner'].create({'name': 'Product Seller'})
+        # cls.env['product.supplierinfo'].create({
+            # 'product_tmpl_id': cls.productA.product_tmpl_id.id,
+            # 'partner_id': cls.seller_partner.id,
+            # 'price': 5.0,
+            # 'delay': 0
+        # })
+        # cls.env['product.supplierinfo'].create({
+            # 'product_tmpl_id': cls.productB.product_tmpl_id.id,
+            # 'partner_id': cls.seller_partner.id,
+            # 'price': 10.0,
+            # 'delay': 0
+        # })
+
         cls.shelf1 = cls.env['stock.location'].create({
             'name': 'shelf1',
             'usage': 'internal',

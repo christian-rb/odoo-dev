@@ -309,7 +309,6 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
         order.action_confirm()
 
         # Verify buttons are working as expected
-        order.invalidate_recordset(['mrp_production_count'])
         self.assertEqual(order.mrp_production_count, 1, "User should see the closest manufacture order in the smart button")
 
         # ===============================================================================

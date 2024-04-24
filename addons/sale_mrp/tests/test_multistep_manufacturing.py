@@ -152,7 +152,6 @@ class TestMultistepManufacturing(TestMrpCommon):
             ('origin', '=', self.sale_order.name),
             ('product_id', '=', self.product_manu.id),
         ])
-        self.sale_order.invalidate_recordset(['mrp_production_count'])
 
         self.assertEqual(self.sale_order.mrp_production_count, 1)
         self.assertEqual(mo.sale_order_count, 1)

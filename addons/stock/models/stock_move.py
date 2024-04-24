@@ -1390,7 +1390,7 @@ Please change the quantity done or the rounding precision of your unit of measur
             if move.state != 'draft':
                 continue
             # if the move is preceded, then it's waiting (if preceding move is done, then action_assign has been called already and its state is already available)
-            if move._get_previous_moves():
+            if move.move_orig_ids:  # ??? _get_previous_moves():
                 move_waiting.add(move.id)
             else:
                 if move.procure_method == 'make_to_order' or move._is_mtso():
@@ -1714,7 +1714,7 @@ Please change the quantity done or the rounding precision of your unit of measur
             quants = quants_by_product[move.product_id.id]
             if move._should_bypass_reservation():
                 # create the move line(s) but do not impact quants
-                if move.move_orig_ids:
+                if move._get_previous_moves():
                     available_move_lines = move._get_available_move_lines(assigned_moves_ids, partially_available_moves_ids)
                     for (location_id, lot_id, package_id, owner_id), quantity in available_move_lines.items():
                         qty_added = min(missing_reserved_quantity, quantity)
@@ -1902,7 +1902,7 @@ Please change the quantity done or the rounding precision of your unit of measur
         moves_to_push = moves_todo.filtered(lambda m: not m._skip_push())
         if moves_to_push:
             moves_to_push._push_apply()
-        for move_dest in moves_todo.move_dest_ids:
+        for move_dest in moves_todo._get_next_moves():
             move_dests_per_company[move_dest.company_id.id] |= move_dest
         for company_id, move_dests in move_dests_per_company.items():
             move_dests.sudo().with_company(company_id)._action_assign()
@@ -2313,7 +2313,8 @@ Please change the quantity done or the rounding precision of your unit of measur
 
     def _is_mtso(self):
         self.ensure_one()
-        return self.rule_id and self.rule_id.procure_method == 'mts_else_mto'
+        return self.procure_method == 'make_to_stock' and \
+               self.rule_id and self.rule_id.procure_method == 'mts_else_mto'
 
     def _get_next_moves(self):
         return self.move_dest_ids | self.group_id.group_dest_ids.stock_move_ids

@@ -67,7 +67,7 @@ class StockMove(models.Model):
 
     def _action_done(self, cancel_backorder=False):
         super()._action_done(cancel_backorder)
-        mtso_moves_to_update = self.group_id.sale_id.picking_ids.move_ids.filtered(lambda m: m._is_mtso())
+        mtso_moves_to_update = self.group_id.sudo().sale_id.picking_ids.move_ids.filtered(lambda m: m._is_mtso())
         mtso_moves_to_update._action_assign()
 
 class ProcurementGroup(models.Model):

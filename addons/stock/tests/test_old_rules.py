@@ -379,8 +379,8 @@ class TestOldRules(TestStockCommon):
         # create chained pick/pack moves to test with
         ship_move._assign_picking()
         ship_move._action_confirm()
-        pack_move = ship_move.move_orig_ids[0]
-        pick_move = pack_move.group_id.stock_move_ids.filtered(lambda m: m.location_dest_id == pack_move.picking_id.location_id)[0]
+        pack_move = ship_move._get_previous_moves()[0]  # MTO
+        pick_move = pack_move._get_previous_moves()[0]  # MTSO  stock_move_ids.filtered(lambda m: m.location_dest_id == pack_move.picking_id.location_id)[0]
 
         picking = pick_move.picking_id
         picking.action_confirm()
@@ -563,8 +563,8 @@ class TestOldRules(TestStockCommon):
         ship_move._assign_picking()
         ship_move._action_confirm()
 
-        pack_move = ship_move.move_orig_ids[0]
-        pick_move = pack_move.group_id.stock_move_ids.filtered(lambda m: m.location_dest_id == pack_move.picking_id.location_id)[0]
+        pack_move = ship_move._get_previous_moves()[0]
+        pick_move = pack_move._get_previous_moves()[0]
 
         self.assertEqual(ship_move.state, 'waiting', "Ship move wasn't created...") # MTO -> Waiting for pack_move
         self.assertEqual(pack_move.state, 'confirmed', "Pack move wasn't created...") # MTSO -> Waiting is not appliable

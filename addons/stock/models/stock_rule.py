@@ -5,7 +5,7 @@ import logging
 from collections import defaultdict, namedtuple
 from dateutil.relativedelta import relativedelta
 
-from odoo import SUPERUSER_ID, _, api, fields, models, registry
+from odoo import SUPERUSER_ID, _, api, Command, fields, models, registry
 from odoo.exceptions import UserError, ValidationError
 from odoo.osv import expression
 from odoo.tools import float_compare, float_is_zero
@@ -283,11 +283,25 @@ class StockRule(models.Model):
             group_id = values.get('group_id', False) and values['group_id'].id
         elif self.group_propagation_option == 'fixed':
             group_id = self.group_id.id
-        if self.procure_method == 'mts_else_mto' and group_id is False and len(self.route_id.rule_ids) > 1:  #move created without parent (SO/MO/PO)
+        if not values.get('orderpoint_id') and self.procure_method == 'mts_else_mto' and not group_id:
             group_id = self.group_id.create({
-                'name': self.route_id.name,  # TODO : What name ?
+                    'name': name,
             }).id
-            # Create group based on route
+
+        group_dest_ids = self.env['procurement.group']
+        move_dest_ids = values.get('move_dest_ids', [])
+        for move in move_dest_ids:
+            if move.procure_method == 'make_to_stock':
+                group_dest_ids |= move.group_id
+        if group_dest_ids:
+            if group_id: # CHECK ME
+                if group_id not in group_dest_ids.ids:
+                    group_id.group_dest_ids |= group_dest_ids
+            else:
+                group_id = self.group_id.create({
+                    'name': name,
+                    'group_dest_ids': [Command.link(pg.id) for pg in group_dest_ids],
+                }).id
 
         date_scheduled = fields.Datetime.to_string(
             fields.Datetime.from_string(values['date_planned']) - relativedelta(days=self.delay or 0)
@@ -308,12 +322,13 @@ class StockRule(models.Model):
 
         # TODO : Fix following behavior since we now work with chained PG
         mts_move_dest_ids = self.env['stock.move']
-        if values.get('move_dest_ids', False) and not self.location_dest_id.should_bypass_reservation():  # FIXME : we may still want to keep the pg-link even if we don't do reservation such that the second condition is too much
+        if values.get('move_dest_ids', False):
             # make_to_stock moves MAY have dest moves but SHOULD NOT have orig moves, in other words, a make_to_stock move CAN NOT be a destination move
             for m in values['move_dest_ids']:
-                if m.procure_method == 'make_to_stock' and not m.group_id:
-                    mts_move_dest_ids |= m
-                else:  # !!! not if == (m != mts OR m.group_id)
+                if m.procure_method == 'make_to_stock':
+                    if not m.group_id:
+                        mts_move_dest_ids |= m
+                else:
                     move_dest_ids.append((4, m.id))
 
         if group_id and mts_move_dest_ids:
