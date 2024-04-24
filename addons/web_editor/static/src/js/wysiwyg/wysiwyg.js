@@ -1125,6 +1125,10 @@ const Wysiwyg = Widget.extend({
             core.bus.trigger('activate_image_link_tool');
             return;
         }
+        // Avoid invoking toggleLinkTools for videos.
+        if (targetEl.parentNode.closest(".media_iframe_video")) {
+            return;
+        }
         this.toggleLinkTools();
     },
     /**
