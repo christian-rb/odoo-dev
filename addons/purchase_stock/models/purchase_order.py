@@ -167,8 +167,8 @@ class PurchaseOrder(models.Model):
             result['res_id'] = pickings.id
         return result
 
-    def _prepare_invoice(self):
-        invoice_vals = super()._prepare_invoice()
+    def _prepare_account_move(self):
+        invoice_vals = super()._prepare_account_move()
         invoice_vals['invoice_incoterm_id'] = self.incoterm_id.id
         return invoice_vals
 

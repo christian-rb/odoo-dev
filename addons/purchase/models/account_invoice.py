@@ -51,7 +51,7 @@ class AccountMove(models.Model):
             return
 
         # Copy data from PO
-        invoice_vals = self.purchase_id.with_company(self.purchase_id.company_id)._prepare_invoice()
+        invoice_vals = self.purchase_id.with_company(self.purchase_id.company_id)._prepare_account_move()
         new_currency_id = self.invoice_line_ids and self.currency_id or invoice_vals.get('currency_id')
         del invoice_vals['ref'], invoice_vals['payment_reference']
         del invoice_vals['company_id']  # avoid recomputing the currency

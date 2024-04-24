@@ -1121,7 +1121,7 @@ class SaleOrder(models.Model):
 
     # INVOICING #
 
-    def _prepare_invoice(self):
+    def _prepare_account_move(self):
         """
         Prepare the dict of values to create the new invoice for a sales order. This method may be
         overridden to implement custom invoice generation (making sure to call super() to establish
@@ -1129,7 +1129,7 @@ class SaleOrder(models.Model):
         """
         self.ensure_one()
 
-        values = super()._prepare_invoice()
+        values = super()._prepare_account_move()
         values.update({
             'ref': self.client_order_ref or '',
             'move_type': 'out_invoice',

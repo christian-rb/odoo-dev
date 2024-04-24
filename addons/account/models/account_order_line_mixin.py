@@ -4,24 +4,26 @@ from odoo import fields, models, _
 from odoo.tools import format_date
 
 
-class AccountOrderLine(models.AbstractModel):
-    # This class enables down payment support for child records of account.order that can be down payments
-    _name = 'account.order.line'
-    _description = 'Account Order Line'
+class AccountOrderLineMixin(models.AbstractModel):
+    # This class enables down payment support for child records of account.order.mixin that can be down payments
+    _name = 'account.order.line.mixin'
+    _description = 'Account Order Line Mixin'
 
     is_downpayment = fields.Boolean(string="Is a down payment",
                                     help="Down payments are made when creating account moves from an order."
-                                         " They are not copied when duplicating an order.")
+                                         " They are not copied when duplicating an order.",
+                                    )
 
     # To override
     move_line_ids = fields.One2many('account.move.line')
     display_type = fields.Selection(
         [('line_section', "Section"), ('line_note', "Note")],
         default=False,
-        help="Technical field for UX purpose.")
+        help="Technical field for UX purpose.",
+    )
     product_id = fields.Many2one('product.product')
     name = fields.Text(compute='_compute_name')
-    order_id = fields.Many2one('account.order')
+    order_id = fields.Many2one('account.order.mixin')
     qty_to_invoice = fields.Float()
     price_unit = fields.Float()
     tax_ids = fields.Many2many('account.tax')

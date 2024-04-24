@@ -32,8 +32,8 @@ class PurchaseAdvancePaymentWizard(models.TransientModel):
     def _get_product_account_internal_group(self):
         return 'expense'
 
-    def create_down_payment_invoice(self):
-        invoice = super().create_down_payment_invoice()
+    def _create_down_payment_invoice(self):
+        invoice = super()._create_down_payment_invoice()
         poster = self.env.user._is_internal() and self.env.user.id or SUPERUSER_ID
         title = _("Down payment vendor bill")
         self.order_ids.with_user(poster).message_post(

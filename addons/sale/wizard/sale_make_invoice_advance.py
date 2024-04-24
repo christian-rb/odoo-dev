@@ -31,8 +31,8 @@ class SaleAdvancePaymentInv(models.TransientModel):
     def _get_product_account_internal_group(self):
         return 'income'
 
-    def create_down_payment_invoice(self):
-        invoice = super().create_down_payment_invoice()
+    def _create_down_payment_invoice(self):
+        invoice = super()._create_down_payment_invoice()
         poster = self.env.user._is_internal() and self.env.user.id or SUPERUSER_ID
         invoice.with_user(poster).message_post_with_source(
             'mail.message_origin_link',

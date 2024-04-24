@@ -54,7 +54,7 @@ class AccountOrderMixin(models.AbstractModel):
         """
         raise NotImplementedError  # To override
 
-    def _prepare_invoice(self):
+    def _prepare_account_move(self):
         """
         Prepare the dict of values to create the new invoice for this order.
         Used when generating the invoice from this account order.
@@ -199,7 +199,7 @@ class AccountOrderMixin(models.AbstractModel):
         for order in self:
             order = order.with_company(order.company_id).with_context(lang=order._get_lang())
 
-            invoice_vals = order._prepare_invoice()
+            invoice_vals = order._prepare_account_move()
             invoiceable_lines = order._get_invoiceable_lines(final)
 
             if all(line.display_type for line in invoiceable_lines):
