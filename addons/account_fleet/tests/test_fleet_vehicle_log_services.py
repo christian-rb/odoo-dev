@@ -112,6 +112,22 @@ class TestFleetVehicleLogServices(AccountTestInvoicingCommon):
         self.assertEqual(self.car_2.log_services[0].account_move_line_id.move_id, self.bill)
         self.assertEqual(self.car_2.log_services[0].amount, self.service_line.price_subtotal)
 
+        # remove the vehicle should also delete the service
+        self.bill.button_draft()
+        self.service_line.vehicle_id = False
+        self.bill.action_post()
+
+        self.assertFalse(self.car_2.log_services)
+        self.assertFalse(self.service_line.vehicle_log_service_id)
+
+        # putting car 2 back should create a new service
+        self.bill.button_draft()
+        self.service_line.vehicle_id = self.car_2
+        self.bill.action_post()
+
+        self.assertEqual(self.car_2.log_services[0].account_move_line_id.move_id, self.bill)
+        self.assertEqual(self.car_2.log_services[0].amount, self.service_line.price_subtotal)
+
     def test_fleet_log_services_amount(self):
         brand = self.env["fleet.vehicle.model.brand"].create({
             "name": "Audi",
