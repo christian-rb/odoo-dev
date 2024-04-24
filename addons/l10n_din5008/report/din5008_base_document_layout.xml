@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_invoice_wizard_preview" inherit_id="web.report_invoice_wizard_preview">
+        <xpath expr="//t[@t-set='address']" position="after">
+            <t t-set="din5008_document_information">
+                <div class="information_block" t-if="not o and not docs">
+                    <table>
+                        <tr>
+                            <td>Invoice No.:</td>
+                            <td>INV/2021/12345</td>
+                        </tr>
+                        <tr>
+                            <td>Invoice Date:</td>
+                            <td>14/04/2023</td>
+                        </tr>
+                        <tr>
+                            <td>Due Date:</td>
+                            <td>21/04/2024</td>
+                        </tr>
+                        <tr>
+                            <td>Delivery Date:</td>
+                            <td>21/04/2024</td>
+                        </tr>
+                        <tr>
+                            <td>Reference:</td>
+                            <td>SO/2021/45678</td>
+                        </tr>
+                    </table>
+                </div>
+            </t>
+        </xpath>
+    </template>
+</odoo>
