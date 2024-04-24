@@ -96,6 +96,7 @@
                 <button name="button_unblock" type="object" string="Unblock" context="{'default_workcenter_id': workcenter_id}" class="btn-danger px-3"
                   invisible="production_state in ('draft', 'done', 'cancel') or working_state != 'blocked'"/>
                 <widget name="mo_view_list_dropdown"/>
+                <widget name="open_workorder_order_form_wizard"/>
                 <field name="show_json_popover" column_invisible="True"/>
                 <field name="json_popover" widget="mrp_workorder_popover" string=" " invisible="not show_json_popover"/>
             </tree>

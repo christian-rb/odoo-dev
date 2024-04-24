@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="mrp.openWorkOrderFormWizard">
+        <button type="object" t-if="showIcon()" class="btn oe_edit_only btn-link o_button_icon fa fa-fw fa-external-link" t-on-click="(ev) => this.openWizard()"/>
+    </t>
+
+</templates>
