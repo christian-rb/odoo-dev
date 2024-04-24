@@ -239,10 +239,15 @@ class ProjectProject(models.Model):
             'views': [[False, 'tree'], [False, 'form'], [False, 'kanban']],
             'domain': [('id', 'in', invoice_ids)],
             'context': {
-                'create': False,
-            }
+                'create': self.env.context.get('from_topbar_action', False),
+                'default_move_type': 'out_invoice',
+                'project_id': self.id
+            },
+            'help': "<p class='o_view_nocontent_smiling_face'>%s</p><p>%s</p>" %
+            (_("No invoices have been created for this project yet."),
+                _("Once a sales order is confirmed, you will then be able to create an invoice and collect the payment."))
         }
-        if len(invoice_ids) == 1:
+        if len(invoice_ids) == 1 and not self.env.context.get('from_topbar_action', False):
             action['views'] = [[False, 'form']]
             action['res_id'] = invoice_ids[0]
         return action
