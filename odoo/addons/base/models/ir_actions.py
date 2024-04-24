@@ -320,6 +320,7 @@ class IrActionsActWindow(models.Model):
     groups_id = fields.Many2many('res.groups', 'ir_act_window_group_rel',
                                  'act_id', 'gid', string='Groups')
     search_view_id = fields.Many2one('ir.ui.view', string='Search View Ref.')
+    topbar_actions = fields.One2many('ir.actions.topbar', 'parent_action_id', string='Topbar actions linked to this action.')
     filter = fields.Boolean()
 
     def read(self, fields=None, load='_classic_read'):
@@ -327,7 +328,15 @@ class IrActionsActWindow(models.Model):
         """
         result = super(IrActionsActWindow, self).read(fields, load=load)
         if not fields or 'help' in fields:
+            topbar_actions = self.topbar_actions.filtered(
+                lambda x: (
+                    x.parent_res_id in (False, self.env.context.get('active_id', False)) and
+                    x.user_id.id in (False, self.env.uid) and
+                    x.is_visible
+                )
+            ).read()
             for values in result:
+                values["topbar_actions"] = topbar_actions
                 model = values.get('res_model')
                 if model in self.env:
                     eval_ctx = dict(self.env.context)
@@ -368,7 +377,7 @@ class IrActionsActWindow(models.Model):
             "res_id", "res_model", "search_view_id", "target", "view_id", "view_mode", "views",
             # `flags` is not a real field of ir.actions.act_window but is used
             # to give the parameters to generate the action
-            "flags"
+            "flags", "topbar_actions"
         }
 
 

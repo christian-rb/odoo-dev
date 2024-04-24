@@ -701,12 +701,43 @@ export function makeActionManager(env, router = _router) {
         delete action.context.no_breadcrumbs;
 
         let resId = viewProps.resId;
+        let topbarActions = [];
+        // If the action has topbar actions, we set a new topbar action at the beginning of the array of topbar actions
+        // containing the parent action itself.
+        if (
+            action.topbar_actions?.length > 0 &&
+            !context.parent_action_topbar_actions &&
+            view.type !== "form"
+        ) {
+            topbarActions = [
+                {
+                    id: 0,
+                    name: action.name,
+                    parent_action_id: [action.id, action.name],
+                    parent_res_model: action.res_model,
+                    action_id: [action.id, action.name],
+                    user_id: false,
+                    context: action.context,
+                },
+                ...action.topbar_actions,
+            ];
+        } else {
+            topbarActions =
+                view.type === "form"
+                    ? []
+                    : context.parent_action_topbar_actions || action.topbar_actions;
+        }
+        const parentActionId = (view.type !== "form" && context.parent_action_id) || false;
+        const currentTopbarActionId = context.current_topbar_action_id || 0;
         return {
             props: viewProps,
             resId: () => resId,
             config: {
                 actionId: action.id,
                 actionType: "ir.actions.act_window",
+                topbarActions,
+                parentActionId,
+                currentTopbarActionId,
                 actionFlags: action.flags,
                 views: action.views,
                 viewSwitcherEntries,
@@ -792,6 +823,12 @@ export function makeActionManager(env, router = _router) {
                 controller.config.breadcrumbs.push(undefined);
                 controller.config.breadcrumbs.pop();
             }
+        };
+        controller.config.setCurrentTopbarAction = (topbarActionId) => {
+            controller.currentTopbarActionId = topbarActionId;
+        };
+        controller.config.setTopbarActions = (topbarActions) => {
+            controller.topbarActions = topbarActions;
         };
         controller.config.historyBack = () => {
             const previousController = controllerStack[controllerStack.length - 2];
@@ -1363,7 +1400,8 @@ export function makeActionManager(env, router = _router) {
         // in case an effect is returned from python and there is already an effect
         // attribute on the button, the priority is given to the button attribute
         const effect = params.effect ? evaluateExpr(params.effect) : action.effect;
-        const options = { onClose: params.onClose };
+        const { onClose, stackPosition, viewType } = params;
+        const options = { onClose, stackPosition, viewType };
         await doAction(action, options);
         if (params.close) {
             await _executeCloseAction();
