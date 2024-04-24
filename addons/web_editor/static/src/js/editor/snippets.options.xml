@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates id="template" xml:space="preserve">
+<t t-name="web_editor.TestSnippetOption">
+    <WeButton selectClass="'test_class'">Test Class</WeButton>
+</t>
+<t t-name="web_editor.WeButton">
+    <we-button t-ref="text-content"
+               t-on-mouseenter="this._onUserValuePreview"
+               t-on-mouseleave="this._onUserValueReset" 
+               t-on-click="this._onButtonClick" class="o_we_user_value_widget" 
+               t-att-class="{ 'active': this.value.active, 'o_we_preview': this.value.isPreviewd }">
+            <div><t t-slot="default"/></div>
+    </we-button>
+</t>

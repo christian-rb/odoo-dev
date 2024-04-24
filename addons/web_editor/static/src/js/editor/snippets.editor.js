@@ -2,6 +2,7 @@
 
 import { clamp } from "@web/core/utils/numbers";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { registry } from "@web/core/registry";
 import { useService, useBus } from "@web/core/utils/hooks";
 import dom from "@web/legacy/js/core/dom";
 import Widget from "@web/legacy/js/core/widget";
@@ -11,7 +12,7 @@ import weUtils from "@web_editor/js/common/utils";
 import * as gridUtils from "@web_editor/js/common/grid_layout_utils";
 import { escape } from "@web/core/utils/strings";
 import { closestElement, isUnremovable } from "@web_editor/js/editor/odoo-editor/src/utils/utils";
-import { debounce, throttleForAnimation } from "@web/core/utils/timing";
+import { batched, debounce, throttleForAnimation } from "@web/core/utils/timing";
 import { uniqueId } from "@web/core/utils/functions";
 import { sortBy, unique } from "@web/core/utils/arrays";
 import { browser } from "@web/core/browser/browser";
@@ -35,6 +36,7 @@ import { renderToElement } from "@web/core/utils/render";
 import { RPCError } from "@web/core/network/rpc";
 import { ColumnLayoutMixin } from "@web_editor/js/common/column_layout_mixin";
 import { Tooltip as OdooTooltip } from "@web/core/tooltip/tooltip";
+import { SnippetOption, SnippetOptionComponent } from "./snippets.options";
 
 let cacheSnippetTemplate = {};
 
@@ -601,6 +603,14 @@ var SnippetEditor = Widget.extend({
         return this._customize$Elements;
     },
     /**
+     * Returns the OWL Options templates to mount their widgets.
+     * The widgets will handle requesting the initial updateUI
+     * @TODO owl-options Implement visibility.
+     */
+    getOptions() {
+        return this.snippetOptions;
+    },
+    /**
      * @param {boolean} [show]
      * @param {boolean} [ignoreDeviceVisibility]
      * @returns {Promise<boolean>}
@@ -707,6 +717,7 @@ var SnippetEditor = Widget.extend({
      */
     _initializeOptions: function () {
         this._customize$Elements = [];
+        this.snippetOptions = [];
         this.styles = {};
         this.selectorSiblings = [];
         this.selectorChildren = [];
@@ -719,6 +730,10 @@ var SnippetEditor = Widget.extend({
             if (parentEditor) {
                 this._customize$Elements = this._customize$Elements
                     .concat(parentEditor._customize$Elements);
+                // TODO: @owl-options This should really be removed in favor of a better
+                // solution. This is only here to have a similar approach for
+                // both OWL options and legacy options for a quick start.
+                this.snippetOptions = [...this.snippetOptions,...parentEditor.snippetOptions];
                 break;
             }
             $element = $element.parent();
@@ -767,17 +782,37 @@ var SnippetEditor = Widget.extend({
             }
 
             var optionName = val.option;
-            var option = new (options.registry[optionName] || options.Class)(
-                this,
-                val.$el.children(),
-                val.base_target ? this.$target.find(val.base_target).eq(0) : this.$target,
-                this.$el,
-                Object.assign({
-                    optionName: optionName,
-                    snippetName: this.getName(),
-                }, val.data),
-                this.options
-            );
+            let option;
+            if (val.isOwl) {
+                option = Object.assign({}, registry.category("snippet_options").get(optionName));
+                option.instance = new (option.Class || SnippetOption)({
+                    editor: this,
+                    $target: val.base_target ? this.$target.find(val.base_target).eq(0) : this.$target,
+                    $overlay: this.$overlay,
+                    data: {
+                        optionName,
+                        snippetName: this.getName(),
+                        ...val.data,
+                    },
+                    options: this.options,
+                });
+                option.isOwl = true;
+                option.renderingComponent ??= class extends SnippetOptionComponent {};
+                option.renderingComponent.template = option.template;
+                option.renderingComponent.components = Object.fromEntries(registry.category("snippet_widgets").getEntries());
+            } else {
+                option = new (options.registry[optionName] || options.Class)(
+                    this,
+                    val.$el.children(),
+                    val.base_target ? this.$target.find(val.base_target).eq(0) : this.$target,
+                    this.$el,
+                    Object.assign({
+                        optionName: optionName,
+                        snippetName: this.getName(),
+                    }, val.data),
+                    this.options
+                );
+            }
             var key = optionName || uniqueId("option");
             if (this.styles[key]) {
                 // If two snippet options use the same option name (and so use
@@ -785,7 +820,7 @@ var SnippetEditor = Widget.extend({
                 // ID (TODO improve)
                 key = uniqueId(key);
             }
-            this.styles[key] = option;
+            this.styles[key] = option.isOwl ? option.instance : option;
             option.__order = i++;
 
             if (option.forceNoDeleteButton) {
@@ -801,6 +836,10 @@ var SnippetEditor = Widget.extend({
                 this.forceDuplicateButton = true;
             }
 
+            if (val.isOwl) {
+                this.snippetOptions.push(markRaw(option));
+                return option.instance.willStart();
+            }
             return option.appendTo(document.createDocumentFragment());
         });
 
@@ -819,6 +858,10 @@ var SnippetEditor = Widget.extend({
             const options = sortBy(Object.values(this.styles), "__order");
             const firstOptions = [];
             options.forEach(option => {
+                // TODO: @owl-options Properly handle option position
+                if (option.isOwl) {
+                    return;
+                }
                 if (option.isTopOption) {
                     if (option.isTopFirstOption) {
                         firstOptions.push(option);
@@ -1809,6 +1852,9 @@ class SnippetsMenu extends Component {
     setup() {
         super.setup(...arguments);
         this.options = Object.assign({}, this.props.options);
+        this.options.snippetEditionRequest = this.snippetEditionRequest.bind(this);
+        this.options.optionUpdate = this._snippetOptionUpdate.bind(this);
+        this.options.env = this.env;
         this.$body = $((this.options.document || document).body);
         this.customEvents = SnippetsMenu.custom_events;
         this.tabs = SnippetsMenu.tabs;
@@ -1837,7 +1883,7 @@ class SnippetsMenu extends Component {
         this.snippetsAreaRef = useRef("snippets-area");
 
         this.snippetEditors = [];
-        this._enabledEditorHierarchy = [];
+        this.state.enabledEditorHierarchy = [];
 
         this._mutex = this.options.mutex;
 
@@ -1916,6 +1962,12 @@ class SnippetsMenu extends Component {
 
         useBus(this.props.bus, "CLEAN_FOR_SAVE", ({ detail }) => {
             detail.proms.push(this.cleanForSave());
+        });
+
+        // If multiple SnippetOptionsComponent are mounted at the same time,
+        // only compute their state once per tick instead of once per option.
+        this.onOptionMounted = batched(() => {
+            this._onOptionMounted();
         });
     }
     /**
@@ -2746,16 +2798,18 @@ class SnippetsMenu extends Component {
                 }
                 resolve(null);
             }).then(async editorToEnable => {
-                if (!previewMode && this._enabledEditorHierarchy[0] === editorToEnable
-                        || ifInactiveOptions && this._enabledEditorHierarchy.includes(editorToEnable)) {
+                if (!previewMode && this.state.enabledEditorHierarchy[0] === editorToEnable
+                        || ifInactiveOptions && this.state.enabledEditorHierarchy.includes(editorToEnable)) {
                     return editorToEnable;
                 }
 
                 if (!previewMode) {
-                    this._enabledEditorHierarchy = [];
+                    this.state.enabledEditorHierarchy = [];
                     let current = editorToEnable;
                     while (current && current.$target) {
-                        this._enabledEditorHierarchy.push(current);
+                        // TODO: @owl-options, make sure changes to instances
+                        // of SnippetEditor should not trigger re-renders.
+                        this.state.enabledEditorHierarchy.push(markRaw(current));
                         current = current.getParent();
                     }
                 }
@@ -2780,12 +2834,13 @@ class SnippetsMenu extends Component {
                 if (editorToEnable) {
                     editorToEnable.toggleOverlay(true, previewMode);
                     if (!previewMode && !editorToEnable.displayOverlayOptions) {
-                        const parentEditor = this._enabledEditorHierarchy.find(ed => ed.displayOverlayOptions);
+                        const parentEditor = this.state.enabledEditorHierarchy.find(ed => ed.displayOverlayOptions);
                         if (parentEditor) {
                             parentEditor.toggleOverlay(true, previewMode);
                         }
                     }
                     customize$Elements = await editorToEnable.toggleOptions(true);
+                    this.state.options = editorToEnable.getOptions();
                 } else {
                     for (const editor of this.snippetEditors) {
                         if (editor.isSticky()) {
@@ -3082,6 +3137,40 @@ class SnippetsMenu extends Component {
         });
         $styles.addClass('d-none');
 
+        // TODO: @owl-options Rename this property when all options have been converted.
+        this.templateOptions.push(...registry.category("snippet_options").getEntries().map(([optionID, option]) => {
+            const selector = option.selector;
+            const exclude = option.exclude || "";
+            const excludeParent = optionID === "so_content_addition" ? snippetAdditionDropIn : "";
+            const target = option.target;
+            const noCheck = option.noCheck;
+            const optionDef = {
+                "option": optionID,
+                "base_selector": selector,
+                "base_exclude": exclude,
+                "base_target": target,
+                "selector": this._computeSelectorFunctions({selector, exclude, target, noCheck}),
+                isOwl: true,
+                "drop-near": option.dropNear && this._computeSelectorFunctions({
+                    selector: option.dropNear("drop-near"),
+                    noCheck,
+                    isChildren: true,
+                    excludeParent,
+                    forDrop: true
+                }),
+                "drop-in": option.dropIn && this._computeSelectorFunctions({
+                    selector: option.dropIn,
+                    noCheck,
+                    forDrop: true,
+                }),
+                "drop-exclude-ancestor": option.dropExcludeAncestor,
+                "drop-lock-within": option.dropLockWithin,
+                "data": option.data || {},
+            };
+            selectors.push(optionDef.selector);
+            return optionDef;
+        }));
+
         globalSelector.closest = function ($from) {
             var $temp;
             var $target;
@@ -3233,6 +3322,7 @@ class SnippetsMenu extends Component {
                     : $els => $els;
 
             var check = false;
+            // TODO: @owl-options Add Owl Options here.
             self.templateOptions.forEach((option, k) => {
                 if (check || !($snippetBody.is(option.base_selector) && !$snippetBody.is(option.base_exclude))) {
                     return;
@@ -3613,7 +3703,7 @@ class SnippetsMenu extends Component {
             // component. So we do not want to remove it.
             // TODO: This should be improved when SnippetEditor / SnippetOptions
             // are converted to OWL.
-            while (this.customizePanel.firstChild?.id !== "o_we_editor_toolbar_container") {
+            while (this.customizePanel.firstChild?.id !== "legacyOptionsLimiter") {
                 this.customizePanel.removeChild(this.customizePanel.firstChild);
             }
             $(this.customizePanel).prepend(content);
@@ -3795,14 +3885,14 @@ class SnippetsMenu extends Component {
     async _snippetOptionUpdate() {
         // Only update editors whose DOM target is still inside the document
         // as a top option may have removed currently-enabled child items.
-        const editors = this._enabledEditorHierarchy.filter(editor => !!editor.$target[0].closest('body'));
+        const editors = this.state.enabledEditorHierarchy.filter(editor => !!editor.$target[0].closest('body'));
 
         await Promise.all(editors.map(editor => editor.updateOptionsUI()));
         await Promise.all(editors.map(editor => editor.updateOptionsUIVisibility()));
 
         // Always enable the deepest editor whose DOM target is still inside
         // the document.
-        if (editors[0] !== this._enabledEditorHierarchy[0]) {
+        if (editors[0] !== this.state.enabledEditorHierarchy[0]) {
             // No awaiting this as the mutex is currently locked here.
             this._activateSnippet(editors[0].$target);
         }
@@ -4717,6 +4807,19 @@ class SnippetsMenu extends Component {
         if (!ev.stopped) {
             return this.props.trigger_up(ev);
         }
+    }
+    /**
+     * When a new option is mounted, update all existing editors to reflect the
+     * potential new values being computed/asked.
+     */
+    _onOptionMounted() {
+        this.execWithLoadingEffect(() => {
+            return Promise.all(this.snippetEditors.map(editor => editor.updateOptionsUI()));
+        });
+    }
+
+    snippetEditionRequest({ exec, optionsLoader }) {
+        this._execWithLoadingEffect(exec, optionsLoader ? "both" : true);
     }
 }
 
