@@ -38,6 +38,8 @@ const serviceRegistry = registry.category("services");
 
 import { markup } from "@odoo/owl";
 
+//RUNNING
+
 /**
  * Helper function that returns, given a pivot instance, the values of the
  * table, separated by ','.
