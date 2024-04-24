@@ -151,3 +151,11 @@
     opacity: 100;
     font-weight: 500;
 }
+
+.o_mail_composer_form div[name="custom_emails"]{
+    &:has(span){
+        textarea:not(:focus){
+            border-bottom: solid 1px #d44c59;
+        }
+    }
+}
