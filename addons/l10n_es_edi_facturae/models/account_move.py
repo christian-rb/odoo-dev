@@ -504,7 +504,7 @@ class AccountMove(models.Model):
         mail = partner_vals['email']
         country_code = partner_vals['country_code']
 
-        partner = self.env['res.partner']._retrieve_partner(name=name, vat=vat, phone=phone, mail=mail)
+        partner = self.env['res.partner']._retrieve_partner(name=name, vat=vat, phone=phone, email=mail)
 
         if not partner and name:
             partner_vals = {'name': name, 'email': mail, 'phone': phone}
