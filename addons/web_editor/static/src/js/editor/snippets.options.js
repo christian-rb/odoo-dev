@@ -818,6 +818,19 @@ class UserValueComponent extends Component {
             });
         }
 
+        // Track the changes to the textContent slot so that parent widgets can
+        // use it (e.g. WeSelect use the active value's textContent for its
+        // toggler).
+        this.textContentRef = useRef('text-content');
+        useEffect(
+            () => {
+                const textContent = this.textContentRef.el?.textContent || '';
+                if (textContent && textContent !== this.value.textContent) {
+                    this.value.textContent = textContent;
+                }
+            }
+        );
+
         onWillDestroy(() => {
             this.env.unregisterUserValue(this.value);
         });
@@ -1041,26 +1054,27 @@ const CheckboxUserValueWidget = ButtonUserValueWidget.extend({
     },
 });
 
-const BaseSelectionUserValueWidget = UserValueWidget.extend({
+const BaseSelectionUserValueWidget = UserValueWidget.extend({});
+class BaseSelectionUserValue extends UserValue {
     /**
      * @override
      */
     async start() {
-        await this._super(...arguments);
+        await super.start(...arguments);
 
-        this.menuEl = document.createElement('we-selection-items');
-        if (this.options && this.options.childNodes) {
-            this.options.childNodes.forEach(node => {
-                // Ensure to only put element nodes inside the selection menu
-                // as there could be an :empty CSS rule to handle the case when
-                // the menu is empty (so it should not contain any whitespace).
-                if (node.nodeType === Node.ELEMENT_NODE) {
-                    this.menuEl.appendChild(node);
-                }
-            });
-        }
-        this.containerEl.appendChild(this.menuEl);
-    },
+        // this.menuEl = document.createElement('we-selection-items');
+        // if (this.options && this.options.childNodes) {
+        //     this.options.childNodes.forEach(node => {
+        //         // Ensure to only put element nodes inside the selection menu
+        //         // as there could be an :empty CSS rule to handle the case when
+        //         // the menu is empty (so it should not contain any whitespace).
+        //         if (node.nodeType === Node.ELEMENT_NODE) {
+        //             this.menuEl.appendChild(node);
+        //         }
+        //     });
+        // }
+        // this.containerEl.appendChild(this.menuEl);
+    }
 
     //--------------------------------------------------------------------------
     // Public
@@ -1070,13 +1084,13 @@ const BaseSelectionUserValueWidget = UserValueWidget.extend({
      * @override
      */
     getMethodsParams(methodName) {
-        const params = this._super(...arguments);
+        const params = super.getMethodsParams(...arguments);
         const activeWidget = this._getActiveSubWidget();
         if (!activeWidget) {
             return params;
         }
         return Object.assign(activeWidget.getMethodsParams(...arguments), params);
-    },
+    }
     /**
      * @override
      */
@@ -1085,23 +1099,23 @@ const BaseSelectionUserValueWidget = UserValueWidget.extend({
         if (activeWidget) {
             return activeWidget.getActiveValue(methodName);
         }
-        return this._super(...arguments);
-    },
+        return super.getValue(...arguments);
+    }
     /**
      * @override
      */
     isContainer() {
         return true;
-    },
+    }
     /**
      * @override
      */
     async setValue(value, methodName) {
-        const _super = this._super.bind(this);
-        for (const widget of this._userValueWidgets) {
+        const subValues = Object.values(this._subValues);
+        for (const widget of subValues) {
             await widget.setValue(NULL_ID, methodName);
         }
-        for (const widget of [...this._userValueWidgets].reverse()) {
+        for (const widget of subValues.reverse()) {
             await widget.setValue(value, methodName);
             if (widget.isActive()) {
                 // Only one select item can be true at a time, we consider the
@@ -1109,8 +1123,8 @@ const BaseSelectionUserValueWidget = UserValueWidget.extend({
                 break;
             }
         }
-        await _super(...arguments);
-    },
+        await super.setValue(...arguments);
+    }
 
     //--------------------------------------------------------------------------
     // Private
@@ -1118,23 +1132,83 @@ const BaseSelectionUserValueWidget = UserValueWidget.extend({
 
     /**
      * @private
-     * @returns {UserValueWidget|undefined}
+     * @returns {UserValue|undefined}
      */
     _getActiveSubWidget() {
-        const previewedWidget = this._userValueWidgets.find(widget => widget.isPreviewed());
+        const previewedWidget = Object.values(this._subValues).find(value => value.isPreviewed());
         if (previewedWidget) {
             return previewedWidget;
         }
-        return this._userValueWidgets.find(widget => widget.isActive());
-    },
-});
+        return Object.values(this._subValues).find(value => value.isActive());
+    }
+}
+class SelectUserValue extends BaseSelectionUserValue {
+    static PLACEHOLDER_TEXT = _t("None");
+    async setValue(value, methodName) {
+        await super.setValue(...arguments);
+        // Re-initialising the toggler.
+        this.env.toggler.textContent = this.constructor.PLACEHOLDER_TEXT;
+        this.env.toggler.faIcon = '';
+        this.env.toggler.imgSrc = '';
+        let textContent = '';
+        const activeWidget = Object.values(this._subValues).find(value => !value.isPreviewed() && value.isActive());
+        if (activeWidget) {
+            const params = activeWidget.getMethodsParams(methodName);
+            // Check the param for svg on buttons
+            const svgSrc = params.svgSrc; // useful to avoid searching text content in svg element
+            const text = (params.selectLabel || (!svgSrc && activeWidget.textContent.trim()));
+            const imgSrc = params.img;
+            const icon = params.icon;
+            if (text) {
+                textContent = text;
+            } else if (icon) {
+                this.env.toggler.faIcon = icon;
+            } else if (imgSrc) {
+                this.env.toggler.imgSrc = imgSrc;
+            } else {
+                // TODO: @owl-options: check this?
+                //const fakeImgEl = activeWidget.el.querySelector('.o_we_fake_img_item');
+                //if (fakeImgEl) {
+                //    this.menuTogglerItemEl = fakeImgEl.cloneNode(true);
+                //}
+            }
+        } else {
+            textContent = this.constructor.PLACEHOLDER_TEXT;
+        }
+        
+        this.env.toggler.textContent = textContent;
+        if (this.menuTogglerItemEl) {
+            this.menuTogglerEl.appendChild(this.menuTogglerItemEl);
+        }
+    }
+    userValueNotification(params) {
+        if (!params.previewMode) {
+            this.env.toggler.open = false;
+        }
+        super.userValueNotification(params);
+    }
+}
+const SelectUserValueWidget = BaseSelectionUserValueWidget.extend({});
+class WeSelect extends UserValueComponent {
+    static isContainer = true;
+    static template = "web_editor.WeSelect";
+    static components = { Dropdown };
+    static model = SelectUserValue;
 
-const SelectUserValueWidget = BaseSelectionUserValueWidget.extend({
-    tagName: 'we-select',
-    events: {
-        'click': '_onClick',
-    },
-    PLACEHOLDER_TEXT: _t("None"),
+    setup() {
+        // The toggler state is passed to the UserValue so that when a new
+        // button becomes active, it can set its own textContent as the
+        // toggler's textContent.
+        this.toggler = useState({
+            open: false,
+            textContent: this.constructor.PLACEHOLDER_TEXT,
+        });
+        useSubEnv({
+            toggler: this.toggler,
+        });
+
+        super.setup();
+    }
 
     /**
      * @override
@@ -1165,7 +1239,7 @@ const SelectUserValueWidget = BaseSelectionUserValueWidget.extend({
         const dropdownCaretEl = document.createElement('span');
         dropdownCaretEl.classList.add('o_we_dropdown_caret');
         this.containerEl.appendChild(dropdownCaretEl);
-    },
+    }
 
     //--------------------------------------------------------------------------
     // Public
@@ -1174,19 +1248,19 @@ const SelectUserValueWidget = BaseSelectionUserValueWidget.extend({
     /**
      * @override
      */
-    close: function () {
+    close() {
         this._super(...arguments);
         this.el.classList.remove("o_we_select_dropdown_up");
         if (this.menuTogglerEl) {
             this.menuTogglerEl.classList.remove('active');
         }
-    },
+    }
     /**
      * @override
      */
-    isPreviewed: function () {
+    isPreviewed() {
         return this._super(...arguments) || this.menuTogglerEl.classList.contains('active');
-    },
+    }
     /**
      * @override
      */
@@ -1194,52 +1268,7 @@ const SelectUserValueWidget = BaseSelectionUserValueWidget.extend({
         this._super(...arguments);
         this.menuTogglerEl.classList.add('active');
         this._adjustDropdownPosition();
-    },
-    /**
-     * @override
-     */
-    async setValue() {
-        await this._super(...arguments);
-
-        if (this.iconEl) {
-            return;
-        }
-
-        if (this.menuTogglerItemEl) {
-            this.menuTogglerItemEl.remove();
-            this.menuTogglerItemEl = null;
-        }
-
-        let textContent = '';
-        const activeWidget = this._userValueWidgets.find(widget => !widget.isPreviewed() && widget.isActive());
-        if (activeWidget) {
-            const svgTag = activeWidget.el.querySelector('svg'); // useful to avoid searching text content in svg element
-            const value = (activeWidget.el.dataset.selectLabel || (!svgTag && activeWidget.el.textContent.trim()));
-            const imgSrc = activeWidget.el.dataset.img;
-            const icon = activeWidget.el.dataset.icon;
-            if (value) {
-                textContent = value;
-            } else if (icon) {
-                this.menuTogglerItemEl = document.createElement('i');
-                this.menuTogglerItemEl.classList.add('fa', icon);
-            } else if (imgSrc) {
-                this.menuTogglerItemEl = document.createElement('img');
-                this.menuTogglerItemEl.src = imgSrc;
-            } else {
-                const fakeImgEl = activeWidget.el.querySelector('.o_we_fake_img_item');
-                if (fakeImgEl) {
-                    this.menuTogglerItemEl = fakeImgEl.cloneNode(true);
-                }
-            }
-        } else {
-            textContent = this.PLACEHOLDER_TEXT;
-        }
-
-        this.menuTogglerEl.textContent = textContent;
-        if (this.menuTogglerItemEl) {
-            this.menuTogglerEl.appendChild(this.menuTogglerItemEl);
-        }
-    },
+    }
     /**
      * @override
      */
@@ -1247,7 +1276,7 @@ const SelectUserValueWidget = BaseSelectionUserValueWidget.extend({
         if (!this.menuTogglerEl.classList.contains('active')) {
             this.menuTogglerEl.click();
         }
-    },
+    }
 
     //--------------------------------------------------------------------------
     // Private
@@ -1259,7 +1288,7 @@ const SelectUserValueWidget = BaseSelectionUserValueWidget.extend({
      */
     _shouldIgnoreClick(ev) {
         return !!ev.target.closest('[role="button"]');
-    },
+    }
     /**
      * Decides whether the dropdown should be positioned below or above the
      * selector based on the available space.
@@ -1290,7 +1319,7 @@ const SelectUserValueWidget = BaseSelectionUserValueWidget.extend({
                 this.el.classList.remove("o_we_select_dropdown_up");
             }
         }
-    },
+    }
 
     //--------------------------------------------------------------------------
     // Handlers
@@ -1301,7 +1330,7 @@ const SelectUserValueWidget = BaseSelectionUserValueWidget.extend({
      *
      * @private
      */
-    _onClick: function (ev) {
+    _onClick(ev) {
         if (this._shouldIgnoreClick(ev)) {
             return;
         }
@@ -1315,8 +1344,9 @@ const SelectUserValueWidget = BaseSelectionUserValueWidget.extend({
         if (activeButton) {
             this.menuEl.scrollTop = activeButton.el.offsetTop - (this.menuEl.offsetHeight / 2);
         }
-    },
-});
+    }
+}
+registry.category("snippet_widgets").add("WeSelect", WeSelect);
 
 const ButtonGroupUserValueWidget = BaseSelectionUserValueWidget.extend({
     tagName: 'we-button-group',

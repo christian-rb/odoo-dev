@@ -2,7 +2,15 @@
 <templates id="template" xml:space="preserve">
 <t t-name="web_editor.TestSnippetOption">
     <WeButton selectClass="'test_class'">Test Class</WeButton>
+    <WeSelect>
+        <WeButton selectClass="'test_class_1'">Test Class 1</WeButton>
+        <WeButton selectClass="'test_class_2'">Test Class 2</WeButton>
+        <WeButton selectClass="'test_class_3'">Test Class 3</WeButton>
+        <WeButton selectClass="'test_class_4'">Test Class 4</WeButton>
+        <WeButton selectClass="'test_class_5'">Test Class 5</WeButton>
+    </WeSelect>
 </t>
+
 <t t-name="web_editor.WeButton">
     <we-button t-ref="text-content"
                t-on-mouseenter="this._onUserValuePreview"
@@ -12,3 +20,14 @@
             <div><t t-slot="default"/></div>
     </we-button>
 </t>
+<t t-name="web_editor.WeSelect">
+    <we-select class="o_we_user_value_widget" t-att-class="{ 'o_we_widget_opened': toggler.open }">
+        <div>
+            <we-toggler t-out="toggler.textContent" t-att-class="{ 'active': toggler.open }" t-on-click="() => toggler.open = !toggler.open"/>
+            <we-selection-items t-on-click="() => toggler.open = false">
+                <t t-slot="default"/>
+            </we-selection-items>
+        </div>
+    </we-select>
+</t>
+</templates>
