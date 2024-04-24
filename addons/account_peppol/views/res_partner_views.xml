@@ -18,6 +18,7 @@
                 <xpath expr="//field[@name='peppol_endpoint']" position="after">
                     <field name="account_peppol_is_endpoint_valid" invisible="1"/>
                     <field name="account_peppol_validity_last_check" invisible="1"/>
+                    <field name="bank_account_count" invisible="1"/>
                     <label for="account_peppol_verification_label"
                            invisible="ubl_cii_format in (False, 'facturx', 'oioubl_201') or not peppol_endpoint"/>
                     <div class="row"
@@ -31,6 +32,9 @@
                                     type="object"
                                     string="Verify"
                                     help="Verify partner's PEPPOL endpoint"/>
+                        </div>
+                        <div class="alert alert-warning" role="alert" invisible="not account_peppol_is_endpoint_valid or bank_account_count != 0 and country_code">
+                            To generate electronic invoices, also set a country and a bank account for this partner.
                         </div>
                     </div>
                 </xpath>
