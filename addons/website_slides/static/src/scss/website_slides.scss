@@ -786,3 +786,12 @@ li.o_wslides_fs_sidebar_list_item.active {
 .oe_show_footer {
     z-index: $MAX-Z-INDEX; // Looks terrible but seems necessary due to fullscreen & canvas in PDFSlidesViewer
 }
+
+.o_wslides_home_aside_title {
+    --o-avatar-height: 1.875rem;
+
+    .o_avatar {
+        width: var(--o-avatar-height);
+        height: var(--o-avatar-height);
+    }
+}
