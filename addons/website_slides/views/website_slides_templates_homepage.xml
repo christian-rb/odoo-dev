@@ -21,36 +21,14 @@
                 </div>
             </section>
             </div>
-            <div class="container mt16 o_wslides_home_nav position-relative">
-                <nav class="navbar navbar-expand-lg navbar-light shadow-sm">
-                    <t t-call="website.website_search_box_input">
-                        <t t-set="_form_classes" t-valuef="o_wslides_nav_navbar_right order-lg-3"/>
-                        <t t-set="search_type" t-valuef="slides"/>
-                        <t t-set="action" t-valuef="/slides/all"/>
-                        <t t-set="display_description" t-valuef="true"/>
-                        <t t-set="display_detail" t-valuef="false"/>
-                        <t t-set="placeholder">Search courses</t>
-                    </t>
-                    <button class="navbar-toggler px-2 order-1" type="button"
-                        data-bs-toggle="collapse" data-bs-target="#navbarSlidesHomepage"
-                        aria-controls="navbarSlidesHomepage" aria-expanded="false" aria-label="Toggle navigation">
-                        <span class="navbar-toggler-icon"/>
-                    </button>
-                    <div class="collapse navbar-collapse order-2" id="navbarSlidesHomepage">
-                        <div class="navbar-nav pt-3 pt-lg-0">
-                            <a class="nav-link nav-link me-md-2 o_wslides_home_all_slides" href="/slides/all"><i class="fa fa-graduation-cap me-1"/>All courses</a>
-                        </div>
-                    </div>
-                </nav>
-                <div class="o_wprofile_email_validation_container">
-                    <t t-call="website_profile.email_validation_banner">
-                        <t t-set="redirect_url" t-value="'/slides'"/>
-                        <t t-set="send_alert_classes" t-value="'alert alert-danger alert-dismissable mt-4 mb-0'"/>
-                        <t t-set="done_alert_classes" t-value="'alert alert-success alert-dismissable mt-4 mb-0'"/>
-                        <t t-set="additional_validation_email_message"> and join this Community</t>
-                        <t t-set="additional_validated_email_message"> You may now participate in our eLearning.</t>
-                    </t>
-                </div>
+            <div class="o_wprofile_email_validation_container">
+                <t t-call="website_profile.email_validation_banner">
+                    <t t-set="redirect_url" t-value="'/slides'"/>
+                    <t t-set="send_alert_classes" t-value="'alert alert-danger alert-dismissable mt-4 mb-0'"/>
+                    <t t-set="done_alert_classes" t-value="'alert alert-success alert-dismissable mt-4 mb-0'"/>
+                    <t t-set="additional_validation_email_message"> and join this Community</t>
+                    <t t-set="additional_validated_email_message"> You may now participate in our eLearning.</t>
+                </t>
             </div>
 
             <div class="container o_wslides_home_main">
@@ -92,6 +70,26 @@
                         </div>
                     </div>
                     <div t-att-class="'col-lg-9 pe-lg-5 order-lg-1' if has_side_column else 'col-lg pr-lg'">
+                        <nav class="navbar navbar-expand-lg navbar-light mx-n3">
+                            <t t-call="website.website_search_box_input">
+                                <t t-set="_form_classes" t-valuef="o_wslides_nav_navbar_right order-lg-3"/>
+                                <t t-set="search_type" t-valuef="slides"/>
+                                <t t-set="action" t-valuef="/slides/all"/>
+                                <t t-set="display_description" t-valuef="true"/>
+                                <t t-set="display_detail" t-valuef="false"/>
+                                <t t-set="placeholder">Search courses</t>
+                            </t>
+                            <button class="navbar-toggler px-2 order-1" type="button"
+                                data-bs-toggle="collapse" data-bs-target="#navbarSlidesHomepage"
+                                aria-controls="navbarSlidesHomepage" aria-expanded="false" aria-label="Toggle navigation">
+                                <span class="navbar-toggler-icon"/>
+                            </button>
+                            <div class="collapse navbar-collapse order-2" id="navbarSlidesHomepage">
+                                <div class="navbar-nav pt-3 pt-lg-0">
+                                    <a class="nav-link nav-link me-md-2 o_wslides_home_all_slides" href="/slides/all"><i class="fa fa-graduation-cap me-1"/>All courses</a>
+                                </div>
+                            </div>
+                        </nav>
                         <div t-if="invite_error_msg" role="alert" class="o_not_editable alert alert-danger text-center" t-esc="invite_error_msg"/>
                         <div class="o_wslides_home_content_section mb-3"
                             t-if="not channels_popular">
@@ -185,7 +183,7 @@
             </div>
             <div class="container mt16 o_wslides_home_nav position-relative">
                 <!-- Navbar dynamically composed using displayed channel tag groups. -->
-                <nav class="navbar navbar-expand-md navbar-light shadow-sm ps-0">
+                <nav class="navbar navbar-expand-md navbar-light ps-0">
                     <div class="navbar-nav border-end">
                         <a class="nav-link nav-item px-3" href="/slides"><i class="oi oi-chevron-left"/></a>
                     </div>
