@@ -11,29 +11,31 @@
             <kanban sample="1">
                 <progressbar field="activity_state" colors="{&quot;planned&quot;: &quot;success&quot;, &quot;today&quot;: &quot;warning&quot;, &quot;overdue&quot;: &quot;danger&quot;}"/>
                 <card>
-                    <aside>
+                    <div class="py-2 ps-2">
                         <widget name="kanban_image" options="{'field': 'image_128'}"/>
-                    </aside>
-                    <header>
-                        <field name="name"/>
-                        <field class="o_card_align_end" name="is_favorite" widget="boolean_favorite" nolabel="1"/>
-                    </header>
-                    <group>
-                        <span invisible="not default_code">
-                            [<field name="default_code" on_change="1"/>]
-                        </span>
-                        <strong invisible="product_variant_count &lt; 2">
-                            <field name="product_variant_count"/> Variants
-                        </strong>
-                        <field name="currency_id" invisible="1"/>
-                        <span>
-                            Price: <field name="list_price" widget="monetary" options="{'currency_field': 'currency_id', 'field_digits': True}"/>
-                        </span>
-                    </group>
-                    <footer>
-                        <field name="categ_id" invisible="1" on_change="1"/>
-                        <field name="product_properties" widget="properties"/>
-                    </footer>
+                    </div>
+                    <div class="d-flex flex-column w-100 p-2 gap-1">
+                        <div class="d-flex h4">
+                            <field name="name"/>
+                            <field class="ms-auto" name="is_favorite" widget="boolean_favorite" nolabel="1"/>
+                        </div>
+                        <div class="d-flex flex-column">
+                            <span invisible="not default_code">
+                                [<field name="default_code" on_change="1"/>]
+                            </span>
+                            <strong invisible="product_variant_count &lt; 2">
+                                <field name="product_variant_count"/> Variants
+                            </strong>
+                            <field name="currency_id" invisible="1"/>
+                            <span>
+                                Price: <field name="list_price" widget="monetary" options="{'currency_field': 'currency_id', 'field_digits': True}"/>
+                            </span>
+                        </div>
+                        <div class="mt-auto">
+                            <field name="categ_id" invisible="0" on_change="1"/>
+                            <field name="product_properties" widget="properties"/>
+                        </div>
+                    </div>
                 </card>
             </kanban>
         </field>
@@ -144,28 +146,30 @@
         <field name="arch" type="xml">
             <kanban class="o_event_kanban_view" default_group_by="stage_id" quick_create_view="event.event_event_view_form_quick_create" sample="1">
                 <card>
-                    <aside full="1">
+                    <div style="flex: 0 0 var(--Card-Aside-width, 95px)">
                         <field name="date_begin" invisible="1"/>
                         <field name="date_end" invisible="1"/>
                         <widget name="event_kanban_date"/>
-                    </aside>
-                    <header>
-                        <field name="name"/>
-                    </header>
-                    <group direction="row">
-                        <i class="fa fa-map-marker fa-fw text-center" title="Location"/>
-                        <field name="address_id" invisible="not address_id"/>
-                        <span invisible="address_id">Online Event</span>
-                    </group>
-                    <group direction="row">
-                        <i class="fa fa-group fa-fw text-center" title="Attendees"/>
-                        <span><field name="seats_taken"/> Attendees</span>
-                    </group>
-                    <footer>
-                        <field name="activity_ids" widget="kanban_activity"/>
-                        <field class="o_card_align_end" name="kanban_state" widget="state_selection"/>
-                        <field class="o_card_align_end" name="user_id" widget="many2one_avatar_user"/>
-                    </footer>
+                    </div>
+                    <div class="d-flex flex-column p-2 w-100 gap-1">
+                        <div class="h4">
+                            <field name="name"/>
+                        </div>
+                        <div class="d-flex gap-2 align-items-center">
+                            <i class="fa fa-map-marker fa-fw text-center" title="Location"/>
+                            <field name="address_id" invisible="not address_id"/>
+                            <span invisible="address_id">Online Event</span>
+                        </div>
+                        <div class="d-flex gap-2 align-items-center">
+                            <i class="fa fa-group fa-fw text-center" title="Attendees"/>
+                            <span><field name="seats_taken"/> Attendees</span>
+                        </div>
+                        <div class="d-flex mt-auto gap-2" style="--Status-size: 1.5em; --Avatar-size: 1.5em">
+                            <field name="activity_ids" widget="kanban_activity" class="me-auto"/>
+                            <field class="o_card_align_end" name="kanban_state" widget="state_selection"/>
+                            <field class="o_card_align_end" name="user_id" widget="many2one_avatar_user"/>
+                        </div>
+                    </div>
                 </card>
             </kanban>
         </field>
