@@ -2,6 +2,7 @@ import { EventBus } from "@odoo/owl";
 import { omit, pick } from "../utils/objects";
 import { objectToUrlEncodedString } from "../utils/urls";
 import { browser } from "./browser";
+import { isDisplayStandalone } from "@web/core/browser/feature_detection";
 import { slidingWindow } from "@web/core/utils/arrays";
 import { isNumeric } from "@web/core/utils/strings";
 
@@ -9,6 +10,10 @@ import { isNumeric } from "@web/core/utils/strings";
 export const PATH_KEYS = ["resId", "action", "active_id", "model"];
 
 export const routerBus = new EventBus();
+
+function isAppclip() {
+    return browser.location.href.includes("/appclip") && isDisplayStandalone();
+}
 
 /**
  * Casts the given string to a number if possible.
@@ -138,7 +143,8 @@ export function stateToUrl(state) {
         }
     }
     const search = objectToUrlEncodedString(omit(state, "actionStack", ...PATH_KEYS));
-    return `/odoo${path}${search ? `?${search}` : ""}`;
+    const start_url = isAppclip() ? "appclip" : "odoo";
+    return `/${start_url}${path}${search ? `?${search}` : ""}`;
 }
 
 export function urlToState(urlObj) {
@@ -170,7 +176,7 @@ export function urlToState(urlObj) {
 
     const [prefix, ...splitPath] = urlObj.pathname.split("/").filter(Boolean);
 
-    if (prefix === "odoo") {
+    if (prefix === "odoo" || isAppclip()) {
         const actionParts = [...splitPath.entries()].filter(
             ([_, part]) => !isNumeric(part) && part !== "new"
         );

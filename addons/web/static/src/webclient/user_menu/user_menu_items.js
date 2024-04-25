@@ -114,7 +114,7 @@ function installPWAItem(env) {
             env.bus.trigger("HOME-MENU:TOGGLED");
             env.services.dialog.add(InstallPWADialog, {});
         },
-        show: () => env.services.installPrompt.isAvailable,
+        show: () => env.services.installPrompt.isAvailable || !env.services.installPrompt.isAppclip,
         sequence: 65,
     };
 }

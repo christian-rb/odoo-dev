@@ -21,6 +21,7 @@ const installPromptService = {
         const state = reactive({
             canPromptToInstall: false,
             isAvailable: false,
+            isAppclip: browser.location.href.includes("/appclip"),
             decline,
             getAppName,
             show,
