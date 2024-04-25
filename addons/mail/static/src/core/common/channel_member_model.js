@@ -16,14 +16,43 @@ export class ChannelMember extends Record {
         return super.insert(...arguments);
     }
 
+    syncNewMessageSeparator = true;
     /** @type {string} */
     create_date;
     /** @type {number} */
     id;
+    isThreadDisplayed = Record.attr(false, {
+        compute() {
+            if (this.store.discuss.isActive && !this.store.env.services.ui.isSmall) {
+                return this.thread?.eq(this.store.discuss.thread);
+            }
+            return Boolean(this.store.ChatWindow.get({ thread: this.thread }));
+        },
+        onUpdate() {
+            if (this.isThreadDisplayed && this.syncNewMessageSeparator) {
+                this.newMessageSeparator = this.seen_message_id;
+            }
+            this.syncNewMessageSeparator = true;
+        },
+    });
     /** @type {luxon.DateTime} */
     last_interest_dt = Record.attr(undefined, { type: "datetime" });
+    newMessageSeparator = Record.one("Message", {
+        onUpdate() {
+            this.syncNewMessageSeparator = false;
+        },
+    });
     persona = Record.one("Persona", { inverse: "channelMembers" });
     rtcSession = Record.one("RtcSession");
+    storeAsOnInit = Record.one("Store", {
+        eager: true,
+        compute() {
+            return this.store;
+        },
+        onAdd() {
+            this.newMessageSeparator = this.seen_message_id;
+        },
+    });
     thread = Record.one("Thread", { inverse: "channelMembers" });
     threadAsSelf = Record.one("Thread", {
         compute() {

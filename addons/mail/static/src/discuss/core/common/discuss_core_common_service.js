@@ -118,9 +118,12 @@ export class DiscussCoreCommon {
                 thread: { id: channel_id, model: "discuss.channel" },
             });
             if (member?.persona.eq(this.store.self)) {
-                member.thread.updateSeen(
-                    last_message_id ? this.store.Message.get(last_message_id) : null
-                );
+                if ("force_new_message_separator" in payload) {
+                    member.newMessageSeparator = this.store.Message.get(
+                        payload.force_new_message_separator
+                    );
+                }
+                member.thread.updateSeen(this.store.Message.get(last_message_id) ?? null);
             }
         });
         this.env.bus.addEventListener("mail.message/delete", ({ detail: { message, notifId } }) => {
@@ -203,6 +206,7 @@ export class DiscussCoreCommon {
                 channel.pendingNewMessages.push(message);
             }
             if (message.isSelfAuthored) {
+                channel.selfMember.newMessageSeparator = message;
                 channel.selfMember.seen_message_id = message;
             } else {
                 if (notifId > channel.message_unread_counter_bus_id) {
@@ -254,7 +258,7 @@ export class DiscussCoreCommon {
             authorMember.seen_message_id = message;
         }
         if (authorMember?.eq(channel.selfMember)) {
-            authorMember.thread.updateSeen(message.id);
+            authorMember.thread.updateSeen(message);
         }
     }
 }

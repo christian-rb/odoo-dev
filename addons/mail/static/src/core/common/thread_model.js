@@ -863,13 +863,17 @@ export class Thread extends Record {
         if (!newestPersistentMessage && !this.isLoaded) {
             this.isLoadedDeferred.then(() => new Promise(setTimeout)).then(() => this.markAsRead());
         }
+        const previousSeenMessage = this.selfMember?.seen_message_id;
         if (this.selfMember) {
             this.selfMember.seen_message_id = newestPersistentMessage;
+            if (this.selfMember.seen_message_id?.notEq(previousSeenMessage)) {
+                this.selfMember.newMessageSeparator = previousSeenMessage;
+            }
         }
         if (
-            this.message_unread_counter > 0 &&
-            this.model === "discuss.channel" &&
-            newestPersistentMessage
+            ((newestPersistentMessage && !previousSeenMessage) ||
+                newestPersistentMessage?.id > previousSeenMessage?.id) &&
+            this.model === "discuss.channel"
         ) {
             rpc("/discuss/channel/set_last_seen_message", {
                 channel_id: this.id,
@@ -1064,6 +1068,7 @@ export class Thread extends Record {
             this.messages.push(tmpMsg);
             if (this.selfMember) {
                 this.selfMember.seen_message_id = tmpMsg;
+                this.selfMember.newMessageSeparator = tmpMsg;
             }
         }
         const data = await rpc("/mail/message/post", params);
@@ -1078,6 +1083,7 @@ export class Thread extends Record {
         this.messages.add(message);
         if (this.selfMember?.seen_message_id?.id < message.id) {
             this.selfMember.seen_message_id = message;
+            this.selfMember.newMessageSeparator = message;
         }
         // Only delete the temporary message now that seen_message_id is updated
         // to avoid flickering.
