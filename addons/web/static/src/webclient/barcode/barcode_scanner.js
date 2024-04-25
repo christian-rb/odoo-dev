@@ -157,7 +157,12 @@ export class BarcodeDialog extends Component {
                         continue;
                     }
                 }
-                this.onResult(code.rawValue);
+                let result = code.rawValue;
+                // if the first characters are ]C1 (FNC1), we remove them.
+                if (result.substring(0, 3) === ']C1') {
+                    result = result.substring(3, result.length);
+                }
+                this.onResult(result);
                 break;
             }
         } catch (err) {
