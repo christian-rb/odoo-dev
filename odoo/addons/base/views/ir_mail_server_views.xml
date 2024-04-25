@@ -8,6 +8,8 @@
                     <header>
                         <button string="Test Connection" type="object"
                             name="test_smtp_connection" class="btn-primary"/>
+                        <button string="Import certificate" type="object"
+                            name="import_certificate" class="btn-primary"/>
                     </header>
                     <sheet>
                         <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger"
@@ -49,6 +51,7 @@
                                         <field name="smtp_pass" invisible="smtp_authentication != 'login'" password="True" force_save="1"/>
                                         <field name="smtp_ssl_certificate" invisible="smtp_authentication != 'certificate'" force_save="1"/>
                                         <field name="smtp_ssl_private_key" invisible="smtp_authentication != 'certificate'" force_save="1"/>
+                                        <field name="smtp_trusted_certificates"/>
                                     </group>
                                 </group>
                             </page>

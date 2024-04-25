@@ -12,16 +12,18 @@ import idna
 import logging
 import re
 import smtplib
+import socket
 import ssl
 import threading
 
 from socket import gaierror, timeout
+from cryptography.hazmat.primitives.serialization import Encoding
 from OpenSSL import crypto as SSLCrypto
 from OpenSSL.crypto import Error as SSLCryptoError, FILETYPE_PEM
 from OpenSSL.SSL import Error as SSLError, VERIFY_PEER, VERIFY_FAIL_IF_NO_PEER_CERT
 from urllib3.contrib.pyopenssl import PyOpenSSLContext, get_subj_alt_name
 
-from odoo import api, fields, models, tools, _
+from odoo import api, fields, models, tools, _, Command
 from odoo.exceptions import UserError
 from odoo.tools import ustr, pycompat, formataddr, email_normalize, encapsulate_email, email_domain_extract, email_domain_normalize
 
@@ -38,6 +40,7 @@ _logger = logging.getLogger(__name__)
 _test_logger = logging.getLogger('odoo.tests')
 
 SMTP_TIMEOUT = 60
+OPENSSL_CERTIFICATE_EXPIRED = 10
 
 
 class MailDeliveryException(Exception):
@@ -92,12 +95,19 @@ def extract_rfc2822_addresses(text):
     return valid_addresses
 
 
-def _verify_check_hostname_callback(cnx, x509, err_no, err_depth, return_code, *, hostname):
+def _verify_check_hostname_callback(cnx, x509, err_no, err_depth, return_code, *, mail_server, hostname):
     """Callback used for pyOpenSSL.verify_mode, by default it only check
        :param:`err_no`, we enrich it to also verify that the SMTP server
        :param:`hostname` matches the :param:`x509`'s Common Name (CN) or
        Subject Alternative Name (SAN)."""
-    if err_no:
+    if err_no == OPENSSL_CERTIFICATE_EXPIRED:
+        certpem = x509.to_cryptography().public_bytes(Encoding.PEM)
+        for trusted_cert in mail_server.smtp_ssl_trusted_certificates:
+            if trusted_cert.raw == certpem:
+                break
+        else:
+            return False
+    elif err_no:
         return False
 
     if err_depth == 0:  # leaf certificate
@@ -105,7 +115,7 @@ def _verify_check_hostname_callback(cnx, x509, err_no, err_depth, return_code, *
             "subject": ((("commonName", x509.get_subject().CN),),),
             "subjectAltName": get_subj_alt_name(x509),
         }
-        match_hostname(peercert, hostname)  # it raises when it does not match
+        match_hostname(peercert, mail_server.smtp_host or hostname)  # it raises when it does not match
 
     return True
 
@@ -142,19 +152,26 @@ class IrMailServer(models.Model):
     smtp_user = fields.Char(string='Username', help="Optional username for SMTP authentication", groups='base.group_system')
     smtp_pass = fields.Char(string='Password', help="Optional password for SMTP authentication", groups='base.group_system')
     smtp_encryption = fields.Selection([('none', 'None'),
-                                        ('starttls_strict', 'TLS (STARTTLS), encryption and validation'),
-                                        ('starttls', 'TLS (STARTTLS), encryption only'),
-                                        ('ssl_strict', 'SSL/TLS, encryption and validation'),
-                                        ('ssl', 'SSL/TLS, encryption only')],
+                                        ('starttls', 'TLS (STARTTLS)'),
+                                        ('ssl', 'SSL/TLS')],
                                        string='Connection Encryption', required=True, default='none',
                                        help="Choose the connection encryption scheme:\n"
                                             "- None: SMTP sessions are done in cleartext.\n"
                                             "- TLS (STARTTLS): TLS encryption is requested at start of SMTP session (Recommended)\n"
-                                            "- SSL/TLS: SMTP sessions are encrypted with SSL/TLS through a dedicated port (default: 465)\n"
-                                            "\n"
-                                            "Choose an additionnal variant for SSL or TLS:\n"
-                                            "- encryption and validation: encrypt the data and authentify the server using its SSL certificate (Recommended)\n"
-                                            "- encryption only: encrypt the data but skip server authentication")
+                                            "- SSL/TLS: SMTP sessions are encrypted with SSL/TLS through a dedicated port (default: 465)")
+    smtp_ssl_check_certificate = fields.Boolean(
+        "Check server certificate", default=True,
+        help="When checked (recommended), the connection is encrypted "
+             "and the authenticity of the remote server is verified "
+             "using its x509 certificate. The certificate is verified "
+             "against both the operating system trust store and the "
+             "SSL Trusted Certificates attached to this server.\n"
+             "\n"
+             "When not checked, the connection is encrypted but the "
+             "authenticity of the remote server is not verified "
+             "putting the connection at risk of man-in-the-middle "
+             "attacks.\n"
+    )
     smtp_ssl_certificate = fields.Binary(
         'SSL Certificate', groups='base.group_system', attachment=False,
         help='SSL certificate used for authentication')
@@ -164,6 +181,12 @@ class IrMailServer(models.Model):
     smtp_debug = fields.Boolean(string='Debugging', help="If enabled, the full output of SMTP sessions will "
                                                          "be written to the server log at DEBUG level "
                                                          "(this is very verbose and may include confidential info!)")
+    smtp_ssl_trusted_certificates = fields.Many2many(
+        'ir.attachment', string='SSL Trusted Certificates', groups='base.group_system',
+        help="In addition to the certificates trusted by the operating "
+             "system, a list of additionnal certificates or public "
+             "keys to trust."
+    )
     sequence = fields.Integer(string='Priority', default=10, help="When no specific mail server is requested for a mail, the highest priority one "
                                                                   "is used. Default priority is 10 (smaller number = higher priority)")
     active = fields.Boolean(default=True)
@@ -258,6 +281,75 @@ class IrMailServer(models.Model):
 
     def _get_test_email_to(self):
         return "noreply@odoo.com"
+
+    def import_certificate(self):
+        self.ensure_one()
+
+        try:
+            self.test_smtp_connection()
+        except UserError as e:
+            pattern = r"|".join([
+                r"certificate verify failed",
+                r"Hostname mismatch, certificate is not valid for '.*'",
+                r"CertificateError: hostname '.*' doesn't match '.*'",
+            ])
+            if not isinstance(e.__cause__, (ssl.SSLError, SSLError)):
+                raise
+            if not re.search(pattern, str(e.__cause__)):
+                raise
+        else:
+            raise UserError(_("The connection can be established already. Certificate importation cancelled."))
+
+        if self.smtp_encryption != 'ssl_strict':
+            raise NotImplementedError('todo')
+
+        # download the remote certificate
+        ssl_context = ssl.create_default_context()
+        ssl_context.check_hostname = False
+        ssl_context.verify_mode = ssl.CERT_NONE
+        with socket.create_connection((self.smtp_host, self.smtp_port), timeout=SMTP_TIMEOUT) as sock:
+            with ssl_context.wrap_socket(sock) as ssock:
+                dercert = ssock.getpeercert(True)
+        pemcert = ssl.DER_cert_to_PEM_cert(dercert).encode()
+
+        # find or create the corresponding attachment
+        certname = f'{self.smtp_host}.cert.pem'
+        for certificate in self.env['ir.attachment'].search([('name', '=', certname)]):
+            if certificate.raw == pemcert:
+                _logger.info("Found existing attachment for %s", certname)
+                break
+        else:
+            _logger.info("Creating new attachment for %s", certname)
+            certificate = self.env['ir.attachment'].create({
+                'name': certname,
+                'mimetype': 'application/pem-certificate-chain',
+                'raw': pemcert,
+            })
+        self.smtp_ssl_trusted_certificates |= certificate
+
+        # offer the user to trust it
+        token = certificate.generate_access_token()[0]
+        return {
+            'type': 'ir.actions.act_url',
+            'target': 'new',
+            'url': f'/web/image/{certificate.id}?access_token={token}',
+        }
+
+        from cryptography import x509
+        cert = x509.load_pem_x509_certificate(pemcert)
+
+        cert.subject
+        # <Name(C=US,
+        #       ST=California,
+        #       L=Los Angeles,
+        #       O=Internet Corporation for Assigned Names and Numbers,
+        #       CN=www.example.org)>
+
+
+        cert.extensions.get_extension_for_class(x509.SubjectAlternativeName).get_values_for_type(x509.DNSName)
+        # ['www.example.org', 'example.net', 'example.edu', 'example.com',
+        #  'example.org', 'www.example.com', 'www.example.edu', 'www.example.net']
+
 
     def test_smtp_connection(self):
         for server in self:
@@ -379,11 +471,11 @@ class IrMailServer(models.Model):
             elif mail_server.smtp_authentication == "certificate":
                 try:
                     ssl_context = PyOpenSSLContext(ssl.PROTOCOL_TLS)
-                    if mail_server.smtp_encryption in ('ssl_strict', 'starttls_strict'):
+                    if mail_server.smtp_ssl_check_certificate:
                         ssl_context.set_default_verify_paths()
                         ssl_context._ctx.set_verify(
                             VERIFY_PEER | VERIFY_FAIL_IF_NO_PEER_CERT,
-                            functools.partial(_verify_check_hostname_callback, hostname=smtp_server)
+                            functools.partial(_verify_check_hostname_callback, mail_server=mail_server, hostname=smtp_server)
                         )
                     else:  # ssl, starttls
                         ssl_context.verify_mode = ssl.CERT_NONE
@@ -399,7 +491,7 @@ class IrMailServer(models.Model):
                     raise UserError(_('The private key or the certificate is not a valid file. \n%s', str(e)))
                 except SSLError as e:
                     raise UserError(_('Could not load your certificate / private key. \n%s', str(e)))
-            elif mail_server.smtp_encryption in ('ssl_strict', 'starttls_strict'):
+            elif mail_server.smtp_ssl_check_certificate:
                 ssl_context = ssl.create_default_context()
                 ssl_context.check_hostname = True
                 ssl_context.verify_mode = ssl.CERT_REQUIRED
@@ -426,7 +518,7 @@ class IrMailServer(models.Model):
                     ssl_context.set_default_verify_paths()
                     ssl_context._ctx.set_verify(
                         VERIFY_PEER | VERIFY_FAIL_IF_NO_PEER_CERT,
-                        functools.partial(_verify_check_hostname_callback, hostname=smtp_server)
+                        functools.partial(_verify_check_hostname_callback, mail_server=mail_server, hostname=smtp_server)
                     )
                 else:
                     ssl_context.verify_mode = ssl.CERT_NONE
