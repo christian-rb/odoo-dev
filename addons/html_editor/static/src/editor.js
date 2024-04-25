@@ -18,6 +18,8 @@ import { MAIN_PLUGINS } from "./plugin_sets";
  * @property { Object } [inlineComponentInfo]
  * @property { Object } [resources]
  * @property { string } [direction="ltr"]
+ * @property { boolean } [dropImageAsAttachment]
+ *
  */
 
 function sortPlugins(plugins) {
