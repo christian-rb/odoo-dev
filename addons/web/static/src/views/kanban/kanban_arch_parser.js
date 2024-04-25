@@ -41,7 +41,7 @@ export class KanbanArchParser {
         let cardClassName;
         // Root level of the template
         visitXML(xmlDoc, (node) => {
-            if (node.tagName === "header") {
+            if (node.tagName === "actions") {
                 headerButtons = [...node.children]
                     .filter((node) => node.tagName === "button")
                     .map((node) => ({

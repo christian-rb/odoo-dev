@@ -14,10 +14,10 @@
                     <aside>
                         <widget name="kanban_image" options="{'field': 'image_128'}"/>
                     </aside>
-                    <title>
+                    <header>
                         <field name="name"/>
                         <field class="o_card_align_end" name="is_favorite" widget="boolean_favorite" nolabel="1"/>
-                    </title>
+                    </header>
                     <group>
                         <span invisible="not default_code">
                             [<field name="default_code" on_change="1"/>]
@@ -69,9 +69,9 @@
                         <widget name="kanban_image" options="{'field': 'avatar_128', 'inner': 'parent_id'}"/>
                     </aside>
                     <group>
-                        <title>
+                        <header>
                             <field name="display_name"/>
-                        </title>
+                        </header>
                         <span invisible="not parent_id or not function">
                             <field name="function"/> at <field name="parent_id" on_change="1"/>
                         </span>
@@ -142,9 +142,9 @@
                         <field name="date_end" invisible="1"/>
                         <widget name="event_kanban_date"/>
                     </aside>
-                    <title>
+                    <header>
                         <field name="name"/>
-                    </title>
+                    </header>
                     <group direction="row">
                         <i class="fa fa-map-marker fa-fw text-center" title="Location"/>
                         <field name="address_id" invisible="not address_id"/>
@@ -190,9 +190,9 @@
                 <field name="active" invisible="1"/>
                 <field name="company_currency" invisible="1"/>
                 <progressbar field="activity_state" colors="{&quot;planned&quot;: &quot;success&quot;, &quot;today&quot;: &quot;warning&quot;, &quot;overdue&quot;: &quot;danger&quot;}" sum_field="expected_revenue" recurring_revenue_sum_field="recurring_revenue_monthly" help="This bar allows to filter the opportunities based on scheduled activities."/>
-                <title>
+                <header>
                     <button name="action_generate_leads" type="object" class="o_button_generate_leads" string="Generate Leads" display="always" invisible="context.get('active_model', 'crm.lead') != 'crm.lead'"/>
-                </title>
+                </header>
                 <card>
                     <widget name="web_ribbon" title="Lost" bg_color="text-bg-danger" invisible="probability &gt; 0 or active"/>
                     <menu>
@@ -200,9 +200,9 @@
                         <a role="menuitem" type="delete" class="dropdown-item">Delete</a>
                         <field name="color" widget="kanban_colorpicker"/>
                     </menu>
-                    <title>
+                    <header>
                         <field name="name"/>
-                    </title>
+                    </header>
                     <group>
                         <field name="expected_revenue" widget="monetary" options="{'currency_field': 'company_currency'}"/>
                         <span invisible="not expected_revenue or not recurring_revenue"> + </span>
@@ -260,9 +260,9 @@
                         <field name="color" widget="kanban_colorpicker"/>
                     </menu>
                     <group>
-                        <title>
+                        <header>
                             <field name="name"/>
-                        </title>
+                        </header>
                         <field name="parent_id" invisible="not parent_id"/>
                         <field name="project_id" invisible="not project_id"/>
                         <field name="partner_id" invisible="not partner_id"/>

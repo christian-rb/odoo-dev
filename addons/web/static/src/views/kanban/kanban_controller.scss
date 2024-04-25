@@ -127,7 +127,7 @@
             flex-grow: 1;
         }
 
-        .o_kanban_card_title {
+        .o_kanban_card_header {
             font-weight: var(--Card-Header-color, #{$headings-font-weight});
             line-height: var(--Card-Header-line-height, #{$headings-line-height});
             font-size: var(--Card-Header-font-size, #{$h5-font-size});
@@ -135,7 +135,7 @@
             margin-bottom: var(--Card-Header-margin-bottom, #{$o-kanban-card-header-margin-bottom});
         }
 
-        .o_kanban_card_group:has(.o_kanban_card_title) {
+        .o_kanban_card_group:has(.o_kanban_card_header) {
             --Card-Header-margin-bottom: #{$o-kanban-card-header-margin-bottom * .5};
 
             color: var(--Card-Subtitle-color, #{$text-muted});
@@ -182,7 +182,7 @@
             line-height: 1;
         }
 
-        .o_kanban_card_title, .o_kanban_card_footer {
+        .o_kanban_card_header, .o_kanban_card_footer {
             --Tag-font-size: 1em;
             --Status-size: 1.5em;
             --Avatar-size: 1.5em;

@@ -7,7 +7,7 @@ const SPECIAL_TYPES = ["edit", "delete", "archive", "unarchive", "set_cover"];
 
 const ITEMS_TO_TAG = {
     group: "section",
-    title: "header",
+    header: "header",
     footer: "footer",
 };
 
@@ -19,7 +19,7 @@ export class KanbanCompiler extends ViewCompiler {
                 fn: this.compileKanban,
                 doNotCopyAttributes: true,
             },
-            { selector: "group, title, footer", fn: this.compileGroup }
+            { selector: "group, header, footer", fn: this.compileGroup }
         );
     }
 
@@ -48,7 +48,7 @@ export class KanbanCompiler extends ViewCompiler {
                     break;
                 }
                 case "group":
-                case "title":
+                case "header":
                 case "footer": {
                     if (!mainNode) {
                         mainNode = createElement("main");
@@ -118,7 +118,7 @@ export class KanbanCompiler extends ViewCompiler {
 
         // move right aligned elements to the right
         let childNodes = [...el.childNodes];
-        if (direction === "column" || ["foot", "head"].includes(type)) {
+        if (direction === "column" || ["footer", "header"].includes(type)) {
             const { left, right } = groupBy(childNodes, (n) => {
                 return n.classList?.contains("o_card_align_end") ? "right" : "left";
             });
