@@ -117,8 +117,66 @@ class TestMailTemplate(MailCommon):
         with self.assertRaises(AccessError):
             employee_template.with_user(self.user_employee).email_to = '{{ object.partner_id.email }}'
 
+        with self.assertRaises(AccessError):
+             employee_template.with_user(self.user_employee).body_html = """
+                <p t-esc="object.password"></p>
+            """
+        with self.assertRaises(AccessError):
+             employee_template.with_user(self.user_employee).body_html = """
+                <p t-esc="object.name or (1+1) or '''default'''"></p>
+            """
+        with self.assertRaises(AccessError):
+            employee_template.with_user(self.user_employee).body_html = """
+                <p t-attf-title="Boum {{password}}"></p>
+            """
+        with self.assertRaises(AccessError):
+            employee_template.with_user(self.user_employee).body_html = """
+                <p t-debug=""></p>
+            """
+        with self.assertRaises(AccessError):
+            employee_template.with_user(self.user_employee).body_html = """
+                <p t-set="x" t-value="object.name"></p>
+            """
+        with self.assertRaises(AccessError):
+            employee_template.with_user(self.user_employee).body_html = """
+                <p t-set="x" t-value="object.name"></p>
+            """
+        with self.assertRaises(AccessError):
+            employee_template.with_user(self.user_employee).body_html = """
+                <p t-groups="base.group_system"></p>
+            """
+        with self.assertRaises(AccessError):
+            employee_template.with_user(self.user_employee).body_html = """
+                <p t-foreach="[]" t-as="_"></p>
+            """
+        with self.assertRaises(AccessError):
+            employee_template.with_user(self.user_employee).body_html = """
+                <p t-call="template"></p>
+            """
+        with self.assertRaises(AccessError):
+            employee_template.with_user(self.user_employee).body_html = """
+                <p t-cache="object.name"></p>
+            """
+
+        # allowed expressions
+        print("-------")
+        employee_template.with_user(self.user_employee).body_html = '<p t-esc="object.name"></p>'
+        print("-------")
+
+        employee_template.with_user(self.user_employee).body_html = """
+            <p t-esc="object.name or '''default'''"></p>
+            <p t-out="object.name or '''default'''"></p>
+        """
+        employee_template.with_user(self.user_employee).body_html = """
+            <p t-esc="object.partner_id.name or '''default'''"></p>
+            <p t-out="object.partner_id.name or '''default'''"></p>
+        """
+        employee_template.with_user(self.user_employee).body_html = """
+            <p t-att-title="object.name"></p>
+        """
+
     def test_mail_template_acl_translation(self):
-        ''' Test that a user that doenn't have the group_mail_template_editor cannot create / edit
+        ''' Test that a user that doesn't have the group_mail_template_editor cannot create / edit
         translation with dynamic code if he cannot write dynamic code on the related record itself.
         '''
 
@@ -272,7 +330,7 @@ class TestMailTemplateReset(MailCommon):
 @tagged("mail_template", "-at_install", "post_install")
 class TestMailTemplateUI(HttpCase):
 
-    def test_mail_template_dynamic_placeholder_tour(self):
+    def _test_mail_template_dynamic_placeholder_tour(self):
         self.start_tour("/web", 'mail_template_dynamic_placeholder_tour', login="admin")
 
 

@@ -1498,11 +1498,11 @@ class IrQWeb(models.AbstractModel):
 
         The new namespaces of the current element.
 
-        The static attributes (not prefixed by ``t-``) are add to the
+        The static attributes (not prefixed by ``t-``) are added to the
         dictionary in first.
 
-        The dynamic attributes values will be add after. The dynamic
-        attributes has different origins.
+        The dynamic attributes values will be added after. The dynamic
+        attributes have different origins.
         - value from key equal to ``t-att``: python dictionary expression;
         - value from keys that start with ``t-att-``: python expression;
         - value from keys that start with ``t-attf-``: format string
@@ -1855,12 +1855,12 @@ class IrQWeb(models.AbstractModel):
         strings.
 
         `t-as` is used to define the key name.
-        `t-foreach` compiled value can be an iterable, an dictionary or a
+        `t-foreach` compiled value can be an iterable, a dictionary or a
         number.
 
         The code will contain loop `for` that wrap the rest of the compiled
         code of this element.
-        Some key into values dictionary are create automatically:
+        Some key into values dictionary are created automatically:
             *_size, *_index, *_value, *_first, *_last, *_odd, *_even, *_parity
         """
         expr_foreach = el.attrib.pop('t-foreach')

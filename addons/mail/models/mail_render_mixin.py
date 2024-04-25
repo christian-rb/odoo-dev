@@ -321,7 +321,7 @@ class MailRenderMixin(models.AbstractModel):
                 if isinstance(e, QWebException) and isinstance(e.__cause__, PermissionError):
                     group = self.env.ref('mail.group_mail_template_editor')
                     raise AccessError(
-                        _('Only users belonging to the "%(group_name)s" group can modify dynamic templates.',
+                        _('Only users belonging to the "%(group_name)s" group can use complex expressions.',
                            group_name=group.name)
                     ) from e
                 _logger.info("Failed to render template: %s", template_src, exc_info=True)
