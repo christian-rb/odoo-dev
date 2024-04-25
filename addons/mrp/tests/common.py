@@ -76,7 +76,7 @@ class TestMrpCommon(TestStockCommon):
             'type': 'product',
         })
 
-        with cls.sudo():
+        with cls.admin_permissions():
             # User Data: mrp user and mrp manager
             cls.user_mrp_user = mail_new_test_user(
                 cls.env,
