@@ -76,7 +76,10 @@
                                 </div>
                             </div>
                         </nav>
-                        <h4 class="mb-4">Online Courses</h4>
+                        <div class="d-flex align-items-center justify-content-between">
+                            <h4 class="mb-4">Online Courses</h4>
+                            <!-- New filters go here -->
+                        </div>
                         <div t-if="invite_error_msg" role="alert" class="o_not_editable alert alert-danger text-center" t-esc="invite_error_msg"/>
                         <div class="o_wslides_home_content_section mb-3"
                             t-if="not channels_popular">
