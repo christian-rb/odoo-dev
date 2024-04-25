@@ -296,16 +296,28 @@
                     </div>
                 </t>
             </div>
-
             <t t-call="website_slides.courses_footer"></t>
         </div>
     </t>
 </template>
 
 <template id='courses_footer'>
-    <section class="s_banner">
-        <div class="oe_structure oe_empty" id="oe_structure_website_slides_course_footer_1"/>
+    <section class="s_call_to_action o_cc o_cc3 pt48 pb24 o_colored_level" data-snippet="s_call_to_action" data-name="Call to Action">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-9 pb16 o_draggable o_colored_level">
+                    <h3 class="o_default_snippet_text"><b class="o_default_snippet_text">50,000+ companies</b> run Odoo to grow their businesses.</h3>
+                    <p class="o_default_snippet_text">Join us and make your company a better place.</p>
+                </div>
+                <div class="col-lg-3 pt8 o_draggable o_colored_level">
+                    <p style="text-align: right;">
+                        <a class="btn btn-primary btn-lg o_default_snippet_text" href="/contactus">Contact us</a>
+                    </p>
+                </div>
+            </div>
+        </div>
     </section>
+    <div class="oe_structure oe_empty" id="oe_structure_website_slides_course_footer_1"/>
 </template>
 
 <template id='course_card' name="Course Card">
