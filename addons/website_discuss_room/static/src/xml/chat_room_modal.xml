@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <templates xml:space="preserve">
     <t t-name="chat_room_modal">
-        <div class="o_wjitsi_room_modal modal fade" role="dialog">
+        <div class="o_wdiscuss_room_modal modal fade" role="dialog">
             <div class="modal-dialog">
                 <div class="modal-content border-0">
                     <main class="modal-body p-0">

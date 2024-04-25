@@ -170,7 +170,7 @@ publicWidget.registry.ChatRoom = publicWidget.Widget.extend({
         jitsiRoom.addEventListener('videoConferenceJoined', async (event) => {
             this.participantId = event.id;
             updateParticipantCount(true);
-            $('.o_wjitsi_chat_room_loading').addClass('d-none');
+            $('.o_wdiscuss_chat_room_loading').addClass('d-none');
 
             // recheck if the room is not full
             if (this.checkFull && this.allParticipantIds.length > this.maxCapacity) {

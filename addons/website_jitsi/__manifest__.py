@@ -10,12 +10,7 @@
     'website': 'https://www.odoo.com/app/events',
     "description": "Create Jitsi room on website.",
     "depends": [
-        "website"
-    ],
-    "data": [
-        'views/chat_room_templates.xml',
-        'views/chat_room_views.xml',
-        'security/ir.model.access.csv',
+        "website_discuss_room",
     ],
     'assets': {
         'web.assets_frontend': [

@@ -1,10 +1,10 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import re
 
 from odoo import api, fields, models
 from odoo.tools import remove_accents
+
 
 class ChatRoomMixin(models.AbstractModel):
     """Add the chat room configuration (`chat.room`) on the needed models.
@@ -37,7 +37,7 @@ class ChatRoomMixin(models.AbstractModel):
         for values in values_list:
             if any(values.get(fmatch[0]) for fmatch in self.ROOM_CONFIG_FIELDS) and not values.get('chat_room_id'):
                 if values.get('room_name'):
-                    values['room_name'] = self._jitsi_sanitize_name(values['room_name'])
+                    values['room_name'] = self._sanitize_name(values['room_name'])
                 room_values = dict((fmatch[1], values[fmatch[0]]) for fmatch in self.ROOM_CONFIG_FIELDS if values.get(fmatch[0]))
                 values['chat_room_id'] = self.env['chat.room'].create(room_values).id
         return super(ChatRoomMixin, self).create(values_list)
@@ -45,7 +45,7 @@ class ChatRoomMixin(models.AbstractModel):
     def write(self, values):
         if any(values.get(fmatch[0]) for fmatch in self.ROOM_CONFIG_FIELDS):
             if values.get('room_name'):
-                values['room_name'] = self._jitsi_sanitize_name(values['room_name'])
+                values['room_name'] = self._sanitize_name(values['room_name'])
             for document in self.filtered(lambda doc: not doc.chat_room_id):
                 room_values = dict((fmatch[1], values[fmatch[0]]) for fmatch in self.ROOM_CONFIG_FIELDS if values.get(fmatch[0]))
                 document.chat_room_id = self.env['chat.room'].create(room_values).id
@@ -59,7 +59,7 @@ class ChatRoomMixin(models.AbstractModel):
                 continue
             chat_room_default = {}
             if 'room_name' not in default:
-                chat_room_default['name'] = self._jitsi_sanitize_name(room.chat_room_id.name)
+                chat_room_default['name'] = self._sanitize_name(room.chat_room_id.name)
             vals['chat_room_id'] = room.chat_room_id.copy(default=chat_room_default).id
         return vals_list
 
@@ -69,7 +69,7 @@ class ChatRoomMixin(models.AbstractModel):
         rooms.unlink()
         return res
 
-    def _jitsi_sanitize_name(self, name):
+    def _sanitize_name(self, name):
         sanitized = re.sub(r'[^\w+.]+', '-', remove_accents(name).lower())
         counter, sanitized_suffixed = 1, sanitized
         existing = self.env['chat.room'].search([('name', '=like', '%s%%' % sanitized)]).mapped('name')
