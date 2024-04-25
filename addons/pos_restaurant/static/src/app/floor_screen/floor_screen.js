@@ -341,6 +341,8 @@ export class FloorScreen extends Component {
 
                 this.selectFloor(floor[0]);
                 this.pos.isEditMode = true;
+                this.pos.models["restaurant.floor"].sort((a, b) => a.id - b.id);
+                this.pos.config.floor_ids.push(floor[0].id);
             },
         });
     }
@@ -558,6 +560,7 @@ export class FloorScreen extends Component {
             if (this.pos.models["restaurant.floor"].length > 0) {
                 this.selectFloor(this.pos.models["restaurant.floor"].getAll()[0]);
             } else {
+                this.pos.config.floor_ids = [];
                 this.pos.isEditMode = false;
                 this.pos.floorPlanStyle = "default";
             }
