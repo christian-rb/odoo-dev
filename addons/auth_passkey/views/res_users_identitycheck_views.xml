@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_users_identitycheck_view_form_passkey" model="ir.ui.view">
+        <field name="model">res.users.identitycheck</field>
+        <field name="inherit_id" ref="base.res_users_identitycheck_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='run_check']" position="after">
+                <field name="hide_button" invisible="1"/>
+                <widget name="verify_identity_passkey" data-hotkey="p" invisible="hide_button == 'passkey'"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
