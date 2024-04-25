@@ -214,12 +214,6 @@ class TestStockCommon(TestProductCommon):
 
     @classmethod
     def setup_logistics_user(cls):
-        # TODO: is this group setup correct with the new user?
-        cls.env.ref('base.group_user').write({'implied_ids': [
-            (4, cls.env.ref('base.group_multi_company').id),
-            (4, cls.env.ref('stock.group_production_lot').id),
-        ]})
-
         cls.user = cls.env['res.users'].create({
             'name': 'Test Stock User',
             'login': 'stock',

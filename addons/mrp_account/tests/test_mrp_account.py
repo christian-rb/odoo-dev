@@ -138,6 +138,7 @@ class TestMrpAccountCommon(TestMrpCommon):
         (cls.product_bolt + cls.product_screw).write({'type': 'product'})
         cls.dining_table.tracking = 'none'
 
+
 class TestMrpAccount(TestMrpAccountCommon):
 
     def test_00_production_order_with_accounting(self):
