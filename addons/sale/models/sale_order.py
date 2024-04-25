@@ -1664,6 +1664,7 @@ class SaleOrder(models.Model):
             and not self.is_expired
             and self.require_signature
             and not self.signature
+            and not self._is_confirmation_amount_reached()
         )
 
     def _has_to_be_paid(self):
@@ -1685,8 +1686,8 @@ class SaleOrder(models.Model):
             self.state in ['draft', 'sent']
             and not self.is_expired
             and self.require_payment
-            and transaction.state != 'done' #the problem, because of that it says that it does not need to be payed
             and self.amount_total > 0
+            and not self._is_confirmation_amount_reached()
         )
 
     def _get_portal_return_action(self):
