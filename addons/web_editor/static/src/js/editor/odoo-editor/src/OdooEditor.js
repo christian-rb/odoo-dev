@@ -3783,6 +3783,10 @@ export class OdooEditor extends EventTarget {
                     insertText(selection, ev.data === null ? ev.dataTransfer.getData('text/plain') : ev.data);
                     selection.collapseToEnd();
                 }
+                const closestBlockText = closestBlock(selection.anchorNode).textContent;
+                const stringToConvert = closestBlockText.substring(0, selection.anchorOffset);
+                const shouldCreateNumberList = (/^(?:[1aA])[.)]\s$/).test(stringToConvert);
+                const shouldCreateBulletList = (/^[-*]\s$/).test(stringToConvert);
                 if (ev.data === '`' && !closestElement(selection.anchorNode, 'code')) {
                     // We just inserted a backtick, check if there was another
                     // one in the text.
@@ -3847,6 +3851,32 @@ export class OdooEditor extends EventTarget {
                             setSelection(codeElement.firstChild, 0);
                         }
                     }
+                } else if ((shouldCreateNumberList || shouldCreateBulletList) &&
+                    !closestElement(selection.anchorNode, 'li')
+                ) {
+                    this.historyStep();
+                    const node = selection.anchorNode;
+                    const listFormatRegex = /^(?:[1aA][.)]|[-*])\s/;
+                    node.textContent = node.textContent.replace(listFormatRegex, '');
+                    fillEmpty(closestBlock(node));
+                    this.historyPauseSteps();
+                    if (shouldCreateNumberList) {
+                        this._applyCommand('toggleList', 'OL');
+                        // When the anchorNode is a context block and a list is
+                        // being created inside it, ensure to navigate to the
+                        // deepest node.
+                        const deepsetNode = getDeepestPosition(selection.anchorNode, selection.anchorOffset);
+                        const closestOl = closestElement(deepsetNode[0], 'OL');
+
+                        if (stringToConvert.startsWith('A')) {
+                            closestOl.style.listStyle = 'upper-alpha';
+                        } else if (stringToConvert.startsWith('a')) {
+                            closestOl.style.listStyle = 'lower-alpha';
+                        }
+                    } else if (shouldCreateBulletList) {
+                        this._applyCommand('toggleList', 'UL');
+                    }
+                    this.historyUnpauseSteps();
                 }
                 this.historyStep();
             } else {
