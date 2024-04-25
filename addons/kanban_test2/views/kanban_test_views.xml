@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <odoo><data>
-    <menuitem id="kanban_test_menu" name="Kanban Test" sequence="0"/>
+    <menuitem id="kanban_test_menu" name="Kanban Test 2" sequence="0"/>
 
     <!-- products -->
     <record id="kanban_test_product_kanban" model="ir.ui.view">
@@ -65,49 +65,56 @@
                 <field name="is_company" invisible="1" on_change="1"/>
                 <card>
                     <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
-                    <aside full="1">
-                        <widget name="kanban_image" options="{'field': 'avatar_128', 'inner': 'parent_id'}"/>
-                    </aside>
-                    <group>
-                        <header>
-                            <field name="display_name"/>
-                        </header>
-                        <span invisible="not parent_id or not function">
-                            <field name="function"/> at <field name="parent_id" on_change="1"/>
-                        </span>
-                    </group>
-                    <group>
-                        <field invisible="not category_id" name="category_id" widget="many2many_tags" options="{'color_field': 'color'}"/>
-                        <field invisible="not parent_id or function" name="parent_id" on_change="1"/>
-                        <field invisible="parent_id or not function" name="function"/>
-                        <span invisible="not city and not country_id">
-                            <field invisible="not city" name="city" on_change="1"/>
-                            <span invisible="not city or not country_id">, </span>
-                            <field invisible="not country_id" name="country_id" on_change="1"/>
-                        </span>
-                        <field name="email" on_change="1" class="text-truncate"/>
-                    </group>
-                    <footer>
-                        <a invisible="meeting_count == 0" type="object" name="schedule_meeting">
-                            <span class="badge rounded-pill">
-                                <i class="fa fa-calendar me-1" aria-label="Meetings" role="img" title="Meetings"/>
-                                <field name="meeting_count"/>
-                            </span>
-                        </a>
-                        <a invisible="opportunity_count == 0" type="object" name="action_view_opportunity">
-                            <span class="badge rounded-pill">
-                                <i class="fa fa-star me-1" aria-label="Opportunities" role="img" title="Opportunities"/>
-                                <field name="opportunity_count"/>
-                            </span>
-                        </a>
-                        <a invisible="sale_order_count == 0" type="object" name="action_view_sale_order">
-                            <span class="badge rounded-pill">
-                                <i class="fa fa-usd me-1" role="img" aria-label="Sale orders" title="Sales orders"/>
-                                <field name="sale_order_count"/>
-                            </span>
-                        </a>
-                        <field class="o_card_align_end" name="activity_ids" widget="kanban_activity"/>
-                    </footer>
+
+                    <div class="row w-100 g-0">
+                        <widget class="col-3 col-md-4" name="kanban_image" options="{'field': 'avatar_128', 'inner': 'parent_id'}"/>
+                        <div class="col-9 col-md-8 p-2">
+                            <div class="d-flex flex-column gap-1 w-100 h-100">
+                                <div>
+                                    <field class="fs-5 fw-bold" name="display_name"/>
+                                    <div class="text-muted" invisible="not parent_id or not function">
+                                        <field name="function"/> at <field name="parent_id" on_change="1"/>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <field invisible="not category_id" name="category_id" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                                    <field invisible="not parent_id or function" name="parent_id" on_change="1"/>
+                                    <field invisible="parent_id or not function" name="function"/>
+                                    <div invisible="not city and not country_id">
+                                        <field invisible="not city" name="city" on_change="1"/>
+                                        <span invisible="not city or not country_id">, </span>
+                                        <field invisible="not country_id" name="country_id" on_change="1"/>
+                                    </div>
+                                    <field name="email" on_change="1" class="d-block text-truncate"/>
+                                </div>
+
+                                <div class="row flex-grow-1 align-content-end fs-4">
+                                    <div class="col">
+                                        <a invisible="meeting_count == 0" type="object" name="schedule_meeting">
+                                            <span class="badge rounded-pill">
+                                                <i class="fa fa-calendar me-1" aria-label="Meetings" role="img" title="Meetings"/>
+                                                <field name="meeting_count"/>
+                                            </span>
+                                        </a>
+                                        <a invisible="opportunity_count == 0" type="object" name="action_view_opportunity">
+                                            <span class="badge rounded-pill">
+                                                <i class="fa fa-star me-1" aria-label="Opportunities" role="img" title="Opportunities"/>
+                                                <field name="opportunity_count"/>
+                                            </span>
+                                        </a>
+                                        <a invisible="sale_order_count == 0" type="object" name="action_view_sale_order">
+                                            <span class="badge rounded-pill">
+                                                <i class="fa fa-usd me-1" role="img" aria-label="Sale orders" title="Sales orders"/>
+                                                <field name="sale_order_count"/>
+                                            </span>
+                                        </a>
+                                    </div>
+                                    <field class="ms-auto col-auto" name="activity_ids" widget="kanban_activity"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </card>
             </kanban>
         </field>
