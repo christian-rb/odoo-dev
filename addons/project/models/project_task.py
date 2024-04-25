@@ -291,10 +291,29 @@ class Task(models.Model):
             Make sure to use the right format and order e.g. Improve the configuration screen #feature #v16 @Mitchell !""",
     )
 
-    _sql_constraints = [
-        ('recurring_task_has_no_parent', 'CHECK (NOT (recurring_task IS TRUE AND parent_id IS NOT NULL))', "A subtask cannot be recurrent."),
-        ('private_task_has_no_parent', 'CHECK (NOT (project_id IS NULL AND parent_id IS NOT NULL))', "A private task cannot have a parent."),
-    ]
+    def display_toast_notification(self):
+        if self.recurring_task and self.parent_id:
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'type': 'danger',
+                    'message': _("You cannot convert this task into a sub-task because it is recurrent."),
+                    'next': {'type': 'ir.actions.act_window_close'},
+                }
+            }
+        elif not self.project_id and self.parent_id:
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'type': 'danger',
+                    'message': _("A private task cannot have a parent."),
+                    'next': {'type': 'ir.actions.act_window_close'},
+                }
+            }
+        else:
+            return self._cr.commit()
 
     @api.constrains('company_id', 'partner_id')
     def _ensure_company_consistency_with_partner(self):

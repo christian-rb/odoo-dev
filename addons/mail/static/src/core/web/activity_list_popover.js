@@ -50,6 +50,7 @@ export class ActivityListPopover extends Component {
     }
 
     onClickAddActivityButton() {
+        debugger
         this.store
             .scheduleActivity(
                 this.props.resModel,

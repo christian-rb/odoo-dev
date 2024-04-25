@@ -23,6 +23,10 @@ export class ProjectTaskKanbanRenderer extends KanbanRenderer {
         });
     }
 
+    get canResequenceGroups() {
+        return super.canResequenceGroups && this.isProjectManager;
+    }
+
     canCreateGroup() {
         // This restrict the creation of project stages to the kanban view of a given project
         return super.canCreateGroup() && (this.isProjectTasksContext() == this.props.list.isGroupedByStage
