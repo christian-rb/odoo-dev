@@ -67,6 +67,17 @@ class ProjectShareWizard(models.TransientModel):
             else:
                 wizard.resource_ref = None
 
+    @api.depends('access_mode')
+    def _compute_share_link(self):
+        readonly_access_wizard_id = []
+        for wizard in self:
+            if wizard.access_mode == 'read':
+                readonly_access_wizard_id.append(wizard.id)
+                continue
+            if wizard.resource_ref:
+                wizard.share_link = wizard.resource_ref.get_base_url() + wizard.resource_ref._get_share_url(redirect=True, share_token=False)
+        super(ProjectShareWizard, self.browse(readonly_access_wizard_id))._compute_share_link()
+
     @api.model_create_multi
     def create(self, vals_list):
         wizards = super().create(vals_list)

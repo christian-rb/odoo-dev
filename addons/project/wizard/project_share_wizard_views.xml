@@ -19,7 +19,7 @@
                 <field name="res_id" invisible="1"/>
                 <group>
                     <field options="{'horizontal': true}" name="access_mode" widget="radio"/>
-                    <field name="share_link" widget="CopyClipboardChar" invisible="access_mode != 'read'"/>
+                    <field name="share_link" widget="CopyClipboardChar"/>
                     <field name="send_email" widget="boolean_toggle" options="{'autosave': False}" invisible="access_mode != 'read'"/>
                     <div invisible="not send_email and access_mode == 'read'" class="o_td_label mb-0">
                         <label for="partner_ids" string="Invite People" invisible="access_mode == 'read'"/>
