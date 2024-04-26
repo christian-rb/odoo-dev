@@ -1190,7 +1190,8 @@
                                     </group>
                                 </group>
                             </page>
-                            <page id="aml_tab" string="Journal Items" groups="account.group_account_readonly" name="aml_tab">
+                            <page id="aml_tab" string="Journal Items" invisible="hide_items" name="aml_tab">
+                                <field name="hide_items" invisible="1"/>
                                 <field name="line_ids"
                                        mode="tree,kanban"
                                        context="{

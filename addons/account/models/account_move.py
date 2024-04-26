@@ -238,6 +238,7 @@ class AccountMove(models.Model):
         index='btree_not_null',
     )
     hide_post_button = fields.Boolean(compute='_compute_hide_post_button', readonly=True)
+    hide_items = fields.Boolean(compute='_compute_hide_items')
     to_check = fields.Boolean(
         string='To Check',
         tracking=True,
@@ -689,6 +690,10 @@ class AccountMove(models.Model):
         for record in self:
             if record.auto_post in ('no', 'at_date'):
                 record.auto_post_until = False
+
+    def _compute_hide_items(self):
+        for record in self:
+            record.hide_items = not self.env.user.has_group('account.group_account_user')
 
     @api.depends('date', 'auto_post')
     def _compute_hide_post_button(self):
