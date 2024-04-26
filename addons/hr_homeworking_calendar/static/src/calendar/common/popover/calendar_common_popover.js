@@ -1,5 +1,4 @@
-/** @odoo-module **/
-
+import { onWillStart } from "@odoo/owl";
 import { user } from "@web/core/user";
 import { patch } from "@web/core/utils/patch";
 import { AttendeeCalendarCommonPopover } from "@calendar/views/attendee_calendar/common/attendee_calendar_common_popover";
@@ -29,6 +28,10 @@ patch(AttendeeCalendarCommonPopover.prototype, {
             "date": { name: "date", type: "date"},
             "employee_name": { name: "employee name", type:"char"}
         };
+        onWillStart(async () => {
+            this.userCanEdit = (await this.orm.read("res.users", [user.userId], ["can_edit"]))[0]['can_edit']
+        });
+
     },
     isWorkLocationEvent(){
         return this.props.record['resModel'] === 'hr.employee.location';
@@ -46,6 +49,9 @@ patch(AttendeeCalendarCommonPopover.prototype, {
         return !('resModel' in this.props.record) || super.isEventViewable;
     },
     get isEventDeletable() {
+        if (this.props.record.homeworking) {
+            return (this.userCanEdit || !this.props.record.ghostRecord) && super.isEventDeletable
+        }
         return super.isEventDeletable;
     },
     get displayAttendeeAnswerChoice() {
