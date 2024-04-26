@@ -1,24 +1,31 @@
-export class ChannelCommand {
+import { Record } from "@mail/core/common/record";
+
+export class ChannelCommand extends Record {
+    static id = "name";
+    /** @type {Object.<number, import("models").ChannelCommand>} */
+    static records = {};
+    /** @returns {import("models").ChannelCommand} */
+    static get(data) {
+        return super.get(data);
+    }
+    /** @returns {import("models").ChannelCommand|import("models").ChannelCommand[]} */
+    static insert(data) {
+        return super.insert(...arguments);
+    }
+
     /** @type {number} */
     endPosition;
-    /** @type {boolean} */
-    hasSubCommand;
     /** @type {string} */
     methodName;
     /** @type {string} */
     name;
     /** @type {Object} */
-    subCommandData;
+    subCommandData = {};
     /** @type {string[]} */
     subCommandFields;
 
-    constructor(params) {
-        this.endPosition = params.endPosition;
-        this.methodName = params.methodName;
-        this.name = params.name;
-        this.subCommandFields = params.subCommandFields;
-        this.hasSubCommand = Boolean(params.subCommandFields);
-        this.subCommandData = {};
+    get hasSubCommand() {
+        return Boolean(this.subCommandFields);
     }
 
     get params() {
@@ -31,3 +38,5 @@ export class ChannelCommand {
         return res;
     }
 }
+
+ChannelCommand.register();

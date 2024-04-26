@@ -45,6 +45,7 @@ declare module "models" {
     // required to propagate types in relational fields
     export interface Models {
         "Attachment": Attachment,
+        "ChannelCommand": ChannelCommand,
         "CannedResponse": CannedResponse,
         "ChannelMember": ChannelMember,
         "ChatWindow": ChatWindow,

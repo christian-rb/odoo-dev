@@ -1,6 +1,5 @@
 import { useSequential } from "@mail/utils/common/hooks";
 import { status, useComponent, useEffect, useState } from "@odoo/owl";
-import { ChannelCommand } from "@mail/core/common/channel_command_model";
 
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
@@ -70,7 +69,10 @@ class UseSuggestion {
         term: "",
     };
     clearCommand() {
-        this.composer.command = undefined;
+        if (this.composer.command) {
+            this.composer.command.subCommandData = {};
+            this.composer.command = undefined;
+        }
     }
     clearRawMentions() {
         this.composer.mentionedChannels.length = 0;
@@ -184,11 +186,11 @@ class UseSuggestion {
         if (this.search.delimiter === " ") {
             this.composer.command.subCommandData = option;
         } else if (this.search.delimiter === "/") {
-            this.composer.command = new ChannelCommand({
+            this.composer.command = {
                 endPosition: before.length + option.label.length,
                 name: option.label,
                 ...commandRegistry.get(option.label),
-            });
+            };
         }
         this.clearSearch();
         this.composer.text = before + option.label + " " + after;
