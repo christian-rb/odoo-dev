@@ -10,30 +10,32 @@
         <field name="arch" type="xml">
             <kanban sample="1">
                 <progressbar field="activity_state" colors="{&quot;planned&quot;: &quot;success&quot;, &quot;today&quot;: &quot;warning&quot;, &quot;overdue&quot;: &quot;danger&quot;}"/>
-                <card>
-                    <aside>
-                        <widget name="kanban_image" options="{'field': 'image_128'}"/>
-                    </aside>
-                    <header>
-                        <field name="name"/>
-                        <field class="o_card_align_end" name="is_favorite" widget="boolean_favorite" nolabel="1"/>
-                    </header>
-                    <group>
-                        <span invisible="not default_code">
-                            [<field name="default_code" on_change="1"/>]
-                        </span>
-                        <strong invisible="product_variant_count &lt; 2">
-                            <field name="product_variant_count"/> Variants
-                        </strong>
+                <card class="d-flex flex-row">
+                    <main class="flex-grow-1">
+                        <div class="d-flex">
+                            <field class="me-1" name="is_favorite" widget="boolean_favorite" nolabel="1"/>
+                            <field class="fw-bold" name="name"/>
+                        </div>
+
+                        <div invisible="not default_code">
+                            [<field class="d-inline" name="default_code"/>]
+                        </div>
+                        <div class="fw-bolder" invisible="product_variant_count &lt; 2">
+                            <field class="d-inline" name="product_variant_count"/> Variants
+                        </div>
                         <field name="currency_id" invisible="1"/>
-                        <span>
-                            Price: <field name="list_price" widget="monetary" options="{'currency_field': 'currency_id', 'field_digits': True}"/>
-                        </span>
-                    </group>
-                    <footer>
-                        <field name="categ_id" invisible="1" on_change="1"/>
-                        <field name="product_properties" widget="properties"/>
-                    </footer>
+                        <div>
+                            Price: <field class="d-inline" name="list_price" widget="monetary" options="{'currency_field': 'currency_id', 'field_digits': True}"/>
+                        </div>
+                    
+                        <footer>
+                            <field name="categ_id" invisible="1"/>
+                            <field name="product_properties" widget="properties"/>
+                        </footer>
+                    </main>
+                    <aside>
+                        <field class="o_image_64_contain" name="image_128" widget="image"/>
+                    </aside>
                 </card>
             </kanban>
         </field>
@@ -62,52 +64,50 @@
         <field name="arch" type="xml">
             <kanban sample="1">
                 <field name="active" invisible="1"/>
-                <field name="is_company" invisible="1" on_change="1"/>
-                <card>
+                <field name="is_company" invisible="1"/>
+                <card class="d-flex flex-row">
                     <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
-                    <aside full="1">
-                        <widget name="kanban_image" options="{'field': 'avatar_128', 'inner': 'parent_id'}"/>
+                    <aside class="o_kanban_aside_full">
+                        <widget class="h-100" name="kanban_image" options="{'field': 'avatar_128', 'inner': 'parent_id'}"/>
                     </aside>
-                    <group>
-                        <header>
-                            <field name="display_name"/>
-                        </header>
-                        <span invisible="not parent_id or not function">
-                            <field name="function"/> at <field name="parent_id" on_change="1"/>
-                        </span>
-                    </group>
-                    <group>
+                    <main class="ms-2 flex-grow">
+                        <field class="fw-bold" name="display_name"/>
+                        <div class="text-muted" invisible="not parent_id or not function">
+                            <field class="d-inline" name="function"/> at <field class="d-inline" name="parent_id"/>
+                        </div>
+
                         <field invisible="not category_id" name="category_id" widget="many2many_tags" options="{'color_field': 'color'}"/>
-                        <field invisible="not parent_id or function" name="parent_id" on_change="1"/>
+                        <field invisible="not parent_id or function" name="parent_id"/>
                         <field invisible="parent_id or not function" name="function"/>
-                        <span invisible="not city and not country_id">
-                            <field invisible="not city" name="city" on_change="1"/>
+                        <div invisible="not city and not country_id">
+                            <field class="d-inline"  invisible="not city" name="city"/>
                             <span invisible="not city or not country_id">, </span>
-                            <field invisible="not country_id" name="country_id" on_change="1"/>
-                        </span>
-                        <field name="email" on_change="1" class="text-truncate"/>
-                    </group>
-                    <footer>
-                        <a invisible="meeting_count == 0" type="object" name="schedule_meeting">
-                            <span class="badge rounded-pill">
-                                <i class="fa fa-calendar me-1" aria-label="Meetings" role="img" title="Meetings"/>
-                                <field name="meeting_count"/>
-                            </span>
-                        </a>
-                        <a invisible="opportunity_count == 0" type="object" name="action_view_opportunity">
-                            <span class="badge rounded-pill">
-                                <i class="fa fa-star me-1" aria-label="Opportunities" role="img" title="Opportunities"/>
-                                <field name="opportunity_count"/>
-                            </span>
-                        </a>
-                        <a invisible="sale_order_count == 0" type="object" name="action_view_sale_order">
-                            <span class="badge rounded-pill">
-                                <i class="fa fa-usd me-1" role="img" aria-label="Sale orders" title="Sales orders"/>
-                                <field name="sale_order_count"/>
-                            </span>
-                        </a>
-                        <field class="o_card_align_end" name="activity_ids" widget="kanban_activity"/>
-                    </footer>
+                            <field class="d-inline" invisible="not country_id" name="country_id"/>
+                        </div>
+                        <field name="email" class="text-truncate"/>
+
+                        <footer>
+                            <a invisible="meeting_count == 0" type="object" name="schedule_meeting">
+                                <span class="badge rounded-pill">
+                                    <i class="fa fa-calendar me-1" aria-label="Meetings" role="img" title="Meetings"/>
+                                    <field class="d-inline" name="meeting_count"/>
+                                </span>
+                            </a>
+                            <a invisible="opportunity_count == 0" type="object" name="action_view_opportunity">
+                                <span class="badge rounded-pill">
+                                    <i class="fa fa-star me-1" aria-label="Opportunities" role="img" title="Opportunities"/>
+                                    <field class="d-inline" name="opportunity_count"/>
+                                </span>
+                            </a>
+                            <a invisible="sale_order_count == 0" type="object" name="action_view_sale_order">
+                                <span class="badge rounded-pill">
+                                    <i class="fa fa-usd me-1" role="img" aria-label="Sale orders" title="Sales orders"/>
+                                    <field class="d-inline" name="sale_order_count"/>
+                                </span>
+                            </a>
+                            <field class="ms-auto" name="activity_ids" widget="kanban_activity"/>
+                        </footer>
+                    </main>
                 </card>
             </kanban>
         </field>
@@ -136,29 +136,31 @@
         <field name="priority">99</field>
         <field name="arch" type="xml">
             <kanban class="o_event_kanban_view" default_group_by="stage_id" quick_create_view="event.event_event_view_form_quick_create" sample="1">
-                <card>
-                    <aside full="1">
+                <card class="row g-0 flex-row">
+                    <aside class="o_kanban_aside_full col-4">
                         <field name="date_begin" invisible="1"/>
                         <field name="date_end" invisible="1"/>
                         <widget name="event_kanban_date"/>
                     </aside>
-                    <header>
-                        <field name="name"/>
-                    </header>
-                    <group direction="row">
-                        <i class="fa fa-map-marker fa-fw text-center" title="Location"/>
-                        <field name="address_id" invisible="not address_id"/>
-                        <span invisible="address_id">Online Event</span>
-                    </group>
-                    <group direction="row">
-                        <i class="fa fa-group fa-fw text-center" title="Attendees"/>
-                        <span><field name="seats_taken"/> Attendees</span>
-                    </group>
-                    <footer>
-                        <field name="activity_ids" widget="kanban_activity"/>
-                        <field class="o_card_align_end" name="kanban_state" widget="state_selection"/>
-                        <field class="o_card_align_end" name="user_id" widget="many2one_avatar_user"/>
-                    </footer>
+                    <main class="col-8 ps-2">
+                        <field class="fw-bold mb-1" name="name"/>
+                    
+                        <div class="d-flex">
+                            <i class="fa fa-map-marker fa-fw text-center me-1" title="Location"/>
+                            <field name="address_id" invisible="not address_id"/>
+                            <span invisible="address_id">Online Event</span>
+                        </div>
+                        <div class="d-flex">
+                            <i class="fa fa-group fa-fw text-center me-1" title="Attendees"/>
+                            <field class="me-1" name="seats_taken"/> Attendees
+                        </div>
+
+                        <footer>
+                            <field name="activity_ids" widget="kanban_activity"/>
+                            <field class="ms-auto" name="kanban_state" widget="state_selection"/>
+                            <field name="user_id" widget="many2one_avatar_user"/>
+                        </footer>
+                    </main>
                 </card>
             </kanban>
         </field>
@@ -195,28 +197,28 @@
                 </header>
                 <card>
                     <widget name="web_ribbon" title="Lost" bg_color="text-bg-danger" invisible="probability &gt; 0 or active"/>
+
                     <menu>
                         <a role="menuitem" type="edit" class="dropdown-item">Edit</a>
                         <a role="menuitem" type="delete" class="dropdown-item">Delete</a>
                         <field name="color" widget="kanban_colorpicker"/>
                     </menu>
-                    <header>
-                        <field name="name"/>
-                    </header>
-                    <group>
-                        <field name="expected_revenue" widget="monetary" options="{'currency_field': 'company_currency'}"/>
-                        <span invisible="not expected_revenue or not recurring_revenue"> + </span>
-                        <field invisible="not recurring_revenue" class="me-1" name="recurring_revenue" widget="monetary" options="{'currency_field': 'company_currency'}"/>
-                        <field invisible="not recurring_revenue" name="recurring_plan"/>
-                        <field name="partner_id" on_change="1"/>
-                        <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
-                        <field name="team_id" invisible="1" on_change="1"/>
-                        <field name="lead_properties" widget="properties"/>
-                    </group>
+
+                    <field class="fw-bold" name="name"/>
+
+                    <field class="mt-1" name="expected_revenue" widget="monetary" options="{'currency_field': 'company_currency'}"/>
+                    <span invisible="not expected_revenue or not recurring_revenue"> + </span>
+                    <field invisible="not recurring_revenue" class="me-1" name="recurring_revenue" widget="monetary" options="{'currency_field': 'company_currency'}"/>
+                    <field invisible="not recurring_revenue" name="recurring_plan"/>
+                    <field name="partner_id"/>
+                    <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                    <field name="team_id" invisible="1"/>
+                    <field name="lead_properties" widget="properties"/>
+
                     <footer>
                         <field name="priority" widget="priority"/>
                         <field name="activity_ids" widget="kanban_activity"/>
-                        <field class="o_card_align_end" name="user_id" widget="many2one_avatar_user" domain="[('share', '=', False)]" on_change="1"/>
+                        <field class="ms-auto" name="user_id" widget="many2one_avatar_user" domain="[('share', '=', False)]"/>
                     </footer>
                 </card>
             </kanban>
@@ -237,6 +239,42 @@
 
 
     <menuitem id="kanban_test_lead_menu_action" name="Leads" parent="kanban_test_menu" action="kanban_test_lead_action"/>
+
+    <!-- activity types -->
+    <record id="kanban_test_activity_types_kanban" model="ir.ui.view">
+        <field name="name">kanban.test.activity_type.kanban</field>
+        <field name="model">mail.activity.type</field>
+        <field name="priority">99</field>
+        <field name="arch" type="xml">
+            <kanban>
+                <card>
+                    <div>
+                        <field class="d-inline" name="icon" widget="icon" title="Activity Type Name"/>
+                        <field class="d-inline fw-bold" name="name"/>
+                    </div>
+                    <field invisible="not res_model" name="res_model"/>
+                    <footer>
+                        <field name="summary"/>
+                        <field class="ms-auto" name="default_user_id" widget="many2one_avatar_user" readonly="1"/>
+                    </footer>
+                </card>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="kanban_test_activity_types_action" model="ir.actions.act_window">
+        <field name="name">Activity types</field>
+        <field name="res_model">mail.activity.type</field>
+        <field name="view_mode">kanban,form</field>
+    </record>
+
+    <record id="kanban_test_activity_types_action_kanban_view_link" model="ir.actions.act_window.view">
+        <field name="view_mode">kanban</field>
+        <field name="view_id" ref="kanban_test_activity_types_kanban"/>
+        <field name="act_window_id" ref="kanban_test_activity_types_action"/>
+    </record>
+
+    <menuitem id="kanban_test_activity_types_menu_action" name="Activity Types" parent="kanban_test_menu" action="kanban_test_activity_types_action"/>
 
     <!-- tasks -->
     <record id="kanban_test_task_kanban" model="ir.ui.view">
@@ -259,36 +297,25 @@
                         <a role="menuitem" type="delete" class="dropdown-item">Delete</a>
                         <field name="color" widget="kanban_colorpicker"/>
                     </menu>
-                    <group>
-                        <header>
-                            <field name="name"/>
-                        </header>
-                        <field name="parent_id" invisible="not parent_id"/>
-                        <field name="project_id" invisible="not project_id"/>
-                        <field name="partner_id" invisible="not partner_id"/>
-                        <field name="milestone_id" options="{'no_open': True}" invisible="not milestone_id"/>
-                    </group>
-                    <group>
-                        <group name="dates" direction="row" class="flex-wrap">
-                            <field name="planned_date_begin" invisible="not planned_date_begin"/>
-                            <i class="fa fa-long-arrow-right mx-1" aria-label="Arrow icon" title="Arrow" invisible="not planned_date_begin"/>
-                            <field name="date_deadline" invisible="not date_deadline"/>
-                        </group>
-                        <group>
-                            <field name="date_deadline" widget="remaining_days" invisible="not date_deadline or planned_date_begin"/>
-                        </group>
-                    </group>
-                    <group name="cover_image">
-                        <field name="displayed_image_id" widget="attachment_image"/>
-                    </group>
+                    <field class="fw-bold" name="name"/>
+                    <field name="parent_id" invisible="not parent_id"/>
+                    <field name="project_id" invisible="not project_id"/>
+                    <field name="partner_id" invisible="not partner_id"/>
+                    <field name="milestone_id" options="{'no_open': True}" invisible="not milestone_id"/>
+                
+                    <field name="date_deadline" decoration-danger="date_deadline &lt; current_date and state not in ['1_done', '1_canceled']" widget="daterange" options="{'start_date_field': 'planned_date_begin'}"/>
+                    <field name="planned_date_begin" invisible="1"/>
+                    <field name="date_deadline" widget="remaining_days" invisible="not date_deadline or planned_date_begin"/>
+                    
+                    <field name="displayed_image_id" widget="attachment_image"/>
+                    
                     <footer>
                         <field name="priority" widget="priority"/>
                         <field name="activity_ids" widget="kanban_activity"/>
-                        <div invisible="not subtask_count">
-                            <widget name="subtask_counter"/>
-                        </div>
-                        <field class="o_card_align_end" name="user_ids" widget="many2many_avatar_user" domain="[('share', '=', False)]"/>
-                        <field class="o_card_align_end" name="state" widget="project_task_state_selection" options="{'is_toggle_mode': false}"/>
+                        <widget invisible="not subtask_count" name="subtask_counter"/>
+
+                        <field class="ms-auto" name="user_ids" widget="many2many_avatar_user" domain="[('share', '=', False)]"/>
+                        <field name="state" widget="project_task_state_selection" options="{'is_toggle_mode': false}"/>
                     </footer>
                 </card>
             </kanban>
@@ -310,5 +337,33 @@
 
     <menuitem id="kanban_test_task_menu_action" name="Tasks" parent="kanban_test_menu" action="kanban_test_task_action"/>
 
+    <!-- task types -->
+    <record id="kanban_test_task_types_kanban" model="ir.ui.view">
+        <field name="name">kanban.test.task_type.kanban</field>
+        <field name="model">project.task.type</field>
+        <field name="priority">99</field>
+        <field name="arch" type="xml">
+            <kanban>
+                <card>
+                    <field class="fw-bold" name="name"/>
+                    <field name="project_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                </card>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="kanban_test_task_types_action" model="ir.actions.act_window">
+        <field name="name">Task types</field>
+        <field name="res_model">project.task.type</field>
+        <field name="view_mode">kanban,form</field>
+    </record>
+
+    <record id="kanban_test_task_types_action_kanban_view_link" model="ir.actions.act_window.view">
+        <field name="view_mode">kanban</field>
+        <field name="view_id" ref="kanban_test_task_types_kanban"/>
+        <field name="act_window_id" ref="kanban_test_task_types_action"/>
+    </record>
+
+    <menuitem id="kanban_test_task_types_menu_action" name="Task Types" parent="kanban_test_menu" action="kanban_test_task_types_action"/>
 
 </data></odoo>
