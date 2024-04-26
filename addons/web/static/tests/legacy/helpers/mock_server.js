@@ -755,12 +755,9 @@ export class MockServer {
             Object.values(this.actions).find((action) => action.xml_id === action_id) ||
             Object.values(this.actions).find((a) => a.path === action_id);
         if (!action) {
-            // when the action doesn't exist, the real server doesn't crash, it
-            // simply returns false
-            console.warn(
+            throw new Error(
                 `No action found for ID ${action_id} during test ${QUnit.config.current.testName}`
             );
-            return false;
         }
         if (action.type === "ir.actions.server") {
             if (action.state !== "code") {

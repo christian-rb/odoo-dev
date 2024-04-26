@@ -354,21 +354,24 @@ export function makeActionManager(env, router = _router) {
                     action_id: actionRequest,
                     context: ctx,
                 });
+            }
+            try {
                 action = await actionCache[key];
-                if (action.help) {
-                    action.help = markup(action.help);
+            } catch (e) {
+                if (e.exceptionName === "odoo.exceptions.MissingError") {
+                    return {
+                        type: "ir.actions.client",
+                        tag: "invalid_action",
+                        id: actionRequest,
+                    };
                 }
-            } else {
-                action = await actionCache[key];
+                throw e;
             }
-            if (!action) {
-                return {
-                    type: "ir.actions.client",
-                    tag: "invalid_action",
-                    id: actionRequest,
-                };
+            action = Object.assign({}, action);
+            if (action?.help) {
+                action.help = markup(action.help);
             }
-            return Object.assign({}, action);
+            return action;
         }
 
         // actionRequest is an object describing the action

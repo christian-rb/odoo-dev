@@ -30,19 +30,21 @@ class Action(Controller):
                 raise MissingError(_("The action %r does not exist.", action_id)) from exc
 
         base_action = Actions.browse([action_id]).sudo().read(['type'])
-        if base_action:
-            action_type = base_action[0]['type']
-            if action_type == 'ir.actions.report':
-                request.update_context(bin_size=True)
-            if action_type == 'ir.actions.server':
-                action = request.env["ir.actions.server"].browse([action_id])
-                result = action.run()
-                parent_path = action.sudo().path
-                if parent_path:
-                    result['path'] = parent_path
-                return clean_action(result, env=action.env) if result else {'type': 'ir.actions.act_window_close'}
-            result = request.env[action_type].sudo().browse([action_id]).read()
-            return clean_action(result[0], env=request.env) if result else False
+        if not base_action:
+            raise MissingError(_("The action %r does not exist.", action_id))
+
+        action_type = base_action[0]['type']
+        if action_type == 'ir.actions.report':
+            request.update_context(bin_size=True)
+        if action_type == 'ir.actions.server':
+            action = request.env["ir.actions.server"].browse([action_id])
+            result = action.run()
+            parent_path = action.sudo().path
+            if parent_path:
+                result['path'] = parent_path
+            return clean_action(result, env=action.env) if result else {'type': 'ir.actions.act_window_close'}
+        result = request.env[action_type].sudo().browse([action_id]).read()
+        return clean_action(result[0], env=request.env) if result else False
 
     @route('/web/action/load_breadcrumbs', type='json', auth='user', readonly=True)
     def load_breadcrumbs(self, actions):
@@ -65,7 +67,9 @@ class Action(Controller):
                         continue
                     if record_id:
                         # some actions may not have a res_model (e.g. a client action)
-                        if act['res_model']:
+                        if record_id == 'new':
+                            display_names.append(_("New"))
+                        elif act['res_model']:
                             display_names.append(request.env[act['res_model']].browse(record_id).display_name)
                         else:
                             display_names.append(act['display_name'])
