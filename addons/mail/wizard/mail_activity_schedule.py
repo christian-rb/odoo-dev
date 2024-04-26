@@ -158,7 +158,7 @@ class MailActivitySchedule(models.TransientModel):
             for template in scheduler.plan_id.template_ids:
                 summary = template.activity_type_id.name
                 if template.summary:
-                    summary += f": {template.summary}"
+                    summary += Markup(": {summary}").format(summary=template.summary)
                 # We don't display deadlines when the user doesn't specify a plan_date
                 if scheduler.plan_date:
                     summary += f" ({format_date(self.env, template._get_date_deadline(scheduler.plan_date))})"

@@ -25,6 +25,7 @@ class TimesheetsAnalysisReport(models.Model):
     unit_amount = fields.Float("Hours Spent", readonly=True)
     partner_id = fields.Many2one('res.partner', string="Partner", readonly=True)
     milestone_id = fields.Many2one('project.milestone', related='task_id.milestone_id')
+    has_department_manager_access = fields.Boolean(search="_search_has_department_manager_access", store=False)
 
     @property
     def _table_query(self):
@@ -81,3 +82,15 @@ class TimesheetsAnalysisReport(models.Model):
                 sql.SQL(self._table_query)
             )
         )
+
+    def _search_has_department_manager_access(self, operator, value):
+        supported_operators = ["!=", "="]
+        if operator not in supported_operators or not isinstance(value, bool):
+            raise NotImplementedError()
+        return [
+                '|',
+                    ('employee_id.user_id', '=', self.env.user.id),
+                    ('employee_id.department_id', 'child_of',
+                        self.env['hr.department']._search([('manager_id', 'in', self.env.user.employee_ids.ids)])
+                    ),
+                ]
