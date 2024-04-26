@@ -941,31 +941,31 @@ class AccountChartTemplate(models.AbstractModel):
                 'type': 'general',
                 'code': _('MISC'),
                 'show_on_dashboard': True,
-                'sequence': 7,
+                'sequence': 9,
             },
             "exch": {
                 'name': _('Exchange Difference'),
                 'type': 'general',
                 'code': _('EXCH'),
                 'show_on_dashboard': False,
-                'sequence': 9,
             },
             "caba": {
                 'name': _('Cash Basis Taxes'),
                 'type': 'general',
                 'code': _('CABA'),
                 'show_on_dashboard': False,
-                'sequence': 10,
             },
             "bank": {
                 'name': _('Bank'),
                 'type': 'bank',
                 'show_on_dashboard': True,
+                'sequence': 7,
             },
             "cash": {
                 'name': _('Cash'),
                 'type': 'cash',
-                'show_on_dashboard': True,
+                'show_on_dashboard': False,
+                'sequence': 8,
             },
         }
 
