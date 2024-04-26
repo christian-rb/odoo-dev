@@ -172,3 +172,14 @@ span.o_force_ltr {
     max-width: 64px;
     max-height: 64px;
 }
+
+.o_has_ui_app_icon {
+    .o_ui_app_icon {
+        width: var(--oi-font-size, 1em);
+        aspect-ratio: 1;
+    }
+
+    &:not(:hover) {
+        --oi-color: currentColor;
+    }
+}
