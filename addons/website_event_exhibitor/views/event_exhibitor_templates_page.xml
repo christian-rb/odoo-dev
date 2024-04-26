@@ -93,7 +93,7 @@
                         <t t-set="attach_to" t-value="'#o_wsponsor_room_iframe'"/>
                         <t t-set="max_capacity" t-value="sponsor.room_max_capacity"/>
                         <t t-set="check_full" t-value="int(not option_can_edit)"/>
-                        <t t-set="room_url" t-value="sponsor.chat_room_id.room_url"/>
+                        <t t-set="room_url" t-value="sponsor.chat_room_id.get_room_url()"/>
                     </t>
                 </div>
             </t>

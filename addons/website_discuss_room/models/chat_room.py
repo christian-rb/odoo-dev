@@ -54,10 +54,17 @@ class ChatRoom(models.Model):
 
     @api.model_create_multi
     def create(self, values_list):
-        for values in values_list:
-            if not values.get("room_url"):
-                new_discuss_channel = self.env["discuss.channel"].create({
-                    'name': values.get("name"),
-                })
-                values["room_url"] = new_discuss_channel.invitation_url
+        public_group = self.env.ref('base.group_public', raise_if_not_found=False)
+        if public_group:
+            for values in values_list:
+                if not values.get("room_url"):
+                    new_discuss_channel = self.env["discuss.channel"].channel_create(
+                        name=values.get("name"),
+                        group_id=public_group.id)
+                    new_discuss_channel.default_display_mode = 'video_full_screen'
+                    values["room_url"] = new_discuss_channel.invitation_url
         return super().create(values_list)
+
+    def get_room_url(self):
+        self.ensure_one()
+        return self.room_url
