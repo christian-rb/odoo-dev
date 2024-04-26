@@ -63,6 +63,14 @@ class DeliveryCarrier(models.Model):
     zip_prefix_ids = fields.Many2many(
         'delivery.zip.prefix', 'delivery_zip_prefix_rel', 'carrier_id', 'zip_prefix_id', 'Zip Prefixes',
         help="Prefixes of zip codes that this carrier applies to. Note that regular expressions can be used to support countries with varying zip code lengths, i.e. '$' can be added to end of prefix to match the exact zip (e.g. '100$' will only match '100' and not '1000')")
+
+    max_weight = fields.Float('Max Weight')
+    weight_uom_name = fields.Char(string='Weight unit of measure label', compute='_compute_weight_uom_name')
+    max_volume = fields.Float('Max Volume')
+    volume_uom_name = fields.Char(string='Volume unit of measure label', compute='_compute_volume_uom_name')
+    must_have_tag_ids = fields.Many2many(string='Must Have Tags', comodel_name='product.tag', relation='product_tag_delivery_carrier_must_have_rel')
+    excluded_tag_ids = fields.Many2many(string='Excluded Tags', comodel_name='product.tag', relation='product_tag_delivery_carrier_excluded_rel')
+
     carrier_description = fields.Text(
         'Carrier Description', translate=True,
         help="A description of the delivery method that you want to communicate to your customers on the Sales Order and sales confirmation email."
@@ -96,6 +104,20 @@ class DeliveryCarrier(models.Model):
         ('margin_not_under_100_percent', 'CHECK (margin >= -1)', 'Margin cannot be lower than -100%'),
         ('shipping_insurance_is_percentage', 'CHECK(shipping_insurance >= 0 AND shipping_insurance <= 100)', "The shipping insurance must be a percentage between 0 and 100."),
     ]
+
+    @api.constrains('must_have_tag_ids', 'excluded_tag_ids')
+    def _check_tags(self):
+        for carrier in self:
+            if carrier.must_have_tag_ids & carrier.excluded_tag_ids:
+                raise UserError(_('A tag cannot be both in the must have and excluded tags.'))
+
+    def _compute_weight_uom_name(self):
+        for carrier in self:
+            carrier.weight_uom_name = self.env['product.template']._get_weight_uom_name_from_ir_config_parameter()
+
+    def _compute_volume_uom_name(self):
+        for carrier in self:
+            carrier.volume_uom_name = self.env['product.template']._get_volume_uom_name_from_ir_config_parameter()
 
     @api.depends('delivery_type')
     def _compute_can_generate_return(self):
@@ -131,7 +153,8 @@ class DeliveryCarrier(models.Model):
     def _is_available_for_order(self, order):
         self.ensure_one()
         order.ensure_one()
-        if not self._match_address(order.partner_shipping_id):
+        if not self._match_address(order.partner_shipping_id) or not self._match_must_have_tags(order)\
+            or not self._match_excluded_tags(order) or not self._match_weight(order) or not self._match_volume(order):
             return False
 
         if self.delivery_type == 'base_on_rule':
@@ -139,8 +162,9 @@ class DeliveryCarrier(models.Model):
 
         return True
 
-    def available_carriers(self, partner):
-        return self.filtered(lambda c: c._match_address(partner))
+    def available_carriers(self, partner, order):
+        return self.filtered(lambda c: c._match_address(partner) and c._match_must_have_tags(order) and c._match_excluded_tags(order)
+                             and c._match_weight(order) and c._match_volume(order))
 
     def _match_address(self, partner):
         self.ensure_one()
@@ -153,6 +177,22 @@ class DeliveryCarrier(models.Model):
             if not partner.zip or not re.match(regex, partner.zip.upper()):
                 return False
         return True
+
+    def _match_must_have_tags(self, order):
+        self.ensure_one()
+        return all(tag in order.order_line.product_id.all_product_tag_ids for tag in self.must_have_tag_ids)
+
+    def _match_excluded_tags(self, order):
+        self.ensure_one()
+        return not any(tag in order.order_line.product_id.all_product_tag_ids for tag in self.excluded_tag_ids)
+
+    def _match_weight(self, order):
+        self.ensure_one()
+        return not self.max_weight or sum(order_line.product_id.weight * order_line.product_qty for order_line in order.order_line) <= self.max_weight
+
+    def _match_volume(self, order):
+        self.ensure_one()
+        return not self.max_volume or sum(order_line.product_id.volume * order_line.product_qty for order_line in order.order_line) <= self.max_volume
 
     @api.onchange('integration_level')
     def _onchange_integration_level(self):
