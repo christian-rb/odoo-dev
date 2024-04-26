@@ -1352,19 +1352,20 @@ const ButtonGroupUserValueWidget = BaseSelectionUserValueWidget.extend({
     tagName: 'we-button-group',
 });
 
-const UnitUserValueWidget = UserValueWidget.extend({
+const UnitUserValueWidget = UserValueWidget.extend({});
+class UnitUserValue extends UserValue {
     /**
      * @override
      */
-    start: async function () {
+    async start() {
         const unit = this.el.dataset.unit || '';
         this.el.dataset.unit = unit;
         if (this.el.dataset.saveUnit === undefined) {
             this.el.dataset.saveUnit = unit;
         }
 
-        return this._super(...arguments);
-    },
+        return super.start(...arguments);
+    }
 
     //--------------------------------------------------------------------------
     // Public
@@ -1373,12 +1374,27 @@ const UnitUserValueWidget = UserValueWidget.extend({
     /**
      * @override
      */
-    getActiveValue: function (methodName) {
-        const activeValue = this._super(...arguments);
+    getMethodsParams(methodName) {
+        const params = super.getMethodsParams(methodName);
+        const unit = params.unit || '';
+        if (params.saveUnit === undefined) {
+            params.saveUnit = unit;
+        }
+        return params;
+    }
+    /**
+     * @override
+     */
+    getActiveValue(methodName) {
+        const activeValue = this._nextValue || super.getActiveValue(...arguments) || "";
 
         const params = this._methodsParams;
         if (!params.unit) {
             return activeValue;
+        }
+        // TODO find correct way to apply this
+        if (params.saveUnit === undefined) {
+            params.saveUnit = params.unit;
         }
 
         const defaultValue = this.getDefaultValue(methodName, false);
@@ -1392,13 +1408,13 @@ const UnitUserValueWidget = UserValueWidget.extend({
                 return `${this._floatToStr(value)}${params.saveUnit}`;
             }
         }).join(' ');
-    },
+    }
     /**
      * @override
      * @param {boolean} [useInputUnit=false]
      */
-    getDefaultValue: function (methodName, useInputUnit) {
-        const defaultValue = this._super(...arguments);
+    getDefaultValue(methodName, useInputUnit) {
+        const defaultValue = super.getDefaultValue(...arguments);
 
         const params = this._methodsParams;
         if (!params.unit) {
@@ -1411,12 +1427,12 @@ const UnitUserValueWidget = UserValueWidget.extend({
             return defaultValue;
         }
         return `${this._floatToStr(numValue)}${unit}`;
-    },
+    }
     /**
      * @override
      */
-    isActive: function () {
-        const isSuperActive = this._super(...arguments);
+    isActive() {
+        const isSuperActive = super.isActive(...arguments);
         const params = this._methodsParams;
         if (!params.unit) {
             return isSuperActive;
@@ -1426,7 +1442,7 @@ const UnitUserValueWidget = UserValueWidget.extend({
             // Or is a composite value.
             || !!this._value.match(/\d+\s+\d+/)
         );
-    },
+    }
     /**
      * @override
      */
@@ -1441,8 +1457,14 @@ const UnitUserValueWidget = UserValueWidget.extend({
                 return this._floatToStr(numValue);
             }).join(' ');
         }
-        return this._super(value, methodName);
-    },
+        return super.setValue(value, methodName);
+    }
+    /**
+     * @override
+     */
+    userValueNotification(params) {
+        super.userValueNotification(params);
+    }
 
     //--------------------------------------------------------------------------
     // Private
@@ -1455,48 +1477,35 @@ const UnitUserValueWidget = UserValueWidget.extend({
      * @param {number} value
      * @returns {string}
      */
-    _floatToStr: function (value) {
+    _floatToStr(value) {
         return `${parseFloat(value.toFixed(5))}`;
-    },
-});
+    }
+}
 
-const InputUserValueWidget = UnitUserValueWidget.extend({
-    tagName: 'we-input',
-    events: {
-        'input input': '_onInputInput',
-        'blur input': '_onInputBlur',
-        'change input': '_onUserValueChange',
-        'keydown input': '_onInputKeydown',
-    },
+const InputUserValueWidget = UnitUserValueWidget.extend({});
+class WeInput extends UserValueComponent {
+    static template = 'web_editor.WeInput';
+    static props = {
+        unit: { type: String, optional: true },
+        step: { type: String, optional: true },
+        saveUnit: { type: String, optional: true },
+        // withUnit: { type: String, optional: true }, // ? boolean ?
+        fakeUnit: { type: String, optional: true }, // ? boolean ?
+        hideUnit: { type: String, optional: true }, // ? boolean ?
+        extraClass: { type: String, optional: true },
+        placeholder: { type: String, optional: true },
+    };
+    static defaultProps = {
+        unit: "",
+        step: "1",
+    };
+    static components = {};
+    static model = UnitUserValue;
 
-    /**
-     * @override
-     */
-    start: async function () {
-        await this._super(...arguments);
-
-        const unit = this.el.dataset.unit;
-        const step = this.el.dataset.step;
-        this.inputEl = document.createElement('input');
-        this.inputEl.setAttribute('type', 'text');
-        this.inputEl.setAttribute('autocomplete', 'chrome-off');
-        this.inputEl.setAttribute('placeholder', this.el.getAttribute('placeholder') || '');
-        const useNumberAlignment = !!step || !!unit || !!this.el.dataset.fakeUnit || !!this.el.dataset.hideUnit;
-        this.inputEl.classList.toggle('text-start', !useNumberAlignment);
-        this.inputEl.classList.toggle('text-end', useNumberAlignment);
-        this.containerEl.appendChild(this.inputEl);
-
-        const showUnit = (!!unit || !!this.el.dataset.fakeUnit) && !this.el.dataset.hideUnit;
-        if (showUnit) {
-            var unitEl = document.createElement('span');
-            const unitText = this.el.dataset.fakeUnit || unit;
-            unitEl.textContent = unitText;
-            this.containerEl.appendChild(unitEl);
-            if (unitText.length > 3) {
-                this.el.classList.add('o_we_large');
-            }
-        }
-    },
+    setup() {
+        super.setup();
+        this.inputRef = useRef("input");
+    }
 
     //--------------------------------------------------------------------------
     // Public
@@ -1506,10 +1515,9 @@ const InputUserValueWidget = UnitUserValueWidget.extend({
      * @override
      */
     async setValue() {
-        await this._super(...arguments);
-        this.inputEl.value = this._value;
+        await super.setValue(...arguments);
         this._oldValue = this._value;
-    },
+    }
 
     //--------------------------------------------------------------------------
     // Private
@@ -1519,8 +1527,8 @@ const InputUserValueWidget = UnitUserValueWidget.extend({
      * @override
      */
     _getFocusableElement() {
-        return this.inputEl;
-    },
+        return this.inputRef.el;
+    }
 
     //--------------------------------------------------------------------------
     // Handlers
@@ -1530,12 +1538,12 @@ const InputUserValueWidget = UnitUserValueWidget.extend({
      * @private
      * @param {Event} ev
      */
-    _onInputInput: function (ev) {
+    _onInputInput(ev) {
         // First record the input value as the new current value and bound it if
         // necessary (min / max params).
-        this._value = this.inputEl.value;
+        this._value = this.inputRef.el?.value;
 
-        const params = this._methodsParams;
+        const params = this.value._methodsParams;
         const hasMin = ('min' in params);
         const hasMax = ('max' in params);
         if (hasMin || hasMax) {
@@ -1572,12 +1580,12 @@ const InputUserValueWidget = UnitUserValueWidget.extend({
             this.changeEventWillBeTriggered = true;
         }
         this._onUserValuePreview(ev);
-    },
+    }
     /**
      * @private
      * @param {Event} ev
      */
-    _onInputBlur: function (ev) {
+    _onInputBlur(ev) {
         if (this.notifyValueChangeOnBlur && !this.changeEventWillBeTriggered) {
             // In case the input value has been modified with arrow up/down, the
             // change event is not triggered (except if there has been a natural
@@ -1587,13 +1595,13 @@ const InputUserValueWidget = UnitUserValueWidget.extend({
             this.notifyValueChangeOnBlur = false;
         }
         this.changeEventWillBeTriggered = false;
-    },
+    }
     /**
      * @private
      * @param {Event} ev
      */
-    _onInputKeydown: function (ev) {
-        const params = this._methodsParams;
+    _onInputKeydown(ev) {
+        const params = this.value._methodsParams;
         if (!params.unit && !params.step) {
             return;
         }
@@ -1603,6 +1611,7 @@ const InputUserValueWidget = UnitUserValueWidget.extend({
                 break;
             case "ArrowUp":
             case "ArrowDown": {
+                ev.preventDefault(); // Do not let it be handled as an hotkey.
                 const input = ev.currentTarget;
                 let parts = (input.value || input.placeholder).match(/-?\d+\.\d+|-?\d+/g);
                 if (!parts) {
@@ -1640,7 +1649,7 @@ const InputUserValueWidget = UnitUserValueWidget.extend({
                     value += (increasing ? step : -step);
                     value = hasMin ? Math.max(params.min, value) : value;
                     value = hasMax ? Math.min(value, params.max) : value;
-                    return this._floatToStr(value);
+                    return this.value._floatToStr(value);
                 }).join(" ");
                 if (newValue === (input.value || input.placeholder)) {
                     return;
@@ -1660,16 +1669,18 @@ const InputUserValueWidget = UnitUserValueWidget.extend({
                 break;
             }
         }
-    },
+    }
     /**
      * @override
      */
     _onUserValueChange() {
         if (this._oldValue !== this._value) {
-            this._super(...arguments);
+            this.value._value = this._value;
+            super._onUserValueChange(...arguments);
         }
     }
-});
+}
+registry.category("snippet_widgets").add("WeInput", WeInput);
 
 const MultiUserValueWidget = UserValueWidget.extend({
     tagName: 'we-multi',
@@ -3991,7 +4002,7 @@ export class SnippetOption {
     }
     getMethodsNames() {
         // TODO: @owl-options either add all possible method or find a way to compute it.
-        return ["selectClass"];
+        return ["selectClass", "selectStyle"];
     }
     /**
      * Updates the UI. For widget update, @see _computeWidgetState.
@@ -4304,7 +4315,6 @@ export class SnippetOption {
                 if (value === "currentColor") {
                     return styles.color;
                 }
-
                 return value;
             }
             case 'selectColorCombination': {
@@ -4671,6 +4681,7 @@ export class SnippetOption {
             this._actionQueues.set(widget, actionQueue.filter(action => action !== currentAction));
 
             if (params.prepare) {
+                // Why must this be done before checking noPreview ?
                 params.prepare();
             }
 
@@ -6368,7 +6379,7 @@ const ImageHandlerOption = SnippetOptionWidget.extend({
         await this._super(...arguments);
 
         if (this._filesize === undefined) {
-            this.$weight.addClass('d-none');
+            // TODO ? this.$weight.addClass('d-none');
             await this._applyOptions(false);
         }
         if (this._filesize !== undefined) {
