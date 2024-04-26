@@ -643,6 +643,8 @@ class AccountChartTemplate(models.AbstractModel):
             if value and field in self.env[model]._fields:
                 self.env['ir.property']._set_default(field, model, self.ref(value).id, company=company)
 
+        self._update_reconciliation_models(company)
+
     def _get_chart_template_data(self, template_code):
         template_data = defaultdict(lambda: defaultdict(dict))
         template_data['res.company']  # ensure it's the first property when iterating
@@ -1017,7 +1019,33 @@ class AccountChartTemplate(models.AbstractModel):
                 "match_same_currency": True,
                 "allow_payment_tolerance": False,
                 "match_partner": True,
-            }
+            },
+            "reconcile_invoice": {
+                "name": 'Create Invoice',
+                "sequence": 4,
+                "rule_type": 'writeoff_button',
+                'counterpart_type': 'sale',
+                'line_ids': [
+                    Command.create({
+                        'amount_type': 'percentage_st_line',
+                        'amount_string': '100',
+                        'tax_id': [],
+                    })
+                ]
+            },
+            "reconcile_bill": {
+                "name": 'Create Bill',
+                "sequence": 5,
+                "rule_type": 'writeoff_button',
+                'counterpart_type': 'purchase',
+                'line_ids': [
+                    Command.create({
+                        'amount_type': 'percentage_st_line',
+                        'amount_string': '100',
+                        'tax_id': [],
+                    })
+                ]
+            },
         }
 
     # --------------------------------------------------------------------------------
@@ -1294,3 +1322,29 @@ class AccountChartTemplate(models.AbstractModel):
                             break
 
         translation_importer.save(overwrite=False)
+
+    def _get_account_reconciliation_models(self, transaction_type, company):
+        return (
+            self.env['account.tax'].search([
+                *self.env['account.tax']._check_company_domain(company),
+                ('type_tax_use', '=', transaction_type),
+            ], limit=1)
+            or self.env['account.tax'].search([
+                *self.env['account.tax']._check_company_domain(company),
+            ], limit=1)
+        )
+
+    @api.model
+    def _update_reconciliation_models(self, company):
+        """
+        Some write-off button default reconciliation models require a tax id,
+        which needs to be set after the default taxes are defined.
+        """
+        for transaction_type in ('sale', 'purchase'):
+            lines = self.env['account.reconcile.model'].search([
+                *self.env['account.reconcile.model']._check_company_domain(company),
+                ('counterpart_type', '=', transaction_type)
+            ]).line_ids
+            tax_id = self._get_account_reconciliation_models(transaction_type, company).id
+            if tax_id:  # some localizations (e.g. l10n_hk) do not have taxes, so we only set tax_id if taxes exist
+                lines.tax_id = tax_id

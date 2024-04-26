@@ -542,6 +542,12 @@ class AccountMove(models.Model):
         store=True,
         readonly=False,
     )
+
+    reconciliation_model_id = fields.Many2one(
+        string='Reconciliation model',
+        comodel_name='account.reconcile.model',
+        store=True,
+    )
     # Technical field used to fit the generic behavior in mail templates.
     user_id = fields.Many2one(string='User', related='invoice_user_id')
     invoice_origin = fields.Char(
@@ -1351,12 +1357,18 @@ class AccountMove(models.Model):
                             handle_price_include=False,
                         ))
                 move.tax_totals = self.env['account.tax']._prepare_tax_totals(**kwargs)
-                if move.invoice_cash_rounding_id:
-                    rounding_amount = move.invoice_cash_rounding_id.compute_difference(move.currency_id, move.tax_totals['amount_total'])
+                # Reconciliation rounding is applied when move is created. If it is posted, should retain rounding.
+                if move.invoice_cash_rounding_id or (move.reconciliation_model_id and move.state == 'posted' or move.env.context.get('amount_total')):
+                    if move.invoice_cash_rounding_id:
+                        rounding_amount = move.invoice_cash_rounding_id.compute_difference(move.currency_id, move.tax_totals['amount_total'])
+                    else:
+                        rounding_amount = move.amount_total - move.tax_totals['amount_total']
+                        if abs(rounding_amount) > 0.02:
+                            rounding_amount = 0
                     totals = move.tax_totals
                     totals['display_rounding'] = True
                     if rounding_amount:
-                        if move.invoice_cash_rounding_id.strategy == 'add_invoice_line':
+                        if move.invoice_cash_rounding_id.strategy == 'add_invoice_line' or move.reconciliation_model_id:
                             totals['rounding_amount'] = rounding_amount
                             totals['formatted_rounding_amount'] = formatLang(self.env, totals['rounding_amount'], currency_obj=move.currency_id)
                         elif move.invoice_cash_rounding_id.strategy == 'biggest_tax':
@@ -2311,6 +2323,26 @@ class AccountMove(models.Model):
                 diff_balance = self.currency_id._convert(diff_amount_currency, self.company_id.currency_id, self.company_id, self.invoice_date or self.date)
             return diff_balance, diff_amount_currency
 
+        # def _compute_reco_model_rounding(self, total_amount_currency):
+        #     ''' Compute the amount differences between statement line and move total.
+        #     :param self:                    The current account.move record.
+        #     :param total_amount_currency:   The invoice's total in invoice's currency.
+        #     :return:                        The amount differences both in company's currency & invoice's currency.
+        #     '''
+        #     amount_total = self.env.context.get('amount_total')
+        #     # if amount total represents a debit, total amount currency represents a credit and vice versa
+        #     difference = - amount_total - total_amount_currency
+        #     if self.currency_id == self.company_id.currency_id:
+        #         diff_amount_currency = diff_balance = difference
+        #     else:
+        #         diff_amount_currency = difference
+        #         diff_balance = self.currency_id._convert(diff_amount_currency, self.company_id.currency_id,
+        #                                                  self.company_id, self.invoice_date or self.date)
+        #     # Rounding should only be applied for small differences caused by the tax calculation
+        #     if abs(difference) < 0.02:
+        #         return diff_balance, diff_amount_currency
+        #     return 0, 0
+
         def _apply_cash_rounding(self, diff_balance, diff_amount_currency, cash_rounding_line):
             ''' Apply the cash rounding.
             :param self:                    The current account.move record.
@@ -2358,6 +2390,13 @@ class AccountMove(models.Model):
                     'account_id': account_id,
                     'tax_ids': [Command.clear()]
                 })
+            #
+            # elif self.env.context.get('amount_total'):
+            #     rounding_line_vals.update({
+            #         'name': 'Reconciliation model rounding',
+            #         'account_id': self.line_ids[0].account_id.id,
+            #         'tax_ids': [Command.clear()],
+            #     })
 
             # Create or update the cash rounding line.
             if cash_rounding_line:
@@ -2401,6 +2440,13 @@ class AccountMove(models.Model):
             return
 
         _apply_cash_rounding(self, diff_balance, diff_amount_currency, existing_cash_rounding_line)
+        #
+        # if self.env.context.get('amount_total'):
+        #     total_amount_currency += existing_cash_rounding_line.amount_currency
+        #     diff_balance, diff_amount_currency = _compute_reco_model_rounding(self, total_amount_currency)
+        #     if self.currency_id.is_zero(diff_balance) and self.currency_id.is_zero(diff_amount_currency):
+        #         return
+        #     _apply_cash_rounding(self, diff_balance, diff_amount_currency, existing_cash_rounding_line)
 
     @contextmanager
     def _sync_unbalanced_lines(self, container):
@@ -2448,6 +2494,8 @@ class AccountMove(models.Model):
         for invoice in container['records']:
             if invoice.state != 'posted':
                 invoice._recompute_cash_rounding_lines()
+            if invoice.reconciliation_model_id:
+                invoice._compute_reconciliation_rounding_lines()
 
     @contextmanager
     def _sync_dynamic_line(self, existing_key_fname, needed_vals_fname, needed_dirty_fname, line_type, container):
@@ -5273,3 +5321,64 @@ class AccountMove(models.Model):
         :return: an array of ir.model.fields for which the user should provide values.
         """
         return []
+
+    def _compute_reconciliation_rounding_lines(self):
+        """ Handle rounding for moves created through a reconciliation model.
+
+        When a move is created through a reconciliation model, the move line amount and
+        corresponding taxes are passed to create the move, and as a result, the
+        move's total amount does not always match the bank statement line amount.
+
+        The strategy used for rounding is adding a line on the invoice. The cash rounding
+        line is added as a new invoice line.
+        """
+        self.ensure_one()
+
+        def _compute_reco_model_rounding(self, total_amount_currency):
+            """ Compute the amount differences between statement line and move total.
+            :param self:                    The current account.move record.
+            :param total_amount_currency:   The invoice's total in invoice's currency.
+            :return:                        The amount differences both in company's currency & invoice's currency.
+            """
+            amount_total = self.env.context.get('amount_total')
+            if amount_total:
+                # if amount total represents a debit, total amount currency represents a credit and vice versa
+                difference = - amount_total - total_amount_currency
+                if self.currency_id == self.company_id.currency_id:
+                    diff_amount_currency = diff_balance = difference
+                else:
+                    diff_amount_currency = difference
+                    diff_balance = self.currency_id._convert(diff_amount_currency, self.company_id.currency_id,
+                                                             self.company_id, self.invoice_date or self.date)
+                # Rounding should only be applied for small differences caused by the tax calculation
+                if abs(difference) < 0.02:
+                    return diff_balance, diff_amount_currency
+            return 0, 0
+
+        # For this rounding, existing rounding lines are not taken into consideration, as when the move is created there
+        # are no other rounding lines. After the move is created, cash rounding should take priority, and can override this rounding.
+        others_lines = self.line_ids.filtered(
+            lambda line: line.account_id.account_type not in ('asset_receivable', 'liability_payable'))
+        total_amount_currency = sum(others_lines.mapped('amount_currency'))
+
+        diff_balance, diff_amount_currency = _compute_reco_model_rounding(self, total_amount_currency)
+
+        # The invoice is already rounded.
+        if self.currency_id.is_zero(diff_balance) and self.currency_id.is_zero(diff_amount_currency):
+            return
+
+        rounding_line_vals = {
+            'name': 'Reconciliation model rounding',
+            'balance': diff_balance,
+            'amount_currency': diff_amount_currency,
+            'partner_id': self.partner_id.id,
+            'move_id': self.id,
+            'currency_id': self.currency_id.id,
+            'company_id': self.company_id.id,
+            'company_currency_id': self.company_id.currency_id.id,
+            'account_id': self.line_ids[0].account_id.id,
+            'tax_ids': [Command.clear()],
+            'display_type': 'rounding',
+        }
+
+        self.env['account.move.line'].create(rounding_line_vals)
