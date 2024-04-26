@@ -69,21 +69,13 @@
     </t>
 
     <t t-name="account.BillGuide">
-        <div class="d-flex flex-row bill_guide_container my-3">
+        <div class="d-flex flex-row bill_guide_container mb-3">
             <div class="bill_guide_left flex-shrink-0 py-3">
                 <div class="text-center">
                     <img class="img-fluid" src="/web/static/img/folder.svg"/>
                 </div>
                 <div class="text-center mt-2">
-                    <AccountFileUploader divClass="'d-inline'" record="this.props.record">
-                        <t t-set-slot="toggler">
-                            <button type="button" class="btn btn-primary o_button_upload_bill">
-                                Upload
-                            </button>
-                        </t>
-                    </AccountFileUploader>
-                    <span class="btn pe-none px-1 fw-normal">or</span>
-                    <span class="btn account_drag_drop_btn border pe-none">Drag &amp; drop here</span>
+                    <span class="btn account_drag_drop_btn border pe-none">Drag &amp; drop</span>
                     <div>
                         <span class="btn pe-none px-1 fw-normal">or</span>
                         <a class="btn btn-link px-0 fw-normal" href="#" type="object" name="action_create_vendor_bill" journal_type="purchase" groups="account.group_account_invoice" t-on-click="() => this.handleButtonClick('action_create_vendor_bill')">
@@ -111,10 +103,21 @@
                             <span class="btn pe-none px-1 fw-normal">Send a bill to</span>
                             <a class="btn btn-link px-0 fw-normal" t-attf-href="mailto:{{alias}}" t-out="alias"></a>
                         </div>
+                        <div>
+                            <span class="btn pe-none px-1 fw-normal">or</span>
+                            <a href="#" type="object" class="btn btn-link px-0 fw-normal" t-on-click="() => this.handleButtonClick('action_create_new')" groups="account.group_account_invoice">Create manually</a>
+                        </div>
                     </div>
                 </div>
-                <div t-else="" class="d-flex h-100 align-items-center justify-content-center">
-                    <a href="#" type="object" class="o_invoice_new" t-on-click="() => this.handleButtonClick('action_create_new')" groups="account.group_account_invoice">Create a bill manually</a>
+                <div t-else="">
+                    <div class="text-center">
+                        <img class="img-fluid" src="/web/static/img/bill.svg" alt="Create bill manually"/>
+                    </div>
+                    <div class="text-center mt-2">
+                        <div class="">
+                            <a href="#" type="object" class="o_invoice_new" t-on-click="() => this.handleButtonClick('action_create_new')" groups="account.group_account_invoice">Create a bill manually</a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -178,7 +181,9 @@
                     <t t-call="{{ templates[this.constructor.KANBAN_BOX_ATTRIBUTE] }}" t-call-context="renderingContext"/>
                 </t>
             </AccountFileUploader>
-            <t t-else="" t-call="{{ templates[this.constructor.KANBAN_BOX_ATTRIBUTE] }}" t-call-context="renderingContext"/>
+            <div t-else="" t-att-class="'oe_kanban_color_' + props.record.data.color">
+                <t t-call="{{ templates[this.constructor.KANBAN_BOX_ATTRIBUTE] }}" t-call-context="renderingContext"/>
+            </div>
             <t t-call="{{ this.constructor.menuTemplate }}"/>
         </div>
     </t>

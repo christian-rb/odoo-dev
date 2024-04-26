@@ -18,9 +18,6 @@
     }
 }
 .o_account_dashboard_kanban_view {
-  .bill_guide_left .o_widget_account_file_uploader {
-    display: inline-block;
-  }
   .o_drop_area {
     background-color: $o-view-background-color;
     border: 1px dashed $border-color;
@@ -31,9 +28,22 @@
   }
 }
 
+.o_view_nocontent {
+  .o_nocontent_help:has(> .bill_guide_container) {
+    min-width: 65vw;
+  }
+}
 .bill_guide_container {
   @include media-breakpoint-up(sm) {
-    min-width: 460px;
+    min-width: 400px;
+  }
+
+  .bill_guide_left, .bill_guide_right {
+    width: 45%;
+  }
+
+  .separator_wrapper {
+    width: 10%;
   }
 }
 
