@@ -51,7 +51,6 @@ class Channel(models.Model):
         ('channel', 'Channel'),
         ('group', 'Group')],
         string='Channel Type', required=True, default='channel', readonly=True, help="Chat is private and unique between 2 persons. Group is private among invited persons. Channel can be freely joined (depending on its configuration).")
-    is_chat = fields.Boolean(string='Is a chat', compute='_compute_is_chat')
     is_editable = fields.Boolean('Is Editable', compute='_compute_is_editable')
     default_display_mode = fields.Selection(string="Default Display Mode", selection=[('video_full_screen', "Full screen video")], help="Determines how the channel will be displayed by default when opening it from its invitation link. No value means display text (no voice/video).")
     description = fields.Text('Description')
@@ -105,11 +104,6 @@ class Channel(models.Model):
             raise ValidationError(_("For %(channels)s, channel_type should be 'channel' to have the group-based authorization or group auto-subscription.", channels=', '.join([ch.name for ch in failing_channels])))
 
     # COMPUTE / INVERSE
-
-    @api.depends('channel_type')
-    def _compute_is_chat(self):
-        for record in self:
-            record.is_chat = record.channel_type == 'chat'
 
     @api.depends('channel_type', 'is_member')
     def _compute_is_editable(self):
@@ -549,29 +543,45 @@ class Channel(models.Model):
                     'ushare': ushare,
                 })
 
-        if self.is_chat or self.channel_type == "group":
-            already_in_ids = [r['id'] for r in recipients_data]
-            recipients_data += [
-                {
-                    'active': partner.active,
-                    'id': partner.id,
-                    'is_follower': False,
-                    'groups': [],
-                    'lang': partner.lang,
-                    'notif': 'web_push',
-                    'share': partner.partner_share,
-                    'type': 'customer',
-                    'uid': False,
-                    'ushare': False,
-                } for partner in self.sudo().channel_member_ids.filtered(
-                    lambda member: (
-                        not member.mute_until_dt and
-                        member.partner_id.id not in already_in_ids
+        already_in_ids = [r['id'] for r in recipients_data]
+        skip_ids = []
+        for member in self.sudo().channel_member_ids:
+            if (
+                not member.partner_id.id == self.env.user.partner_id.id and
+                not member.mute_until_dt and
+                not member.partner_id.user_id.res_users_settings_id.mute_until_dt and
+                (
+                    # first check if it is on mute
+                    # first check channel specific settings
+                    # then check user specific settings if self has a channel_type of 'channel'
+                    # notify rule: if (set to 'all') or (set to 'mentions' and the partner is mentioned)
+                    member.custom_notifications == 'all' or
+                    member.custom_notifications == 'mentions' and member.partner_id.id in pids or
+                    self.channel_type != 'channel' and not member.custom_notifications or  # when channel_type is not 'channel', use 'all' as default
+                    self.channel_type == 'channel' and not member.custom_notifications and (
+                        member.partner_id.user_id.res_users_settings_id.custom_notifications == 'all' or
+                        not member.partner_id.user_id.res_users_settings_id.custom_notifications and member.partner_id.id in pids
                     )
-                ).partner_id
-            ]
-
-        return recipients_data
+                )
+            ):
+                if member.partner_id.id in already_in_ids:
+                    continue
+                else:
+                    recipients_data.append({
+                        'active': member.partner_id.active,
+                        'id': member.partner_id.id,
+                        'is_follower': False,
+                        'groups': [],
+                        'lang': member.partner_id.lang,
+                        'notif': 'web_push',
+                        'share': member.partner_id.partner_share,
+                        'type': 'customer',
+                        'uid': False,
+                        'ushare': False,
+                    })
+            elif member.partner_id.id in already_in_ids:
+                skip_ids += [member.partner_id.id]
+        return list(filter(lambda r: r['id'] not in skip_ids, recipients_data))
 
     def _notify_get_recipients_groups(self, message, model_description, msg_vals=None):
         """ All recipients of a message on a channel are considered as partners.

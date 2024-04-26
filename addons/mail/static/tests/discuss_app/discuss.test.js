@@ -1943,7 +1943,7 @@ test("Notification settings: basic rendering", async () => {
     await openDiscuss(channelId);
     await click("[title='Notification Settings']");
     await contains("button", { text: "All Messages" });
-    await contains("button", { text: "Mentions Only" });
+    await contains("button", { text: "Mentions Only", count: 2 }); // the extra is in the Use Default as subtitle
     await contains("button", { text: "Nothing" });
     await click("[title='Mute Channel']");
     await contains("[title='For 15 minutes']");

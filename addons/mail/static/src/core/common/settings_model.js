@@ -1,3 +1,4 @@
+import { _t } from "@web/core/l10n/translation";
 import { browser } from "@web/core/browser/browser";
 import { Record } from "./record";
 import { debounce } from "@web/core/utils/timing";
@@ -39,6 +40,53 @@ export class Settings extends Record {
      */
     voiceActivationThreshold = 0.05;
     /**
+     * General notification settings for channels
+     * @type {'mentions'|'all'|'no_notif'}
+     */
+    custom_notifications = Record.attr("mentions", {
+        compute() {
+            return this.custom_notifications === false ? "mentions" : this.custom_notifications;
+        },
+    });
+    selected_mute_duration = Record.attr(false, {
+        compute() {
+            // Restore the selected mute duration from local storage
+            // Only being called once when the page is loaded
+            return browser.localStorage.getItem(
+                `${this.store.self.localId}_selected_mute_duration`
+            );
+        },
+        onUpdate() {
+            // Prevent the same value from being set during initialization
+            if (
+                this.selected_mute_duration ===
+                browser.localStorage.getItem(`${this.store.self.localId}_selected_mute_duration`)
+            ) {
+                return;
+            }
+            this.selected_mute_duration
+                ? browser.localStorage.setItem(
+                      `${this.store.self.localId}_selected_mute_duration`,
+                      this.selected_mute_duration
+                  )
+                : browser.localStorage.removeItem(
+                      `${this.store.self.localId}_selected_mute_duration`
+                  );
+            if (!this.selected_mute_duration && !this.mute_until_dt) {
+                return;
+            }
+            this.store.settings.setMuteDuration(this.selected_mute_duration);
+        },
+    });
+    mute_until_dt = Record.attr(false, {
+        type: "datetime",
+        onUpdate() {
+            if (!this.mute_until_dt) {
+                this.selected_mute_duration = false;
+            }
+        },
+    });
+    /**
      * @returns {Object} MediaTrackConstraints
      */
     get audioConstraints() {
@@ -50,6 +98,67 @@ export class Settings extends Record {
             constraints.deviceId = this.audioInputDeviceId;
         }
         return constraints;
+    }
+
+    get NOTIFICATIONS() {
+        return [
+            {
+                id: "all",
+                name: _t("All Messages"),
+            },
+            {
+                id: "mentions",
+                name: _t("Mentions Only"),
+            },
+            {
+                id: "no_notif",
+                name: _t("Nothing"),
+            },
+        ];
+    }
+
+    get MUTES() {
+        return [
+            {
+                id: "15_mins",
+                value: 15,
+                name: _t("For 15 minutes"),
+            },
+            {
+                id: "1_hour",
+                value: 60,
+                name: _t("For 1 hour"),
+            },
+            {
+                id: "3_hours",
+                value: 180,
+                name: _t("For 3 hours"),
+            },
+            {
+                id: "8_hours",
+                value: 480,
+                name: _t("For 8 hours"),
+            },
+            {
+                id: "24_hours",
+                value: 1440,
+                name: _t("For 24 hours"),
+            },
+            {
+                id: "forever",
+                value: -1,
+                name: _t("Until I turn it back on"),
+            },
+        ];
+    }
+
+    getMuteUntilText(dt) {
+        if (dt) {
+            return dt.year <= new Date().getFullYear() + 2
+                ? _t("Until ") + dt.toFormat("MM/dd, HH:mm")
+                : _t("Until I turn it back on");
+        }
+        return undefined;
     }
 
     getVolume(rtcSession) {
@@ -65,6 +174,31 @@ export class Settings extends Record {
     }
 
     // "setters"
+
+    /**
+     * @param {string} notif
+     */
+    setCustomNotifications(notif) {
+        this.store.env.services.orm.call(
+            "res.users.settings",
+            "set_res_users_settings",
+            [[this.id]],
+            {
+                new_settings: {
+                    custom_notifications: notif === "mentions" ? false : notif,
+                },
+            }
+        );
+    }
+
+    /**
+     * @param {integer|false} minutes
+     */
+    setMuteDuration(minutes) {
+        this.store.env.services.orm.call("res.users.settings", "mute", [[this.id]], {
+            minutes: minutes,
+        });
+    }
 
     /**
      * @param {String} audioInputDeviceId

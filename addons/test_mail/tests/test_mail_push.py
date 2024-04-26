@@ -140,6 +140,13 @@ class TestWebPushNotification(SMSCommon):
         push_to_end_point.assert_not_called()
         push_to_end_point.reset_mock()
 
+        self.env['discuss.channel.member'].search([
+            ('partner_id', 'in', (self.user_email.partner_id + self.user_inbox.partner_id).ids),
+            ('channel_id', 'in', (chat_channel + channel_channel + group_channel).ids),
+        ]).write({
+            'mute_until_dt': False,
+        })
+
         # Test Channel Message
         group_channel.with_user(self.user_email).message_post(
             body='Test',

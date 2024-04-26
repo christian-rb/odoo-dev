@@ -300,8 +300,20 @@ export class Thread extends Record {
     });
     /** @type {Boolean} */
     is_editable;
-    /** @type {false|'mentions'|'no_notif'} */
-    custom_notifications = false;
+    /**
+     * The false value is used for channels only, which means using default from `Settings`.
+     * In other cases, the value is either `all`, `mentions` or `no_notif`.
+     * `all` is the default value for all non-channels.
+     *
+     * @type {false|'all'|'mentions'|'no_notif'}
+     */
+    custom_notifications = Record.attr(false, {
+        compute() {
+            return this.channel_type === "channel"
+                ? this.custom_notifications
+                : this.custom_notifications || "all";
+        },
+    });
     /** @type {luxon.DateTime} */
     mute_until_dt = Record.attr(undefined, { type: "datetime" });
     /** @type {Boolean} */

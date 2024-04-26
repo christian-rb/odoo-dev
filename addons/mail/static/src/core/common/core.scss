@@ -12,6 +12,14 @@
     }
 }
 
+.o-discuss-separator {
+    opacity: $hr-opacity / 2;
+}
+
+.o-width-auto {
+    width: auto;
+}
+
 .o-discuss-badge, .o-discuss-badgeShape {
     display: flex;
     transform: translate(0, 0) !important; // cancel systray style on badge
