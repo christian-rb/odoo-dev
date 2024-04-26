@@ -9,7 +9,7 @@
         <div class="d-flex">
             <div
                 class="input-group-text rounded-start text-lowercase border-0"
-                t-esc="serverUrl.length > 30 ? serverUrl.slice(0,14) + '..' + serverUrl.slice(-14) : serverUrl"
+                t-esc="serverUrl.length > 45 ? serverUrl.slice(0,21) + '..' + serverUrl.slice(-21) : serverUrl"
             />
             <input
                 class="o_input"
