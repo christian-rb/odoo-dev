@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { Component, xml } from "@odoo/owl";
+import { after, describe, expect, getFixture, mountOnFixture, test } from "@odoo/hoot";
 import {
     clear,
     click,
@@ -23,8 +23,8 @@ import {
     setInputFiles,
     setInputRange,
     uncheck,
-} from "../../../hoot-dom/hoot-dom";
-import { after, describe, expect, mountOnFixture, test } from "../../hoot";
+} from "@odoo/hoot-dom";
+import { Component, xml } from "@odoo/owl";
 import { mockUserAgent } from "../../mock/navigator";
 import { advanceTime, animationFrame } from "../../mock/time";
 import { parseUrl } from "../local_helpers";
@@ -644,6 +644,21 @@ describe(parseUrl(import.meta.url), () => {
                 `input`,
                 `keyup:${char}`,
             ]),
+        ]).toVerifySteps();
+
+        click(getFixture());
+
+        expect([
+            // Pointer out
+            "pointermove",
+            "mousemove",
+            "pointerout",
+            "mouseout",
+            "pointerleave",
+            "mouseleave",
+            // Change
+            "blur",
+            "change",
         ]).toVerifySteps();
     });
 

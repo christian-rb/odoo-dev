@@ -57,6 +57,7 @@ export class Job {
     config = {};
     /** @type {Job[]} */
     path = [this];
+    ready = false;
     /** @type {Tag[]} */
     tags = [];
     visited = 0;
@@ -84,13 +85,6 @@ export class Job {
         this.key = normalize(this.fullName);
 
         this.configure(config);
-    }
-
-    /**
-     * @returns {boolean}
-     */
-    canRun() {
-        return !this.config.skip;
     }
 
     /**

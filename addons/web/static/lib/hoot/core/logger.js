@@ -124,6 +124,12 @@ export const logger = {
     /**
      * @param {...any} args
      */
+    debug(...args) {
+        $debug(...styledArguments(args));
+    },
+    /**
+     * @param {...any} args
+     */
     groupCollapsed(...args) {
         $groupCollapsed(...styledArguments(args));
     },

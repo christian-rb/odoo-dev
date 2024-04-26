@@ -93,6 +93,7 @@ export class Test extends Job {
      */
     setRunFn(fn) {
         this.runFn = fn;
+        this.ready = Boolean(this.runFn);
         if (this.runFn) {
             this.code = formatFunctionSource(this.runFn);
         }

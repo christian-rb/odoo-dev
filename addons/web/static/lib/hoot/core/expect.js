@@ -21,6 +21,7 @@ import { isFirefox, isIterable } from "@web/../lib/hoot-dom/hoot_dom_utils";
 import {
     HootError,
     Markup,
+    deepCopy,
     deepEqual,
     ensureArguments,
     ensureArray,
@@ -142,7 +143,7 @@ const afterTest = (test, options) => {
                 label: "step",
                 message: `unverified steps`,
                 pass: false,
-                info: [[Markup.red("Steps:"), Markup.diff([], currentResult.steps)]],
+                info: [[Markup.red("Steps:"), Markup.diff([], deepCopy(currentResult.steps))]],
             })
         );
     }
@@ -1900,7 +1901,7 @@ export class Matchers {
         if (!pass) {
             const formattedStack = formatStack(currentStack);
             const stackContent = Markup.text(formattedStack, { technical: true });
-            assertion.info = [...details(actual), [Markup.red("Source:"), stackContent]];
+            assertion.info = [...deepCopy(details(actual)), [Markup.red("Source:"), stackContent]];
         }
 
         registerAssertion(assertion);

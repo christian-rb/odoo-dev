@@ -44,7 +44,6 @@ export const beforeEach = runner.exportFn(runner.beforeEach);
 export const onError = runner.exportFn(runner.onError);
 
 // Fixture
-export const destroy = runner.fixture.destroy;
 export const getFixture = runner.fixture.get;
 export const mountOnFixture = runner.fixture.mount;
 
@@ -54,8 +53,10 @@ export const dryRun = runner.exportFn(runner.dryRun);
 export const getCurrent = runner.exportFn(runner.getCurrent);
 export const registerPreset = runner.exportFn(runner.registerPreset);
 export const start = runner.exportFn(runner.start);
+export const stop = runner.exportFn(runner.stop);
 
 export { makeExpect } from "./core/expect";
+export { destroy } from "./core/fixture";
 
 // Constants
 export const globals = {

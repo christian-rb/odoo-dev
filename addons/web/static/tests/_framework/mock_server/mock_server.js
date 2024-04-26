@@ -1,7 +1,6 @@
 import {
-    after,
     before,
-    beforeAll,
+    beforeEach,
     createJobScopedGetter,
     expect,
     getCurrent,
@@ -116,6 +115,17 @@ const authenticateUser = (user) => {
  */
 const ensureError = (error) => (error instanceof Error ? error : new Error(error));
 
+const getCurrentMockServer = () => {
+    const { test } = getCurrent();
+    if (!test) {
+        return null;
+    }
+    if (!mockServers.has(test.runFn)) {
+        mockServers.set(test.runFn, new MockServer());
+    }
+    return mockServers.get(test.runFn);
+};
+
 const getCurrentParams = createJobScopedGetter(
     /**
      * @param {ServerParams} previous
@@ -162,22 +172,6 @@ const modelNotFoundError = (modelName, consequence) => {
 };
 
 /**
- * @template T
- * @param {Promise<T>} promise
- * @returns {Promise<T>}
- */
-const returnIfSameTest = async (promise) => {
-    const originalTestId = getCurrent().test?.id;
-    if (originalTestId) {
-        const result = await promise;
-        if (originalTestId === getCurrent().test?.id) {
-            return result;
-        }
-    }
-    return new Promise(() => {});
-};
-
-/**
  * @param {unknown} value
  */
 const toDisplayName = (value) => {
@@ -193,7 +187,7 @@ class MockServerBaseEnvironment {
     cookie = new Map();
 
     get companies() {
-        return this.server.env["res.company"].read(serverState.companies.map((c) => c.id));
+        return MockServer.env["res.company"].read(serverState.companies.map((c) => c.id));
     }
 
     get company() {
@@ -221,14 +215,7 @@ class MockServerBaseEnvironment {
     }
 
     get user() {
-        return this.server.env["res.users"]._filter([["id", "=", serverState.userId]])[0];
-    }
-
-    /**
-     * @param {MockServer} server
-     */
-    constructor(server) {
-        this.server = server;
+        return MockServer.env["res.users"]._filter([["id", "=", serverState.userId]])[0];
     }
 }
 
@@ -241,10 +228,30 @@ const DEFAULT_MENU = {
 const R_DATASET_ROUTE = /\/web\/dataset\/call_(button|kw)\/[\w.-]+\/(?<step>\w+)/;
 const R_WEBCLIENT_ROUTE = /(?<step>\/web\/webclient\/\w+)/;
 
+const mockRpcRegistry = registry.category("mock_rpc");
+/** @type {WeakMap<() => any, MockServer>} */
+const mockServers = new WeakMap();
 const serverFields = new WeakSet();
 
-beforeAll(() =>
-    patch(assets, {
+beforeEach((test) => {
+    /**
+     * @template T
+     * @param {Promise<T>} promise
+     * @returns {Promise<T>}
+     */
+    const returnIfSameTest = async (promise) => {
+        if (originalTestId) {
+            const result = await promise;
+            if (originalTestId === getCurrent().test?.id) {
+                return result;
+            }
+        }
+        return new Promise(() => {});
+    };
+
+    const originalTestId = test.id;
+
+    return patch(assets, {
         async getBundle() {
             return returnIfSameTest(super.getBundle(...arguments));
         },
@@ -257,8 +264,8 @@ beforeAll(() =>
         async loadJS() {
             return returnIfSameTest(super.loadJS(...arguments));
         },
-    })
-);
+    });
+});
 
 //-----------------------------------------------------------------------------
 // Exports
@@ -266,7 +273,10 @@ beforeAll(() =>
 
 export class MockServer {
     /** @type {MockServer | null} */
-    static current = null;
+    static get current() {
+        const mockServer = getCurrentMockServer();
+        return mockServer?.started ? mockServer : null;
+    }
 
     static get env() {
         return this.current?.env;
@@ -317,14 +327,6 @@ export class MockServer {
     websockets = [];
 
     constructor() {
-        if (MockServer.current) {
-            throw new MockServerError(
-                `cannot instantiate a new MockServer: one is already running`
-            );
-        }
-
-        MockServer.current = this;
-
         // Set default routes
         this.onRpc("/web/action/load", this.mockActionLoad);
         this.onRpc("/web/bundle", this.mockBundle, { pure: true });
@@ -337,10 +339,6 @@ export class MockServer {
 
         mockFetch((input, init) => this.handle(input, init));
         mockWebSocket((ws) => this.websockets.push(ws));
-
-        after(() => {
-            MockServer.current = null;
-        });
     }
 
     /**
@@ -752,22 +750,19 @@ export class MockServer {
      * @returns {MockServerEnvironment}
      */
     makeServerEnv() {
-        const serverEnv = new MockServerBaseEnvironment(this);
+        const serverEnv = new MockServerBaseEnvironment();
         return new Proxy(serverEnv, {
             get: (target, p) => {
-                if (p in target || typeof p !== "string") {
-                    return target[p];
+                if (p in target || typeof p !== "string" || p === "then") {
+                    return Reflect.get(target, p);
                 }
-                if (p === "then") {
-                    return;
-                }
-                const model = this.models[p];
+                const model = Reflect.get(this.models, p);
                 if (!model) {
                     throw modelNotFoundError(p, "could not get model from server environment");
                 }
                 return model;
             },
-            has: (target, p) => p in target || p in this.models,
+            has: (target, p) => Reflect.has(target, p) || Reflect.has(this.models, p),
         });
     }
 
@@ -1048,9 +1043,10 @@ export function defineMenus(menus) {
 export function defineModels(ModelClasses) {
     const models = Object.values(ModelClasses);
     for (const ModelClass of models) {
-        const { definition } = ModelClass;
-        if (definition._fetch) {
-            registerModelToFetch(definition._name);
+        const instance = new ModelClass();
+        // we cannot get the `definition` as this will trigger the model creation
+        if (instance._fetch) {
+            registerModelToFetch(instance._name);
         }
     }
 
@@ -1103,10 +1099,10 @@ export function logout() {
  * Shortcut function to create and start a {@link MockServer}.
  */
 export async function makeMockServer() {
-    const mockServer = new MockServer();
+    const mockServer = getCurrentMockServer();
 
     // Add routes from "mock_rpc" registry
-    for (const [route, callback] of registry.category("mock_rpc").getEntries()) {
+    for (const [route, callback] of mockRpcRegistry.getEntries()) {
         if (typeof callback === "function") {
             mockServer.onRpc(route, callback);
         }
