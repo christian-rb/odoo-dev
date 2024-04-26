@@ -410,7 +410,7 @@ class ProjectCustomerPortal(CustomerPortal):
 
         Task = request.env['project.task']
         milestone_domain = AND([domain, [('allow_milestones', '=', True)], [('milestone_id', '!=', False)]])
-        milestones_allowed = Task.search_count(milestone_domain, limit=1) == 1
+        milestones_allowed = Task.sudo().search_count(milestone_domain, limit=1) == 1
         searchbar_sortings = dict(sorted(self._task_get_searchbar_sortings(milestones_allowed, project).items(),
                                          key=lambda item: item[1]["sequence"]))
         searchbar_inputs = self._task_get_searchbar_inputs(milestones_allowed, project)
