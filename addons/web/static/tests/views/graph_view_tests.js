@@ -1096,6 +1096,42 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
+    QUnit.test("format total in hh:mm when measure is unit_amount", async function (assert) {
+        assert.expect(9);
+        serverData.models['account.analytic.line'] = {
+            fields: {
+                unit_amount: { string: "Unit Amount", type: "float", group_operator: "sum", store: true },
+                project_id: {
+                    string: "Project",
+                    type: "many2one",
+                    relation: "project.project",
+                    store: true,
+                    sortable: true,
+                },
+            },
+            records: [
+                { id: 1, unit_amount: 8, project_id: false },
+            ],
+        }
+        const graph = await makeView({
+            serverData,
+            resModel: "account.analytic.line",
+            type: "graph",
+            arch: `
+                    <graph>
+                        <field name="unit_amount"/>
+                        <field name="unit_amount" type="measure"/>
+                    </graph>`
+        });
+        const { measure } = getGraphModelMetaData(graph);
+        assert.hasClass(target.querySelector(".o_graph_view"), "o_view_controller");
+        assert.containsOnce(target, "div.o_graph_canvas_container canvas");
+        assert.strictEqual(measure, "unit_amount", `the measure should be "unit_amount"`);
+        checkLabels(assert, graph, ["Total"]);
+        checkLegend(assert, graph, "Unit Amount");
+        checkTooltip(assert, graph, { title: "Unit Amount", lines: [{ label: "Total", value: "8:00" }] }, 0);
+    });
+
     QUnit.test("Stacked button visible in the line chart", async function (assert) {
         const graph = await makeView({
             serverData,

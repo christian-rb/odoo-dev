@@ -16,6 +16,12 @@ import { cookie } from "@web/core/browser/cookie";
 
 const NO_DATA = _t("No data");
 
+// Measures for which value should be converted into HH:MM format
+export const HOURS_MEASURE_FIELDS = [
+    'unit_amount', 'effective_hours', 'allocated_hours', 'remaining_hours', 'total_hours_spent',
+    'subtask_effective_hours', 'overtime', 'number_hours', 'difference', 'timesheet_unit_amount'
+];
+
 export const LINE_FILL_TRANSPARENCY = 0.4;
 
 /**
@@ -499,7 +505,7 @@ export class GraphRenderer extends Component {
      * @returns {Object[]}
      */
     getTooltipItems(data, metaData, tooltipModel) {
-        const { allIntegers, domains, mode, groupBy } = metaData;
+        const { allIntegers, domains, mode, groupBy, measure } = metaData;
         const sortedDataPoints = sortBy(tooltipModel.dataPoints, "raw", "desc");
         const items = [];
         for (const item of sortedDataPoints) {
@@ -525,6 +531,12 @@ export class GraphRenderer extends Component {
                     label = `${label} / ${dataset.label}`;
                 }
                 boxColor = mode === "bar" ? dataset.backgroundColor : dataset.borderColor;
+            }
+            if (HOURS_MEASURE_FIELDS.includes(measure) || (measure.includes("_hours") && !measure.includes("_percentage"))) {
+                // Format value to HH:MM
+                const [hours, minutes] = value.split(".");
+                const formattedMinutes = parseInt(minutes) ? (Math.round(parseInt(minutes) / 100 * 60)).toString().padStart(2, '0') : "00";
+                value = `${hours}:${formattedMinutes}`;
             }
             items.push({ label, value, boxColor, percentage });
         }

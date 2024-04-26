@@ -1,11 +1,7 @@
 /** @odoo-module **/
 
 import { ProjectTaskGraphModel } from "@project/views/project_task_graph/project_task_graph_model";
-
-const FIELDS = [
-    'unit_amount', 'effective_hours', 'allocated_hours', 'remaining_hours', 'total_hours_spent', 'subtask_effective_hours',
-    'overtime', 'number_hours', 'difference', 'timesheet_unit_amount'
-];
+import { HOURS_MEASURE_FIELDS } from "@web/views/graph/graph_renderer";
 
 export class hrTimesheetGraphModel extends ProjectTaskGraphModel {
     /**
@@ -27,7 +23,7 @@ export class hrTimesheetGraphModel extends ProjectTaskGraphModel {
     _getProcessedDataPoints() {
         const currentCompany = this.companyService.currentCompany;
         const factor = currentCompany.timesheet_uom_factor || 1;
-        if (factor !== 1 && FIELDS.includes(this.metaData.measure)) {
+        if (factor !== 1 && HOURS_MEASURE_FIELDS.includes(this.metaData.measure)) {
             // recalculate the Duration values according to the timesheet_uom_factor
             for (const dataPt of this.dataPoints) {
                 dataPt.value *= factor;
