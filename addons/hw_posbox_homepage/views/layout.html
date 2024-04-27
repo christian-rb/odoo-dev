@@ -29,6 +29,31 @@
             .float-end {
                 float: right;
             }
+            table.table_info {
+                width: 100%;
+                border-collapse: collapse;
+                margin-left: auto;
+                margin-right: auto;
+            }
+            table.table_info tr {
+                border-bottom: 1px solid #f1f1f1;
+            }
+            table.table_info tr:last-child {
+                border-width: 0px;
+            }
+            table.table_info td {
+                padding: 8px;
+                border-left: 1px solid #f1f1f1;
+            }
+            table.table_info td:first-child {
+                border-left: 0;
+            }
+            td.heading {
+                font-weight: bold;
+                vertical-align: top;
+                width: 30%;
+                text-align: left;
+            }
             .btn {
                 display: inline-block;
                 padding: 8px 15px;
@@ -128,8 +153,8 @@
         {% block head %}{% endblock %}
     </head>
     <body>
-        {%if breadcrumb %}
-            <div class="breadcrumb"><a href="/">Home</a> / <span>{{ breadcrumb }}</span></div>
+        {% if breadcrumb %}
+            <div class="breadcrumb"><a href="/">Home</a> / <span>{{ breadcrumb }}</span>{% block extra_breadcrumb %}{% endblock %}</div>
         {% endif %}
         <div class="container">
             {% block content %}{% endblock %}

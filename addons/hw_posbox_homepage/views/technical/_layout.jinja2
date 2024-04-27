@@ -1,0 +1,41 @@
+{% extends "layout.html" %}
+{% block extra_breadcrumb %}
+ / <select style="width: auto;" onchange="window.location.href=this.value">
+{% for menu in TECHNICAL_MENUS.sub_menus %}
+    {% set menu_url = menu.url %}
+    <option value="{{ menu_url }}" {% if menu_url == request_path %}selected{% endif %}>
+        {{ menu.name }}
+    </option>
+    {% for sub_menu in menu.sub_menus %}
+        {% if request_path == sub_menu.url %}
+            <option selected>
+                &boxur;&HorizontalLine; {{ sub_menu.name }}
+            </option>
+        {% endif %}
+    {% endfor %}
+{% endfor %}
+</select>
+{% endblock %}
+
+
+{% macro iot_table(infos_table, empty_text="No Information was found") %}
+    <table class="table_info">
+        {% for info_table in infos_table %}
+        <tr>
+            <th>{{ info_table.name }}</th>
+            <td>{{ info_table.value }}</td>
+            {% if info_table.action_url %}
+                <td style="text-align: right;">
+                <a class='btn btn-sm' href="{{ info_table.action_url }}" {% if info_table.action_target %} target="{{ info_table.action_target }}"{% endif %}>
+                {{ info_table.action_name }}
+                </a>
+                </td>
+            {% endif %}
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="3" class="text-center"><i>{{ empty_text }}</i></td>
+        </tr>
+        {% endfor %}
+    </table>
+{% endmacro %}

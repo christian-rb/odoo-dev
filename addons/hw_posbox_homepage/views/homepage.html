@@ -20,29 +20,6 @@
         margin-bottom: 30px;
         justify-content: center;
     }
-    table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-    table tr {
-        border-bottom: 1px solid #f1f1f1;
-    }
-    table tr:last-child {
-        border-width: 0px;
-    }
-    table td {
-        padding: 8px;
-        border-left: 1px solid #f1f1f1;
-    }
-    table td:first-child {
-        border-left: 0;
-    }
-    td.heading {
-        font-weight: bold;
-        vertical-align: top;
-        width: 30%;
-        text-align: left;
-    }
     .device-status {
         margin: 6px 0;
     }
@@ -169,55 +146,15 @@
         </div>
     </div>
     <h2 class="text-center text-green">Your IoT Box is up and running</h2>
-    <table align="center" cellpadding="3">
+    <table cellpadding="3" class="table_info">
         <tr>
             <td class="heading">Name</td>
             <td> {{ hostname }} {% if system == "Linux" %}<a class="btn btn-sm float-right" href='/server'>configure</a>{% endif %}</td>
         </tr>
         <tr>
-            <td class="heading">Version</td>
-            <td> {{ version }} {% if system == "Linux" %}<a class="btn btn-sm float-right" href='/hw_proxy/upgrade/'>update</a>{% endif %}</td>
-        </tr>
-        <tr>
-            <td class="heading">IP Address</td>
-            <td>{{ ip }}</a></td>
-        </tr>
-        <tr>
-            <td class="heading">Mac Address</td>
-            <td> {{ mac }}</td>
-        </tr>
-        <tr>
-            <td class="heading">Network</td>
-            <td>{{ network_status }} {% if system == "Linux" %}<a class="btn btn-sm float-right" href='/wifi'>configure wifi</a>{% endif %}</td>
-        </tr>
-        <tr>
-            <td class="heading">Server</td>
+            <td class="heading">Synchronised Odoo Server</td>
             <td><a href='{{ server_status }}' target=_blank>{{ server_status }}<a class="btn btn-sm float-end" href='/server'>configure</a></td>
         </tr>
-        <tr class="{{ 'warn-tr' if not is_certificate_ok }}">
-            <td class="heading">HTTPS certificate</td>
-            <td>
-                {% if is_certificate_ok %}
-                    <details>
-                        <summary>OK</summary>
-                        <code>{{ certificate_details }}</code>
-                    </details>
-                {% else %}
-                    Error code:
-                    {% set error_code = certificate_details.split(' ') | first | replace("_", "-") | lower %}
-                    {% set doc_url = 'https://www.odoo.com/documentation/master/applications/productivity/iot/config/https_certificate_iot.html#' ~ error_code %}
-                    <a target="_blank" class="btn btn-sm float-end" href="{{ doc_url }}">help</a>
-                    <br/>
-                    <code style="white-space: pre-wrap;">{{ certificate_details }}</code>
-                {% endif %}
-            </td>
-        </tr>
-        {% if server_status != "Not Configured" %}
-        <tr>
-            <td class="heading">Six payment terminal</td>
-            <td>{{ six_terminal }} <a class="btn btn-sm float-end" href='/six_payment_terminal'>configure</a></td>
-        </tr>
-        {% endif %}
         {% if pairing_code %}
         <tr>
             <td class="heading">Pairing code</td>
@@ -245,19 +182,11 @@
                         </div>
                     {% endfor %}
                 </div>
-                <br><center><a class="btn btn-sm" href='/list_handlers'>handlers list</a></center>
             </td>
         </tr>
     </table>
     <div style="margin: 20px auto 10px auto;" class="text-center">
         <a class="btn" href='/point_of_sale/display'>POS Display</a>
-        {% if system == "Linux" %}
-            <a class="btn" style="margin-left: 10px;" href='/remote_connect'>Remote Debug</a>
-            <a target="_blank" class="btn" style="margin-left: 10px;" href="http://{{ ip }}:631">Printers server</a>
-        {% endif %}
-        {% if server_status != "Not Configured" %}
-        <a class="btn" style="margin-left: 10px;" href='/list_credential'>Credential</a>
-        {% endif %}
         <a class="btn" style="margin-left: 10px;" href='/technical'>Technical</a>
     </div>
     {{ loading_block_ui(loading_message) }}
