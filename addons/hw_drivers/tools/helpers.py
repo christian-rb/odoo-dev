@@ -21,7 +21,7 @@ import contextlib
 import requests
 import secrets
 
-from odoo import _, http, service
+from odoo import _, http, release, service
 from odoo.tools.func import lazy_property
 from odoo.tools.misc import file_path
 from odoo.modules.module import get_resource_path
@@ -273,11 +273,21 @@ def get_odoo_server_url():
 def get_token():
     return read_file_first_line('token')
 
+def get_commit_hash():
+    return subprocess.check_output(
+        ['git', '--work-tree=/home/pi/odoo/', '--git-dir=/home/pi/odoo/.git', 'rev-parse', '--short', 'HEAD']
+        ).decode('ascii').strip()
+
 def get_version():
     if platform.system() == 'Linux':
-        return read_file_first_line('/var/odoo/iotbox_version')
+        letter_prefix = 'L'
+        image_version = read_file_first_line('/var/odoo/iotbox_version')
+        revision = get_commit_hash()
     elif platform.system() == 'Windows':
-        return 'W22_11'
+        letter_prefix = 'W'
+        image_version = 'N/A'  # not applicable for windows
+        revision = None  # already added in release.version on windows executables
+    return '-'.join(filter(None, (letter_prefix, image_version, release.version, revision)))
 
 def get_wifi_essid():
     wifi_options = []
