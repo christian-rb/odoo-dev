@@ -32,6 +32,8 @@ publicWidget.registry.websiteForum = publicWidget.Widget.extend({
         'click .js_close_intro': '_onCloseIntroClick',
         'click .answer_collapse': '_onExpandAnswerClick',
         "click .o_js_forum_tag_follow": "_onClickTagFollow",
+        "click .o_js_forum_signup_later": "_onClickSignUpLater",
+        "click .o_js_forum_signup_never": "_onClickSignUpNever",
         'submit .js_wforum_submit_form:has(:not(.karma_required).o_wforum_submit_post)': '_onSubmitForm',
     },
 
@@ -183,6 +185,19 @@ publicWidget.registry.websiteForum = publicWidget.Widget.extend({
                     .fromSQL(post.dataset.lastActivity, {zone: 'utc'})
                     .toRelative();
             });
+
+        // show the sign-up call to action if appropriate
+        const signUpCta = document.querySelector(".o_wforum_sign_up_cta");
+        if (signUpCta) {
+            // check if public user has hidden the cta forever or temporarily (~one day)
+            const hiddenAt = parseInt(localStorage.getItem("forum-signup-cta-hidden-at")) || 0;
+            if (
+                !localStorage.getItem("forum-signup-cta-hidden-forever") &&
+                hiddenAt < Date.now() - 24 * 60 * 60 * 1000
+            ) {
+                signUpCta.classList.remove("d-none");
+            }
+        }
         return this._super.apply(this, arguments);
     },
 
@@ -320,6 +335,22 @@ publicWidget.registry.websiteForum = publicWidget.Widget.extend({
                 ev.currentTarget.querySelector(".o_js_forum_tag_link").classList.toggle(token);
             });
         }
+    },
+    /**
+     * @private
+     * @param {Event} ev
+     */
+    _onClickSignUpLater: function (ev) {
+        ev.preventDefault();
+        localStorage.setItem("forum-signup-cta-hidden-at", Date.now());
+    },
+    /**
+     * @private
+     * @param {Event} ev
+     */
+    _onClickSignUpNever: function (ev) {
+        ev.preventDefault();
+        localStorage.setItem("forum-signup-cta-hidden-forever", true);
     },
     /**
      * @private

@@ -283,6 +283,7 @@
                         Please wait for a moderator to validate your previous post to be allowed replying questions.
                     </div>
                 </t>
+                <t t-if="is_public_user" t-call="website_forum.sign_up_cta"/>
                 <section t-if="related_posts" t-call="website_forum.related_posts"/>
             </div>
         </div>
@@ -618,5 +619,16 @@
     </table>
 </template>
 
+<template id="sign_up_cta" name="Sign-Up Call to Action">
+    <div class="o_wforum_sign_up_cta alert alert-info mt-4 collapse show d-none">
+       <h4 class="alert-heading">Hi! Enjoying your reading? Why not sign up for an account?</h4>
+       <p>With an account, you will benefit from all the features and interact with the community!</p>
+       <div class="d-flex">
+            <a class="forum_register_url btn btn-primary me-2" href="/web/login">Sign up</a>
+            <button class="o_js_forum_signup_later btn btn-light me-1" data-bs-toggle="collapse" data-bs-target=".o_wforum_sign_up_cta">Maybe later</button>
+            <button class="o_js_forum_signup_never btn btn-link" data-bs-toggle="collapse" data-bs-target=".o_wforum_sign_up_cta">No, thanks</button>
+       </div>
+    </div>
+</template>
     </data>
 </odoo>

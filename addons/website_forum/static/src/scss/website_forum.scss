@@ -222,6 +222,10 @@ $-forum-sidebar-width: map-get($container-max-widths, sm) / 2;
             outline: 0;
         }
     }
+
+    .o_wforum_sign_up_cta {
+        max-width: 700px;
+    }
 }
 
 .website_forum, .o_wforum_profile_tab {
