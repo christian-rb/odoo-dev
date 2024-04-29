@@ -158,12 +158,18 @@ class AccountMove(models.Model):
 
             street = ', '.join([x for x in (move.partner_id.street, move.partner_id.street2) if x])
 
-            invoice_npwp = '000000000000000'
-            if commercial_partner.vat and len(commercial_partner.vat) >= 12:
+            invoice_npwp = ''
+            if commercial_partner.vat and len(commercial_partner.vat) >= 15:
                 invoice_npwp = commercial_partner.vat
-            elif (not commercial_partner.vat or len(commercial_partner.vat) < 12) and commercial_partner.l10n_id_nik:
+            elif (not commercial_partner.vat or len(commercial_partner.vat) < 15) and commercial_partner.l10n_id_nik:
                 invoice_npwp = commercial_partner.l10n_id_nik
+            if not invoice_npwp:
+                raise UserError(_("Please make sure that you've input the appropriate NPWP or NIK for the following customer: %s"))
             invoice_npwp = invoice_npwp.replace('.', '').replace('-', '')
+
+            etax_name = commercial_partner.l10n_id_tax_name or move.partner_id.name
+            if invoice_npwp[:15] == '000000000000000' and commercial_partner.l10n_id_nik:
+                etax_name = "%s#NIK#NAMA#%s" % (commercial_partner.l10n_id_nik, etax_name)
 
             # Here all fields or columns based on eTax Invoice Third Party
             eTax['KD_JENIS_TRANSAKSI'] = move.l10n_id_tax_number[0:2] or 0
@@ -173,8 +179,9 @@ class AccountMove(models.Model):
             eTax['TAHUN_PAJAK'] = move.invoice_date.year
             eTax['TANGGAL_FAKTUR'] = '{0}/{1}/{2}'.format(move.invoice_date.day, move.invoice_date.month, move.invoice_date.year)
             eTax['NPWP'] = invoice_npwp
-            eTax['NAMA'] = move.partner_id.name if eTax['NPWP'] == '000000000000000' else commercial_partner.l10n_id_tax_name or move.partner_id.name
-            eTax['ALAMAT_LENGKAP'] = move.partner_id.contact_address.replace('\n', '') if eTax['NPWP'] == '000000000000000' else commercial_partner.l10n_id_tax_address or street
+            eTax['NAMA'] = etax_name
+            eTax['ALAMAT_LENGKAP'] = move.partner_id.contact_address.replace('\n', '').strip() if eTax['NPWP'] == '000000000000000' else move.partner_id.l10n_id_tax_address \
+                or move.partner_id.parent_id.l10n_id_tax_address or street
             eTax['JUMLAH_DPP'] = int(float_round(move.amount_untaxed, 0)) # currency rounded to the unit
             eTax['JUMLAH_PPN'] = int(float_round(move.amount_tax, 0, rounding_method="DOWN"))  # tax amount ALWAYS rounded down
             eTax['ID_KETERANGAN_TAMBAHAN'] = '1' if move.l10n_id_kode_transaksi == '07' else ''
