@@ -9,7 +9,7 @@ class CrmChatbotCase(chatbot_common.CrmChatbotCase):
 
     @users('user_public')
     def test_chatbot_lead_public_user(self):
-        self._chatbot_create_lead(self.user_public)
+        self._chatbot_create_lead(self.user_public, process_step_no_su=True)
 
         created_lead = self.env['crm.lead'].sudo().search([], limit=1, order='id desc')
         self.assertEqual(created_lead.name, "Testing Bot's New Lead")
@@ -32,7 +32,7 @@ class CrmChatbotCase(chatbot_common.CrmChatbotCase):
         self.assertEqual(created_lead.team_id, self.sale_team_with_lead)
         self.assertEqual(created_lead.type, 'lead')
 
-    def _chatbot_create_lead(self, user):
+    def _chatbot_create_lead(self, user, process_step_no_su=False):
         channel_info = self.make_jsonrpc_request("/im_livechat/get_session", {
             'anonymous_name': 'Test Visitor',
             'channel_id': self.livechat_channel.id,
@@ -44,7 +44,8 @@ class CrmChatbotCase(chatbot_common.CrmChatbotCase):
         self._post_answer_and_trigger_next_step(
             discuss_channel,
             self.step_dispatch_create_lead.name,
-            chatbot_script_answer=self.step_dispatch_create_lead
+            chatbot_script_answer=self.step_dispatch_create_lead,
+            process_step_no_su=True,
         )
         self.assertEqual(discuss_channel.chatbot_current_step_id, self.step_create_lead_email)
         self._post_answer_and_trigger_next_step(discuss_channel, 'test2@example.com')
