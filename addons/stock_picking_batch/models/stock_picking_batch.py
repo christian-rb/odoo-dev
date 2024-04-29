@@ -280,8 +280,9 @@ class StockPickingBatch(models.Model):
     # Miscellaneous
     # -------------------------------------------------------------------------
     def _sanity_check(self):
+        validating_picking = self.picking_ids.browse(self._context.get('button_validate_picking_ids', False))
         for batch in self:
-            if not batch.picking_ids <= batch.allowed_picking_ids:
+            if not batch.picking_ids - validating_picking <= batch.allowed_picking_ids:
                 erroneous_pickings = batch.picking_ids - batch.allowed_picking_ids
                 raise UserError(_(
                     "The following transfers cannot be added to batch transfer %s. "
