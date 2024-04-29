@@ -141,6 +141,12 @@ export class PosData extends Reactive {
             }
         }
 
+        if (data["product.product"]) {
+            data["product.product"] = data["product.product"].filter(
+                (p) => !this.models["product.product"].get(p.id)
+            );
+        }
+
         const results = this.models.loadData(data, [], true);
         for (const [model, data] of Object.entries(results)) {
             for (const record of data) {

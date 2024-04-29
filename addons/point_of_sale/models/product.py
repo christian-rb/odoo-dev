@@ -82,9 +82,9 @@ class ProductProduct(models.Model):
     @api.model
     def _load_pos_data_fields(self, config_id):
         return [
-            'id', 'display_name', 'lst_price', 'standard_price', 'categ_id', 'pos_categ_ids', 'taxes_id', 'barcode',
-            'default_code', 'to_weight', 'uom_id', 'description_sale', 'description', 'product_tmpl_id', 'tracking',
-            'write_date', 'available_in_pos', 'attribute_line_ids', 'active', 'image_128', 'combo_ids',
+            'id', 'display_name', 'lst_price', 'standard_price', 'categ_id', 'pos_categ_ids', 'taxes_id', 'barcode', 'name',
+            'default_code', 'to_weight', 'uom_id', 'description_sale', 'description', 'product_tmpl_id', 'tracking', 'detailed_type',
+            'write_date', 'available_in_pos', 'attribute_line_ids', 'active', 'image_128', 'combo_ids', 'product_template_variant_value_ids',
         ]
 
     def _load_pos_data(self, data):
@@ -183,18 +183,22 @@ class ProductProduct(models.Model):
             'variants': variant_list
         }
 
+    def get_product_stock(self):
+        self.ensure_one()
+        return [{
+            'name': w.name,
+            'available_quantity': self.with_context({'warehouse': w.id}).qty_available,
+            'forecasted_quantity': self.with_context({'warehouse': w.id}).virtual_available,
+        } for w in self.env['stock.warehouse'].sudo().search(self.env['stock.warehouse']._check_company_domain(self.env.company))]
+
 
 class ProductAttribute(models.Model):
     _name = 'product.attribute'
     _inherit = ['product.attribute', 'pos.load.mixin']
 
     @api.model
-    def _load_pos_data_domain(self, data):
-        return [('create_variant', '=', 'no_variant')]
-
-    @api.model
     def _load_pos_data_fields(self, config_id):
-        return ['name', 'display_type', 'template_value_ids', 'attribute_line_ids']
+        return ['name', 'display_type', 'template_value_ids', 'attribute_line_ids', 'create_variant']
 
 
 class ProductAttributeCustomValue(models.Model):

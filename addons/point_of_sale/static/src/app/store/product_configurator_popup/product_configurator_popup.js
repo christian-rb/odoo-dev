@@ -1,14 +1,17 @@
 /** @odoo-module */
 import { Dialog } from "@web/core/dialog/dialog";
 import { Component, onMounted, useRef, useState, useSubEnv } from "@odoo/owl";
+import { usePos } from "../pos_hook";
+import { useTrackedAsync } from "@point_of_sale/app/utils/hooks";
+import { useRefListener, useService } from "@web/core/utils/hooks";
 
 export class BaseProductAttribute extends Component {
     static template = "";
-    static props = ["attribute"];
+    static props = ["attributeLine"];
     setup() {
         this.env.attribute_components.push(this);
-        this.attribute = this.props.attribute;
-        this.values = this.attribute.template_value_ids;
+        this.attributeLine = this.props.attributeLine;
+        this.values = this.attributeLine.product_template_value_ids;
         this.state = useState({
             attribute_value_ids: parseFloat(this.values[0].id),
             custom_value: "",
@@ -17,7 +20,7 @@ export class BaseProductAttribute extends Component {
 
     getValue() {
         const attribute_value_ids =
-            this.attribute.display_type === "multi"
+            this.attributeLine.attribute_id.display_type === "multi"
                 ? this.values.filter((val) => this.state.attribute_value_ids[val.id])
                 : [this.values.find((val) => val.id === parseInt(this.state.attribute_value_ids))];
 
@@ -89,9 +92,7 @@ export class MultiProductAttribute extends BaseProductAttribute {
     }
 
     initAttribute() {
-        const attribute = this.props.attribute;
-
-        for (const value of attribute.template_value_ids) {
+        for (const value of this.values) {
             this.state.attribute_value_ids[value.id] = false;
         }
     }
@@ -111,18 +112,73 @@ export class ProductConfiguratorPopup extends Component {
 
     setup() {
         useSubEnv({ attribute_components: [] });
-    }
+        this.pos = usePos();
+        this.ui = useState(useService("ui"));
+        this.fetchStock = useTrackedAsync((p) => this.getStockInfos(p));
+        this.inputArea = useRef("input-area");
+        this.state = useState({
+            onHand: 0,
+            payload: this.env.attribute_components,
+            priceInfos: {
+                withTax: 0,
+                withoutTax: 0,
+                amountTax: 0,
+                tax: {},
+            },
+        });
 
-    get attributes() {
-        return this.props.product.attribute_line_ids.map((attrLine) => attrLine.attribute_id);
-    }
+        onMounted(() => {
+            this.computeProductPriceInfos();
+            this.fetchStock.call(this.props.product);
+        });
 
+        useRefListener(this.inputArea, "touchend", this.computeProductPriceInfos.bind(this));
+        useRefListener(this.inputArea, "click", this.computeProductPriceInfos.bind(this));
+    }
+    computeProductPriceInfos() {
+        let product = this.props.product;
+        const formattedPayload = this.computePayload();
+        const alwaysVariants = this.props.product.attribute_line_ids.every(
+            (line) => line.attribute_id.create_variant === "always"
+        );
+
+        if (alwaysVariants) {
+            const newProduct = this.pos.models["product.product"]
+                .filter((p) => p.raw.product_template_variant_value_ids.length > 0)
+                .find((p) =>
+                    p.raw.product_template_variant_value_ids.every((v) =>
+                        formattedPayload.attribute_value_ids.includes(v)
+                    )
+                );
+            if (newProduct) {
+                this.fetchStock.call(product);
+                product = newProduct;
+            }
+        }
+
+        const productPrice = alwaysVariants
+            ? product.get_price()
+            : formattedPayload.price_extra + product.get_price();
+        const productPriceDetails = this.pos.getProducePriceDetails(product, productPrice);
+        this.state.priceInfos = {
+            withTax: productPriceDetails.total_included,
+            withoutTax: productPriceDetails.total_excluded,
+            amountTax: productPriceDetails.total_included - productPriceDetails.total_excluded,
+            tax: productPriceDetails.taxes_data[0],
+        };
+    }
+    async getStockInfos(product) {
+        const infos = await this.pos.data.call("product.product", "get_product_stock", [
+            product.id,
+        ]);
+        this.state.onHand = infos.reduce((acc, info) => acc + info.available_quantity, 0);
+    }
     computePayload() {
         const attribute_custom_values = [];
         let attribute_value_ids = [];
         var price_extra = 0.0;
 
-        this.env.attribute_components.forEach((attribute_component) => {
+        this.state.payload.forEach((attribute_component) => {
             const { valueIds, extra, custom_value } = attribute_component.getValue();
             attribute_value_ids.push(valueIds);
 
