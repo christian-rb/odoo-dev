@@ -48,6 +48,15 @@ class AccountMoveSend(models.TransientModel):
         string="Use template",
         domain="[('model', '=', 'account.move')]",
     )
+    pdf_template_id = fields.Many2one(
+        comodel_name='ir.actions.report',
+        string='Invoice template:',
+        domain="[('is_invoice_report', '=', True)]",
+        default=lambda self: self.env['ir.actions.report'].search([('report_name', '=', 'account.report_invoice_with_payments')], limit=1)
+    )
+    show_pdf_template_menu = fields.Boolean(
+        compute='_compute_show_pdf_template_menu',
+    )
     mail_lang = fields.Char(
         string="Lang",
         compute='_compute_mail_lang',
@@ -228,6 +237,17 @@ class AccountMoveSend(models.TransientModel):
     # -------------------------------------------------------------------------
 
     @api.depends('move_ids')
+    def _compute_show_pdf_template_menu(self):
+        available_templates = self.env['ir.actions.report'].search([('is_invoice_report', '=', True)], limit=2)
+        for wizard in self:
+            if len(available_templates) == 1:
+                wizard.pdf_template_id = available_templates[0]
+                wizard.show_pdf_template_menu = False
+            else:
+                # show pdf template menu if the wizard has one move that needs pdf
+                wizard.show_pdf_template_menu = len(wizard.move_ids) == 1 and self._need_invoice_document(wizard.move_ids[0])
+
+    @api.depends('move_ids')
     def _compute_company_id(self):
         for wizard in self:
             if len(wizard.move_ids.company_id) > 1:
@@ -386,7 +406,10 @@ class AccountMoveSend(models.TransientModel):
         if invoice.invoice_pdf_report_id:
             return
 
-        content, _report_format = self.env['ir.actions.report']._render('account.account_invoices', invoice.ids)
+        if not self.pdf_template_id.xml_id:
+            self.pdf_template_id.export_data(['id', 'xml_id'])
+
+        content, _report_format = self.env['ir.actions.report']._render(self.pdf_template_id.xml_id, invoice.ids)
 
         invoice_data['pdf_attachment_values'] = {
             'raw': content,
@@ -403,7 +426,7 @@ class AccountMoveSend(models.TransientModel):
         :param invoice:         An account.move record.
         :param invoice_data:    The collected data for the invoice so far.
         """
-        content, _report_format = self.env['ir.actions.report']._render('account.account_invoices', invoice.ids, data={'proforma': True})
+        content, _report_format = self.env['ir.actions.report']._render(self.pdf_template_id.xml_id, invoice.ids, data={'proforma': True})
 
         invoice_data['proforma_pdf_attachment_values'] = {
             'raw': content,
