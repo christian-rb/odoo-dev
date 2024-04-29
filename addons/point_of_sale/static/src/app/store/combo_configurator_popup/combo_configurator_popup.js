@@ -16,6 +16,7 @@ export class ComboConfiguratorPopup extends AbstractAwaitablePopup {
             combo: Object.fromEntries(this.props.product.combo_ids.map((elem) => [elem, 0])),
             // configuration: id of combo_line -> ProductConfiguratorPopup payload
             configuration: {},
+            discardActive: true
         });
     }
 
@@ -50,7 +51,10 @@ export class ComboConfiguratorPopup extends AbstractAwaitablePopup {
 
     async onClickProduct({ product, combo_line }, ev) {
         if (product.isConfigurable()) {
+            //When product configure popup opens, the discard button should be disabled.
+            this.state.discardActive = false;
             const { confirmed, payload } = await product.openConfigurator({ initQuantity: 1 });
+            this.state.discardActive = true;
             if (confirmed) {
                 this.state.configuration[combo_line.id] = payload;
             } else {
