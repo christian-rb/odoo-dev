@@ -513,6 +513,8 @@ class Picking(models.Model):
         ('name_uniq', 'unique(name, company_id)', 'Reference must be unique per company!'),
     ]
 
+    show_next_transfers = fields.Boolean(compute='_compute_show_next_transfers')
+
     def _compute_has_tracking(self):
         for picking in self:
             picking.has_tracking = any(m.has_tracking != 'none' for m in picking.move_ids)
@@ -939,6 +941,35 @@ class Picking(models.Model):
                 'picking_code': self.picking_type_code,
                 'create': self.state not in ('done', 'cancel'),
             }
+        }
+
+    def _get_next_transfers(self):
+        next_transfers = set()
+        for move in self.move_ids:
+            if move.next_move:
+                next_transfers.add(move.next_move.picking_id.id)
+        return next_transfers
+
+    @api.depends('move_ids.next_move')
+    def _compute_show_next_transfers(self):
+        self.show_next_transfers = len(self._get_next_transfers()) != 0
+
+    def action_next_transfer(self):
+        next_transfers = self._get_next_transfers()
+
+        if len(next_transfers) == 1:
+            return {
+                "type": "ir.actions.act_window",
+                "res_model": "stock.picking",
+                "views": [[False, "form"]],
+                "res_id": next_transfers.pop()
+            }
+        return {
+            'name': _('Next Transfers'),
+            "type": "ir.actions.act_window",
+            "res_model": "stock.picking",
+            "views": [[False, "tree"], [False, "form"]],
+            "domain": [('id', 'in', list(next_transfers))],
         }
 
     def _action_done(self):

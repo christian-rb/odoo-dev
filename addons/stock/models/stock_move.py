@@ -191,6 +191,7 @@ class StockMove(models.Model):
     show_quant = fields.Boolean("Show Quant", compute="_compute_show_info")
     show_lots_m2o = fields.Boolean("Show lot_id", compute="_compute_show_info")
     show_lots_text = fields.Boolean("Show lot_name", compute="_compute_show_info")
+    next_move = fields.Many2one('stock.move')
 
     @api.depends('product_id')
     def _compute_product_uom(self):
@@ -981,6 +982,7 @@ Please change the quantity done or the rounding precision of your unit of measur
                 new_move = rule._run_push(move)
                 if new_move:
                     new_moves.append(new_move)
+                    move.next_move = new_move
 
             move_to_propagate_ids = set()
             move_to_mts_ids = set()
