@@ -96,6 +96,7 @@ export class KanbanHeader extends Component {
     get groupAggregate() {
         const { group, progressBarState } = this.props;
         const { sumField } = progressBarState.progressAttributes;
+        progressBarState._updateProgressBar();
         return progressBarState.getAggregateValue(group, sumField);
     }
 

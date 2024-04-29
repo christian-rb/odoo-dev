@@ -90,12 +90,6 @@ class ProgressBarState {
                     color,
                 };
             });
-            bars.push({
-                count: group.count - bars.map((r) => r.count).reduce((a, b) => a + b, 0),
-                value: FALSE,
-                string: _t("Other"),
-                color: "200",
-            });
 
             // Update activeBars count and aggreagates
             if (this.activeBars[group.__rawValue]) {
@@ -288,7 +282,7 @@ class ProgressBarState {
                     for (const bar of groupInfo.bars) {
                         bar.count = (counts && counts[bar.value]) || 0;
                     }
-                    groupInfo.bars.find((b) => b.value === FALSE).count = counts
+                    group.count -= counts
                         ? group.count - Object.values(counts).reduce((a, b) => a + b, 0)
                         : group.count;
 
