@@ -332,7 +332,7 @@ export class ListController extends Component {
                 callback: () => this.toggleArchiveState(false),
             },
             duplicate: {
-                isAvailable: () => this.activeActions.duplicate && !isM2MGrouped,
+                isAvailable: () => this.activeActions.duplicate && this.activeActions.create && !isM2MGrouped,
                 sequence: 35,
                 icon: "fa fa-clone",
                 description: _t("Duplicate"),
