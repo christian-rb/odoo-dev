@@ -1,10 +1,13 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+import json
 import odoo
 
+from odoo import http
+from odoo.tests import HttpCase
 from odoo.addons.point_of_sale.tests.common import TestPoSCommon
 
 @odoo.tests.tagged('post_install', '-at_install')
-class TestReportSession(TestPoSCommon):
+class TestReportSession(TestPoSCommon, HttpCase):
 
     def setUp(self):
         super(TestReportSession, self).setUp()
@@ -109,3 +112,69 @@ class TestReportSession(TestPoSCommon):
             session_name = self.env['pos.session'].browse(payment['session']).name
             payment_method_name = self.env['pos.payment.method'].browse(payment['id']).name
             self.assertEqual(payment['name'], payment_method_name + " " + session_name)
+
+    def test_report_session_pdf(self):
+
+        self.test_user = self.env['res.users'].create({
+            'name': 'A test user with account rights',
+            'login': 'test_user',
+            'password': 'test_user',
+            'groups_id': [(6, 0, [
+                self.env.ref('base.group_user').id,
+                self.env.ref('point_of_sale.group_pos_user').id,
+                self.env.ref('account.group_account_user').id,
+            ])],
+        })
+
+        self.authenticate("test_user", "test_user")
+        self.product1 = self.create_product('Product A', self.categ_basic, 100)
+        self.config.open_ui()
+        session_id_2 = self.config.current_session_id.id
+
+        order_info = {
+            'company_id': self.env.company.id,
+            'session_id': session_id_2,
+            'partner_id': self.partner_a.id,
+            'lines': [(0, 0, {
+                'name': "OL/0001",
+                'product_id': self.product1.id,
+                'price_unit': 100,
+                'discount': 0,
+                'qty': 1,
+                'tax_ids': [],
+                'price_subtotal': 100,
+                'price_subtotal_incl': 100,
+            })],
+            'pricelist_id': self.config.pricelist_id.id,
+            'amount_paid': 100.0,
+            'amount_total': 100.0,
+            'amount_tax': 0.0,
+            'amount_return': 0.0,
+            'to_invoice': False,
+        }
+        order = self.env['pos.order'].create(order_info)
+        self.make_payment(order, self.bank_pm1, 100)
+
+        # Generate report
+        report_url = f"/report/pdf/point_of_sale.report_saledetails/{session_id_2}"
+        data = json.dumps([report_url, 'qweb-pdf'])
+        context = json.dumps({
+            "lang": "en_US",
+            "tz": False,
+            "uid": self.env.uid,
+            "allowed_company_ids": [self.env.company.id]
+        })
+        token = 'dummy-token'
+        response = self.url_open(
+            '/report/download?data=%s&context=%s&token=%s' % (data, context, token),
+            headers={
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': http.Request.csrf_token(self),
+            },
+        )
+
+        self.config.current_session_id.action_pos_session_closing_control()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.headers['Content-Type'], 'application/pdf')
+        self.assertIn('attachment; filename*=UTF-8\'\'Sales%20Details.pdf', response.headers['Content-Disposition'])

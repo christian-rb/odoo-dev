@@ -65,9 +65,20 @@ class TestPointOfSaleHttpCommon(AccountTestInvoicingHttpCommon):
                 (4, cls.env.ref('point_of_sale.group_pos_manager').id),
             ],
         })
+        cls.account_user = cls.env['res.users'].create({
+            'name': 'A test user with account rights',
+            'login': 'account_user',
+            'password': 'account_user',
+            'groups_id': [(6, 0, [
+                cls.env.ref('base.group_user').id,
+                cls.env.ref('point_of_sale.group_pos_user').id,
+                cls.env.ref('account.group_account_user').id,
+            ])],
+        })
 
         cls.pos_user.partner_id.email = 'pos_user@test.com'
         cls.pos_admin.partner_id.email = 'pos_admin@test.com'
+        cls.account_user.partner_id.email = 'account_user@test.com'
 
         cls.bank_journal = journal_obj.create({
             'name': 'Bank Test',
@@ -1203,6 +1214,10 @@ class TestUi(TestPointOfSaleHttpCommon):
         })
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'BarcodeScanPartnerTour', login="pos_user")
+
+    def test_sales_report_generation(self):
+        self.main_pos_config.with_user(self.account_user).open_ui()
+        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'SaleReportUITour', login="account_user")
 
 # This class just runs the same tests as above but with mobile emulation
 class MobileTestUi(TestUi):

@@ -39,3 +39,14 @@ export function isNot() {
         isCheck: true,
     };
 }
+export function secondary(text) {
+    let trigger = ".modal-footer .btn-secondary";
+    if (text) {
+        trigger += `:contains("${text}")`;
+    }
+    return {
+        content: "${text} dialog",
+        in_modal: true,
+        trigger,
+    };
+}
