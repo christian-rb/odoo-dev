@@ -76,6 +76,7 @@
 
     // New semantic
     .o_kanban_record.o_new_kanban {
+        --fieldWidget-display: block;
         $-py:  var(--KanbanRecord-padding-v);
         $-px:  var(--KanbanRecord-padding-h);
         padding: var(--KanbanRecord-padding-v) var(--KanbanRecord-padding-h);
