@@ -103,7 +103,7 @@ export class KanbanRecord extends Component {
             classes.push("o_draggable");
         }
         if (forceGlobalClick || archInfo.openAction || archInfo.allowGlobalClick) {
-            classes.push("o_kanban_global_click");
+            classes.push("cursor-pointer");
         }
         if (progressBarState) {
             const { fieldName, colors } = progressBarState.progressAttributes;

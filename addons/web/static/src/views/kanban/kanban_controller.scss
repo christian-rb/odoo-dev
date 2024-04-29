@@ -80,10 +80,10 @@
         $-py:  var(--KanbanRecord-padding-v);
         $-px:  var(--KanbanRecord-padding-h);
         padding: var(--KanbanRecord-padding-v) var(--KanbanRecord-padding-h);
+        gap: var(--KanbanRecord-padding-v) var(--KanbanRecord-padding-h);
 
         position: relative;
         display: flex;
-        flex-flow: column;
         align-items: stretch;
         min-width: 150px;
         margin: 0 0 (-$border-width);
@@ -93,30 +93,38 @@
         word-wrap: break-word;
         word-break: break-word;
 
+        &:not(.row) {
+            flex-flow: column;
+            gap: 0;
+        }
+
         --Tag-max-width: 100%;
         --Tag-font-size: #{$o-font-size-base-smaller};
         --Tags-margin: calc(1em - var(--Tag-font-size, .75rem)) 0;
 
-        > main {
+        main {
+        // > main {
             display: flex;
             flex-flow: column;
+            // flex-grow: 1;
         }
 
-        > footer, > main > footer {
+        footer {
+        // > footer, > main > footer {
             margin-top: auto;
-            padding-top: 8px;
+            padding-top: var(--KanbanRecord-padding-v);
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: $o-kanban-record-margin * 0.5;
         }
 
         // TODO (maybe?): handle card layout with flex-row if contains aside/main ?
 
         // FIXME: no need to handle this in the framework, case isn't frequent, probably (not sure)
         aside.o_kanban_aside_full {
-            max-height: 140px;
-            height: calc(100% + var(--KanbanRecord-padding-v)* 2);
-            align-self: center;
+            // max-height: 140px;
+            // height: calc(100% + var(--KanbanRecord-padding-v)* 2);
+            // align-self: center;
             margin-top: calc(var(--KanbanRecord-padding-v)* -1);
             margin-bottom: calc(var(--KanbanRecord-padding-v)* -1);
             margin-left: calc(var(--KanbanRecord-padding-h)* -1);
@@ -226,9 +234,9 @@
         //     }
         // }
 
-        &.o_kanban_global_click {
-            cursor: pointer;
-        }
+        // &.o_kanban_global_click {
+        //     cursor: pointer;
+        // }
 
         .o_dropdown_kanban {
             visibility: hidden;
