@@ -8,7 +8,7 @@ import { ViewButton } from "@web/views/view_button/view_button";
 import { useViewCompiler } from "@web/views/view_compiler";
 
 import { HierarchyCompiler } from "./hierarchy_compiler";
-import { getFormattedRecord } from "@web/views/kanban/kanban_record";
+import { getFormattedRecord, getImageSrcFromRecordInfo } from "@web/views/kanban/kanban_record";
 
 export class HierarchyCard extends Component {
     static components = {
@@ -46,6 +46,7 @@ export class HierarchyCard extends Component {
         const record = getFormattedRecord(data.record);
         return {
             context: this.props.node.context,
+            hierarchy_image: (...args) => getImageSrcFromRecordInfo(data.record, ...args),
             JSON,
             luxon,
             record,
