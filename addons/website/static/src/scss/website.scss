@@ -601,9 +601,16 @@ font[class*='bg-'] {
     @each $-color, $-value in $theme-colors {
         &.text-bg-#{$-color} {
             $-bg: tint-color($-value, 80%);
-            background-color: $-bg !important;
+            $-text-color-hover: color-contrast($-value, $min-contrast-ratio: 3);
+
+            background-color: var(--background-color, $-bg) !important;
             border: $border-width solid $-value;
-            color: increase-contrast($-value , $-bg) !important;
+            color: var(--color, increase-contrast($-value , $-bg)) !important;
+
+            &.o_badge_clickable:hover {
+                --background-color: #{$-value};
+                --color: #{color-contrast($-value, $min-contrast-ratio: 3)};
+            }
         }
     }
 }
