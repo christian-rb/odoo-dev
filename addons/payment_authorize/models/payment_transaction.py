@@ -197,6 +197,10 @@ class PaymentTransaction(models.Model):
             )
         return tx
 
+    def _compare_notification_data(self, notification_data):
+        # TODO(loti): check this.
+        return
+
     def _process_notification_data(self, notification_data):
         """ Override of payment to process the transaction based on Authorize data.
 

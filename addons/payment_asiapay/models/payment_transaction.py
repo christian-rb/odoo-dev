@@ -131,6 +131,11 @@ class PaymentTransaction(models.Model):
 
         return tx
 
+    def _compare_notification_data(self, notification_data):
+        amount = notification_data.get('Amt')
+        currency_code = const.CURRENCY_MAPPING_INV[notification_data.get('Cur')]
+        self._validate_amount_and_currency_code(amount, currency_code)
+
     def _process_notification_data(self, notification_data):
         """ Override of `payment' to process the transaction based on AsiaPay data.
 

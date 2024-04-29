@@ -358,6 +358,11 @@ class PaymentTransaction(models.Model):
             converted_amount, is_refund=is_refund, provider_reference=provider_reference
         )
 
+    def _compare_notification_data(self, notification_data):
+        amount = notification_data.get('amount').get('value')
+        currency_code = notification_data.get('amount').get('currency')
+        self._validate_amount_and_currency_code(amount, currency_code)
+
     def _process_notification_data(self, notification_data):
         """ Override of payment to process the transaction based on Adyen data.
 
