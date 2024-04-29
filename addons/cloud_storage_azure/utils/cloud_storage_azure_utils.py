@@ -8,6 +8,8 @@ importing the azure.storage.blob library.
 import base64
 import hashlib
 import hmac
+import urllib.parse
+
 import requests
 from urllib.parse import quote
 from datetime import date
@@ -17,30 +19,12 @@ from odoo.exceptions import ValidationError
 X_MS_VERSION = '2023-11-03'
 
 
-def encode_base64(data):
-    if isinstance(data, str):
-        data = data.encode('utf-8')
-    encoded = base64.b64encode(data)
-    return encoded.decode('utf-8')
-
-
-def decode_base64_to_bytes(data):
-    if isinstance(data, str):
-        data = data.encode('utf-8')
-    return base64.b64decode(data)
-
-
-def sign_string(key, string_to_sign, key_is_base64=True):
-    if key_is_base64:
-        key = decode_base64_to_bytes(key)
-    else:
-        if isinstance(key, str):
-            key = key.encode('utf-8')
-    if isinstance(string_to_sign, str):
-        string_to_sign = string_to_sign.encode('utf-8')
+def sign_string(key, string_to_sign):
+    key = base64.b64decode(key.encode())
+    string_to_sign = string_to_sign.encode()
     signed_hmac_sha256 = hmac.HMAC(key, string_to_sign, hashlib.sha256)
     digest = signed_hmac_sha256.digest()
-    encoded_digest = encode_base64(digest)
+    encoded_digest = base64.b64encode(digest).decode()
     return encoded_digest
 
 
@@ -63,12 +47,6 @@ class QueryStringConstants:
     SIGNED_CONTENT_ENCODING = 'rsce'
     SIGNED_CONTENT_LANGUAGE = 'rscl'
     SIGNED_CONTENT_TYPE = 'rsct'
-    START_PK = 'spk'
-    START_RK = 'srk'
-    END_PK = 'epk'
-    END_RK = 'erk'
-    SIGNED_RESOURCE_TYPES = 'srt'
-    SIGNED_SERVICES = 'ss'
     SIGNED_OID = 'skoid'
     SIGNED_TID = 'sktid'
     SIGNED_KEY_START = 'skt'
@@ -81,7 +59,6 @@ class QueryStringConstants:
     SIGNED_AUTHORIZED_OID = 'saoid'
     SIGNED_UNAUTHORIZED_OID = 'suoid'
     SIGNED_CORRELATION_ID = 'scid'
-    SIGNED_DIRECTORY_DEPTH = 'sdd'
 
 
 class BlobQueryStringConstants:
@@ -94,7 +71,7 @@ class _BlobSharedAccessHelper:
 
     def _add_query(self, name, val):
         if val:
-            self.query_dict[name] = str(val) if val is not None else None
+            self.query_dict[name] = str(val)
 
     def get_value_to_append(self, query):
         return_value = self.query_dict.get(query) or ''
@@ -398,12 +375,12 @@ def get_user_delegation_key(
     # Parse the user delegation key from the response
     key_response_xml = etree.fromstring(key_response.content)
     user_delegation_key = UserDelegationKey()
-    user_delegation_key.signed_oid = key_response_xml.find('SignedOid').text
-    user_delegation_key.signed_tid = key_response_xml.find('SignedTid').text
-    user_delegation_key.signed_start = key_response_xml.find('SignedStart').text
-    user_delegation_key.signed_expiry = key_response_xml.find('SignedExpiry').text
-    user_delegation_key.signed_service = key_response_xml.find('SignedService').text
-    user_delegation_key.signed_version = key_response_xml.find('SignedVersion').text
-    user_delegation_key.value = key_response_xml.find('Value').text
+    user_delegation_key.signed_oid = key_response_xml.findtext('SignedOid')
+    user_delegation_key.signed_tid = key_response_xml.findtext('SignedTid')
+    user_delegation_key.signed_start = key_response_xml.findtext('SignedStart')
+    user_delegation_key.signed_expiry = key_response_xml.findtext('SignedExpiry')
+    user_delegation_key.signed_service = key_response_xml.findtext('SignedService')
+    user_delegation_key.signed_version = key_response_xml.findtext('SignedVersion')
+    user_delegation_key.value = key_response_xml.findtext('Value')
 
     return user_delegation_key

@@ -18,7 +18,6 @@ except ImportError:
 
 DEFAULT_ENDPOINT = "https://storage.googleapis.com"
 SEVEN_DAYS = 7 * 24 * 60 * 60  # max age for V4 signed URLs.
-UTC = datetime.timezone.utc
 _EXPIRATION_TYPES = (int, datetime.datetime, datetime.timedelta)
 
 
@@ -48,7 +47,7 @@ def get_expiration_seconds_v4(expiration):
 
     if isinstance(expiration, datetime.datetime):
         if expiration.tzinfo is None:
-            expiration = expiration.replace(tzinfo=UTC)
+            expiration = expiration.replace(tzinfo=datetime.timezone.utc)
 
         expiration = expiration - now
 
@@ -108,37 +107,6 @@ def get_canonical_headers(headers):
 
     canonical_headers = ["{}:{}".format(*item) for item in ordered_headers]
     return canonical_headers, ordered_headers
-
-
-def _url_encode(query_params):
-    """Encode query params into URL.
-
-    :type query_params: dict
-    :param query_params: Query params to be encoded.
-
-    :rtype: str
-    :returns: URL encoded query params.
-    """
-    params = [
-        f"{_quote_param(name)}={_quote_param(value)}"
-        for name, value in query_params.items()
-    ]
-
-    return "&".join(sorted(params))
-
-
-def _quote_param(param):
-    """Quote query param.
-
-    :type param: Any
-    :param param: Query param to be encoded.
-
-    :rtype: str
-    :returns: URL encoded query param.
-    """
-    if not isinstance(param, bytes):
-        param = str(param)
-    return urllib.parse.quote(param, safe="~")
 
 
 def generate_signed_url_v4(
@@ -287,7 +255,7 @@ def generate_signed_url_v4(
     if generation is not None:
         query_parameters["generation"] = generation
 
-    canonical_query_string = _url_encode(query_parameters)
+    canonical_query_string = urllib.parse.urlencode(query_parameters, quote_via=urllib.parse.quote)
 
     lowercased_headers = dict(ordered_headers)
 
