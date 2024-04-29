@@ -6582,6 +6582,33 @@ registry.ImageTools = ImageHandlerOption.extend({
     // Options
     //--------------------------------------------------------------------------
 
+    async doStretch(){
+        this.trigger_up('disable_loading_effect');
+        const img = this._getImg();
+        const document = this.$el[0].ownerDocument;
+        const imageCropWrapperElement = document.createElement('div');
+        document.body.append(imageCropWrapperElement);
+        const imageCropWrapper = await attachComponent(this, imageCropWrapperElement, ImageCrop, {
+            activeOnStart: true,
+            media: img,
+            mimetype: this._getImageMimetype(img),
+        });
+        if(img.classList.contains('o_we_image_cropped')){
+            await imageCropWrapper.component.mountedPromise;
+            await imageCropWrapper.component.reset();
+        }else{
+            await imageCropWrapper.component.mountedPromise;
+            await imageCropWrapper.component.auto_1gem1();
+            
+        }
+        if (isGif(this._getImageMimetype(img))) {
+            img.dataset[img.dataset.shape ? 'originalMimetype' : 'mimetype'] = 'image/png';
+        }
+        await this._reapplyCurrentShape();
+        imageCropWrapperElement.remove();
+        imageCropWrapper.destroy();
+        this.trigger_up('enable_loading_effect');
+    },
     /**
      * Displays the image cropping tools
      *
@@ -7236,6 +7263,9 @@ registry.ImageTools = ImageHandlerOption.extend({
             // selector so this option should not be visible.
             return false;
         }
+        if (widgetName === "do_stretch_opt") {
+            return this._isStretchShape();
+        }
         if (params.optionsPossibleValues.setImgShapeHoverEffect) {
             const imgEl = this._getImg();
             return imgEl.classList.contains("o_animate_on_hover") && this._canHaveHoverEffect();
@@ -7301,6 +7331,10 @@ registry.ImageTools = ImageHandlerOption.extend({
             case 'setHoverEffectColor': {
                 const imgEl = this._getImg();
                 return imgEl.dataset.hoverEffectColor || "";
+            }
+            case 'doStretch': {
+                const imgEl = this._getImg();
+                return !imgEl.classList.contains('o_we_image_cropped')
             }
         }
         return this._super(...arguments);
@@ -7526,6 +7560,16 @@ registry.ImageTools = ImageHandlerOption.extend({
     _isAnimatedShape() {
         const shapeImgWidget = this._requestUserValueWidgets("shape_img_opt")[0];
         return shapeImgWidget?.getMethodsParams().animated;
+    },
+    /**
+     * Checks if the shape can be stretched or not.
+     *
+     * @private
+     * @returns {boolean}
+     */
+    _isStretchShape() {
+        const shapeImgWidget = this._requestUserValueWidgets("shape_img_opt")[0];
+        return shapeImgWidget?.getMethodsParams().stretch;
     },
     /**
      * Checks if the shape can have a hover effect.

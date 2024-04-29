@@ -97,6 +97,17 @@ export class ImageCrop extends Component {
         }
     }
 
+    async auto_1gem1() {
+        if (this.$cropperImage) {
+            this.$cropperImage.cropper('reset');
+            if (this.aspectRatio !== '1/1') {
+                this.aspectRatio = '1/1';
+                this.$cropperImage.cropper('setAspectRatio', this.aspectRatios[this.aspectRatio].value);
+            }
+            await this._save(true);
+        }
+    }
+
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
