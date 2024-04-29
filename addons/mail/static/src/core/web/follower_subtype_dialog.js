@@ -23,7 +23,7 @@ import { useService } from "@web/core/utils/hooks";
  */
 export class FollowerSubtypeDialog extends Component {
     static components = { Dialog };
-    static props = ["close", "follower", "onFollowerChanged"];
+    static props = ["close", "follower", "thread?", "onFollowerChanged"];
     static template = "mail.FollowerSubtypeDialog";
 
     setup() {
@@ -39,6 +39,10 @@ export class FollowerSubtypeDialog extends Component {
                 follower_id: this.props.follower.id,
             });
         });
+    }
+
+    get target() {
+        return this.props.follower || this.props.thread;
     }
 
     /**

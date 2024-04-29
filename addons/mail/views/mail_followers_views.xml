@@ -43,5 +43,17 @@
             <field name="view_mode">tree,form</field>
         </record>
 
+        <!-- <record id="action_add_remove_followers" model="ir.actions.act_window">
+            <field name="name">Add / Remove Followers</field>
+            <field name="res_model">mail.followers</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+            <field name="context">{
+                'default_composition_mode': 'mass',
+                'default_mass_keep_log': True,
+                'default_res_ids': active_ids,
+            }</field>
+            <field name="binding_view_types">list</field>
+        </record> -->
     </data>
 </odoo>

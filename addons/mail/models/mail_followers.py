@@ -21,6 +21,11 @@ class Followers(models.Model):
     _log_access = False
     _description = 'Document Followers'
 
+    def _get_default_subtype_ids(self):
+        # company = self.env.company
+        # return company.compute_fiscalyear_dates(datetime.date.today())['date_from'] if company else None
+        return self.env[self.res_model].browse(self.res_id).default_subtype_ids
+
     # Note. There is no integrity check on model names for performance reasons.
     # However, followers of unlinked models are deleted by models themselves
     # (see 'ir.model' inheritance).
@@ -31,8 +36,8 @@ class Followers(models.Model):
     partner_id = fields.Many2one(
         'res.partner', string='Related Partner', index=True, ondelete='cascade', required=True)
     subtype_ids = fields.Many2many(
-        'mail.message.subtype', string='Subtype',
-        help="Message subtypes followed, meaning subtypes that will be pushed onto the user's Wall.")
+        'mail.message.subtype', string='Subtype', default=lambda self: self._get_subtype_ids(),
+        help="Message subtypes followed, meaning subtypes that will be pushed onto the user's Wall. By default, using the settings from the thread.")
     name = fields.Char('Name', related='partner_id.name')
     email = fields.Char('Email', related='partner_id.email')
     is_active = fields.Boolean('Is Active', related='partner_id.active')
@@ -69,6 +74,10 @@ class Followers(models.Model):
     _sql_constraints = [
         ('mail_followers_res_partner_res_model_id_uniq', 'unique(res_model,res_id,partner_id)', 'Error, a partner cannot follow twice the same object.'),
     ]
+
+    def _compute_subtype_ids(self):
+        for follower in self:
+            follower.subtype_ids = follower._get_subtype_ids()
 
     # --------------------------------------------------
     # Private tools methods to fetch followers data

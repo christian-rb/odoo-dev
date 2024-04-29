@@ -115,6 +115,9 @@ class MailThread(models.AbstractModel):
         'Number of errors', compute='_compute_message_has_error',
         help="Number of messages with delivery error")
     message_attachment_count = fields.Integer('Attachment Count', compute='_compute_message_attachment_count', groups="base.group_user")
+    default_subtype_ids = fields.Many2many(
+        'mail.message.subtype', string='Default subtypes',
+        help="Default message subtypes followed, meaning default subtypes that will be pushed onto the new follower's Wall.")
 
     @api.depends('message_follower_ids')
     def _compute_message_partner_ids(self):
