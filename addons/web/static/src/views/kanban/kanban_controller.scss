@@ -97,12 +97,12 @@
         --Tag-font-size: #{$o-font-size-base-smaller};
         --Tags-margin: calc(1em - var(--Tag-font-size, .75rem)) 0;
 
-        main {
+        > main {
             display: flex;
             flex-flow: column;
         }
 
-        footer {
+        > footer, > main > footer {
             margin-top: auto;
             padding-top: 8px;
             display: flex;
