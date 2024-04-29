@@ -103,16 +103,16 @@ class Page(models.Model):
             previous_page = page
         return self.filtered(lambda page: page.id in ids)
 
-    def copy_data(self, default=None):
-        vals_list = super().copy_data(default=default)
-        if not default:
-            return vals_list
-        for page, vals in zip(self, vals_list):
+    @api.returns('self', lambda value: value.id)
+    def copy(self, default=None):
+        if default:
             if not default.get('view_id'):
-                new_view = page.view_id.copy({'website_id': default.get('website_id')})
-                vals['view_id'] = new_view.id
-            vals['url'] = default.get('url', self.env['website'].get_unique_path(page.url))
-        return vals_list
+                view = self.env['ir.ui.view'].browse(self.view_id.id)
+                new_view = view.copy({'website_id': default.get('website_id')})
+                default['view_id'] = new_view.id
+
+            default['url'] = default.get('url', self.env['website'].get_unique_path(self.url))
+        return super().copy(default=default)
 
     @api.model
     def clone_page(self, page_id, page_name=None, clone_menu=True):

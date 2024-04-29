@@ -205,6 +205,28 @@ class TestPage(common.TransactionCase):
         self.assertTrue(website_id not in pages.mapped('website_id').ids, "The website from which we deleted the generic page should not have a specific one.")
         self.assertTrue(website_id not in View.search([('name', 'in', ('Base', 'Extension'))]).mapped('website_id').ids, "Same for views")
 
+    def test_unique_key_on_duplication(self):
+        Page = self.env['website.page']
+        View = self.env['ir.ui.view']
+
+        test_view = View.create({
+            'name': 'Base',
+            'type': 'qweb',
+            'arch': '<div>Test View</div>',
+            'key': 'website.test',
+        })
+        page_test = Page.create({
+            'view_id': test_view.id,
+            'url': '/test',
+            'name': 'test',
+            'website_id': 1,
+        })
+
+        Page.clone_page(page_test.id, page_name='test', clone_menu=True)
+        cloned_page = Page.search([('url', '=', '/test-1')])
+        self.assertEqual(len(cloned_page), 1, "A page with an URL /test-1 should've been created")
+        self.assertNotEqual(page_test.key, cloned_page.key)
+
 
 @tagged('-at_install', 'post_install')
 class WithContext(HttpCase):
