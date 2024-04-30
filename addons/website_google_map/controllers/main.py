@@ -24,14 +24,23 @@ class GoogleMap(http.Controller):
 
     @http.route(['/google_map'], type='http', auth="public", website=True, sitemap=False)
     def google_map(self, *arg, **post):
+        PartnerSudo = request.env['res.partner'].sudo()
         clean_ids = []
-        for partner_id in post.get('partner_ids', "").split(","):
-            try:
-                clean_ids.append(int(partner_id))
-            except ValueError:
-                pass
-        partners = request.env['res.partner'].sudo().search([("id", "in", clean_ids),
-                                                             ('website_published', '=', True), ('is_company', '=', True)])
+        domain = [('website_published', '=', True)]
+        if post.get('partner_ids'):
+            for partner_id in post['partner_ids'].split(","):
+                try:
+                    clean_ids.append(int(partner_id))
+                except ValueError:
+                    pass
+            domain += [("id", "in", clean_ids), ('is_company', '=', True)]
+        elif post.get('fn') and hasattr(self, f"_google_map_domain_{post['fn']}"):
+            domain += getattr(self, f"_google_map_domain_{post['fn']}")(**post)
+        else:
+            domain += [(0, '=', 1)]
+
+        partners = PartnerSudo.search(domain)
+
         partner_data = {
             "counter": len(partners),
             "partners": []
