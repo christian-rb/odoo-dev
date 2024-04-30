@@ -62,7 +62,7 @@ class MailBot(models.AbstractModel):
             elif _('fuck') in body or "fuck" in body:
                 return _("That's not nice! I'm a bot but I have feelings... 💔")
             # help message
-            elif self._is_help_requested(body) or odoobot_state == 'idle':
+            elif self._is_help_requested(body):
                 return _("Unfortunately, I'm just a bot 😞 I don't understand! If you need help discovering our product, please check "
                          "<a href=\"https://www.odoo.com/documentation\" target=\"_blank\">our documentation</a> or "
                          "<a href=\"https://www.odoo.com/slides\" target=\"_blank\">our videos</a>.")
