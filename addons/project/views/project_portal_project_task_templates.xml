@@ -24,9 +24,9 @@
                         <t t-set="grouped_tasks_colspan" t-value="grouped_tasks_colspan if allow_milestone else grouped_tasks_colspan - 1"></t>
                         <th t-attf-colspan="{{2 if groupby != 'priority' else 1}}"/>
                         <th>Name</th>
+                        <th t-if="groupby != 'project_id' and multiple_projects">Project</th>
                         <th>Assignees</th>
                         <th t-if="groupby != 'milestone_id' and allow_milestone" name="project_portal_milestones">Milestone</th>
-                        <th t-if="groupby != 'project_id' and multiple_projects">Project</th>
                         <th t-if="groupby != 'state'"/>
                         <th t-if="groupby != 'stage_id'" class="text-end">Stage</th>
                     </tr>
@@ -77,6 +77,9 @@
                                 <td>
                                     <a t-attf-href="/my/#{task_url}/#{task.id}?{{ keep_query() }}"><span t-att-title="task.name" t-field="task.name"/></a>
                                 </td>
+                                <td t-if="groupby != 'project_id' and multiple_projects">
+                                    <span title="Current project of the task" t-out="task.project_id.name" />
+                                </td>
                                 <td>
                                     <t t-set="assignees" t-value="task.sudo().user_ids"/>
                                     <div t-if="assignees" class="flex-nowrap ps-3">
@@ -90,9 +93,6 @@
                                     <t t-if="task.milestone_id and task.allow_milestones">
                                         <span t-esc="task.milestone_id.name" />
                                     </t>
-                                </td>
-                                <td t-if="groupby != 'project_id' and multiple_projects">
-                                    <span title="Current project of the task" t-esc="task.project_id.name" />
                                 </td>
                                 <td t-if="groupby != 'state'" align="right" class="align-middle">
                                     <t t-call="project.portal_my_tasks_state_widget_template">
@@ -208,7 +208,7 @@
                                         <div class="o_portal_contact_details d-flex flex-column gap-2">
                                             <div class="d-flex justify-content-start align-items-center gap-2">
                                                 <img class="o_avatar o_portal_contact_img rounded" t-att-src="image_data_uri(task.partner_id.avatar_512)"/>
-                                                <h6 class="mb-0" t-out="task.partner_id.name"></h6>
+                                                <h6 class="mb-0" t-out="task.partner_id.display_name"></h6>
                                             </div>
                                             <div t-field="task.partner_id" t-options='{"widget": "contact", "fields": ["email", "phone"]}'/>
                                         </div>
