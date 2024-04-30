@@ -338,6 +338,64 @@ export class RunningTourActionHelper {
 
         triggerPointerEvent(target, "pointerup", true, targetPosition);
     }
+<<<<<<< HEAD
+||||||| parent of c43635741b51 (temp)
+    _keydown(values, keyCodes) {
+        while (keyCodes.length) {
+            const eventOptions = {};
+            const keyCode = keyCodes.shift();
+            let insertedText = null;
+            if (isNaN(keyCode)) {
+                eventOptions.key = keyCode;
+            } else {
+                const code = parseInt(keyCode, 10);
+                if (
+                    code === 32 || // spacebar
+                    (code > 47 && code < 58) || // number keys
+                    (code > 64 && code < 91) || // letter keys
+                    (code > 95 && code < 112) || // numpad keys
+                    (code > 185 && code < 193) || // ;=,-./` (in order)
+                    (code > 218 && code < 223) // [\]' (in order))
+                ) {
+                    insertedText = String.fromCharCode(code);
+                }
+            }
+            values.$element.trigger(Object.assign({ type: "keydown" }, eventOptions));
+            if (insertedText) {
+                document.execCommand("insertText", 0, insertedText);
+            }
+            values.$element.trigger(Object.assign({ type: "keyup" }, eventOptions));
+        }
+    }
+=======
+    _keydown(values, keyCodes) {
+        while (keyCodes.length) {
+            const eventOptions = {};
+            const keyCode = keyCodes.shift();
+            let insertedText = null;
+            if (isNaN(keyCode)) {
+                eventOptions.key = keyCode;
+            } else {
+                const code = parseInt(keyCode, 10);
+                if (
+                    code === 32 || // spacebar
+                    (code > 47 && code < 58) || // number keys
+                    (code > 64 && code < 91) || // letter keys
+                    (code > 95 && code < 112) || // numpad keys
+                    (code > 185 && code < 193) || // ;=,-./` (in order)
+                    (code > 218 && code < 223) // [\]' (in order))
+                ) {
+                    insertedText = String.fromCharCode(code);
+                }
+            }
+            values.$element.trigger(Object.assign({ type: "keydown" }, eventOptions));
+            if (insertedText) {
+                values.$element[0].ownerDocument.execCommand("insertText", 0, insertedText);
+            }
+            values.$element.trigger(Object.assign({ type: "keyup" }, eventOptions));
+        }
+    }
+>>>>>>> c43635741b51 (temp)
 }
 
 export const stepUtils = {
