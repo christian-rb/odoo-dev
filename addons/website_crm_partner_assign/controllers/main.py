@@ -186,6 +186,22 @@ class WebsiteAccount(CustomerPortal):
 class WebsiteCrmPartnerAssign(WebsitePartnerPage):
     _references_per_page = 40
 
+    def _google_map_domain_partners(self, **kw):
+        current_grade = kw.get('current_grade')
+        current_country = kw.get('current_country')
+
+        domain = [('grade_id', '!=', False), ('is_company', '=', True)]
+        if not request.env.user.has_group('website.group_website_restricted_editor'):
+            domain += [('grade_id.website_published', '=', True)]
+
+        if current_country:
+            domain += [('country_id', '=', int(current_country))]
+
+        if current_grade:
+            domain += [('grade_id', '=', int(current_grade))]
+
+        return domain
+
     def sitemap_partners(env, rule, qs):
         if not qs or qs.lower() in '/partners':
             yield {'loc': '/partners'}

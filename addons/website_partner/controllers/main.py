@@ -2,10 +2,11 @@
 
 from odoo import http
 from odoo.addons.http_routing.models.ir_http import unslug, slug
+from odoo.addons.website_google_map.controllers.main import GoogleMap
 from odoo.http import request
 
 
-class WebsitePartnerPage(http.Controller):
+class WebsitePartnerPage(GoogleMap):
 
     # Do not use semantic controller due to SUPERUSER_ID
     @http.route(['/partners/<partner_id>'], type='http', auth="public", website=True)

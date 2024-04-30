@@ -6,12 +6,26 @@ import werkzeug.urls
 from odoo import http
 from odoo.addons.http_routing.models.ir_http import unslug, slug
 from odoo.addons.website.models.ir_http import sitemap_qs2dom
+from odoo.addons.website_google_map.controllers.main import GoogleMap
 from odoo.tools.translate import _
 from odoo.http import request
 
 
-class WebsiteCustomer(http.Controller):
+class WebsiteCustomer(GoogleMap):
     _references_per_page = 20
+
+    def _google_map_domain_customers(self, **kw):
+        current_industry = kw.get('current_industry')
+        current_country = kw.get('current_country')
+
+        domain = [('assigned_partner_id', '!=', False)]
+
+        if current_country and current_country != '0':
+            domain += [('country_id', '=', int(current_country))]
+
+        if current_industry and current_industry != '0':
+            domain += [('industry_id', '=', int(current_industry))]
+        return domain
 
     def sitemap_industry(env, rule, qs):
         if not qs or qs.lower() in '/customers':

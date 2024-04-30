@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+import contextlib
+
 from odoo import http
 from odoo.http import request
 from odoo.tools.json import scriptsafe
@@ -29,17 +31,16 @@ class GoogleMap(http.Controller):
         domain = [('website_published', '=', True)]
         if post.get('partner_ids'):
             for partner_id in post['partner_ids'].split(","):
-                try:
+                with contextlib.suppress(ValueError):
                     clean_ids.append(int(partner_id))
-                except ValueError:
-                    pass
             domain += [("id", "in", clean_ids), ('is_company', '=', True)]
         elif post.get('fn') and hasattr(self, f"_google_map_domain_{post['fn']}"):
             domain += getattr(self, f"_google_map_domain_{post['fn']}")(**post)
         else:
             domain += [(0, '=', 1)]
 
-        partners = PartnerSudo.search(domain)
+        limit = post.get('limit') and int(post['limit']) or 80
+        partners = PartnerSudo.search(domain, limit=limit)
 
         partner_data = {
             "counter": len(partners),
