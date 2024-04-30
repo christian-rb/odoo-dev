@@ -18,14 +18,14 @@ class TestAutoJoin(common.TransactionCase):
         domain2 = [('id', 'in', records.ids), ('line_ids.value', '>', 0)]
 
         # reference results
-        self.assertEqual(len(model.search(domain1)), 2)
-        self.assertEqual(len(model.search(domain2)), 2)
+        self.assertEqual(model.search_count(domain1), 2)
+        self.assertEqual(model.search_count(domain2), 2)
 
-        result1 = model.read_group(domain1, [], [])
+        result1 = model.web_read_group(domain1, [], ['__count'])['groups']
         self.assertEqual(len(result1), 1)
         self.assertEqual(result1[0]['__count'], 2)
 
-        result2 = model.read_group(domain2, [], [])
+        result2 = model.web_read_group(domain2, [], ['__count'])['groups']
         self.assertEqual(len(result2), 1)
         self.assertEqual(result2[0]['__count'], 2)
 
@@ -35,10 +35,10 @@ class TestAutoJoin(common.TransactionCase):
         self.assertEqual(len(model.search(domain1)), 2)
         self.assertEqual(len(model.search(domain2)), 2)
 
-        result1 = model.read_group(domain1, [], [])
+        result1 = model.web_read_group(domain1, [], ['__count'])['groups']
         self.assertEqual(len(result1), 1)
         self.assertEqual(result1[0]['__count'], 2)
 
-        result2 = model.read_group(domain2, [], [])
+        result2 = model.web_read_group(domain2, [], ['__count'])['groups']
         self.assertEqual(len(result2), 1)
         self.assertEqual(result2[0]['__count'], 2)

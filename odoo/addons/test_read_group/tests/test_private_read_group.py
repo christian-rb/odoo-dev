@@ -331,6 +331,9 @@ class TestPrivateReadGroup(common.TransactionCase):
             Model._read_group([], ['"create_date:week'])
 
         with self.assertRaises(ValueError):
+            Model._read_group([], ['"create_date:unknown_number'])
+
+        with self.assertRaises(ValueError):
             Model._read_group([], ['order_id.id'])
 
         # Test malformed aggregate clause

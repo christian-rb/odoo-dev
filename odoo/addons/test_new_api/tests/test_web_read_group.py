@@ -17,25 +17,25 @@ class TestWebReadGroup(TransactionCase):
 
     def test_web_read_group_limit_not_reached(self):
         result = self.env['test_new_api.multi.tag'].web_read_group(
-            [], ['__count'], ['name'], limit=80,
+            [], ['name'], ['__count'], limit=80,
         )
         self.assertEqual(result, {
             'groups': [
-                {'name': 'one', 'name_count': 1, '__domain': [('name', '=', 'one')]},
-                {'name': 'there', 'name_count': 3, '__domain': [('name', '=', 'there')]},
-                {'name': 'two', 'name_count': 2, '__domain': [('name', '=', 'two')]},
+                {'name': 'one', '__count': 1, '__domain_part': [('name', '=', 'one')]},
+                {'name': 'there', '__count': 3, '__domain_part': [('name', '=', 'there')]},
+                {'name': 'two', '__count': 2, '__domain_part': [('name', '=', 'two')]},
             ],
             'length': 3,
         })
 
     def test_web_read_group_limit_reached(self):
         result = self.env['test_new_api.multi.tag'].web_read_group(
-            [], ['__count'], ['name'], limit=2,
+            [], ['name'], ['__count'], limit=2,
         )
         self.assertEqual(result, {
             'groups': [
-                {'name': 'one', 'name_count': 1, '__domain': [('name', '=', 'one')]},
-                {'name': 'there', 'name_count': 3, '__domain': [('name', '=', 'there')]},
+                {'name': 'one', '__count': 1, '__domain_part': [('name', '=', 'one')]},
+                {'name': 'there', '__count': 3, '__domain_part': [('name', '=', 'there')]},
             ],
             'length': 3,
         })
@@ -43,12 +43,12 @@ class TestWebReadGroup(TransactionCase):
     def test_web_read_group_groupby_id(self):
         """ Test ['id'] as groupby, it is quite a dummy feature, but it should work """
         result = self.env['test_new_api.multi.tag'].web_read_group(
-            [], ['__count'], ['id'], limit=2,
+            [], ['id'], ['__count'], limit=2,
         )
         self.assertEqual(result, {
             'groups': [
-                {'id': (self.tags[0].id, 'one'), 'id_count': 1, '__domain': [('id', '=', self.tags[0].id)]},
-                {'id': (self.tags[1].id, 'two'), 'id_count': 1, '__domain': [('id', '=', self.tags[1].id)]},
+                {'id': (self.tags[0].id, 'one'), '__count': 1, '__domain_part': [('id', '=', self.tags[0].id)]},
+                {'id': (self.tags[1].id, 'two'), '__count': 1, '__domain_part': [('id', '=', self.tags[1].id)]},
             ],
             'length': 6,
         })
