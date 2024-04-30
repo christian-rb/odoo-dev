@@ -979,7 +979,7 @@
                                            groups="account.group_account_readonly"
                                            class="mr4"
                                            options="{'no_create': True, 'no_open': True}"
-                                           readonly="posted_before"/>
+                                           readonly="not (last_in_sequence and state == 'draft')"/>
                                     <div name="currency_div"
                                          groups="base.group_multi_currency"
                                          style="white-space: pre;"

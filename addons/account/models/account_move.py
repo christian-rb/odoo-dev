@@ -255,6 +255,7 @@ class AccountMove(models.Model):
     highest_name = fields.Char(compute='_compute_highest_name')
     made_sequence_hole = fields.Boolean(compute='_compute_made_sequence_hole', search="_search_made_sequence_hole")
     show_name_warning = fields.Boolean(store=False)
+    last_in_sequence = fields.Boolean(store=False, compute='_compute_last_in_sequence')
     type_name = fields.Char('Type Name', compute='_compute_type_name')
     country_code = fields.Char(related='company_id.account_fiscal_country_id.code', readonly=True)
     attachment_ids = fields.One2many('ir.attachment', 'res_id', domain=[('res_model', '=', 'account.move')], string='Attachments')
@@ -1018,6 +1019,11 @@ class AccountMove(models.Model):
             move.amount_total_signed = abs(total) if move.move_type == 'entry' else -total
             move.amount_residual_signed = total_residual
             move.amount_total_in_currency_signed = abs(move.amount_total) if move.move_type == 'entry' else -(sign * move.amount_total)
+
+    @api.depends('state')
+    def _compute_last_in_sequence(self):
+        for move in self:
+            move.last_in_sequence = move._is_last_from_seq_chain()
 
     @api.depends('amount_residual', 'move_type', 'state', 'company_id')
     def _compute_payment_state(self):
@@ -2751,9 +2757,9 @@ class AccountMove(models.Model):
                     "Therefore, you cannot edit the following fields: %s.",
                     ', '.join(f['string'] for f in self.fields_get(violated_fields).values())
                 ))
-            if (move.posted_before and 'journal_id' in vals and move.journal_id.id != vals['journal_id']):
-                raise UserError(_('You cannot edit the journal of an account move if it has been posted once.'))
-            if (move.name and move.name != '/' and move.sequence_number not in (0, 1) and 'journal_id' in vals and move.journal_id.id != vals['journal_id']):
+            if (move.posted_before and not move.last_in_sequence and 'journal_id' in vals and move.journal_id.id != vals['journal_id']):
+                raise UserError(_('You cannot edit the journal of an account move if it has been posted once and it is not at the end of the sequence.'))
+            if (move.name and move.name != '/' and not move.last_in_sequence and 'journal_id' in vals and move.journal_id.id != vals['journal_id']):
                 raise UserError(_('You cannot edit the journal of an account move if it already has a sequence number assigned.'))
 
             # You can't change the date or name of a move being inside a locked period.
