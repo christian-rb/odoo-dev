@@ -92,6 +92,10 @@ export class BarcodeDialog extends Component {
         return this.detector && this.detector.__proto__.constructor.name === "ZXingBarcodeDetector";
     }
 
+    get title() {
+        return "Barcode Scanner";
+    }
+
     /**
      * Check for camera preview element readiness
      *
@@ -186,14 +190,14 @@ export function isBarcodeScannerSupported() {
  *
  * @returns {Promise<string>} resolves when a {qr,bar}code has been detected
  */
-export async function scanBarcode(env, facingMode = "environment") {
+export async function scanBarcode(env, facingMode = "environment", barcodeClass = BarcodeDialog) {
     let res;
     let rej;
     const promise = new Promise((resolve, reject) => {
         res = resolve;
         rej = reject;
     });
-    env.services.dialog.add(BarcodeDialog, {
+    env.services.dialog.add(barcodeClass, {
         facingMode,
         onResult: (result) => res(result),
         onError: (error) => rej(error),
