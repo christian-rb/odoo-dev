@@ -30,6 +30,7 @@ this event.
         'security/ir_rule.xml',
         'security/event_security.xml',
         'wizard/event_edit_registration.xml',
+        'wizard/event_configurator_views.xml',
     ],
     'demo': [
         'data/event_sale_demo.xml',

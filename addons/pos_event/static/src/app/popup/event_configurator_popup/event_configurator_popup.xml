@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="pos_event.EventConfiguratorPopup">
+        <Dialog title="this.props.tickets[0].event_id.name + ' - Choose ticket type'">
+            <h4>Quantity</h4>
+            <div class="d-flex justify-content-center align-items-start w-50">
+                <NumericInput class="'w-100'" tModel="[this.state, 'qty']" min="1"/>
+            </div>
+            <h4 class="mt-4">Ticket types</h4>
+            <div class="o_event_configurator_popup d-flex gap-4">
+                <t t-foreach="this.tickets" t-as="ticket" t-key="ticket.id">
+                    <t t-set="product" t-value="this.getProductProxy(ticket.product_id.id)"/>
+                    <div t-attf-class="{{ticket.seats_available === 0 ? 'pe-none opacity-50' : 'cursor-pointer'}} shadow d-flex" t-on-click="() => this.selectProduct(product)">
+                        <div class="bg-light px-3 py-2 rounded-start d-flex flex-column">
+                            <span t-esc="product.display_name" class="fs-5"/>
+                            <span t-attf-class="{{ ticket.seats_available > 0 ? 'text-success' : 'text-danger'}} fs-6">
+                                <t t-esc="ticket.seats_available" /> left
+                            </span>
+                        </div>
+                        <div class="bg-primary px-3 py-2 text-white rounded-end d-flex align-items-center justify-content-center">
+                            <span t-esc="pos.getProductPriceFormatted(product)" class="fs-4" />
+                        </div>
+                    </div>
+                </t>
+            </div>
+            <t t-set-slot="footer">
+                <button class="btn btn-secondary o-default-button" t-on-click="cancel">Cancel</button>
+            </t>
+        </Dialog>
+    </t>
+</templates>

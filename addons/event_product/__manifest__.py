@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 {
     'name': 'Events Product',
     'version': '1.3',

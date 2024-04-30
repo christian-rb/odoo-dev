@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import logging
@@ -60,7 +59,7 @@ class EventTemplateTicket(models.Model):
 
     def _init_column(self, column_name):
         if column_name != "product_id":
-            return super(EventTemplateTicket, self)._init_column(column_name)
+            return super()._init_column(column_name)
 
         # fetch void columns
         self.env.cr.execute("SELECT id FROM %s WHERE product_id IS NULL" % self._table)
@@ -95,7 +94,7 @@ class EventTemplateTicket(models.Model):
     @api.model
     def _get_event_ticket_fields_whitelist(self):
         """ Add sale specific fields to copy from template to ticket """
-        return super(EventTemplateTicket, self)._get_event_ticket_fields_whitelist() + ['product_id', 'price']
+        return super()._get_event_ticket_fields_whitelist() + ['product_id', 'price']
 
 
 class EventTicket(models.Model):
