@@ -47,6 +47,7 @@ import snippetsOptionsLegacy from "./snippets.options.legacy";
 import {
     Component,
     onMounted,
+    onPatched,
     onWillDestroy,
     useComponent,
     useEffect,
@@ -56,6 +57,7 @@ import {
     useState,
     useSubEnv,
 } from "@odoo/owl";
+import { useService } from "@web/core/utils/hooks";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 
 const preserveCursor = OdooEditorLib.preserveCursor;
@@ -2203,42 +2205,60 @@ const VideopickerUserValueWidget = MediapickerUserValueWidget.extend({
     },
 });
 
-const DatetimePickerUserValueWidget = InputUserValueWidget.extend({
-    events: { // Explicitely not consider all InputUserValueWidget events
-        'blur input': '_onInputBlur',
-        'input input': '_onDateInputInput',
-    },
-    pickerType: 'datetime',
-
+class DatetimeUserValue extends UnitUserValue {
     /**
      * @override
      */
-    init: function () {
-        this._super(...arguments);
-        this._value = DateTime.now().toUnixInteger().toString();
-    },
+    async setValue(value, methodName) {
+        return super.setValue(this._intStrToDateTime(value), methodName);
+    }
+    _intStrToDateTime(value) {
+        let dateTime = null;
+        if (value) {
+            dateTime = DateTime.fromSeconds(parseInt(value))
+            if (!dateTime.isValid) {
+                dateTime = DateTime.now();
+            }
+        }
+        return dateTime;
+    }
+}
+
+const DatetimePickerUserValueWidget = InputUserValueWidget.extend({});
+class WeDatetime extends WeInput {
+    static template = "web_editor.WeDatetime";
+    static model = DatetimeUserValue;
+    static props = {
+        pickerType: { type: String, optional: true },
+    };
+    static defaultProps = {
+        pickerType: "datetime",
+    };
     /**
      * @override
      */
-    start: async function () {
-        await this._super(...arguments);
-
-        this.el.classList.add('o_we_large');
-        this.inputEl.classList.add('datetimepicker-input', 'mx-0', 'text-start');
-
-        this.picker = this.call("datetime_picker", "create", {
-            target: this.inputEl,
-            onChange: this._onDateTimePickerChange.bind(this),
-            pickerProps: {
-                type: this.pickerType,
-                minDate: DateTime.fromObject({ year: 1000 }),
-                maxDate: DateTime.now().plus({ year: 200 }),
-                value: DateTime.fromSeconds(parseInt(this._value)),
-                rounding: 0,
-            },
+    setup() {
+        super.setup();
+        this.datetime_picker = useService("datetime_picker");
+        onMounted(() => {
+            this.picker = this.datetime_picker.create({
+                target: this.inputRef.el,
+                onChange: this._onDateTimePickerChange.bind(this),
+                pickerProps: {
+                    type: this.props.pickerType,
+                    minDate: DateTime.fromObject({ year: 1000 }),
+                    maxDate: DateTime.now().plus({ year: 200 }),
+                    value: this.value._value,
+                    rounding: 0,
+                },
+            });
+            this.picker.enable();
         });
-        this.picker.enable();
-    },
+        onPatched(() => {
+            this.picker.state.value = typeof this.value._value === "string" ?
+                this.value._intStrToDateTime(this.value._value) : this.value._value;
+        });
+    }
 
     //--------------------------------------------------------------------------
     // Public
@@ -2247,31 +2267,17 @@ const DatetimePickerUserValueWidget = InputUserValueWidget.extend({
     /**
      * @override
      */
-    getMethodsParams: function () {
+    getMethodsParams() {
         return Object.assign(this._super(...arguments), {
             format: this.defaultFormat,
         });
-    },
+    }
     /**
      * @override
      */
-    isPreviewed: function () {
+    isPreviewed() {
         return this._super(...arguments) || this.picker.isOpen;
-    },
-    /**
-     * @override
-     */
-    async setValue() {
-        await this._super(...arguments);
-        let dateTime = null;
-        if (this._value) {
-            dateTime = DateTime.fromSeconds(parseInt(this._value))
-            if (!dateTime.isValid) {
-                dateTime = DateTime.now();
-            }
-        }
-        this.picker.state.value = dateTime;
-    },
+    }
 
     //--------------------------------------------------------------------------
     // Handlers
@@ -2281,14 +2287,15 @@ const DatetimePickerUserValueWidget = InputUserValueWidget.extend({
      * @private
      * @param {Event} ev
      */
-    _onDateTimePickerChange: function (newDateTime) {
+    _onDateTimePickerChange(newDateTime) {
         if (!newDateTime || !newDateTime.isValid) {
             this._value = '';
         } else {
             this._value = newDateTime.toUnixInteger().toString();
         }
-        this._onUserValuePreview();
-    },
+        //this._onUserValuePreview();
+        this._onUserValueChange();
+    }
     /**
      * Handles the clear button of the datepicker.
      *
@@ -2298,14 +2305,21 @@ const DatetimePickerUserValueWidget = InputUserValueWidget.extend({
     _onDateInputInput(ev) {
         if (!this.inputEl.value) {
             this._value = '';
-            this._onUserValuePreview(ev);
+            //this._onUserValuePreview(ev);
+            this._onUserValueChange(ev);
         }
-    },
-});
+    }
+    /**
+     * @override
+     */
+    _onUserValueChange() {
+        this.value._value = this._value;
+        super._onUserValueChange(...arguments);
+    }
+}
+registry.category("snippet_widgets").add("WeDatetime", WeDatetime);
 
-const DatePickerUserValueWidget = DatetimePickerUserValueWidget.extend({
-    pickerType: 'date',
-});
+const DatePickerUserValueWidget = DatetimePickerUserValueWidget.extend({});
 
 const ListUserValueWidget = UserValueWidget.extend({
     tagName: 'we-list',
@@ -2731,7 +2745,6 @@ const RangeUserValueWidget = UnitUserValueWidget.extend({
             this.outputEl.classList.add('ms-2');
             this.containerEl.appendChild(this.outputEl);
         }
-
         this._onInputChange = debounce(this._onInputChange, 100);
     },
 
@@ -4002,7 +4015,7 @@ export class SnippetOption {
     }
     getMethodsNames() {
         // TODO: @owl-options either add all possible method or find a way to compute it.
-        return ["selectClass", "selectStyle"];
+        return ["selectClass", "selectStyle", "selectDataAttribute"];
     }
     /**
      * Updates the UI. For widget update, @see _computeWidgetState.
