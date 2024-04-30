@@ -1,7 +1,7 @@
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { DropdownGroup } from "@web/core/dropdown/dropdown_group";
-import { useService } from "@web/core/utils/hooks";
+import { useBus, useService } from "@web/core/utils/hooks";
 import { registry } from "@web/core/registry";
 import { debounce } from "@web/core/utils/timing";
 import { ErrorHandler } from "@web/core/utils/components";
@@ -13,6 +13,7 @@ import {
     useEffect,
     useRef,
     onWillUnmount,
+    useState,
 } from "@odoo/owl";
 const systrayRegistry = registry.category("systray");
 
@@ -34,6 +35,14 @@ export class NavBar extends Component {
         const debouncedAdapt = debounce(this.adapt.bind(this), 250);
         onWillDestroy(() => debouncedAdapt.cancel());
         useExternalListener(window, "resize", debouncedAdapt);
+        this.state = useState({
+            breadcrumbs: this.actionService.breadcrumbs,
+        });
+
+        useBus(this.env.bus, "ACTION_MANAGER:UI-UPDATED", () => {
+            console.log({ old: this.breadcrumbs, new: this.actionService.breadcrumbs });
+            this.state.breadcrumbs = this.actionService.breadcrumbs;
+        });
 
         let adaptCounter = 0;
         const renderAndAdapt = () => {

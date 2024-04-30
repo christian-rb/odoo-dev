@@ -1554,6 +1554,9 @@ export function makeActionManager(env, router = _router) {
         get currentController() {
             return _getCurrentController();
         },
+        get breadcrumbs() {
+            return _getBreadcrumbs(controllerStack);
+        },
     };
 }
 

@@ -28,7 +28,7 @@
                             <t t-slot="control-panel-status-indicator" />
                         </section>
                     </t>
-                    <t t-else="">
+                    <t t-if="!env.isSmall">
                         <t t-slot="control-panel-breadcrumb">
                             <t t-call="web.Breadcrumbs"/>
                         </t>
