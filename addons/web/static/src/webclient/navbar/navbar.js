@@ -195,6 +195,15 @@ export class NavBar extends Component {
         }
     }
 
+    /**
+     * Called when an element of the breadcrumbs is clicked.
+     *
+     * @param {string} jsId
+     */
+    onBreadcrumbClicked(jsId) {
+        this.actionService.restore(jsId);
+    }
+
     getMenuItemHref(payload) {
         return `/odoo/${payload.actionPath || "action-" + payload.actionID}`;
     }
