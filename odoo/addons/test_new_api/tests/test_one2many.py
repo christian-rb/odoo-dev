@@ -500,3 +500,12 @@ class One2manyCase(TransactionCase):
 
         # Make sure the parent_record2 only has its own child records
         self.assertEqual(parent_record2.child_ids.ids, children[parent_record2.id])
+
+    def test_unlink_one2many_compute(self):
+        record = self.env['test_new_api.compute.many2many.move'].create({
+            'line_ids': [Command.create({})]
+        })
+        self.assertEqual(record.state, 'Lines')
+        record.line_ids.unlink()
+        # Should have been recomputed, as the line_ids have changed
+        self.assertEqual(record.state, 'No Lines')
