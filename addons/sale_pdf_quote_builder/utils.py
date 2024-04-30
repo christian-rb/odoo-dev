@@ -9,11 +9,10 @@ from odoo.exceptions import ValidationError
 from odoo.tools import format_amount, format_date, format_datetime, pdf
 
 def _ensure_names_follows_pattern(names):
-    """TODO edm (alphanum or -) once or more (. (alphanum or -) once or more) zero or more
+    """TODO edm (alphanum (this include underscore) or -) once or more ( at this point, we didn't replace __ by . yet, so no need to cover that case)
     """
-    name_pattern = re.compile(r'^(\w|-)+(\.(\w|-)+)*$')
     name_pattern = re.compile(r'^(\w|-)+$')
-    if any(not re.match(name_pattern, name) for name in names if name):  # name could be False TODO edm: might not be the case anymore
+    if names and any(not re.match(name_pattern, name) for name in names):  # name could be False TODO edm: might not be the case anymore
         raise ValidationError(_(
             "Invalid resource names. It should only contain alphanumerics, points, hyphen"
             " or underscores."
@@ -75,7 +74,8 @@ def _get_field_format(field, order, env, tz, lang_code):
         value = order
     else:  # Product document
         BaseModel = order.env['sale.order.line']
-        value = order.order_line.browse(path[0].strip('sol_id_'))
+        line_id = int(path[0].strip('sol_id_'))
+        value = order.order_line.browse(line_id)
         path = path[1:]
 
     Model = BaseModel
@@ -86,19 +86,53 @@ def _get_field_format(field, order, env, tz, lang_code):
         # TODO edm: would it be possible to pass the path minus last and get the needed information?
 
     value = value[path[-1]]
-    field_type = _get_existing_field_info(path[-1], Model)['type']
-    print(field_type)
+    field_info = _get_existing_field_info(path[-1], Model)
+    field_type = field_info['type']
+    print("field_type: ", field_type)
+    print("value: ", value)
 
-    if field_type == 'char':
+    # TODO edm: factorize
+    if field_type == 'boolean':
+        formatted_value = value
+    elif field_type == 'integer':
+        formatted_value = value
+    elif field_type == 'float':
+        formatted_value = value
+    elif field_type == 'monetary':
+        # TODO edm: wrong, should take the currency_field of the record, not the order
+        formatted_value = format_amount(env, value, order.currency_id)
+    elif field_type == 'char':  # translated?
         formatted_value = value
     elif field_type == 'text':
         formatted_value = value  # translated?
+    elif field_type == 'html':
+        formatted_value = ''  # TODO edm: decide, passing or not?
     elif field_type == 'date':
         formatted_value = format_date(env, value, lang_code=lang_code)
     elif field_type == 'datetime':
         formatted_value = format_datetime(env, value, tz=tz)
-    elif field_type == 'amount':
-        formatted_value = format_amount(env, value, order.currency_id),
+    elif field_type == 'binary':  # TODO edm: I don't see a case where we want to send that.
+        formatted_value = ''  # TODO edm: decide, passing or not?
+    elif field_type == 'selection' and value:  # is it already translated?
+        selection_dict = {k:v for k, v in field_info['selection']}
+        formatted_value = selection_dict[value]
+    elif field_type == 'reference':  # TODO edm: I don't see a case where we want to send that.
+        formatted_value = ''  # TODO edm: decide, passing or not?
+    elif field_type == 'many2one':
+        formatted_value = ''  # TODO edm: decide, passing or not?
+    elif field_type == 'many2one_reference':  # TODO edm: I don't see a case where we want to send that.
+        formatted_value = ''  # TODO edm: decide, passing or not?
+    elif field_type == 'json':
+        formatted_value = ''  # TODO edm: decide, passing or not?
+    elif field_type == 'properties':  # TODO edm: I don't see a case where we want to send that.
+        formatted_value = ''  # TODO edm: decide, passing or not?
+    elif field_type == 'properties_definition':  # TODO edm: I don't see a case where we want to send that.
+        formatted_value = ''  # TODO edm: decide, passing or not?
+    elif field_type == 'one2many':
+        formatted_value = ''  # TODO edm: decide, passing or not?
+    elif field_type == 'many2many':
+        formatted_value = ''  # TODO edm: decide, passing or not?
+
     else:
         formatted_value = value
         # TODO edm: everything else

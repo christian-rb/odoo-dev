@@ -84,8 +84,9 @@ class IrActionsReport(models.Model):
         field_names = set()
         if all_form_fields != None:
             field_names = reader.getFields()
-            utils._ensure_names_follows_pattern(field_names)  # TODO edm: it's done at upload, do we really want to add it here too? + constraint If yes, also check whitelist then
-            all_form_fields.update([prefix + field for field in field_names])
+            if field_names:
+                utils._ensure_names_follows_pattern(field_names)  # TODO edm: it's done at upload, do we really want to add it here too? + constraint If yes, also check whitelist then
+                all_form_fields.update([prefix + field for field in field_names])
 
         for page_id in range(0, reader.getNumPages()):
             page = reader.getPage(page_id)
