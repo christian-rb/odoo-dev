@@ -2,10 +2,11 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import Command
-from odoo.tests.common import new_test_user
-from .common import TestSaleProjectCommon
 from odoo.tests import Form
+from odoo.tests.common import new_test_user
 from odoo.tests.common import tagged
+from .common import TestSaleProjectCommon
+
 
 @tagged('post_install', '-at_install')
 class TestSaleProject(TestSaleProjectCommon):
@@ -652,3 +653,71 @@ class TestSaleProject(TestSaleProjectCommon):
         sale_line = self.env['sale.order.line'].browse(sale_line_id)
         self.assertEqual(sale_line.product_id, product_service, 'The created SOL should use the right product.')
         self.assertTrue(product_service.name in sale_line_name, 'The created SOL should use the full name of the product and not just what was typed.')
+
+    def test_sale_order_with_project_task_from_multi_companies(self):
+        SaleOrder = self.env["sale.order"]
+        Company = self.env["res.company"]
+        Product = self.env["product.product"]
+        Project = self.env["project.project"]
+        Partner = self.env["res.partner"]
+
+        uom_hour = self.env.ref("uom.product_uom_hour")
+        will_smith = Partner.create({"name": "Will Smith"})
+        multi_company_project = Project.create({
+            "name": "Multi Company Project",
+            "company_id": None,
+            "allow_billable": True,
+        })
+
+        company_a = Company.create({
+            "name": "Company A"
+        })
+        service_product_a = Product.with_company(company_a).create({
+            "name": "Task Creating Product",
+            "standard_price": 30,
+            "list_price": 90,
+            "type": "service",
+            "service_tracking": "task_global_project",
+            "invoice_policy": "order",
+            "uom_id": uom_hour.id,
+            "uom_po_id": uom_hour.id,
+            "project_id": multi_company_project.id,
+        })
+        sale_order_a = SaleOrder.with_company(company_a).create({
+            "partner_id": will_smith.id,
+            "order_line": [Command.create({
+                "product_id": service_product_a.id,
+                "product_uom_qty": 10,
+            })]
+        })
+        sale_order_a.with_company(company_a).action_confirm()
+
+        company_b = Company.create({
+            "name": "Company B"
+        })
+        service_product_b = Product.with_company(company_b).create({
+            "name": "Task Creating Product",
+            "standard_price": 30,
+            "list_price": 90,
+            "type": "service",
+            "service_tracking": "task_global_project",
+            "invoice_policy": "order",
+            "uom_id": uom_hour.id,
+            "uom_po_id": uom_hour.id,
+            "project_id": multi_company_project.id,
+        })
+        sale_order_b = SaleOrder.with_company(company_b).create({
+            "partner_id": will_smith.id,
+            "order_line": [Command.create({
+                "product_id": service_product_b.id,
+                "product_uom_qty": 10,
+            })]
+        })
+        sale_order_b.with_company(company_b).action_confirm()
+
+        self.assertEqual(
+            multi_company_project.with_company(company_b).sale_order_count, 2,
+            "Expected 2 orders to be related to the project")
+        self.assertEqual(
+            multi_company_project.with_company(company_b).sale_order_line_count, 2,
+            "Expected 2 order lines to be related to the project")
