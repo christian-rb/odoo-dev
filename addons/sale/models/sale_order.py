@@ -621,7 +621,7 @@ class SaleOrder(models.Model):
             else:
                 record.tax_country_id = record.company_id.account_fiscal_country_id
 
-    @api.depends('invoice_ids.state', 'currency_id', 'amount_total')
+    @api.depends('invoice_ids.state', 'order_line.amount_to_invoice')
     def _compute_amount_to_invoice(self):
         for order in self:
             # If the invoice status is 'Fully Invoiced' force the amount to invoice to equal zero and return early.
@@ -629,16 +629,16 @@ class SaleOrder(models.Model):
                 order.amount_to_invoice = 0.0
                 return
 
-            order.amount_to_invoice = order.amount_total
-            for invoice in order.invoice_ids.filtered(lambda x: x.state == 'posted'):
-                prices = sum(invoice.line_ids.filtered(lambda x: order in x.sale_line_ids.order_id).mapped('price_total'))
-                invoice_amount_currency = invoice.currency_id._convert(
-                    prices * -invoice.direction_sign,
-                    order.currency_id,
-                    invoice.company_id,
-                    invoice.date,
-                )
-                order.amount_to_invoice -= invoice_amount_currency
+            order.amount_to_invoice = sum(order.order_line.mapped('amount_to_invoice'))
+            # for invoice in order.invoice_ids.filtered(lambda x: x.state == 'posted'):
+            #     prices = sum(invoice.line_ids.filtered(lambda x: order in x.sale_line_ids.order_id).mapped('price_total'))
+            #     invoice_amount_currency = invoice.currency_id._convert(
+            #         prices * -invoice.direction_sign,
+            #         order.currency_id,
+            #         invoice.company_id,
+            #         invoice.date,
+            #     )
+            #     order.amount_to_invoice -= invoice_amount_currency
 
     @api.depends('amount_total', 'amount_to_invoice')
     def _compute_amount_invoiced(self):

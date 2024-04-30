@@ -253,11 +253,19 @@ class SaleOrderLine(models.Model):
 
     untaxed_amount_invoiced = fields.Monetary(
         string="Untaxed Invoiced Amount",
-        compute='_compute_untaxed_amount_invoiced',
+        compute='_compute_invoiced_amounts',
+        store=True)
+    amount_invoiced = fields.Monetary(
+        string="Invoiced Amount",
+        compute='_compute_invoiced_amounts',
         store=True)
     untaxed_amount_to_invoice = fields.Monetary(
         string="Untaxed Amount To Invoice",
-        compute='_compute_untaxed_amount_to_invoice',
+        compute='_compute_amounts_to_invoice',
+        store=True)
+    amount_to_invoice = fields.Monetary(
+        string="Amount To Invoice",
+        compute='_compute_amount_to_invoice',
         store=True)
 
     # Technical computed fields for UX purposes (hide/make fields readonly, ...)
@@ -854,7 +862,7 @@ class SaleOrderLine(models.Model):
                 line.invoice_status = 'no'
 
     @api.depends('invoice_lines', 'invoice_lines.price_total', 'invoice_lines.move_id.state', 'invoice_lines.move_id.move_type')
-    def _compute_untaxed_amount_invoiced(self):
+    def _compute_invoiced_amounts(self):
         """ Compute the untaxed amount already invoiced from the sale order line, taking the refund attached
             the so line into account. This amount is computed as
                 SUM(inv_line.price_subtotal) - SUM(ref_line.price_subtotal)
@@ -863,18 +871,22 @@ class SaleOrderLine(models.Model):
                 `ref_line` is a customer credit note (refund) line linked to the SO line
         """
         for line in self:
+            untaxed_amount_invoiced = 0.0
             amount_invoiced = 0.0
             for invoice_line in line._get_invoice_lines():
                 if invoice_line.move_id.state == 'posted':
                     invoice_date = invoice_line.move_id.invoice_date or fields.Date.today()
                     if invoice_line.move_id.move_type == 'out_invoice':
-                        amount_invoiced += invoice_line.currency_id._convert(invoice_line.price_subtotal, line.currency_id, line.company_id, invoice_date)
+                        untaxed_amount_invoiced += invoice_line.currency_id._convert(invoice_line.price_subtotal, line.currency_id, line.company_id, invoice_date)
+                        amount_invoiced += invoice_line.currency_id._convert(invoice_line.price_total, line.currency_id, line.company_id, invoice_date)
                     elif invoice_line.move_id.move_type == 'out_refund':
-                        amount_invoiced -= invoice_line.currency_id._convert(invoice_line.price_subtotal, line.currency_id, line.company_id, invoice_date)
-            line.untaxed_amount_invoiced = amount_invoiced
+                        untaxed_amount_invoiced -= invoice_line.currency_id._convert(invoice_line.price_subtotal, line.currency_id, line.company_id, invoice_date)
+                        amount_invoiced -= invoice_line.currency_id._convert(invoice_line.price_total, line.currency_id, line.company_id, invoice_date)
+            line.untaxed_amount_invoiced = untaxed_amount_invoiced
+            line.amount_invoiced = amount_invoiced
 
     @api.depends('state', 'product_id', 'untaxed_amount_invoiced', 'qty_delivered', 'product_uom_qty', 'price_unit')
-    def _compute_untaxed_amount_to_invoice(self):
+    def _compute_amounts_to_invoice(self):
         """ Total of remaining amount to invoice on the sale order line (taxes excl.) as
                 total_sol - amount already invoiced
             where Total_sol depends on the invoice policy of the product.
@@ -882,44 +894,65 @@ class SaleOrderLine(models.Model):
             Note: Draft invoice are ignored on purpose, the 'to invoice' amount should
             come only from the SO lines.
         """
-        for line in self:
+        for so_line in self:
+            untaxed_amount_to_invoice = 0.0
             amount_to_invoice = 0.0
-            if line.state == 'sale':
+            if so_line.state == 'sale':
                 # Note: do not use price_subtotal field as it returns zero when the ordered quantity is
                 # zero. It causes problem for expense line (e.i.: ordered qty = 0, deli qty = 4,
                 # price_unit = 20 ; subtotal is zero), but when you can invoice the line, you see an
                 # amount and not zero. Since we compute untaxed amount, we can use directly the price
                 # reduce (to include discount) without using `compute_all()` method on taxes.
-                price_subtotal = 0.0
-                uom_qty_to_consider = line.qty_delivered if line.product_id.invoice_policy == 'delivery' else line.product_uom_qty
-                price_reduce = line.price_unit * (1 - (line.discount or 0.0) / 100.0)
+                uom_qty_to_consider = so_line.qty_delivered if so_line.product_id.invoice_policy == 'delivery' else so_line.product_uom_qty
+                price_reduce = so_line.price_unit * (1 - (so_line.discount or 0.0) / 100.0)
+                price_subtotal_untaxed = price_reduce * uom_qty_to_consider
                 price_subtotal = price_reduce * uom_qty_to_consider
-                if len(line.tax_id.filtered(lambda tax: tax.price_include)) > 0:
+                if len(so_line.tax_id.filtered(lambda tax: tax.price_include)) > 0:
                     # As included taxes are not excluded from the computed subtotal, `compute_all()` method
                     # has to be called to retrieve the subtotal without them.
                     # `price_reduce_taxexcl` cannot be used as it is computed from `price_subtotal` field. (see upper Note)
-                    price_subtotal = line.tax_id.compute_all(
+                    price_subtotal_untaxed = so_line.tax_id.compute_all(
                         price_reduce,
-                        currency=line.currency_id,
+                        currency=so_line.currency_id,
                         quantity=uom_qty_to_consider,
-                        product=line.product_id,
-                        partner=line.order_id.partner_shipping_id)['total_excluded']
-                inv_lines = line._get_invoice_lines()
-                if any(inv_lines.mapped(lambda l: l.discount != line.discount)):
+                        product=so_line.product_id,
+                        partner=so_line.order_id.partner_shipping_id)['total_excluded']
+                inv_lines = so_line._get_invoice_lines()
+                if any(inv_lines.mapped(lambda l: l.discount != so_line.discount)):
                     # In case of re-invoicing with different discount we try to calculate manually the
                     # remaining amount to invoice
+                    amount_untaxed = 0
                     amount = 0
-                    for l in inv_lines:
-                        if len(l.tax_ids.filtered(lambda tax: tax.price_include)) > 0:
-                            amount += l.tax_ids.compute_all(l.currency_id._convert(l.price_unit, line.currency_id, line.company_id, l.date or fields.Date.today(), round=False) * l.quantity)['total_excluded']
+                    for inv_line in inv_lines:
+                        if len(inv_line.tax_ids.filtered(lambda tax: tax.price_include)) > 0:
+                            compute_all_company_currency = inv_line.tax_ids.compute_all(inv_line.currency_id._convert(
+                                inv_line.price_unit,
+                                so_line.currency_id,
+                                so_line.company_id,
+                                inv_line.date or fields.Date.context_today(inv_line.move_id),
+                                round=False,
+                            ) * inv_line.quantity)
+                            amount_untaxed += compute_all_company_currency['total_excluded']
+                            amount += compute_all_company_currency['total_included']
                         else:
-                            amount += l.currency_id._convert(l.price_unit, line.currency_id, line.company_id, l.date or fields.Date.today(), round=False) * l.quantity
+                            amount_company_currency = inv_line.currency_id._convert(
+                                inv_line.price_unit,
+                                so_line.currency_id,
+                                so_line.company_id,
+                                inv_line.date or fields.Date.context_today(inv_line.move_id),
+                                round=False,
+                            ) * inv_line.quantity
+                            amount_untaxed += amount_company_currency
+                            amount += amount_company_currency
 
+                    untaxed_amount_to_invoice = max(price_subtotal_untaxed - amount_untaxed, 0)
                     amount_to_invoice = max(price_subtotal - amount, 0)
                 else:
-                    amount_to_invoice = price_subtotal - line.untaxed_amount_invoiced
+                    untaxed_amount_to_invoice = price_subtotal_untaxed - so_line.untaxed_amount_invoiced
+                    amount_to_invoice = price_subtotal - so_line.amount_invoiced
 
-            line.untaxed_amount_to_invoice = amount_to_invoice
+            so_line.untaxed_amount_to_invoice = untaxed_amount_to_invoice
+            so_line.amount_to_invoice = amount_to_invoice
 
     @api.depends('order_id.partner_id', 'product_id')
     def _compute_analytic_distribution(self):
