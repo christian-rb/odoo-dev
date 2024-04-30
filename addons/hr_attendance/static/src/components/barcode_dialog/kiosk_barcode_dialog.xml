@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="hr_attendance.BarcodeDialog" t-inherit="web.BarcodeDialog">
+        <xpath expr="//CropOverlay" position="before">
+            <t t-if="employeeNumber == 1">
+                <div>
+                    No Badge ID on your employee, do you cant to set a barcode to test ?
+                    <!-- <button>
+                        Set Badge ID
+                    </button> -->
+                </div>
+            </t>
+        </xpath>
+    </t>
+</templates>
