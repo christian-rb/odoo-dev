@@ -54,11 +54,9 @@ class IrActionsReport(models.Model):
                     )
                 if included_product_docs:
                     for doc in included_product_docs:
+                        sol_id = doc_line_id_mapping[doc.id]
                         self._add_pages_to_writer(
-                            writer,
-                            base64.b64decode(doc.datas),
-                            all_form_fields,
-                            doc_line_id_mapping[doc.id],
+                            writer, base64.b64decode(doc.datas), all_form_fields, sol_id,
                         )
                 self._add_pages_to_writer(writer, initial_stream.getvalue())
                 if has_footer:
@@ -66,9 +64,7 @@ class IrActionsReport(models.Model):
                         writer, base64.b64decode(footer_record.sale_footer), all_form_fields
                     )
 
-                form_fields = self._get_form_fields_mapping(
-                    order, all_form_fields, doc_line_id_mapping
-                )
+                form_fields = self._get_form_fields_mapping(order, all_form_fields)
                 pdf.fill_form_fields_pdf(writer, form_fields=form_fields)
                 with io.BytesIO() as _buffer:
                     writer.write(_buffer)
@@ -78,6 +74,7 @@ class IrActionsReport(models.Model):
         return result
 
     def _add_pages_to_writer(self, writer, document, all_form_fields=None, sol_id=None):
+        # TODO edm: docstring
         prefix = f'sol_id_{sol_id}__' if sol_id else ''
         reader = PdfFileReader(io.BytesIO(document), strict=False)
 
@@ -101,7 +98,7 @@ class IrActionsReport(models.Model):
                         })
             writer.addPage(page)
 
-    def _get_form_fields_mapping(self, order, all_form_fields, doc_line_id_mapping=None):
+    def _get_form_fields_mapping(self, order, all_form_fields):
         """ Dictionary mapping specific pdf fields name to Odoo fields data for a sale order.
         Override this method to add new fields to the mapping.
 
@@ -115,56 +112,9 @@ class IrActionsReport(models.Model):
         env = self.with_context(use_babel=True).env
         tz = order.partner_id.tz or self.env.user.tz or 'UTC'
         lang_code = order.partner_id.lang or self.env.user.lang
-        if tz == False:  # todo edm; delete this
-            form_fields_mapping = {
-                'name': order.name,
-                'partner_id__name': order.partner_id.name,
-                'user_id__name': order.user_id.name,
-                'amount_untaxed': format_amount(env, order.amount_untaxed, order.currency_id),
-                'amount_total': format_amount(env, order.amount_total, order.currency_id),
-                'delivery_date': format_datetime(env, order.commitment_date, tz=tz),
-                'validity_date': format_date(env, order.validity_date, lang_code=lang_code),
-                'client_order_ref': order.client_order_ref or '',
-            }
-
-            # Adding fields from each line, prefixed by the line_id to avoid conflicts
-            lines_with_doc_ids = set(doc_line_id_mapping.values())
-            for line in order.order_line.filtered(lambda sol: sol.id in lines_with_doc_ids):
-                form_fields_mapping.update(self._get_sol_form_fields_mapping(line))
-
-        print("here comes the mapping")
         form_fields_mapping = {
-            field: utils._get_field_format(field, order, env, tz, lang_code) for field in all_form_fields
+            field: utils._get_field_format(field, order, env, tz, lang_code)
+            for field in all_form_fields
         }
-
 
         return form_fields_mapping
-
-    def _get_sol_form_fields_mapping(self, line):
-        """ Dictionary mapping specific pdf fields name to Odoo fields data for a sale order line.
-
-        Fields name are prefixed by the line id to avoid conflict between files.
-
-        Override this method to add new fields to the mapping.
-
-        :param recordset line: sale.order.line record
-        :rtype: dict
-        :return: mapping of prefixed fields name to Odoo fields data
-
-        Note: line.ensure_one()
-        """
-        line.ensure_one()
-        env = self.with_context(use_babel=True).env
-        return {
-            f'{line.id}_description': line.name,
-            f'{line.id}_quantity': line.product_uom_qty,
-            f'{line.id}_uom': line.product_uom.name,
-            f'{line.id}_price_unit': format_amount(env, line.price_unit, line.currency_id),
-            f'{line.id}_discount': line.discount,
-            f'{line.id}_product_sale_price': format_amount(
-                env, line.product_id.lst_price, line.product_id.currency_id
-            ),
-            f'{line.id}_taxes': ', '.join(tax.name for tax in line.tax_id),
-            f'{line.id}_tax_excl_price': format_amount(env, line.price_subtotal, line.currency_id),
-            f'{line.id}_tax_incl_price': format_amount(env, line.price_total, line.currency_id),
-        }

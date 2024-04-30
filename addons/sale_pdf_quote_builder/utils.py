@@ -12,21 +12,10 @@ def _ensure_names_follows_pattern(names):
     """TODO edm (alphanum (this include underscore) or -) once or more ( at this point, we didn't replace __ by . yet, so no need to cover that case)
     """
     name_pattern = re.compile(r'^(\w|-)+$')
-    print(names)
     if names and any(not re.match(name_pattern, name) for name in names):  # name could be False TODO edm: might not be the case anymore
         raise ValidationError(_(
             "Invalid resource names. It should only contain alphanumerics, hyphens or underscores."
         ))
-
-# def _get_existing_field_info(res_field, Model):
-#     field_info = Model.fields_get().get(res_field)
-#     if not field_info:
-#         raise ValidationError(_(
-#             "The field %(field_name)s doesn't exist on model %(model_name)s",
-#             field_name=res_field,
-#             model_name=Model._name
-#         ))
-#     return field_info  # TODO edm
 
 def _get_restricted_form_fields(BaseModel, docs):
     # TODO edm docstring, ensure mimetypde can't be done here because of the onchange where the mimetype has to be manually computed.
@@ -40,10 +29,8 @@ def _get_restricted_form_fields(BaseModel, docs):
         raw_pdf_fields = reader.getFields() or set()
         _ensure_names_follows_pattern(raw_pdf_fields)
         pdf_models_and_fields = _get_model_and_fields(BaseModel, raw_pdf_fields)
-        print(pdf_models_and_fields)
         temporary_whitelist = {('sale.order', 'date_order'), ('sale.order', 'tax_totals'), ('sale.order.line', 'display_type'), ('sale.order.line', 'price_total'), ('product.product', 'active'), ('sale.order.line', 'name'), ('sale.order', 'note'), ('sale.order.line', 'product_uom_qty'), ('product.product', 'product_template_attribute_value_ids'), ('sale.order', 'commitment_date'), ('sale.order', 'order_line'), ('product.product', 'default_code'), ('sale.order', 'validity_date'), ('sale.order.line', 'order_id'), ('product.product', 'product_document_count'), ('product.product', 'image_128'), ('sale.order.line', 'state')}  # TODO edm
         restricted_fields |= {mf for mf in pdf_models_and_fields if mf not in temporary_whitelist}
-        print("restricted_field: ", restricted_fields)
     return restricted_fields
 
 
@@ -51,7 +38,7 @@ def _get_model_and_fields(BaseModel, field_names):
     model_and_fields = set()
     for name in field_names:  # TODO edm: deque?
         path = name.split('__')
-        # chain = collections.deque(chain)
+        # chain = collections.deque(chain)  # TODO edm. Or is it possible to have something built in for this?
         Model = BaseModel
         field = ''
         for elem in path:
@@ -70,8 +57,6 @@ def _get_model_and_fields(BaseModel, field_names):
     return model_and_fields
 
 def _get_field_format(field, order, env, tz, lang_code):
-    # TODO edm: sol names are prefixed by the sol id
-    # TODO edm: but if 100+ elem ==> this is done a hundred times... =/
     path = field.split('__')
     is_sol = path[0].startswith('sol_id_')
 
@@ -86,7 +71,7 @@ def _get_field_format(field, order, env, tz, lang_code):
 
     Model = BaseModel
 
-    for elem in path[:-1]:
+    for elem in path[:-1]:  # TODO edm: but if 100+ chained elem ==> this is done a hundred times... =/
         Model, value = Model[elem], value[elem]
         # TODO edm: isn't it possible to get the model from the value while it's not the end value?
         # TODO edm: would it be possible to pass the path minus last and get the needed information?
@@ -94,8 +79,6 @@ def _get_field_format(field, order, env, tz, lang_code):
     value = value[path[-1]]
     field_info = Model.fields_get().get(path[-1])
     field_type = field_info['type']
-    print("field_type: ", field_type)
-    print("value: ", value)
 
     if field_type == 'boolean':  # Todo edm: let this value?
         formatted_value = _("Yes") if value else _("No")
@@ -110,7 +93,7 @@ def _get_field_format(field, order, env, tz, lang_code):
         selection_dict = {k:v for k, v in field_info['selection']}
         formatted_value = selection_dict[value]
     elif field_type in {'one2many', 'many2one', 'many2many'}:
-        for elem in {'name', 'title', 'description'}:  # TODO edm: decide if we keep that "magic"
+        for elem in {'name', 'title', 'description'}:
             name_key = elem if value.fields_get().get(elem) else None
             if name_key:
                 break
@@ -118,4 +101,4 @@ def _get_field_format(field, order, env, tz, lang_code):
     else:
         formatted_value = value
 
-    return formatted_value or ''
+    return '' if formatted_value is False else formatted_value  # empty values are set to False

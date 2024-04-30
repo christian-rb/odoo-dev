@@ -9,7 +9,6 @@
 
         'security/ir.model.access.csv',
 
-        'views/pdf_quote_builder_form_field_whitelist.xml',
         'views/product_document_views.xml',
         'views/sale_order_template_views.xml',
 
