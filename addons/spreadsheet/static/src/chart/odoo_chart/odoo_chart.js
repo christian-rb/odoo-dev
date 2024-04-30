@@ -81,7 +81,13 @@ export class OdooChart extends AbstractChart {
     getDefinition() {
         return {
             //@ts-ignore Defined in the parent class
-            title: this.title,
+            title:
+                this.title.type === "reference"
+                    ? this.title.reference
+                        ? this.getters.getRangeString(this.title.reference, this.sheetId)
+                        : ""
+                    : this.title.value,
+            titleType: this.title.type,
             background: this.background,
             legendPosition: this.legendPosition,
             metaData: this.metaData,
