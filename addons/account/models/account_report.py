@@ -517,7 +517,7 @@ class AccountReportExpression(models.Model):
         selection=[
             ('from_beginning', 'From the very start'),
             ('from_fiscalyear', 'From the start of the fiscal year'),
-            ('from_previous_fiscalyear', 'Frome the end of the previous fiscal year'),
+            ('from_previous_fiscalyear', 'From the end of the previous fiscal year'),
             ('to_beginning_of_fiscalyear', 'At the beginning of the fiscal year'),
             ('to_beginning_of_period', 'At the beginning of the period'),
             ('normal', 'According to each type of account'),

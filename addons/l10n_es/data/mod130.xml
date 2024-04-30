@@ -35,7 +35,6 @@
                                 <field name="engine">domain</field>
                                 <field name="formula" eval="[('account_id.internal_group', '=', 'income'), '|', ('partner_id.industry_id', '=', False), ('partner_id.industry_id.name', '!=', 'Agriculture')]"/>
                                 <field name="subformula">-sum</field>
-                                    <field name="date_scope">from_fiscalyear</field>
                             </record>
                         </field>
                     </record>
@@ -164,6 +163,19 @@
                         <field name="name">[14]</field>
                         <field name="code">aeat_mod_130_14</field>
                         <field name="aggregation_formula">aeat_mod_130_12.balance - aeat_mod_130_13.balance</field>
+                    </record>
+                    <record id="mod_130_casilla_15" model="account.report.line">
+                        <field name="name">[15]</field>
+                        <field name="groupby">account_id</field>
+                        <field name="foldable" eval="True"/>
+                        <field name="expression_ids">
+                            <record id="mod_130_casilla_15_balance" model="account.report.expression">
+                                <field name="label">balance</field>
+                                <field name="engine">custom</field>
+                                <field name="formula">_report_custom_engine_mod_130</field>
+                                <field name="subformula">mod_130_15</field>
+                            </record>
+                        </field>
                     </record>
                 </field>
             </record>
