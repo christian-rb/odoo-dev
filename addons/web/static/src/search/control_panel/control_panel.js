@@ -10,6 +10,7 @@ import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { useHotkey } from "@web/core/hotkeys/hotkey_hook";
 
 import { Component, useState, onMounted, useExternalListener, useRef, useEffect } from "@odoo/owl";
+import { Breadcrumb } from "@web/webclient/breadcrumb/breadcrumb";
 
 const STICKY_CLASS = "o_mobile_sticky";
 
@@ -20,6 +21,7 @@ export class ControlPanel extends Component {
         SearchBar,
         Dropdown,
         DropdownItem,
+        Breadcrumb,
     };
     static props = {
         display: { type: Object, optional: true },
@@ -141,15 +143,6 @@ export class ControlPanel extends Component {
             layoutActions: true,
             ...this.props.display,
         };
-    }
-
-    /**
-     * Called when an element of the breadcrumbs is clicked.
-     *
-     * @param {string} jsId
-     */
-    onBreadcrumbClicked(jsId) {
-        this.actionService.restore(jsId);
     }
 
     /**

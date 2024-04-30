@@ -22,9 +22,9 @@
         />
 
         <t t-if="env.isSmall and currentApp">
-          <t t-set="breadcrumbs" t-value="state.breadcrumbs"/>
+          <!-- <t t-set="breadcrumbs" t-value="state.breadcrumbs"/> -->
           <t t-log="breadcrumbs"/>
-          <t t-call="web.Breadcrumbs"/>
+          <Breadcrumb breadcrumbs="state.breadcrumbs"/>
         </t>
         <t t-else="">
           <!-- Current App Sections -->

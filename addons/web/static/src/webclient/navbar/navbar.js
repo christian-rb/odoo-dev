@@ -15,6 +15,7 @@ import {
     onWillUnmount,
     useState,
 } from "@odoo/owl";
+import { Breadcrumb } from "../breadcrumb/breadcrumb";
 const systrayRegistry = registry.category("systray");
 
 const getBoundingClientRect = Element.prototype.getBoundingClientRect;
@@ -23,7 +24,14 @@ export class MenuDropdown extends Dropdown {}
 
 export class NavBar extends Component {
     static template = "web.NavBar";
-    static components = { Dropdown, DropdownItem, DropdownGroup, MenuDropdown, ErrorHandler };
+    static components = {
+        Dropdown,
+        DropdownItem,
+        DropdownGroup,
+        MenuDropdown,
+        ErrorHandler,
+        Breadcrumb,
+    };
     static props = {};
 
     setup() {
@@ -193,15 +201,6 @@ export class NavBar extends Component {
         if (menu) {
             this.menuService.selectMenu(menu);
         }
-    }
-
-    /**
-     * Called when an element of the breadcrumbs is clicked.
-     *
-     * @param {string} jsId
-     */
-    onBreadcrumbClicked(jsId) {
-        this.actionService.restore(jsId);
     }
 
     getMenuItemHref(payload) {
