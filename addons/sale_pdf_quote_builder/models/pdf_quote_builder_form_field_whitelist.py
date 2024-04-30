@@ -35,7 +35,7 @@ class PDFQuoteBuilderFormFieldWhitelist(models.Model):
             names = {entry.res_model, entry.res_field}
             utils._ensure_names_follows_pattern(names)
             Model = entry._get_existing_model()  # Raise if not existing
-            utils._get_existing_field_info(entry.res_model, Model)  # Raise if not existing
+            # utils._get_existing_field_info(entry.res_model, Model)  # Raise if not existing
 
     @api.depends('res_model', 'res_field')
     def _compute_res_name(self):
