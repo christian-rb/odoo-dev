@@ -36,9 +36,10 @@ export class Map extends Component {
         );
         useEffect(
             (locations) => {
+                this.removeMarkers();
                 this.addMarkers(locations);
             },
-            () => [this.props.locations]
+            () => [this.props.locations, this.props.selectedLocationId]
         );
         useEffect(
             (locations, selectedLocationId) => {
@@ -58,12 +59,11 @@ export class Map extends Component {
     }
 
     addMarkers(locations) {
-        this.removeMarkers();
         for (const loc of locations) {
             // Icon creation
             const iconInfo = {
                 // TODO: Add `o_location_selector_marker_icon_selected` class when the marker is active.
-                className: "o_location_selector_marker_icon",
+                className: String(loc.id) === this.props.selectedLocationId ? "o_location_selector_marker_icon o_location_selector_marker_icon_selected" : "o_location_selector_marker_icon",
                 html: renderToString(
                     "website_sale.locationSelector.map.marker",
                     { number: locations.indexOf(loc) + 1 },

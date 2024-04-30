@@ -2,6 +2,7 @@
 <templates xml:space="preserve">
     <t t-name="website_sale.locationSelector.location">
         <button
+            t-att-id="'location-'+this.props.id"
             class="list-group-item list-group-item-action d-flex gap-2 gap-lg-3"
             t-att-class="{'o_location_selector_location_selected text-bg-light': props.isSelected}"
             t-on-click="() => props.setSelectedLocation(props.id)"

@@ -14,15 +14,26 @@
 
                 <!-- "List view / Map view" navigation -->
                 <div class="nav nav-tabs d-md-none" role="tablist">
-                    <button id="list-tab" class="o_locationSelector_mobile_tab nav-link active flex-grow-1 border-top-0 border-start-0 border-end-0 py-3 bg-transparent text-black" data-bs-toggle="tab" data-bs-target="#o_location_selector_list_view" type="button" role="tab" aria-controls="o_location_selector_list_view" aria-selected="true">List view</button>
-                    <button id="map-tab" class="o_locationSelector_mobile_tab nav-link flex-grow-1 border-top-0 border-start-0 border-end-0 bg-transparent text-black" data-bs-toggle="tab" data-bs-target="#o_location_selector_map_view" type="button" role="tab" aria-controls="o_location_selector_map_view" aria-selected="false">Map view</button>
+                    <button
+                        class="o_locationSelector_mobile_tab flex-grow-1 border-top-0 border-start-0 border-end-0 py-3 bg-transparent text-black"
+                        t-on-click="() => this.state.viewMode = 'list'"
+                    >
+                        List view
+                    </button>
+                    <button
+                        t-if="this.state.loadMap"
+                        class="o_locationSelector_mobile_tab flex-grow-1 border-top-0 border-start-0 border-end-0 bg-transparent text-black"
+                        t-on-click="() => this.state.viewMode = 'map'"
+                    >
+                        Map view
+                    </button>
                 </div>
             </div>
 
-            <div class="tab-content d-flex h-100 mx-0 mx-md-n3 overflow-hidden">
+            <div class="d-none d-md-flex h-100 mx-0 mx-md-n3 overflow-hidden">
 
                 <!-- List view -->
-                <section id="o_location_selector_list_view" class="o_locationSelector_view tab-pane fade show active col-md-4 d-md-flex flex-grow-1 flex-column" role="tabpanel" aria-labelledby="list-tab">
+                <section class="o_locationSelector_view col-md-4 d-md-flex flex-grow-1 flex-column">
 
                     <!-- Search bar -->
                     <t t-call="website_sale.locationSelector.searchbar">
@@ -30,39 +41,25 @@
                     </t>
 
                     <!-- List group -->
-                    <div class="d-flex flex-grow-1 h-100 h-md-auto overflow-x-auto">
-                        <div class="list-group list-group-flush flex-grow-1">
-                            <t t-if="this.state.locations.length">
-                                <t
-                                    t-foreach="this.state.locations"
-                                    t-as="location"
-                                    t-key="location.id"
-                                >
-                                    <Location
-                                        id="location.id.toString()"
-                                        name="location.pick_up_point_name"
-                                        address="location.pick_up_point_address"
-                                        number="location_index + 1"
-                                        openingHours="location.opening_hours"
-                                        isSelected="this.state.selectedLocationId === location.id.toString()"
-                                        setSelectedLocation.bind="setSelectedLocation"
-                                    />
-                                </t>
-                            </t>
-                            <t t-else="">
-                                <p t-if="this.state.error" class="p-3 fw-bold">No result</p>
-                                <div t-else="" class="position-absolute start-50 top-50 translate-middle">
-                                    <div class="spinner-border" role="status">
-                                        <span class="visually-hidden">Loading...</span>
-                                    </div>
-                                </div>
-                            </t>
+                    <LocationList
+                        t-if="this.state.locations.length"
+                        locations="this.state.locations"
+                        selectedLocationId="this.state.selectedLocationId.toString()"
+                        setSelectedLocation.bind="setSelectedLocation"
+                        validateSelection.bind="validateSelection"
+                    />
+                    <t t-else="">
+                        <p t-if="this.state.error" class="p-3 fw-bold">No result</p>
+                        <div t-else="" class="position-absolute start-50 top-50 translate-middle">
+                            <div class="spinner-border" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
                         </div>
-                    </div>
+                    </t>
                 </section>
 
                 <!-- Map view -->
-                <section id="o_location_selector_map_view" class="o_locationSelector_view tab-pane fade col-md-8 d-md-flex flex-grow-1 border-start" role="tabpanel" aria-labelledby="list-tab">
+                <section class="o_locationSelector_view col-md-8 d-md-flex flex-grow-1 border-start">
                     <Map
                         t-if="this.state.loadMap"
                         locations="this.state.locations"
@@ -71,6 +68,16 @@
                         validateSelection.bind="validateSelection"
                     />
                 </section>
+            </div>
+
+            <div class="d-md-none h-100">
+                <t
+                    t-component="mobileComponent"
+                    locations="this.state.locations"
+                    selectedLocationId="this.state.selectedLocationId.toString()"
+                    setSelectedLocation.bind="setSelectedLocation"
+                    validateSelection.bind="validateSelection"
+                />
             </div>
 
             <t t-set-slot="footer">
@@ -89,10 +96,13 @@
     </t>
 
     <t t-name="website_sale.locationSelector.searchbar">
-        <div role="search" t-attf-class="input-group p-3 border-bottom #{wrapClass}">
-            <input class="search-query form-control oe_search_box border-0 text-bg-light" t-model.lazy="this.state.zipCode"/>
-            <button type="submit" aria-label="Search" title="Search" class="oe_search_button btn btn-light">
-                <i class="oi oi-search" data-oe-model="ir.ui.view" data-oe-id="951" data-oe-field="arch" data-oe-xpath="/data/xpath[3]/form/t[1]/div[1]/button[1]/i[1]"/>
+        <div role="search" class="input-group p-3 border-bottom" t-att-class="wrapClass">
+            <input
+                class="search-query form-control oe_search_box border-0 text-bg-light"
+                t-model.lazy="this.state.zipCode"
+            />
+            <button type="submit" aria-label="Search" title="Search" class="btn btn-light">
+                <i class="oi oi-search"/>
             </button>
         </div>
     </t>

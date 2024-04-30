@@ -5,11 +5,11 @@ import { AssetsLoadingError, loadCSS, loadJS } from "@web/core/assets";
 import { Dialog } from "@web/core/dialog/dialog";
 import { _t } from "@web/core/l10n/translation";
 import { rpc } from "@web/core/network/rpc";
-import { Location } from "@website_sale/js/location_selector/location/location";
+import { LocationList } from "@website_sale/js/location_selector/location_list/location_list";
 import { Map } from "@website_sale/js/location_selector/map/map";
 
 export class LocationSelectorDialog extends Component {
-    static components = { Dialog, Location, Map };
+    static components = { Dialog, LocationList, Map };
     static template = 'website_sale.locationSelector.dialog';
     static props = {
         carrierId: Number,
@@ -27,6 +27,7 @@ export class LocationSelectorDialog extends Component {
         this.state = useState({
             locations: [],
             error: false,
+            viewMode: "map",
             zipCode: this.props.zipCode,
             selectedLocationId: String(this.props.selectedLocationId),
             loadMap: false,
@@ -84,6 +85,7 @@ export class LocationSelectorDialog extends Component {
      * @param {String} zip - The postal code used to look for close locations.
      */
     async _updateLocations(zip) {
+        this.state.error = false;
         const { locations, error } = await this._getLocations(zip);
         if (error) {
             this.state.error = error;
@@ -116,5 +118,10 @@ export class LocationSelectorDialog extends Component {
         );
         await this.props.save(this.props.carrierId, loc);
         this.props.close();
+    }
+
+    get mobileComponent() {
+        if (this.state.viewMode !== "list" && this.state.loadMap) return Map;
+        return LocationList;
     }
 }
