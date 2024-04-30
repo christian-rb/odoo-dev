@@ -15,6 +15,7 @@ import { useSpreadsheetPrint } from "@spreadsheet/hooks";
 import { router } from "@web/core/browser/router";
 
 import { Component, onWillStart, useState, useEffect } from "@odoo/owl";
+import { SpreadsheetFavorite } from "@spreadsheet/components/spreadsheet_favorite/spreadsheet_favorite";
 
 export class SpreadsheetDashboardAction extends Component {
     static template = "spreadsheet_dashboard.DashboardAction";
@@ -25,6 +26,7 @@ export class SpreadsheetDashboardAction extends Component {
         DashboardMobileSearchPanel,
         MobileFigureContainer,
         SpreadsheetShareButton,
+        SpreadsheetFavorite,
     };
     static props = { ...standardActionServiceProps };
 
@@ -137,6 +139,13 @@ export class SpreadsheetDashboardAction extends Component {
             },
         ]);
         return url;
+    }
+
+    async toggleFavorite() {
+        const favorite = await this.orm.call("spreadsheet.dashboard", "action_toggle_favorite", [
+            [this.activeDashboardId],
+        ]);
+        this.state.activeDashboard.favorite = favorite;
     }
 
     toggleSidebar() {

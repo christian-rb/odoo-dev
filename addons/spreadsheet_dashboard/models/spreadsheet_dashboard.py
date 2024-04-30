@@ -22,11 +22,31 @@ class SpreadsheetDashboard(models.Model):
         user_locale = self.env['res.lang']._get_user_spreadsheet_locale()
         snapshot.setdefault('settings', {})['locale'] = user_locale
         default_currency = self.env['res.currency'].get_company_currency_for_spreadsheet()
+        favorite = self.env['spreadsheet.dashboard.favorite'].search([
+            ('dashboard_id', '=', self.id),
+            ('user_id', '=', self.env.user.id),
+        ], limit=1)
         return {
             'snapshot': snapshot,
             'revisions': [],
             'default_currency': default_currency,
+            'favorite': bool(favorite),
         }
+
+    def action_toggle_favorite(self):
+        self.ensure_one()
+        favorite = self.env['spreadsheet.dashboard.favorite'].search([
+            ('dashboard_id', '=', self.id),
+            ('user_id', '=', self.env.user.id),
+        ])
+        if favorite:
+            favorite.unlink()
+            return False
+        favorite.create({
+            'dashboard_id': self.id,
+            'user_id': self.env.user.id,
+        })
+        return True
 
     def copy_data(self, default=None):
         default = dict(default or {})

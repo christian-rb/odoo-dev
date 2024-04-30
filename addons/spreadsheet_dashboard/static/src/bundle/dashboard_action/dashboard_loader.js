@@ -27,6 +27,7 @@ export const Status = {
  * @property {string} status
  * @property {Model} [model]
  * @property {Error} [error]
+ * @property {boolean} [favorite]
  *
  * @typedef DashboardGroupData
  * @property {number} id
@@ -162,12 +163,13 @@ export class DashboardLoader {
         const dashboard = this._getDashboard(dashboardId);
         dashboard.status = Status.Loading;
         try {
-            const { snapshot, revisions, default_currency } = await this.orm.call(
+            const { snapshot, revisions, default_currency, favorite } = await this.orm.call(
                 "spreadsheet.dashboard",
                 "get_readonly_dashboard",
                 [dashboardId]
             );
             dashboard.model = this._createSpreadsheetModel(snapshot, revisions, default_currency);
+            dashboard.favorite = favorite;
             dashboard.status = Status.Loaded;
         } catch (error) {
             dashboard.error = error;
