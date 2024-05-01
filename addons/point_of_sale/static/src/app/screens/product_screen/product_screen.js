@@ -288,6 +288,7 @@ export class ProductScreen extends ControlButtonsMixin(Component) {
             });
         }
         this.currentOrder.add_product(product, options);
+        this.state.showProductReminder = true;
         this.numberBuffer.reset();
     }
     async _getPartnerByBarcode(code) {
@@ -342,6 +343,7 @@ export class ProductScreen extends ControlButtonsMixin(Component) {
         }
         const options = await product.getAddProductOptions(lotBarcode);
         await this.currentOrder.add_product(product, { ...options, ...customProductOptions });
+        this.state.showProductReminder = true;
         this.numberBuffer.reset();
     }
     async displayAllControlPopup() {
