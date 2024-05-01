@@ -1238,14 +1238,13 @@
             <field name="currency_subunit_label">Chon</field>
         </record>
 
-        <record id="ZWL" model="res.currency">
-            <field name="name">ZWL</field>
-            <field name="full_name">Zimbabwean dollar</field>
-            <field name="symbol">Z$</field>
+        <record id="ZIG" model="res.currency">
+            <field name="name">ZIG</field>
+            <field name="full_name">Zimbabwe Gold</field>
+            <field name="symbol">ZiG</field>
             <field name="rounding">0.01</field>
             <field name="active" eval="False"/>
-            <field name="currency_unit_label">Dollars</field>
-            <field name="currency_subunit_label">Cents</field>
+            <field name="currency_unit_label">ZiGs</field>
         </record>
 
         <record id="ZMW" model="res.currency">
