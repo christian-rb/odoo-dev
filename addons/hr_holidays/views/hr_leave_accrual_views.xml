@@ -80,6 +80,12 @@
                             </div>
                         </div>
                         <field name="postpone_max_days" class="w-25" invisible="action_with_unused_accruals != 'postponed'"/>
+                        <div class="o_td_label">
+                            <label for="accrual_end_date" string="Carry Over Validity"/>
+                        </div>
+                        <div>
+                            <field name="accrual_end_date" string="Carry Over Validity" style="width: 8rem" />
+                        </div>
                     </group>
                 </sheet>
             </form>

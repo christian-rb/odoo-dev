@@ -516,6 +516,9 @@ class HolidaysAllocation(models.Model):
                         allocation_days = allocation.number_of_days + leaves_taken
                         allocation_max_days = current_level.postpone_max_days + leaves_taken
                         allocation.number_of_days = min(allocation_days, allocation_max_days)
+                # if it's end date for carrying accruals, make accrual count 0
+                if current_level.accrual_end_date and allocation.nextcall >= current_level.accrual_end_date:
+                    allocation.number_of_days = 0
 
                 allocation.lastcall = allocation.nextcall
                 allocation.nextcall = nextcall
