@@ -8,6 +8,12 @@
             <field name="default" eval="False"/>
             <field name="description">Quotation sent</field>
         </record>
+        <record id="mt_order_viewed" model="mail.message.subtype">
+            <field name="name">Quotation Viewed</field>
+            <field name="res_model">sale.order</field>
+            <field name="default" eval="False"/>
+            <field name="description">Quotation Viewed</field>
+        </record>
         <record id="mt_order_confirmed" model="mail.message.subtype">
             <field name="name">Sales Order Confirmed</field>
             <field name="res_model">sale.order</field>
@@ -44,6 +50,14 @@
             <field name="sequence">23</field>
             <field name="res_model">crm.team</field>
             <field name="parent_id" ref="account.mt_invoice_validated"/>
+            <field name="relation_field">team_id</field>
+        </record>
+        <record id="mt_salesteam_order_viewed" model="mail.message.subtype">
+            <field name="name">Quotation Viewed</field>
+            <field name="sequence">24</field>
+            <field name="res_model">crm.team</field>
+            <field name="default" eval="True"/>
+            <field name="parent_id" ref="sale.mt_order_viewed"/>
             <field name="relation_field">team_id</field>
         </record>
     </data>
