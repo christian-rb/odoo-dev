@@ -148,6 +148,16 @@ class UseSuggestion {
             before = text.substring(0, this.search.position);
             after = text.substring(position, text.length);
         }
+        if (option.type) {
+            if (option.type === "everyone") {
+                for (const channelMember of this.thread.channelMembers) {
+                    this.composer.mentionedPartners.add({
+                        id: channelMember.persona.id,
+                        type: "partner",
+                    });
+                }
+            }
+        }
         if (option.partner) {
             this.composer.mentionedPartners.add({
                 id: option.partner.id,
@@ -173,19 +183,19 @@ class UseSuggestion {
         if (!this.search.delimiter) {
             return;
         }
-        const { type, suggestions } = this.suggestionService.searchSuggestions(this.search, {
+        const { type, suggestions, specialSuggestions } = this.suggestionService.searchSuggestions(this.search, {
             thread: this.thread,
             sort: true,
         });
-        if (!suggestions.length) {
+        if (!suggestions.length && !specialSuggestions.length) {
             this.state.items = undefined;
             return;
         }
         // arbitrary limit to avoid displaying too many elements at once
         // ideally a load more mechanism should be introduced
         const limit = 8;
-        suggestions.length = Math.min(suggestions.length, limit);
-        this.state.items = { type, suggestions };
+        const totalSuggestions = [...suggestions.slice(0, limit), ...specialSuggestions];
+        this.state.items = { type, suggestions: totalSuggestions };
     }
 }
 

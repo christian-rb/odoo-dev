@@ -155,6 +155,7 @@ export class SuggestionService {
             });
         }
         const suggestions = [];
+        const specialSuggestions = []
         for (const partner of partners) {
             if (!partner.name) {
                 continue;
@@ -166,11 +167,17 @@ export class SuggestionService {
                 suggestions.push(partner);
             }
         }
+        if (thread.channel_type === "group" || thread.channel_type === "channel") {
+            if (/\bever(y|yo|yon|yone)?\b$/.test(cleanedSearchTerm)) {
+                specialSuggestions.push({isSpecial: true, label: "everyone", type: "everyone", name: "Everyone", description: "Notify everyone"})
+            }
+        }
         return {
             type: "Partner",
             suggestions: sort
                 ? [...this.sortPartnerSuggestions(suggestions, cleanedSearchTerm, thread)]
                 : suggestions,
+            specialSuggestions
         };
     }
 
