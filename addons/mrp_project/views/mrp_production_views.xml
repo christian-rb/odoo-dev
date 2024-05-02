@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Part of Odoo. See LICENSE file for full copyright and licensing details.
+  -->
+
+<odoo>
+    <record id="view_production_form_mrp_project" model="ir.ui.view">
+        <field name="name">production.form.inherit.mrp.project</field>
+        <field name="model">mrp.production</field>
+        <field name="inherit_id" ref="mrp.mrp_production_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_linked_project" type="object" class="oe_stat_button" icon="fa-puzzle-piece" invisible="not project_id" groups="project.group_project_user">
+                    <div class="o_stat_info">
+                        <span class="o_stat_text">Project</span>
+                    </div>
+                </button>
+                <button type="object" name="action_view_tasks" class="oe_stat_button" icon="fa-tasks" invisible="not project_id" groups="project.group_project_user">
+                    <field name="task_count" widget="statinfo" string="Tasks"/>
+                </button>
+            </xpath>
+            <xpath expr="//page[@name='miscellaneous']//field[@name='picking_type_id']" position="after">
+                <field name="project_id"/>
+            </xpath>
+        </field>
+    </record>
+    <record id="model_mrp_production_action_create_project" model="ir.actions.server">
+        <field name="name">Create Project</field>
+        <field name="model_id" ref="mrp.model_mrp_production"/>
+        <field name="binding_model_id" ref="mrp.model_mrp_production"/>
+        <field name="binding_view_types">form</field>
+        <field name="state">code</field>
+        <field name="code">action = records.action_create_project()</field>
+    </record>
+</odoo>
