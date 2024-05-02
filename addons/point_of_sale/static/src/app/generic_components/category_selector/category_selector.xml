@@ -12,12 +12,10 @@
                         class="category-button btn btn-light d-flex flex-column align-items-center justify-content-center category-item p-1 h-100"
                         style="max-width: 100px;"
                         t-on-click="() => props.onClick(category.id)">
-                        <t t-if="props.showImage">
-                            <img t-if="category.imageUrl"
-                                class="rounded h-75"
-                                t-att-src="category.imageUrl"
-                                alt="Category" />
-                        </t>
+                        <img t-if="category.imageUrl"
+                            t-att-src="category.imageUrl"
+                            style="height: 3rem;"
+                            alt="Category" />
                         <i t-if="category.icon"
                             t-attf-class="fa {{category.icon}}"
                             aria-hidden="true" />
