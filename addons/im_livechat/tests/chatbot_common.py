@@ -135,11 +135,13 @@ class ChatbotCase(common.HttpCase):
 
     @classmethod
     def _post_answer_and_trigger_next_step(cls, discuss_channel, answer, chatbot_script_answer=False):
-        mail_message = discuss_channel.message_post(body=answer)
+        mail_message = discuss_channel.sudo().message_post(body=answer)
         if chatbot_script_answer:
             cls.env['chatbot.message'].search([
                 ('mail_message_id', '=', mail_message.id)
             ], limit=1).user_script_answer_id = chatbot_script_answer.id
-
-        next_step = discuss_channel.chatbot_current_step_id._process_answer(discuss_channel, mail_message.body)
+        discuss_channel.env.su = True
+        next_step = discuss_channel.chatbot_current_step_id._process_answer(discuss_channel.sudo(), mail_message.body)
+        discuss_channel.env.su = False
+        next_step.env.su = True
         next_step._process_step(discuss_channel)

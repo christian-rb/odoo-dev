@@ -39,7 +39,7 @@ class CrmChatbotCase(chatbot_common.CrmChatbotCase):
             'chatbot_script_id': self.chatbot_script.id,
             'user_id': user.id,
         })["Thread"]
-        discuss_channel = self.env['discuss.channel'].sudo().browse(channel_info['id'])
+        discuss_channel = self.env['discuss.channel'].browse(channel_info['id'])
 
         self._post_answer_and_trigger_next_step(
             discuss_channel,
@@ -53,3 +53,20 @@ class CrmChatbotCase(chatbot_common.CrmChatbotCase):
         self._post_answer_and_trigger_next_step(discuss_channel, '123456')
 
         self.assertEqual(discuss_channel.chatbot_current_step_id, self.step_create_lead)
+
+    # @users('user_public')
+    # def test_access_rights_extracting_customer_values_for_lead_creation(self):
+    #     pass
+        # channel_info = self.make_jsonrpc_request("/im_livechat/get_session", {
+        #     'anonymous_name': 'Test Visitor',
+        #     'channel_id': self.livechat_channel.id,
+        #     'chatbot_script_id': self.chatbot_script.id,
+        #     'user_id': self.user_public.id,
+        # })["Thread"]
+        # discuss_channel = self.env['discuss.channel'].sudo().browse(channel_info['id'])
+
+        # self.make_jsonrpc_request("/chatbot/step/trigger", {
+        #     'channel_id': self.livechat_channel.id,
+        #     'chatbot_script_id': self.chatbot_script.id,
+        #     'user_id': self.user_public.id,
+        # })["Thread"]
