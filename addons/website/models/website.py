@@ -1000,9 +1000,7 @@ class Website(models.Model):
             search_criteria.append((url, website.website_domain()))
 
         # Search the URL in every relevant field
-        html_fields_attributes = self._get_html_fields_attributes() + [
-            ('website.menu', 'website_menu', 'url', False),
-        ]
+        html_fields_attributes = self._get_html_fields_attributes()
         for model, _table, column, _translate in html_fields_attributes:
             Model = self.env[model]
             if not Model.check_access_rights('read', raise_exception=False):

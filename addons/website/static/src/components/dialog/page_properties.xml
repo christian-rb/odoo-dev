@@ -34,6 +34,7 @@
             </t>
         </t>
         <t t-else="">
+            <p class="text-warning">Don't forget to update all links referring to it.</p>
             <p class="text-warning">We found these ones:</p>
             <div t-foreach="state.dependencies" t-as="dependency" t-key="dependency" class="ml16 mb16">
                 <a class="collapsed" data-bs-toggle="collapse"
@@ -80,7 +81,6 @@
             <t t-if="props.resIds.length > 1">Some of these pages are used as new page templates.</t>
             <t t-else="">This page is used as a new page template.</t>
         </p>
-        <p class="text-warning">Don't forget to update all links referring to it.</p>
         <PageDependencies resIds="props.resIds" resModel="props.resModel" mode="'collapse'"/>
         <CheckBox value="state.confirm" onChange.bind="onConfirmCheckboxChange">
             <p class="text-warning">I am sure about this.</p>
