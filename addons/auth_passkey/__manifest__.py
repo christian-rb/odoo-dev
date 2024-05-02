@@ -10,6 +10,7 @@
     },
     'data': [
         'views/auth_passkey_key_views.xml',
+        'views/auth_passkey_wizard_views.xml',
         'views/auth_signup_login_templates.xml',
         'views/res_users_views.xml',
         'views/res_users_identitycheck_views.xml',

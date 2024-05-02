@@ -4,7 +4,7 @@
     <t t-name="auth_passkey.CreatePasskeyButton">
         <a
             t-att-title="title"
-            t-on-click.prevent.stop="createNewPasskey"
+            t-on-click="createNewPasskey"
             role="button"
             data-hotkey="a"
         >

@@ -6,7 +6,7 @@ from odoo.addons.base.models.res_users import check_identity
 
 class PassKey(models.Model):
     _name = "auth.passkey.key"
-    _description = "Passkeys"
+    _description = "Passkey"
     _order = "id desc"
 
     name = fields.Char(required=True)
@@ -23,17 +23,15 @@ class PassKey(models.Model):
         result = self.sudo().search([("credential_identifier", "=", identifier)])
         return result
 
-    @check_identity
-    @api.model
-    def action_new_passkey(self, key):
+    def _create_new_passkey(self, name, credential_identifier, public_key, user_id):
         self.env.cr.execute("""
         INSERT INTO {table} (name, credential_identifier, public_key, create_uid)
         VALUES (%s, %s, %s, %s)
         """.format(table=self._table), [
-            key['name'],
-            base64.urlsafe_b64decode(key['credential_identifier']).hex(),
-            key['public_key'],
-            self.env.user.id,
+            name,
+            credential_identifier,
+            public_key,
+            user_id,
         ])
 
     @check_identity
@@ -65,5 +63,33 @@ class PassKey(models.Model):
             'res_id': self.id,
             'context': {
                 'dialog_size': 'medium',
+            }
+        }
+
+class PassKeyWizard(models.TransientModel):
+    _name = "auth.passkey.wizard"
+    _description = "Passkey Wizard"
+
+    name = fields.Char(required=True)
+
+    @check_identity
+    @api.model
+    def action_new_passkey(self, key):
+        self.env['auth.passkey.key']._create_new_passkey(
+            key['name'],
+            base64.urlsafe_b64decode(key['credential_identifier']).hex(),
+            key['public_key'],
+            self.env.user.id,
+        )
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'message': _('Successfully created Passkey'),
+                'type': 'success',
+                'next': {
+                    'type': 'ir.actions.client',
+                    'tag': 'soft_reload',
+                },
             }
         }

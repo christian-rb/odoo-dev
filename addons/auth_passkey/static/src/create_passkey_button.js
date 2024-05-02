@@ -29,20 +29,12 @@ export class CreatePasskeyButton extends Component {
         }
         try {
             const registration = await this.register()
-            this.orm.call("auth.passkey.key", "action_new_passkey", [{
+            const action = await this.orm.call("auth.passkey.wizard", "action_new_passkey", [{
                 "name": name,
                 "credential_identifier": registration.credentialId,
                 "public_key": registration.credentialPublicKey,
             }])
-            this.dialogService.closeAll()
-            this.actionService.doAction({
-                type: "ir.actions.client",
-                tag: "soft_reload",
-            })
-            this.notification.add(
-                _t("Successfully created Passkey"),
-                { type: "success" },
-            )
+            this.actionService.doAction(action)
         } catch (e) {
             console.error(e)
             this.notification.add(
