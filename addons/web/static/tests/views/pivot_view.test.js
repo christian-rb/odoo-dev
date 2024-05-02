@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import { expect, test } from "@odoo/hoot";
-import { queryAll, queryAllTexts, queryFirst } from "@odoo/hoot-dom";
+import { queryAll, queryAllTexts, queryOne, queryText } from "@odoo/hoot-dom";
 import {
 	defineModels,
 	fields,
@@ -9,27 +9,26 @@ import {
 	onRpc,
 	mountView,
 	contains,
-	getService,
-	mountWithCleanup,
 	toggleMenuItem,
 	toggleSearchBarMenu,
 	patchDate,
+	mockService,
+	getDropdownMenu,
 } from "@web/../tests/web_test_helpers";
-import { WebClient } from "@web/webclient/webclient";
 
 
 class Partner extends models.Model {
 	_name = "partner";
-	foo = fields.Integer({ string: "Foo", searchable: true, aggregator: "sum" });
+	foo = fields.Integer({ string: "Foo", searchable: true, aggregator: "sum", groupable: false,});
 	bar = fields.Boolean({ string: "bar", store: true, sortable: true, groupable: true });
 	date = fields.Date({ string: "Date", store: true, groupable: true, sortable: true });
 	product_id = fields.Many2one({ string: "Product", relation: "product", store: true, sortable: true, groupable: true });
 	other_product_id = fields.Many2one({ string: "Other Product", relation: "product", store: true, sortable: true, groupable: true });
-	non_stored_m2o = fields.Many2one({ string: "Non Stored M2O", relation: "product" });
+	non_stored_m2o = fields.Many2one({ string: "Non Stored M2O", relation: "product", groupable: false});
 	customer = fields.Many2one({ string: "Customer", store: true, relation: "customer", store: true, sortable: true, groupable: true });
-	computed_field = fields.Integer({ string: "Computed and not stored", compute: true, aggregator: "sum" });
+	computed_field = fields.Integer({ string: "Computed and not stored", compute: true, aggregator: "sum", groupable: false});
 	company_type = fields.Selection({ string: "Company Type", selection: [["company", "Company"], ["individual", "individual"]], searchable: true, sortable: true, store: true, groupable: true });
-	price_nonaggregatable = fields.Monetary({ string: "Price non-aggregatable", aggregator: undefined, store: true, currency_field: this.currency_id });
+	price_nonaggregatable = fields.Monetary({ string: "Price non-aggregatable", aggregator: undefined, store: true, currency_field: this.currency_id, groupable: false,});
 	ref = fields.Reference({
 		string: "Reference", selection: [
 			["product", "Product"],
@@ -37,9 +36,9 @@ class Partner extends models.Model {
 		], aggregator: "count_distinct"
 	})
 	properties = fields.Properties({ string: "Properties", definition_record: "parent_id", definition_record_field: "properties_defintion" })
-	parent_id = fields.Many2one({ string: "Parent", relation: "partner" });
-	properties_definition = fields.PropertiesDefinition({ string: "Properties" });
-	display_name = fields.Char({ string: "Displayed name" });
+	parent_id = fields.Many2one({ string: "Parent", relation: "partner", groupable: false,});
+	properties_definition = fields.PropertiesDefinition({ string: "Properties", groupable: false,});
+	display_name = fields.Char({ string: "Displayed name", groupable: false});
 	_records = [
 		{
 			id: 1,
@@ -353,35 +352,41 @@ test(
 	}
 );
 
-// test.debug("clicking on a cell triggers a doAction", async function (assert) {
+// test.debug("clicking on a cell triggers a doAction", async () => {
 // 	expect.assertions(2);
 // 	Partner._views["form, 2"] = `<form/>`;
 // 	Partner._views["list, false"] = `<list/>`;
 // 	Partner._views["kanban, 5"] = `<kanban/>`;
 
-// 	// onRpc(({ method }) => expect.step(method));
-
-// 	await mountWithCleanup(WebClient);
-// 	getService("action").doAction({
-// 		context: {
-// 			lang: "en",
-// 			tz: "taht",
-// 			someKey: true,
-// 			uid: 7,
-// 			userContextKey: true,
-// 		},
-// 		domain: [["product_id", "=", 37]],
-// 		name: "Partners",
-// 		res_model: "partner",
-// 		target: "current",
-// 		type: "ir.actions.act_window",
-// 		view_mode: "list",
-// 		views: [
-// 			[false, "list"],
-// 			[2, "form"],
-// 		],
-// 	});
-
+// 	mockService("action", () => {
+// 		return {
+// 			doAction(action) {
+// 				expect(action).toEqual(
+// 					{
+// 						context: {
+// 							lang: "en",
+// 							tz: "taht",
+// 							someKey: true,
+// 							uid: 7,
+// 							userContextKey: true,
+// 						},
+// 						domain: [["product_id", "=", 37]],
+// 						name: "Partners",
+// 						res_model: "partner",
+// 						target: "current",
+// 						type: "ir.actions.act_window",
+// 						view_mode: "list",
+// 						views: [
+// 							[false, "list"],
+// 							[2, "form"],
+// 						],
+// 					},
+// 				);
+// 				return Promise.resolve(true);
+// 			},
+// 		};
+//     });
+	
 // 	await mountView({
 // 		type: "pivot",
 // 		resModel: "partner",
@@ -494,4 +499,280 @@ test("columns are highlighted when hovering a measure", async () => {
 	}
 	await contains(".o_pivot_buttons button.dropdown-toggle").hover();
 	expect(".o_cell_hover").toHaveCount(0);
+});
+
+test(
+	"columns are highlighted when hovering an origin (comparison mode)",
+	async () => {
+		expect.assertions(5);
+
+		patchDate("2016-12-20T1:00:00");
+		Partner._records[0].date = "2016-11-15";
+		Partner._records[1].date = "2016-12-17";
+		Partner._records[2].date = "2016-11-22";
+		Partner._records[3].date = "2016-11-03";
+
+		await mountView({
+			type: "pivot",
+			resModel: "partner",
+			arch: `
+			<pivot>
+				<field name="product_id" type="row"/>
+				<field name="date" type="col"/>
+			</pivot>`,
+			searchViewArch: `
+			<search>
+				<filter name="date_filter" date="date" domain="[]" default_period='this_month'/>
+			</search>`,
+			context: { search_default_date_filter: true },
+		});
+
+		await toggleSearchBarMenu();
+		await toggleMenuItem("Date: Previous period");
+
+		// hover the second origin in second group
+		await contains("th.o_pivot_origin_row:nth-of-type(5)").hover();
+		expect(".o_cell_hover").toHaveCount(3);
+		for (let i = 1; i <= 3; i++) {
+			expect(`tbody tr:nth-of-type(${i}) td:nth-of-type(5)`).toHaveClass("o_cell_hover");
+		}
+		await contains(".o_pivot_buttons button.dropdown-toggle").hover();
+		expect(".o_cell_hover").toHaveCount(0);
+
+	}
+);
+
+test('pivot view with disable_linking="True"', async () => {
+	mockService("action", () => {
+		return {
+			doAction() {
+				throw new Error("should not execute an action");
+			},
+		};
+    });
+
+	await mountView({
+		type: "pivot",
+		resModel: "partner",
+		arch: `
+			<pivot disable_linking="True">
+				<field name="foo" type="measure"/>
+			</pivot>`,
+	});
+
+	expect("table").not.toHaveClass("o_enable_linking");
+	expect(".o_pivot_cell_value").toHaveCount(1);
+	await contains(".o_pivot_cell_value").click(); // should not trigger a do_action
+});
+
+test('clicking on the "Total" cell with time range activated', async () => {
+	expect.assertions(2);
+
+	patchDate("2016-12-20T1:00:00");
+
+	mockService("action", () => {
+		return {
+			doAction(action) {
+				expect(action.domain).toEqual(
+					["&", ["date", ">=", "2016-12-01"], ["date", "<=", "2016-12-31"]],
+				);
+				return Promise.resolve(true);
+			},
+		};
+    });
+
+	await mountView({
+		type: "pivot",
+		resModel: "partner",
+		arch: "<pivot/>",
+		searchViewArch: `
+			<search>
+				<filter name="date_filter" date="date" domain="[]" default_period='this_month'/>
+			</search>`,
+		context: { search_default_date_filter: true },
+	});
+
+	expect("table").toHaveClass("o_enable_linking");
+	await contains(".o_pivot_cell_value").click();
+});
+
+test(
+	'clicking on a fake cell value ("empty group") in comparison mode',
+	async () => {
+		expect.assertions(3);
+
+		patchDate("2016-12-20T1:00:00");
+		Partner._records[0].date = "2016-11-15";
+		Partner._records[1].date = "2016-12-17";
+		Partner._records[2].date = "2016-11-22";
+		Partner._records[3].date = "2016-11-03";
+		
+		const expectedDomains = [
+			["&", ["date", ">=", "2016-12-01"], ["date", "<=", "2016-12-31"]],
+			[[0, "=", 1]],
+		];
+		mockService("action", () => {
+			return {
+				doAction(action) {
+					expect(action.domain).toEqual(expectedDomains.shift());
+					return Promise.resolve(true);
+				},
+			};
+		});
+
+		await mountView({
+			type: "pivot",
+			resModel: "partner",
+			arch: `<pivot><field name="product_id" type="row"/></pivot>`,
+			searchViewArch: `
+				<search>
+					<filter name="date_filter" date="date" domain="[]" default_period='this_month'/>
+				</search>`,
+			context: { search_default_date_filter: true },
+		});
+
+		await toggleSearchBarMenu();
+		await toggleMenuItem("Date: Previous period");
+
+		expect("table").toHaveClass("o_enable_linking");
+		// here we click on the group corresponding to Total/Total/This Month
+		await contains(".o_pivot_cell_value:eq(1)").click(); // should trigger a do_action with appropriate domain
+		// here we click on the group corresponding to xphone/Total/This Month
+		await contains(".o_pivot_cell_value:eq(4)").click(); // should trigger a do_action with appropriate domain
+	}
+);
+
+test("pivot view grouped by date field", async () => {
+	expect.assertions(2);
+
+	onRpc(({ method, kwargs }) => {
+		if(method === "read_group") {
+			const wrongFields = kwargs.fields.filter((field) => {
+				return !(field.split(":")[0] in Partner._fields);
+			});
+			expect(wrongFields.length).toBe(0);
+		}
+	});
+
+	await mountView({
+		type: "pivot",
+		resModel: "partner",
+		arch: `
+			<pivot>
+				<field name="date" interval="month" type="col"/>
+				<field name="foo" type="measure"/>
+			</pivot>`,
+	});
+});
+
+test("without measures, pivot view uses __count by default", async () => {
+	Partner._fields.computed_field = fields.Integer({ string: "Computed and not stored", compute: false, aggregator: null });
+	Partner._fields.foo = fields.Integer({ string: "Foo", searchable: true, aggregator: null });
+	expect.assertions(4);
+
+	onRpc(({method, kwargs}) => {
+		if (method === "read_group") {
+			expect(kwargs.fields).toEqual(["__count"]);
+		}
+	});
+
+	await mountView({
+		type: "pivot",
+		resModel: "partner",
+		arch: "<pivot></pivot>",
+	});
+
+	await contains(".o_pivot_buttons .dropdown-toggle").click();
+	const dropdownMenu = getDropdownMenu(".o_pivot_buttons button.dropdown-toggle");
+	expect(queryAll(".dropdown-item", {root: dropdownMenu})).toHaveCount(1);
+	const measure = dropdownMenu.querySelector(".dropdown-item");
+	expect(measure).toHaveText("Count");
+	expect(measure).toHaveClass("selected");
+});
+
+test("pivot view grouped by many2one field", async () => {
+	await mountView({
+		type: "pivot",
+		resModel: "partner",
+		arch: `
+			<pivot>
+				<field name="product_id" type="row"/>
+				<field name="foo" type="measure"/>
+			</pivot>`,
+	});
+
+	expect(".o_pivot_header_cell_opened").toHaveCount(1);
+	expect(".o_pivot_header_cell_closed:contains(xphone)").toHaveCount(1);
+	expect(".o_pivot_header_cell_closed:contains(xpad)").toHaveCount(1);
+});
+
+test("pivot view can be reloaded", async () => {
+	let readGroupCount = 0;
+	onRpc(({ method }) => {
+		if (method === "read_group") {
+			readGroupCount++;
+		}
+	})
+	await mountView({
+		type: "pivot",
+		resModel: "partner",
+		arch: "<pivot></pivot>",
+		searchViewArch: `
+			<search>
+				<filter name="some_filter" string="Some Filter" domain="[('foo', '>', 10)]"/>
+			</search>`,
+	});
+	expect("td.o_pivot_cell_value:contains(4)").toHaveCount(1);
+	expect(readGroupCount).toBe(1);
+	await toggleSearchBarMenu();
+	await toggleMenuItem("Some Filter");
+	expect("td.o_pivot_cell_value:contains(2)").toHaveCount(1);
+	expect(readGroupCount).toBe(2);
+});
+
+test("basic folding/unfolding", async () => {
+	expect.assertions(7);
+	Partner._fields.create_date = fields.Datetime({
+		groupable: false,
+        string: "Created on",
+    });
+    Partner._fields.write_date = fields.Datetime({
+        string: "Last Modified on",
+		groupable: false,
+    });
+	let rpcCount = 0;
+
+	onRpc(({method}) => {
+		if (method === "read_group") {
+			rpcCount++;
+		}
+	});
+
+	await mountView({
+		type: "pivot",
+		resModel: "partner",
+		arch: `
+			<pivot>
+				<field name="product_id" type="row"/>
+				<field name="foo" type="measure"/>
+			</pivot>`,
+	});
+
+	expect("tbody tr").toHaveCount(3);
+	// click on the opened header to close it
+	await contains(".o_pivot_header_cell_opened").click();
+	expect("tbody tr").toHaveCount(1);
+	// click on closed header to open dropdown
+	await contains("tbody .o_pivot_header_cell_closed").click();
+	expect(".o-dropdown--menu").toHaveCount(1);
+	expect(queryText(".o-dropdown--menu").replace(/\s/g, ""))
+		.toBe("CompanyTypeCustomerDateOtherProductProductbarAddCustomGroupCompanyTypeCustomerDateOtherProductProductbar");
+	// open the Date sub dropdown
+	await contains(".o-dropdown--menu .dropdown-toggle.o_menu_item").hover();
+	const subDropdownMenu = getDropdownMenu(".o-dropdown--menu .dropdown-toggle.o_menu_item");
+	expect(subDropdownMenu.innerText.replace(/\s/g, "")).toEqual("YearQuarterMonthWeekDay");
+
+	await contains(queryOne(".dropdown-item:eq(2)", {root: subDropdownMenu})).click();
+	expect("tbody tr").toHaveCount(4);
+	expect(rpcCount).toBe(3);
 });
