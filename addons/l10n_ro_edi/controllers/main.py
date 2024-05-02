@@ -13,7 +13,6 @@ from werkzeug.urls import url_join, url_encode
 
 ENDPOINT_AUTHORIZE = 'https://logincert.anaf.ro/anaf-oauth2/v1/authorize'
 ENDPOINT_TOKEN = 'https://logincert.anaf.ro/anaf-oauth2/v1/token'
-ENDPOINT_REVOKE = 'https://logincert.anaf.ro/anaf-oauth2/v1/revoke'
 
 
 class EFacturaOAuthController(http.Controller):
@@ -46,7 +45,7 @@ class EFacturaOAuthController(http.Controller):
             raise UserError(error_message)
 
         response = requests.post(
-            url='https://logincert.anaf.ro/anaf-oauth2/v1/token',
+            url=ENDPOINT_TOKEN,
             data={
                 "grant_type": "authorization_code",
                 "client_id": company.l10n_ro_edi_client_id,

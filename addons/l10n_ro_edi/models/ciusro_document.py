@@ -91,10 +91,8 @@ class CIUSRODocument(models.Model):
                 raise UserError(_('Invalid request endpoint "%s"') % endpoint)
 
         try:
-            if session:
-                response = session.request(method=method, url=url, params=params, data=data, headers=headers, timeout=10)
-            else:
-                response = requests.request(method=method, url=url, params=params, data=data, headers=headers, timeout=10)
+            requester = session if session else requests
+            response = requester.request(method=method, url=url, params=params, data=data, headers=headers, timeout=10)
         except requests.HTTPError as e:
             return self._handle_error(str(e))
         if response.status_code == 400:
