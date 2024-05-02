@@ -1675,12 +1675,6 @@ registry.ImagesLazyLoading = publicWidget.Widget.extend({
         }
         if (reset) {
             imgEl.style.minHeight = imgEl.dataset.lazyLoadingInitialMinHeight;
-            if (imgEl.getAttribute('style') === "") {
-                // Don't leave empty `style` attribute on the element. It is
-                // messing with the editor sanitize which removes empty style
-                // and class.
-                imgEl.removeAttribute('style');
-            }
             delete imgEl.dataset.lazyLoadingInitialMinHeight;
         } else {
             // Write initial min-height on the dataset, so that it can also
