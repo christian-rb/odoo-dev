@@ -29,7 +29,7 @@ class CIUSRODocument(models.Model):
             ('ok', 'OK'),
             ('error', 'Error'),
         ],
-        string='E-Factura State',
+        string='E-Factura Status',
         default='to_send',
     )
     attachment_id = fields.Binary(string='E-Factura Attachment')

@@ -95,14 +95,14 @@
                         domain="[('l10n_ro_edi_state', 'in', ('ok', 'sent'))]"/>
             </xpath>
             <xpath expr="//group" position="inside">
-                <filter string="CIUS-RO Send State" name="l10n_ro_edi_state_group"
+                <filter string="E-Factura Status" name="l10n_ro_edi_state_group"
                         domain="" context="{'group_by':'l10n_ro_edi_state'}"/>
             </xpath>
         </field>
     </record>
 
     <record id="l10n_ro_edi_action_fetch_ciusro_status" model="ir.actions.server">
-        <field name="name">Fetch CIUS-RO Status</field>
+        <field name="name">Fetch E-Factura Status</field>
         <field name="model_id" ref="account.model_account_move"/>
         <field name="binding_model_id" ref="account.model_account_move"/>
         <field name="binding_view_types">list</field>

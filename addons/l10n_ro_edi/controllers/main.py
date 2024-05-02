@@ -38,7 +38,7 @@ class EFacturaOAuthController(http.Controller):
         """ Use the acquired access_key to request access & refresh token from ANAF """
         company = http.request.env['res.company'].sudo().browse(company_id)
         access_key = kw.get('code')
-        # Without certificate, ANAF won't give any access key in the callback's "code" parameter
+        # Without certificate, ANAF won't give any access key in the callback URL's "code" parameter
         if not access_key:
             error_message = _("Access key not found. Please try again.\nResponse: %s", kw)
             company.l10n_ro_edi_oauth_error = error_message
@@ -71,17 +71,19 @@ class EFacturaOAuthController(http.Controller):
             raise UserError(error_message)
 
         # The access_token is in JWT format, which consists of 3 parts separated by '.':
-        # Header, Payload, and Signature. We only need the Payload part to decode the token.
-        # We also need to make sure to correctly pad the payload string to be decoded successfully.
+        # Header, Payload, and Signature. We only need the Payload part to decode the token
+        # and get the access expiry date
         payload = response_json['access_token'].split('.')[1]
         payload += '=' * (-len(payload) % 4)
         decoded_payload = base64.urlsafe_b64decode(payload).decode('utf-8')
         access_token_obj = json.loads(decoded_payload)
+        access_expiry_date = datetime.fromtimestamp(access_token_obj['exp'])
+        refresh_expiry_date = datetime.now() + timedelta(days=364)
         company.write({
-            'l10n_ro_edi_access_token': access_token_obj['jti'],
+            'l10n_ro_edi_access_token': response_json['access_token'],
             'l10n_ro_edi_refresh_token': response_json['refresh_token'],
-            'l10n_ro_edi_access_expiry_date': datetime.fromtimestamp(access_token_obj['exp']),
-            'l10n_ro_edi_refresh_expiry_date': datetime.now() + timedelta(days=364),
+            'l10n_ro_edi_access_expiry_date': access_expiry_date,
+            'l10n_ro_edi_refresh_expiry_date': refresh_expiry_date,
             'l10n_ro_edi_oauth_error': False,
         })
-        return request.redirect(company.get_base_url())
+        return request.redirect(f"{company.get_base_url()}/web")
