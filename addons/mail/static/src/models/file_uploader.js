@@ -80,11 +80,11 @@ registerModel({
                 });
                 return;
             }
-            return (composer || thread).messaging.models['Attachment'].insert({
+            return {
                 composer: composer,
                 originThread: (!composer && thread) ? thread : undefined,
                 ...attachmentData,
-            });
+            };
         },
         /**
          * @private
@@ -147,6 +147,9 @@ registerModel({
                         throw e;
                     }
                 }
+            }
+            for (const i in attachments) {
+                (composer || thread).messaging.models['Attachment'].insert(attachments[i]);
             }
             if (activity && activity.exists()) {
                 await activity.markAsDone({ attachments });
