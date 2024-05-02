@@ -102,6 +102,10 @@ class LoyaltyReward(models.Model):
             'The discount must be strictly positive.'),
     ]
 
+    def action_archive(self):
+        res = super().action_archive()
+        return res
+
     @api.depends('reward_product_id.product_tmpl_id.uom_id', 'reward_product_tag_id')
     def _compute_reward_product_uom_id(self):
         for reward in self:
@@ -239,9 +243,16 @@ class LoyaltyReward(models.Model):
                 self.reward_product_id.action_archive()
         return res
 
+    def has_sale_order(self):
+        sale_orders = self.env['sale.order.line'].search([('reward_id.id', '=', self.id)])
+        return bool(len(sale_orders))
+
     def unlink(self):
         programs = self.program_id
-        res = super().unlink()
+        if self.has_sale_order():
+            res = self.action_archive()
+        else:
+            res = super().unlink()
         # Not guaranteed to trigger the constraint
         programs._constrains_reward_ids()
         return res
