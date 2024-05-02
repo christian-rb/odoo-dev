@@ -337,4 +337,48 @@
     <menuitem name="By Job Positions" parent="menu_crm_case_categ0_act_job"
         id="menu_hr_job_position_interviewer" action="action_hr_job_interviewer"
         sequence="1" groups="hr_recruitment.group_hr_recruitment_interviewer" />
+
+    <record id="hr_job_platform_form" model="ir.ui.view">
+        <field name="name">hr.job.platform.form</field>
+        <field name="model">hr.job.platform</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="email"/>
+                        <field name="subject_regex" placeholder="e.g. from\s([A-Za-z\s]+)"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="hr_job_platform_tree" model="ir.ui.view">
+        <field name="name">hr.job.platform.tree</field>
+        <field name="model">hr.job.platform</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="email"/>
+                <field name="subject_regex" placeholder="e.g. ^New application:.*from (.*)"/>
+            </tree>
+        </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="action_hr_job_platforms">
+        <field name="name">Job Platform</field>
+        <field name="res_model">hr.job.platform</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_empty_folder">
+                No Job Platforms yet
+            </p>
+        </field>
+    </record>
+    <menuitem id="menu_hr_recruitment_config_job_platforms" name="Job Platforms" parent="menu_hr_recruitment_configuration" sequence="10" />
+
+    <menuitem name="Job Platforms" parent="menu_hr_recruitment_config_job_platforms"
+        id="menu_hr_job_platform" action="action_hr_job_platforms"
+        sequence="1"/>
 </odoo>

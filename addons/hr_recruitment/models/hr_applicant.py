@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+import re
 
 from markupsafe import Markup
 
@@ -424,10 +425,6 @@ class Applicant(models.Model):
         # user_id change: update date_open
         if vals.get('user_id'):
             vals['date_open'] = fields.Datetime.now()
-        if vals.get('email_from'):
-            vals['email_from'] = vals['email_from'].strip()
-            if self._email_is_blacklisted(vals['email_from']):
-                del vals['email_from']
         old_interviewers = self.interviewer_ids
         # stage_id: track last stage before update
         if 'stage_id' in vals:
@@ -451,10 +448,6 @@ class Applicant(models.Model):
     def _unlink_except_linked_employee(self):
         if self.emp_id:
             raise UserError(_("The applicant is linked to an employee, to avoid losing information, archive it instead."))
-
-    def _email_is_blacklisted(self, mail):
-        normalized_mail = tools.email_normalize(mail)
-        return normalized_mail in [m.strip() for m in self.env['ir.config_parameter'].sudo().get_param('hr_recruitment.blacklisted_emails', '').split(',')]
 
     def get_empty_list_help(self, help_message):
         if 'active_id' in self.env.context and self.env.context.get('active_model') == 'hr.job':
@@ -638,10 +631,14 @@ class Applicant(models.Model):
             'name': msg.get('subject') or _("No Subject"),
             'partner_name': partner_name or email_from_normalized,
         }
-        if msg.get('from') and not self._email_is_blacklisted(msg.get('from')):
+        job_platform = self.env['hr.job.platform'].search([('email', '=', email_from_normalized)], limit=1)
+        if msg.get('from') and not job_platform:
             defaults['email_from'] = msg.get('from')
             defaults['partner_id'] = msg.get('author_id', False)
-        if msg.get('email_from') and self._email_is_blacklisted(msg.get('email_from')):
+        if msg.get('email_from') and job_platform:
+            subject_pattern = re.compile(job_platform.subject_regex)
+            pattern_result = re.findall(subject_pattern, msg.get('subject'))
+            defaults['partner_name'] = pattern_result[0] if pattern_result else partner_name
             del msg['email_from']
         if msg.get('priority'):
             defaults['priority'] = msg.get('priority')
