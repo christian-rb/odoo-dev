@@ -1,7 +1,5 @@
-import { Component, onWillUnmount, status, useComponent, useEnv, xml } from "@odoo/owl";
-import { Dialog } from "@web/core/dialog/dialog";
+import { onWillUnmount, status, useComponent } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
-import { omit } from "@web/core/utils/objects";
 
 /**
  * @typedef {import("@web/core/popover/popover_service").PopoverServiceAddFunction} PopoverServiceAddFunction
@@ -17,12 +15,6 @@ import { omit } from "@web/core/utils/objects";
  *  - Signals the manager to remove the popover.
  * @property {boolean} isOpen
  *  - Whether the popover is currently open.
- *
- * @typedef ExtraOptions
- * @property {boolean} [responsive=false]
- *  - if true, the popover will get replaced by a fullscreen dialog on small screens
- *
- * @typedef {ExtraOptions & PopoverServiceAddOptions} PopoverHookOptions
  */
 
 /**
@@ -57,45 +49,19 @@ export function makePopover(addFn, component, options) {
  * Manages a component to be used as a popover.
  *
  * @param {typeof import("@odoo/owl").Component} component
- * @param {PopoverHookOptions} [options]
+ * @param {PopoverServiceAddOptions} [options]
  * @returns {PopoverHookReturnType}
  */
 export function usePopover(component, options = {}) {
     const popoverService = useService("popover");
-    const dialogService = useService("dialog");
-    const env = useEnv();
     const owner = useComponent();
-    const shouldBeResponsive = options.responsive ?? false;
-    const newOptions = omit(options, "responsive");
+    const newOptions = Object.create(options);
     newOptions.onClose = () => {
         if (status(owner) !== "destroyed") {
             options.onClose?.();
         }
     };
-    const addFn = (target, comp, props, options) => {
-        if (shouldBeResponsive && env.isSmall) {
-            return dialogService.add(
-                PopoverInDialog,
-                { component: comp, componentProps: props },
-                { onClose: options.onClose }
-            );
-        }
-        return popoverService.add(target, comp, props, options);
-    };
-    const popover = makePopover(addFn, component, newOptions);
+    const popover = makePopover(popoverService.add, component, newOptions);
     onWillUnmount(popover.close);
     return popover;
-}
-
-class PopoverInDialog extends Component {
-    static components = { Dialog };
-    static props = ["close", "component", "componentProps"];
-    static template = xml`
-        <Dialog footer="false">
-            <t t-component="props.component" t-props="componentProps"/>
-        </Dialog>
-    `;
-    get componentProps() {
-        return { ...this.props.componentProps, close: this.props.close };
-    }
 }

@@ -20,6 +20,7 @@ import { DateTimePickerPopover } from "./datetime_picker_popover";
  *  a "change" event or when the datetime picker popover has been closed.
  * @property {DateTimePickerProps} pickerProps
  * @property {string | ReturnType<typeof import("@odoo/owl").useRef>} [target]
+ * @property {(component, options) => import("../popover/popover_hook").PopoverHookReturnType} [createPopover]
  *
  * @typedef {import("./datetime_picker").DateTimePickerProps} DateTimePickerProps
  */
@@ -52,11 +53,10 @@ export const datetimePickerService = {
             /**
              * @param {DateTimePickerHookParams} hookParams
              */
-            create: (
-                hookParams,
-                getInputs = () => [hookParams.target, null],
-                createPopover = (...args) => makePopover(popoverService.add, ...args)
-            ) => {
+            create: (hookParams, getInputs = () => [hookParams.target, null]) => {
+                const createPopover =
+                    hookParams.createPopover ??
+                    ((...args) => makePopover(popoverService.add, ...args));
                 const popover = createPopover(DateTimePickerPopover, {
                     onClose: () => {
                         if (!allowOnClose) {
