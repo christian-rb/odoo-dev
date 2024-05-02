@@ -28,7 +28,7 @@ class AccountMoveLine(models.Model):
     l10n_gr_edi_available_cls_vat = fields.Char(compute='_compute_l10n_gr_edi_available_cls_type')
     l10n_gr_edi_tax_exemption_category = fields.Selection(
         selection=TAX_EXEMPTION_CATEGORY_SELECTION,
-        string='MyDATA Tax Exemption Causes',
+        string='MyDATA Tax Exemption Category',
         compute='_compute_l10n_gr_edi_tax_exemption_category',
         store=True,
     )
@@ -53,6 +53,7 @@ class AccountMoveLine(models.Model):
         print(category_domain)
         preferred_classification = self.env['l10n_gr_edi.preferred_classification'].search([
             ('fiscal_position_id', '=', self.move_id.fiscal_position_id.id),
+            ('fiscal_position_id', '!=', False),
             ('l10n_gr_edi_inv_type', '=', self.move_id.l10n_gr_edi_inv_type),
             category_domain,
         ], limit=1)
@@ -61,6 +62,7 @@ class AccountMoveLine(models.Model):
             # If nothing is found, get preferred classification from line's product template
             preferred_classification = self.env['l10n_gr_edi.preferred_classification'].search([
                 ('product_template_id', '=', self.product_id.product_tmpl_id.id),
+                ('product_template_id', '!=', False),
                 ('l10n_gr_edi_inv_type', '=', self.move_id.l10n_gr_edi_inv_type),
                 category_domain,
             ], limit=1)
@@ -133,6 +135,6 @@ class AccountMoveLine(models.Model):
     def _compute_l10n_gr_edi_tax_exemption_category(self):
         for line in self:
             if len(line.tax_ids) == 1 and line.tax_ids.amount == 0:
-                line.l10n_gr_edi_tax_exemption_category = '1'
+                line.l10n_gr_edi_tax_exemption_category = line.tax_ids.l10n_gr_edi_default_tax_exemption_category or '1'
             else:
                 line.l10n_gr_edi_tax_exemption_category = False

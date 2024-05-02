@@ -21,6 +21,7 @@
         'views/account_fiscal_position_views.xml',
         'views/account_journal_views.xml',
         'views/account_move_views.xml',
+        'views/account_tax_views.xml',
         'views/mydata_document_views.xml',
         'views/product_template_views.xml',
         'views/res_company_views.xml',

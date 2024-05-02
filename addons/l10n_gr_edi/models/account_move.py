@@ -17,7 +17,8 @@ class AccountMove(models.Model):
     l10n_gr_edi_inv_type = fields.Selection(
         selection=INVOICE_TYPES_SELECTION,
         string='MyDATA Invoice Type',
-        default='1.1',
+        compute='_compute_l10n_gr_edi_inv_type',
+        store=True,
     )
     l10n_gr_edi_available_inv_type = fields.Char(compute='_compute_l10n_gr_edi_available_inv_type')
     l10n_gr_edi_correlation_id = fields.Many2one(
@@ -44,6 +45,14 @@ class AccountMove(models.Model):
                 preferred_classification = line._l10n_gr_edi_get_preferred_classification()
                 line.l10n_gr_edi_cls_category = preferred_classification.l10n_gr_edi_cls_category
                 line.l10n_gr_edi_cls_type = preferred_classification.l10n_gr_edi_cls_type
+
+    @api.depends('move_type')
+    def _compute_l10n_gr_edi_inv_type(self):
+        for move in self:
+            if move.move_type in ('out_invoice', 'out_refund'):
+                move.l10n_gr_edi_inv_type = '1.1'
+            else:
+                move.l10n_gr_edi_inv_type = '13.1'
 
     @api.depends('move_type')
     def _compute_l10n_gr_edi_available_inv_type(self):
