@@ -134,7 +134,7 @@ class ChatbotCase(common.HttpCase):
         })
 
     @classmethod
-    def _post_answer_and_trigger_next_step(cls, discuss_channel, answer, chatbot_script_answer=False, process_step_no_su=False):
+    def _post_answer_and_trigger_next_step(cls, discuss_channel, answer, chatbot_script_answer=False):
         mail_message = discuss_channel.message_post(body=answer)
         if chatbot_script_answer:
             cls.env['chatbot.message'].search([
@@ -142,6 +142,4 @@ class ChatbotCase(common.HttpCase):
             ], limit=1).user_script_answer_id = chatbot_script_answer.id
 
         next_step = discuss_channel.chatbot_current_step_id._process_answer(discuss_channel, mail_message.body)
-        if process_step_no_su:
-            discuss_channel.env.su = False
         next_step._process_step(discuss_channel)
