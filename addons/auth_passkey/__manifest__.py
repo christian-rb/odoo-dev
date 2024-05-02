@@ -23,6 +23,7 @@
             'auth_passkey/static/src/create_passkey_button.xml',
             'auth_passkey/static/src/verify_identity_button.js',
             'auth_passkey/static/src/verify_identity_button.xml',
+            'auth_passkey/static/src/conditional_access.js',
         ],
         'web.assets_frontend': [
             'auth_passkey/static/lib/simplewebauthn.js',
