@@ -80,6 +80,7 @@ export class PosStore extends Reactive {
         "dialog",
         "printer",
         "action",
+        "notification"
     ];
     constructor() {
         super();
@@ -98,6 +99,7 @@ export class PosStore extends Reactive {
             bus_service,
             pos_data,
             action,
+            notification
         }
     ) {
         this.env = env;
@@ -109,6 +111,7 @@ export class PosStore extends Reactive {
         this.bus = bus_service;
         this.data = pos_data;
         this.action = action;
+        this.notification = notification;
         this.unwatched = markRaw({});
         this.pushOrderMutex = new Mutex();
 
