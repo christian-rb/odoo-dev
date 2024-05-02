@@ -11,7 +11,10 @@ class PreferredClassification(models.Model):
     _description = 'Preferred myDATA classification combinations for a particular product'
     _order = 'priority DESC, id DESC'
 
+    # Inverse fields
     product_template_id = fields.Many2one('product.template')
+    fiscal_position_id = fields.Many2one('account.fiscal.position')
+
     priority = fields.Integer('Priority', default=1)
     l10n_gr_edi_inv_type = fields.Selection(
         selection=INVOICE_TYPES_SELECTION,

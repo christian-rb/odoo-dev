@@ -303,9 +303,9 @@ class TestGreeceMyDATA(AccountTestInvoicingCommon):
         })
         invoice = self._create_invoice()
         invoice.mydata_prepare_constraints()
-        errors = 'Missing VAT on Company My Greece Company\n' \
-                 'Missing VAT on Partner Greece Partner A\n' \
-                 'You need to set AADE User ID and Subscription Key in the settings.'
+        errors = '\n'.join(('Missing VAT on Company My Greece Company',
+                            'Missing VAT on Partner Greece Partner A',
+                            'You need to set AADE User ID and Subscription Key in the settings.'))
         self.assert_mydata_error(invoice, errors)
 
     def test_mydata_prepare_constraints_no_classification(self):

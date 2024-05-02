@@ -41,7 +41,9 @@ class AccountMove(models.Model):
             move.invoice_line_ids.l10n_gr_edi_detail_type = False
             move.invoice_line_ids.l10n_gr_edi_cls_vat = False
             for line in move.invoice_line_ids:
-                line._l10n_gr_edi_update_preferred_classification()
+                preferred_classification = line._l10n_gr_edi_get_preferred_classification()
+                line.l10n_gr_edi_cls_category = preferred_classification.l10n_gr_edi_cls_category
+                line.l10n_gr_edi_cls_type = preferred_classification.l10n_gr_edi_cls_type
 
     @api.depends('move_type')
     def _compute_l10n_gr_edi_available_inv_type(self):

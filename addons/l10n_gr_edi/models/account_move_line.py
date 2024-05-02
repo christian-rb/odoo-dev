@@ -41,30 +41,43 @@ class AccountMoveLine(models.Model):
         string='MyDATA Detail Type',
     )
 
-    def _l10n_gr_edi_update_preferred_classification(self):
+    def _l10n_gr_edi_get_preferred_classification(self, with_cls_category=False):
         self.ensure_one()
+        if with_cls_category:
+            category_domain = ('l10n_gr_edi_cls_category', '=', self.l10n_gr_edi_cls_category)
+        else:
+            category_domain = ('l10n_gr_edi_cls_category', 'in', self.l10n_gr_edi_available_cls_category and
+                               self.l10n_gr_edi_available_cls_category.split(',') or ())
+
+        # Try to get preferred classification from move's fiscal position first
+        print(category_domain)
         preferred_classification = self.env['l10n_gr_edi.preferred_classification'].search([
-            ('product_template_id', '=', self.product_id.product_tmpl_id.id),
+            ('fiscal_position_id', '=', self.move_id.fiscal_position_id.id),
             ('l10n_gr_edi_inv_type', '=', self.move_id.l10n_gr_edi_inv_type),
-            ('l10n_gr_edi_cls_category', 'in', self.l10n_gr_edi_available_cls_category and
-             self.l10n_gr_edi_available_cls_category.split(',') or ()),
+            category_domain,
         ], limit=1)
-        self.l10n_gr_edi_cls_category = preferred_classification.l10n_gr_edi_cls_category
-        self.l10n_gr_edi_cls_type = preferred_classification.l10n_gr_edi_cls_type
+
+        if not preferred_classification:
+            # If nothing is found, get preferred classification from line's product template
+            preferred_classification = self.env['l10n_gr_edi.preferred_classification'].search([
+                ('product_template_id', '=', self.product_id.product_tmpl_id.id),
+                ('l10n_gr_edi_inv_type', '=', self.move_id.l10n_gr_edi_inv_type),
+                category_domain,
+            ], limit=1)
+
+        return preferred_classification
 
     @api.onchange('product_id', 'l10n_gr_edi_available_cls_category')
     def _onchange_update_classification(self):
         for line in self:
-            line._l10n_gr_edi_update_preferred_classification()
+            preferred_classification = line._l10n_gr_edi_get_preferred_classification()
+            line.l10n_gr_edi_cls_category = preferred_classification.l10n_gr_edi_cls_category
+            line.l10n_gr_edi_cls_type = preferred_classification.l10n_gr_edi_cls_type
 
     @api.onchange('l10n_gr_edi_available_cls_type')
     def _onchange_get_preferred_product_cls_type(self):
         for line in self:
-            preferred_classification = self.env['l10n_gr_edi.preferred_classification'].search([
-                ('product_template_id', '=', line.product_id.product_tmpl_id.id),
-                ('l10n_gr_edi_inv_type', '=', line.move_id.l10n_gr_edi_inv_type),
-                ('l10n_gr_edi_cls_category', '=', line.l10n_gr_edi_cls_category),
-            ], limit=1)
+            preferred_classification = line._l10n_gr_edi_get_preferred_classification(with_cls_category=True)
             line.l10n_gr_edi_cls_type = preferred_classification.l10n_gr_edi_cls_type
 
     @api.onchange('l10n_gr_edi_available_cls_vat')

@@ -815,6 +815,7 @@ COMBINATIONS_WITH_POSSIBLE_EMPTY_TYPE = (('1.1', 'category1_95'), ('3.2', 'categ
 
 VALID_TAX_AMOUNTS = (24, 13, 6, 17, 9, 4, 0)
 
+
 def _get_l10n_gr_edi_available_cls_category(inv_type, category_type='0'):
     """ Helper for getting the l10n_gr_edi_available_cls_category string value
     @param category_type: '0' (all, default) | '1' (income) | '2' (expense) """
@@ -831,6 +832,7 @@ def _get_l10n_gr_edi_available_cls_category(inv_type, category_type='0'):
             available_cls_category = ','.join(category for category in CLASSIFICATION_MAP[inv_type])
 
     return available_cls_category
+
 
 def _get_l10n_gr_edi_available_cls_type(inv_type, cls_category):
     """ Helper for getting the l10n_gr_edi_available_cls_type string value """
@@ -856,6 +858,7 @@ def _get_l10n_gr_edi_available_cls_type(inv_type, cls_category):
             available_cls_type = ','.join(available_types)
 
     return available_cls_type
+
 
 def _get_l10n_gr_edi_available_cls_vat(inv_type, cls_category):
     """ Helper for getting the l10n_gr_edi_available_cls_vat string value """
