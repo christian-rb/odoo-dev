@@ -12,6 +12,18 @@
     <WeInput unit="'px'" step="'5'" selectStyle="'0'" cssProperty="'border-width'" extraClass="'border'"/>
     <WeDatetime selectDataAttribute="''" attributeName="'datetime'"/>
     <WeDatetime selectDataAttribute="''" attributeName="'dateonly'" pickerType="'date'"/>
+    <WeRange string="'Range'"
+            selectDataAttribute="''"
+            attributeName="'range'"
+            min="'-100'"
+            step="'10'"/>
+    <WeRange string="'Reversed Range'"
+            selectDataAttribute="''"
+            attributeName="'revrange'"
+            displayRangeValue="'true'"
+            min="'100'"
+            max="'-100'"
+            step="'10'"/>
 </t>
 
 <t t-name="web_editor.WeButton">
@@ -62,5 +74,20 @@
             />
         </div>
     </we-input>
+</t>
+<t t-name="web_editor.WeRange">
+    <we-range class="o_we_user_value_widget">
+        <div>
+            <input type="range" t-att-class="{o_we_inverted_range: this.inverted}"
+                t-att-min="this.min"
+                t-att-max="this.max"
+                t-att-step="this.props.step"
+                t-att-value="this.value._value"
+                t-on-change="this._onInputChange"
+                t-on-input="this._onInputInput"
+            />
+            <output t-if="this.props.displayRangeValue" class="ms-2" t-out="this.value.displayValue"/>
+        </div>
+    </we-range>
 </t>
 </templates>

@@ -2716,37 +2716,7 @@ const ListUserValueWidget = UserValueWidget.extend({
     },
 });
 
-const RangeUserValueWidget = UnitUserValueWidget.extend({
-    tagName: 'we-range',
-    events: {
-        'change input': '_onInputChange',
-        'input input': '_onInputInput',
-    },
-
-    /**
-     * @override
-     */
-    async start() {
-        await this._super(...arguments);
-        this.input = document.createElement('input');
-        this.input.type = "range";
-        let min = this.el.dataset.min && parseFloat(this.el.dataset.min) || 0;
-        let max = this.el.dataset.max && parseFloat(this.el.dataset.max) || 100;
-        const step = this.el.dataset.step && parseFloat(this.el.dataset.step) || 1;
-        this.displayValue = this.el.dataset.displayRangeValue;
-        if (min > max) {
-            [min, max] = [max, min];
-            this.input.classList.add('o_we_inverted_range');
-        }
-        this._setInputAttributes(min, max, step);
-        this.containerEl.appendChild(this.input);
-        if (this.displayValue) {
-            this.outputEl = document.createElement('output');
-            this.outputEl.classList.add('ms-2');
-            this.containerEl.appendChild(this.outputEl);
-        }
-        this._onInputChange = debounce(this._onInputChange, 100);
-    },
+class RangeUserValue extends UnitUserValue {
 
     //--------------------------------------------------------------------------
     // Public
@@ -2756,35 +2726,87 @@ const RangeUserValueWidget = UnitUserValueWidget.extend({
      * @override
      */
     loadMethodsData(validMethodNames) {
-        this._super(...arguments);
+        super.loadMethodsData(...arguments);
+        // TODO find way to handle from template ?
+        /*
         for (const methodName of this._methodsNames) {
             const possibleValues = this._methodsParams.optionsPossibleValues[methodName];
             if (possibleValues.length > 1) {
-                this._setInputAttributes(0, possibleValues.length - 1, 1);
+                this._setInputAttributes(0, possibleValues.length - 1, 1); // min, max, step
                 break;
             }
         }
-    },
+        */
+    }
     /**
      * @override
      */
     async setValue(value, methodName) {
-        await this._super(...arguments);
         const possibleValues = this._methodsParams.optionsPossibleValues[methodName];
-        const inputValue = possibleValues.length > 1 ? possibleValues.indexOf(value) : this._value;
-        this.input.value = inputValue;
+        const inputValue = possibleValues.length > 1 ? possibleValues.indexOf(value) : value;//this._value;
         if (this.displayValue) {
             this._computeDisplayValue(inputValue);
         }
-    },
+        await super.setValue(inputValue, methodName);
+    }
     /**
      * @override
      */
     getValue(methodName) {
-        const value = this._super(...arguments);
+        const value = super.getValue(...arguments);
         const possibleValues = this._methodsParams.optionsPossibleValues[methodName];
         return possibleValues.length > 1 ? possibleValues[+value] : value;
-    },
+    }
+    /**
+     * @private
+     * @param {string} inputValue 
+     */
+    _computeDisplayValue(inputValue) {
+        if (this.toRatio) {
+            const inputValueAsNumber = Number(inputValue);
+            const ratio = inputValueAsNumber >= 0 ? 1 + inputValueAsNumber : 1 / (1 - inputValueAsNumber);
+            this.displayValue = `${ratio.toFixed(2)}x`;
+        } else {
+            this.displayValue = inputValue;
+        }
+    }}
+
+const RangeUserValueWidget = UnitUserValueWidget.extend({});
+class WeRange extends WeInput {
+    static template = "web_editor.WeRange";
+    static model = RangeUserValue;
+    static props = {
+        min: { type: Number, optional: true },
+        max: { type: Number, optional: true },
+        step: { type: Number, optional: true },
+        toRatio: { type: Boolean, optional: true },
+        displayRangeValue: { type: Boolean, optional: true },
+    };
+    static defaultProps = {
+        min: "0",
+        max: "100",
+        step: "1",
+        toRatio: "",
+        displayRangeValue: "",
+    };
+    setup() {
+        this._onInputChange = debounce(this._onInputChange, 100);
+        super.setup();
+        this.value.toRatio = this.props.toRatio;
+        this.value.displayValue = this.props.displayRangeValue;
+        if (this.displayValue) {
+            this.value._computeDisplayValue(this.value._value);
+        }
+        if (this.props.min > this.props.max) {
+            this.max = this.props.min;
+            this.min = this.props.max;
+            this.inverted = true;
+        } else {
+            this.min = this.props.min;
+            this.max = this.props.max;
+            this.inverted = false;
+        }
+    }
 
     //--------------------------------------------------------------------------
     // Handlers
@@ -2796,20 +2818,7 @@ const RangeUserValueWidget = UnitUserValueWidget.extend({
     _onInputChange(ev) {
         this._value = ev.target.value;
         this._onUserValueChange(ev);
-    },
-    /**
-     * @private
-     * @param {string} inputValue 
-     */
-    _computeDisplayValue(inputValue) {
-        if (this.el.dataset.toRatio) {
-            const inputValueAsNumber = Number(inputValue);
-            const ratio = inputValueAsNumber >= 0 ? 1 + inputValueAsNumber : 1 / (1 - inputValueAsNumber);
-            this.outputEl.value = `${ratio.toFixed(2)}x`;
-        } else {
-            this.outputEl.value = inputValue;
-        }
-    },
+    }
     /**
      * @private
      * @param {Event} ev
@@ -2817,19 +2826,12 @@ const RangeUserValueWidget = UnitUserValueWidget.extend({
     _onInputInput(ev) {
         this._value = ev.target.value;
         if (this.displayValue) {
-            this._computeDisplayValue(this._value);
+            this.value._computeDisplayValue(this._value);
         }
         this._onUserValuePreview(ev);
-    },
-    /**
-     * @private
-     */
-    _setInputAttributes(min, max, step) {
-        this.input.setAttribute('min', min);
-        this.input.setAttribute('max', max);
-        this.input.setAttribute('step', step);
-    },
-});
+    }
+}
+registry.category("snippet_widgets").add("WeRange", WeRange);
 
 const SelectPagerUserValueWidget = SelectUserValueWidget.extend({
     className: (SelectUserValueWidget.prototype.className || '') + ' o_we_select_pager',
