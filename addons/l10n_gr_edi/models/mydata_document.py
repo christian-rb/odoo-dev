@@ -14,7 +14,7 @@ class MyDataDocument(models.Model):
 
     state = fields.Selection(
         selection=[('sent', 'Sent'), ('error', 'Error')],
-        string='MyDATA state',
+        string='MyDATA Status',
     )
     attachment_id = fields.Binary(string='XML file')
     datetime = fields.Datetime()

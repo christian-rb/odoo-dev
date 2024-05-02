@@ -12,8 +12,9 @@ class AccountMove(models.Model):
     _inherit = 'account.move'
 
     l10n_gr_edi_mark = fields.Char(string='MyDATA Mark')
-    l10n_gr_edi_state = fields.Selection(related='l10n_gr_edi_active_document_id.state')
+    l10n_gr_edi_state = fields.Selection(related='l10n_gr_edi_active_document_id.state', store=True)
     l10n_gr_edi_message = fields.Char(related='l10n_gr_edi_active_document_id.message')
+    l10n_gr_edi_warnings = fields.Char(compute='_compute_l10n_gr_edi_warnings')
     l10n_gr_edi_inv_type = fields.Selection(
         selection=INVOICE_TYPES_SELECTION,
         string='MyDATA Invoice Type',
@@ -67,7 +68,17 @@ class AccountMove(models.Model):
         for move in self:
             move.l10n_gr_edi_need_correlated = move.l10n_gr_edi_inv_type in TYPES_WITH_CORRELATE_INVOICE
 
-    def mydata_prepare_constraints(self):
+    @api.depends('state')
+    def _compute_l10n_gr_edi_warnings(self):
+        print('_compute_l10n_gr_edi_warnings')
+        for move in self:
+            if move.state == 'posted':
+                warnings = move.mydata_prepare_constraints(skip_document_error=True)
+                move.l10n_gr_edi_warnings = '\n'.join(warnings)
+            else:
+                move.l10n_gr_edi_warnings = False
+
+    def mydata_prepare_constraints(self, skip_document_error=False):
         """ Tries to catch all possible errors before sending to MyDATA API """
         self.ensure_one()
         errors = []
@@ -99,7 +110,7 @@ class AccountMove(models.Model):
                 errors.append(_('Invalid tax amount for line %s. The valid values are %s',
                                 line.name, ', '.join(str(tax) for tax in VALID_TAX_AMOUNTS)))
 
-        if errors:
+        if errors and not skip_document_error:
             self.env['mydata.document'].create([{
                 'move_id': self.id,
                 'state': 'error',

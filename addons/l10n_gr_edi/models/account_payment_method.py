@@ -12,7 +12,7 @@ PAYMENT_METHOD_MAPPING = {
     '6': '6 - Web Banking',
     '7': '7 - POS / e-POS',
 }
-PAYMENT_METHOD_SELECTION = [(key, value) for key, value in PAYMENT_METHOD_MAPPING.items()]
+PAYMENT_METHOD_SELECTION = list((key, value) for key, value in PAYMENT_METHOD_MAPPING.items())
 
 
 class AccountPaymentMethodLine(models.Model):
