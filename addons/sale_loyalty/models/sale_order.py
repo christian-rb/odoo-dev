@@ -913,8 +913,8 @@ class SaleOrder(models.Model):
                         points += rule.reward_point_amount
                     elif rule.reward_point_mode == 'money':
                         # Compute amount paid for rule
-                        # NOTE: this does not account for discounts -> 1 point per $ * (100$ - 30%) will result in 100 points
-                        amount_paid = sum(max(0, line.price_total) for line in order_lines if line.product_id in rule_products)
+                        # NOTE: this accounts for discounts -> 1 point per $ * (100$ - 30%) will result in 70 points
+                        amount_paid = sum(line.price_total for line in lines_per_rule[rule] if line.product_id in so_products_per_rule.get(rule, []))
                         points += float_round(rule.reward_point_amount * amount_paid, precision_digits=2, rounding_method='DOWN')
                     elif rule.reward_point_mode == 'unit':
                         points += rule.reward_point_amount * ordered_rule_products_qty
