@@ -5,6 +5,8 @@
     'description': "Build nice quotations",
     'depends': ['sale_management'],
     'data': [
+        'data/ir_config_parameters.xml',
+
         'report/ir_actions_report.xml',
 
         'security/ir.model.access.csv',

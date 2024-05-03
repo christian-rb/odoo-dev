@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo noupdate="1">
+
+    <record id="pdf_quote_builder_whitelist" model="ir.config_parameter">
+        <field name="key">sale_pdf_quote_builder.whitelisted_form_fields</field>
+        <field name="value">{"sale.order": ["date_order", "tax_totals", "note"], "sale.order.line": ["display_type", "price_total", "name", "product_uom_qty"], "product.product": ["active"]}</field>
+    </record>
+
+</odoo>

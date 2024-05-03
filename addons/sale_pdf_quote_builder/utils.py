@@ -2,6 +2,7 @@
 
 import base64
 import io
+import json
 import re
 
 from odoo import _
@@ -17,10 +18,9 @@ def _ensure_names_follows_pattern(names):
             "Invalid resource names. It should only contain alphanumerics, hyphens or underscores."
         ))
 
-def _get_restricted_form_fields(BaseModel, docs):
+def _get_restricted_form_fields(BaseModel, docs, str_whitelist):
     # TODO edm docstring, ensure mimetypde can't be done here because of the onchange where the mimetype has to be manually computed.
-    restricted_fields = set()
-    # whitelisted_fields = docs.env['pdf.quote.builder.form.field.whitelist'].search([])  # TODO edm
+    restricted_fields = {}
     for doc in docs:
         # Without bin_size=False, size is returned instead of content when saving the file.
         # But in compute and onchange, setting that context will empty the datas.
@@ -29,13 +29,18 @@ def _get_restricted_form_fields(BaseModel, docs):
         raw_pdf_fields = reader.getFields() or set()
         _ensure_names_follows_pattern(raw_pdf_fields)
         pdf_models_and_fields = _get_model_and_fields(BaseModel, raw_pdf_fields)
-        temporary_whitelist = {('sale.order', 'date_order'), ('sale.order', 'tax_totals'), ('sale.order.line', 'display_type'), ('sale.order.line', 'price_total'), ('product.product', 'active'), ('sale.order.line', 'name'), ('sale.order', 'note'), ('sale.order.line', 'product_uom_qty'), ('product.product', 'product_template_attribute_value_ids'), ('sale.order', 'commitment_date'), ('sale.order', 'order_line'), ('product.product', 'default_code'), ('sale.order', 'validity_date'), ('sale.order.line', 'order_id'), ('product.product', 'product_document_count'), ('product.product', 'image_128'), ('sale.order.line', 'state')}  # TODO edm
-        restricted_fields |= {mf for mf in pdf_models_and_fields if mf not in temporary_whitelist}
+        whitelisted_fields = json.loads(str_whitelist)
+        for model, fields_list in pdf_models_and_fields.items():
+            missing_fields = [field not in whitelisted_fields.get(model) for field in fields_list]
+            if model not in restricted_fields:
+                restricted_fields[model] = fields_list
+            else:
+                restricted_fields[model].extend(missing_fields)
     return restricted_fields
 
 
 def _get_model_and_fields(BaseModel, field_names):
-    model_and_fields = set()
+    model_and_fields = {}
     for name in field_names:  # TODO edm: deque?
         path = name.split('__')
         # chain = collections.deque(chain)  # TODO edm. Or is it possible to have something built in for this?
@@ -53,7 +58,10 @@ def _get_model_and_fields(BaseModel, field_names):
                         model_name=Model._name
                     ))
                 Model = Model[elem]
-        model_and_fields.add((Model._name, field))
+        if Model not in model_and_fields:
+            model_and_fields[Model._name] = [field]
+        else:
+            model_and_fields[Model._name].append(field)
     return model_and_fields
 
 def _get_field_format(field, order, env, tz, lang_code):
@@ -71,7 +79,7 @@ def _get_field_format(field, order, env, tz, lang_code):
 
     Model = BaseModel
 
-    for elem in path[:-1]:  # TODO edm: but if 100+ chained elem ==> this is done a hundred times... =/
+    for elem in path[:-1]:  # TODO edm: but if 100+ chained elem ==> this is done a hundred times... =/ shouldn't happen though
         Model, value = Model[elem], value[elem]
         # TODO edm: isn't it possible to get the model from the value while it's not the end value?
         # TODO edm: would it be possible to pass the path minus last and get the needed information?
@@ -80,7 +88,7 @@ def _get_field_format(field, order, env, tz, lang_code):
     field_info = Model.fields_get().get(path[-1])
     field_type = field_info['type']
 
-    if field_type == 'boolean':  # Todo edm: let this value?
+    if field_type == 'boolean':
         formatted_value = _("Yes") if value else _("No")
     elif field_type == 'monetary':
         # TODO edm: wrong, should take the currency_field of the record, not the order

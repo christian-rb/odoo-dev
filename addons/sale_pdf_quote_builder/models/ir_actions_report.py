@@ -53,6 +53,11 @@ class IrActionsReport(models.Model):
                         writer, base64.b64decode(header_record.sale_header), all_form_fields
                     )
                 if included_product_docs:
+                    # TODO edm: _get_restricted_form_fields check in case of upgrade? Raise at first found though,
+                    #  so maybe not that method, or with a raise=true Though with the upgrade script,
+                    #  we could change the param, not the field in the pdf anyway. And it'll crash
+                    # TODO edm: raise for all documents or skip the one?
+                    # TODO edm: check on header/footer too
                     for doc in included_product_docs:
                         sol_id = doc_line_id_mapping[doc.id]
                         self._add_pages_to_writer(
@@ -82,7 +87,6 @@ class IrActionsReport(models.Model):
         if all_form_fields != None:
             field_names = reader.getFields()
             if field_names:
-                utils._ensure_names_follows_pattern(field_names)  # TODO edm: it's done at upload, do we really want to add it here too? + constraint If yes, also check whitelist then
                 all_form_fields.update([prefix + field for field in field_names])
 
         for page_id in range(0, reader.getNumPages()):

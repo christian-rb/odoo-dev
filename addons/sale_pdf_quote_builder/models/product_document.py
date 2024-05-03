@@ -40,7 +40,10 @@ class ProductDocument(models.Model):
                 doc.has_restricted_form_fields = False
                 continue
 
-            restricted_fields = utils._get_restricted_form_fields(BaseModel, doc)
+            str_whitelist = self.env['ir.config_parameter'].sudo().get_param(
+                'sale_pdf_quote_builder.whitelisted_form_fields'
+            )
+            restricted_fields = utils._get_restricted_form_fields(BaseModel, doc, str_whitelist)
             doc.has_restricted_form_fields = bool(restricted_fields)
 
     # === ONCHANGE METHODS ===#
@@ -84,8 +87,11 @@ class ProductDocument(models.Model):
         BaseModel = self.env['sale.order.line']
         inside_docs = self.filtered(lambda d: d.attached_on == 'inside')
         has_admin_rights = self.env.user.has_group('base.group_system')
+        str_whitelist = self.env['ir.config_parameter'].sudo().get_param(
+            'sale_pdf_quote_builder.whitelisted_form_fields'
+        )
         has_restricted_inside_docs = any(
-            [utils._get_restricted_form_fields(BaseModel, doc) for doc in inside_docs]
+            [utils._get_restricted_form_fields(BaseModel, doc, str_whitelist) for doc in inside_docs]  # TODO edm
         )
         if has_restricted_inside_docs and not has_admin_rights:
             raise ValidationError(_(
@@ -105,7 +111,10 @@ class ProductDocument(models.Model):
     def action_open_whitelisting_wizard(self):
         self.ensure_one()
         BaseModel = self.env['sale.order.line']
-        restricted_fields = utils._get_restricted_form_fields(BaseModel, self)
+        str_whitelist = self.env['ir.config_parameter'].sudo().get_param(
+            'sale_pdf_quote_builder.whitelisted_form_fields'
+        )
+        restricted_fields = utils._get_restricted_form_fields(BaseModel, self, str_whitelist)
         return {
             'name': _("Whitelisting PDF Form Fields"),
             'type': 'ir.actions.act_window',
