@@ -1954,6 +1954,14 @@ class Task(models.Model):
         return super(Task, self).read_group(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
 
     @api.model
+    def search_read(self, domain=None, fields=None, offset=0, limit=None, order=None):
+        if ('personal_stage_type_ids', '=', False) in domain:
+            personal_stages = self.env['project.task.stage.personal'].search([('user_id', '=', self.env.uid)])
+            task_ids = personal_stages.task_id.ids
+            domain = [('id', 'not in', task_ids) if elem == ('personal_stage_type_ids', '=', False) else elem for elem in domain]
+        return super().search_read(domain=domain, fields=fields, offset=offset, limit=limit, order=order)
+
+    @api.model
     def _search(self, args, offset=0, limit=None, order=None, count=False, access_rights_uid=None):
         fields_list = {term[0] for term in args if isinstance(term, (tuple, list)) and term not in [expression.TRUE_LEAF, expression.FALSE_LEAF]}
         self._ensure_fields_are_accessible(fields_list)
