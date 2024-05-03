@@ -716,6 +716,11 @@ class Warehouse(models.Model):
             pull_rules_list = supplier_wh._get_supply_pull_rules_values(
                 [self.Routing(output_location, transit_location, supplier_wh.out_type_id, 'pull')],
                 values={'route_id': inter_wh_route.id, 'location_dest_from_rule': True})
+            if supplier_wh.delivery_steps != 'ship_only':
+                # Replenish from Output location
+                pull_rules_list += supplier_wh._get_supply_pull_rules_values(
+                    [self.Routing(supplier_wh.lot_stock_id, output_location, supplier_wh.pick_type_id, 'pull')],
+                    values={'route_id': inter_wh_route.id})
             pull_rules_list += self._get_supply_pull_rules_values(
                 [self.Routing(transit_location, self.lot_stock_id, self.in_type_id, 'pull')],
                 values={'route_id': inter_wh_route.id, 'propagate_warehouse_id': supplier_wh.id})
