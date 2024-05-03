@@ -86,7 +86,7 @@ $table-cell-v-spacing: map-get($spacers, 2);
     }
 }
 
-.o_table_boxed {
+.o_table_boxed, .o_table_boxed-rounded {
     td, th {
         padding: $table-cell-v-spacing $table-cell-h-spacing;
     }
@@ -157,5 +157,42 @@ $table-cell-v-spacing: map-get($spacers, 2);
 
     #total table::before {
         border-top: none;
+    }
+}
+
+.o_table_boxed-rounded {
+    table {
+        &::before {
+            border-radius: $border-radius-lg $border-radius-lg 0 $border-radius-lg ;
+        }
+
+        th:first-child {
+            border-radius: $border-radius-lg 0 0 0;
+        }
+
+        th:last-child {
+            border-radius: 0 $border-radius-lg 0 0;
+        }
+
+        //TODO MANO remove this !important
+        th {
+            border-color: $gray-300 !important;
+        }
+    }
+
+    #total table {
+        &::before {
+            border-radius: 0 0 $border-radius-lg $border-radius-lg;
+        }
+
+        tr:last-child {
+            td:first-child {
+                border-radius: 0 0 0 $border-radius-lg;
+            }
+
+            td:last-child {
+                border-radius: 0 0 $border-radius-lg 0;
+            }
+        }
     }
 }

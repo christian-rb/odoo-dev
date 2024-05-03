@@ -291,7 +291,7 @@
                 </div>
             </t>
 
-            <div name="address" t-att-class="colclass">
+            <div name="address" t-att-class="not custom_layout_address and colclass">
                 <t t-esc="address or None">
                     <div class="bg-light border-1 rounded h-100 d-flex flex-column align-items-center justify-content-center p-4 opacity-75 text-muted text-center">
                         <strong>Address block</strong>
@@ -687,8 +687,17 @@
 
     <template id="external_layout_bubble">
         <!-- HEADER -->
-        <div t-attf-class="header o_company_#{company.id}_layout" t-att-style="report_header_style">
-            <div class="row">
+        <div t-attf-class="header o_company_#{company.id}_layout">
+            <svg
+            class="o_report_layout_shape o_bubble_1"
+            version="1.1"
+            baseProfile="basic"
+            width="1100"
+            height="1100"
+            xmlns="http://www.w3.org/2000/svg">
+               <circle cx="550" cy="550" r="550" t-att-fill="company.primary_color" fill-opacity=".1"/>
+           </svg>
+            <!-- <div class="row">
                 <div class="col-3 mb4">
                     <img t-if="company.logo" t-att-src="image_data_uri(company.logo)" style="max-height: 45px;" alt="Logo"/>
                 </div>
@@ -698,9 +707,13 @@
                 <div class="col-12">
                     <div style="border-bottom: 1px solid black;"/>
                 </div>
-            </div>
-            <div class="row">
-                <div class="col-6" name="company_address">
+            </div> -->
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <div>
+                    <img t-if="company.logo" class="o_company_logo" t-att-src="image_data_uri(company.logo)" alt="Logo"/>
+                    <div t-if="company.report_header" t-field="company.report_header" class="o_company_tagline fw-bold">Company tagline</div>
+                </div>
+                <div name="company_address" class="text-end">
                     <ul class="list-unstyled" name="company_address_list">
                         <li t-if="company.is_company_details_empty"><span t-field="company.partner_id" t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": true}'>
                             <div class="bg-light border-1 rounded h-100 d-flex flex-column align-items-center justify-content-center p-4 w-100 opacity-75 text-muted text-center">
@@ -727,25 +740,30 @@
         </div>
 
         <!-- BODY -->
-        <div t-attf-class="article o_report_layout_bubble o_company_#{company.id}_layout {{  'o_report_layout_background' if company.layout_background in ['Geometric', 'Custom']  else  '' }}"
+        <div t-attf-class="article o_report_layout_bubble o_table_boxed-rounded o_company_#{company.id}_layout {{  'o_report_layout_background' if company.layout_background in ['Geometric', 'Custom']  else  '' }}"
              t-attf-style="background-image: url({{ 'data:image/png;base64,%s' % company.layout_background_image.decode('utf-8') if company.layout_background_image and company.layout_background == 'Custom' else '/base/static/img/bg_background_template.jpg' if company.layout_background == 'Geometric' else ''}});"
              t-att-data-oe-model="o and o._name"
              t-att-data-oe-id="o and o.id"
              t-att-data-oe-lang="o and o.env.context.get('lang')">
-            <div class="pt-5">
-                <!-- This div ensures that the address is not cropped by the header. -->
-                <t t-call="web.address_layout"/>
-            </div>
+            <!-- This div ensures that the address is not cropped by the header. -->
+            <t t-set="custom_layout_address" t-value="true"/>
+            <t t-call="web.address_layout"/>
             <t t-out="0"/>
         </div>
 
         <!-- Footer -->
-        <div t-attf-class="footer o_standard_footer o_company_#{company.id}_layout">
-            <div class="text-center" style="border-top: 1px solid black;">
-                <ul class="list-inline mb4">
-                    <div t-field="company.report_footer"/>
-                </ul>
-
+        <div t-attf-class="footer o_company_#{company.id}_layout border-top text-center">
+            <svg
+            class="o_report_layout_shape o_bubble_2"
+            version="1.1"
+            baseProfile="basic"
+            width="1000"
+            height="1000"
+            xmlns="http://www.w3.org/2000/svg">
+               <circle cx="500" cy="500" r="500" t-att-fill="company.secondary_color" fill-opacity=".1"/>
+           </svg>
+            <div class="d-inline-block pt-2 text-wrap" t-field="company.report_footer"/>
+            <div>
                 <div t-if="report_type == 'pdf'" class="text-muted">
                     Page: <span class="page"/> / <span class="topage"/>
                 </div>
@@ -908,6 +926,14 @@
             </t>
             <t t-elif="layout == 'web.external_layout_bubble'">
                 &amp;.o_report_layout_bubble {
+                    #informations {
+                        background-color: mix(white, <t t-esc='secondary'/>, 92%);;
+                        border-color: <t t-esc='secondary'/>;
+                    }
+                    thead th, #total .o_total td {
+                        color: color-contrast(<t t-esc='primary'/>);
+                        background-color: <t t-esc='primary'/>;
+                    }
                 }
             </t>
             }

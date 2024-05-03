@@ -1,0 +1,35 @@
+.o_report_layout_bubble {
+    h2 {
+        text-align: right;
+    }
+
+    #informations {
+        margin: 0;
+        padding: map-get($spacers, 2) $table-cell-h-spacing;
+        border-radius: $border-radius-lg;
+        border: $border-width * 2 solid;
+
+        // In pdf it overlaps with existing margin, set to 0 to replicate in HTML
+        div:first-child {
+            padding-left: 0;
+        }
+
+        div:last-child {
+            padding-right: 0;
+        }
+    }
+}
+
+.o_report_layout_shape {
+    position: fixed;
+    z-index: -1;
+
+    &.o_bubble_1 {
+        top: -800px;
+        right: -450px;
+    }
+    &.o_bubble_2 {
+        top: 0px;
+        left: -450px;
+    }
+}
