@@ -26,14 +26,19 @@ export class ExpenseListController extends ExpenseDocumentUpload(ListController)
         });
     }
 
+    displayUpload() {
+        return !this.isExpenseSheet;
+    }
+
     displaySubmit() {
         const records = this.model.root.selection;
         return records.length && records.every(record => record.data.state === 'draft') && this.isExpenseSheet;
     }
 
     displayCreateReport() {
-        const records = this.model.root.selection;
-        return !this.isExpenseSheet && (records.length === 0 || records.some(record => record.data.state === "draft"))
+        const hasExpensesToReport= this.model.root.records.some(record => record.data.state === "draft");
+        const selectedRecords = this.model.root.selection;
+        return !this.isExpenseSheet && hasExpensesToReport && (selectedRecords.length === 0 || selectedRecords.some(record => record.data.state === "draft"))
     }
 
     displayApprove() {

@@ -208,12 +208,16 @@
 
                             <label for="tax_ids"/>
                             <div class="o_row">
-                                <field name="tax_ids"
-                                       force_save="1"
-                                       widget="many2many_tags"
-                                       readonly="not is_editable"
-                                       options="{'no_create': True}"/>
-                                <field name="tax_amount"/>
+                                <div class="col-6">
+                                    <field name="tax_ids"
+                                    force_save="1"
+                                    widget="many2many_tags"
+                                    readonly="not is_editable"
+                                    options="{'no_create': True}"/>
+                                </div>
+                                <div class="col-6">
+                                    <field name="tax_amount" invisible="not tax_ids"/>
+                                </div>
                             </div>
                             <t groups="hr_expense.group_hr_expense_team_approver">
                                 <field name="employee_id" groups="!hr.group_hr_user"
@@ -222,7 +226,7 @@
                                        readonly="not is_editable"/>
                                 <field name="employee_id" groups="hr.group_hr_user"
                                        context="{'default_company_id': company_id}" widget="many2one_avatar_employee"
-                                       options="{'relation': 'hr.employee', 'no_create': True}"
+                                       options="{'relation': 'hr.employee'}"
                                    readonly="not is_editable"/>
                             </t>
                             <label id="lo" for="payment_mode"/>
@@ -231,20 +235,20 @@
                             </div>
                         </group>
                         <group>
-                            <field name="date" readonly="not is_editable"/>
-                            <field name="vendor_id" invisible="payment_mode != 'company_account'"/>
-                            <field name="accounting_date"
+                            <field name="date" readonly="not is_editable" class="w-50"/>
+                            <field name="vendor_id" invisible="payment_mode != 'company_account'" class="w-50"/>
+                            <field name="accounting_date" class="w-50"
                                    invisible="not accounting_date or state not in ['approved', 'done']"
                                    readonly="not is_editable"/>
-                            <field name="account_id" options="{'no_create': True}"
+                            <field name="account_id" options="{'no_create': True}" class="w-50"
                                    domain="[('account_type', 'not in', ('asset_receivable','liability_payable','asset_cash','liability_credit_card')), ('company_id', '=', company_id)]"
                                    groups="account.group_account_readonly" readonly="not is_editable"
                                    context="{'default_company_id': company_id}"/>
-                            <field name="analytic_distribution" widget="analytic_distribution"
+                            <field name="analytic_distribution" widget="analytic_distribution" class="w-50"
                                 groups="analytic.group_analytic_accounting"
                                 options="{'product_field': 'product_id', 'account_field': 'account_id', 'business_domain': 'expense'}"
                                 readonly="not is_editable"/>
-                            <field name="company_id" groups="base.group_multi_company" readonly="state != 'draft'"/>
+                            <field name="company_id" groups="base.group_multi_company" readonly="state != 'draft'" class="w-50"/>
                         </group>
                     </group>
                     <div>
@@ -412,6 +416,7 @@
                                 help="Expense Date"/>
                         <filter string="Company" name="company" domain="[]" context="{'group_by': 'company_id'}"
                                 groups="base.group_multi_company"/>
+                        <filter string="Expense Report" name="expense_report" domain="[]" context="{'group_by': 'sheet_id'}"/>
                     </group>
                 </search>
             </field>
@@ -569,6 +574,13 @@
                         </div>
                         <group name="product_details">
                             <group string="General Information">
+                                <label for="default_code"/>
+                                <div>
+                                    <field name="default_code" class="w-50"/>
+                                    <span class="d-inline-block">
+                                        <i class="text-muted">Use this reference as a subject prefix when submitting by email.</i>
+                                    </span>
+                                </div>
                                 <field name="active" invisible="1"/>
                                 <field name="type" invisible="1"/>
                                 <field name="standard_price" class="w-25"
@@ -579,13 +591,6 @@
                                         or meal."/>
                                 <field name="uom_id" class="w-25" groups="uom.group_uom" options="{'no_create': True}"/>
                                 <field name="uom_po_id" invisible="1"/>
-                                <label for="default_code"/>
-                                <div>
-                                    <field name="default_code" class="w-50"/>
-                                    <span class="d-inline-block">
-                                        <i class="text-muted">Use this reference as a subject prefix when submitting by email.</i>
-                                    </span>
-                                </div>
                                 <field name="categ_id" class="w-50"/>
                                 <field name="company_id" class="w-50" groups="base.group_multi_company"/>
                             </group>
@@ -640,10 +645,12 @@
             <field name="arch" type="xml">
                 <tree class="o_expense_categories">
                     <field name="name" readonly="1"/>
-                    <field name="default_code" optional="show" readonly="1"/>
-                    <field name="description" widget="html" string="Internal Note" optional="show" readonly="1"/>
-                    <field name="lst_price" optional="show" string="Sales Price"/>
-                    <field name="standard_price" optional="show"/>
+                    <field name="currency_id" column_invisible="True"/>
+                    <field name="cost_currency_id" column_invisible="True"/>
+                    <field name="default_code" optional="show" string="Reference" readonly="1"/>
+                    <field name="description" widget="html" string="Note" optional="show" readonly="1"/>
+                    <field name="lst_price" widget='monetary' options="{'currency_field': 'currency_id', 'field_digits': True}" optional="show" string="Sales Price"/>
+                    <field name="standard_price" widget='monetary' options="{'currency_field': 'cost_currency_id', 'field_digits': True}" optional="show"/>
                     <field name="supplier_taxes_id" widget="many2many_tags" optional="show"/>
                 </tree>
             </field>
@@ -804,7 +811,7 @@
                     <div class="oe_button_box" name="button_box">
                         <button name="action_open_account_moves"
                             class="oe_stat_button"
-                            icon="fa-file-text-o"
+                            icon="fa-bars"
                             type="object"
                             invisible="state not in ['post', 'done'] or nb_account_move == 0"
                             groups="account.group_account_invoice">
@@ -1234,7 +1241,7 @@
                    groups="account.group_account_user,hr_expense.group_hr_expense_team_approver"/>
 
         <menuitem id="menu_hr_expense_reports" name="Reporting" sequence="4" parent="menu_hr_expense_root"
-                  groups="hr_expense.group_hr_expense_manager"/>
+                   groups="hr_expense.group_hr_expense_user"/>
         <menuitem id="menu_hr_expense_all_expenses" name="Expenses Analysis" sequence="0"
                   parent="menu_hr_expense_reports" action="hr_expense_actions_all"/>
 

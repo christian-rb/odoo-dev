@@ -7,7 +7,7 @@ import werkzeug
 from odoo import api, fields, Command, models, _
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools.misc import format_date
-from odoo.tools import email_split, float_repr, float_round, is_html_empty
+from odoo.tools import email_split, float_repr, float_round, float_is_zero, is_html_empty
 
 
 class HrExpense(models.Model):
@@ -480,6 +480,12 @@ class HrExpense(models.Model):
     def _check_payment_mode(self):
         self.sheet_id._check_payment_mode()
 
+    @api.constrains('total_amount')
+    def _check_total_amount(self):
+        for expense in self:
+            if float_is_zero(expense.total_amount, precision_digits=2):
+                raise ValidationError(_('Expense amount to report should be strictly positive.'))
+
     def _convert_to_tax_base_line_dict(self, base_line=None, currency=None, price_unit=None, quantity=None, account=None):
         self.ensure_one()
         return self.env['account.tax']._convert_to_tax_base_line_dict(
@@ -936,19 +942,16 @@ class HrExpense(models.Model):
             'to_submit': {
                 'description': _('to submit'),
                 'amount': 0.0,
-                'tooltip': _("Expenses that need to be submitted to the approver."),
                 'currency': self.env.company.currency_id.id,
             },
             'submitted': {
                 'description': _('under validation'),
                 'amount': 0.0,
-                'tooltip': _("Expenses from which the report has been submitted to the approver and is waiting for approval."),
                 'currency': self.env.company.currency_id.id,
             },
             'approved': {
                 'description': _('to be reimbursed'),
                 'amount': 0.0,
-                'tooltip': _("Expenses paid by employee that are approved but not paid yet."),
                 'currency': self.env.company.currency_id.id,
             }
         }

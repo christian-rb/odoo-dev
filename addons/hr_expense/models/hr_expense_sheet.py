@@ -441,6 +441,20 @@ class HrExpenseSheet(models.Model):
             if sheet.expense_line_ids.company_id - sheet.company_id:
                 raise ValidationError(_('An expense report must contain only lines from the same company.'))
 
+    @api.onchange('expense_line_ids')
+    def _update_sheet_name(self):
+        expense_lines = self.expense_line_ids
+        if not self.name and expense_lines:
+            same_date = all(expense.date == expense_lines[0].date for expense in expense_lines)
+            if len(expense_lines) > 1 and same_date:
+                self.name = expense_lines[0].date
+            elif len(expense_lines) == 1:
+                self.name = expense_lines[0].name
+            else:
+                first_date = min(expense.date for expense in expense_lines)
+                last_date = max(expense.date for expense in expense_lines)
+                self.name = f"{first_date} - {last_date}"
+
     @api.model
     def _search_product_ids(self, operator, value):
         if operator == 'in' and not isinstance(value, list):

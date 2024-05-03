@@ -15,13 +15,14 @@ class ResConfigSettings(models.TransientModel):
                                              config_parameter='hr_expense.use_mailgateway')
     module_hr_payroll_expense = fields.Boolean(string='Reimburse Expenses in Payslip')
     module_hr_expense_extract = fields.Boolean(string='Send bills to OCR to generate expenses')
-    expense_product_id = fields.Many2one('product.product', related='company_id.expense_product_id', readonly=False, check_company=True)
-    expense_journal_id = fields.Many2one('account.journal', related='company_id.expense_journal_id', readonly=False, check_company=True)
+    expense_product_id = fields.Many2one('product.product', related='company_id.expense_product_id', readonly=False, check_company=True, domain="[('can_be_expensed', '=', True)]")
+    expense_journal_id = fields.Many2one('account.journal', related='company_id.expense_journal_id', readonly=False, check_company=True, domain="[('type', '=', 'purchase')]")
     company_expense_allowed_payment_method_line_ids = fields.Many2many(
         comodel_name='account.payment.method.line',
         check_company=True,
         related='company_id.company_expense_allowed_payment_method_line_ids',
         readonly=False,
+        domain="[('payment_type', '=', 'outbound'), ('journal_id', '!=', False)]",
     )
 
     @api.model
