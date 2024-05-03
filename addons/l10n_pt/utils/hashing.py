@@ -1,4 +1,3 @@
-
 import base64
 import binascii
 import requests
@@ -23,13 +22,6 @@ ERROR_MESSAGES = {
 }
 
 
-def get_message_to_hash(date, create_date, amount_total, l10n_pt_document_number, previous_hash):
-    date = date.isoformat()
-    system_entry_date = create_date.isoformat(timespec='seconds')
-    gross_total = float_repr(amount_total, 2)
-    return f"{date};{system_entry_date};{l10n_pt_document_number};{gross_total};{previous_hash}"
-
-
 def call_iap(env, route, params=None):
     try:
         params = params or {}
@@ -46,15 +38,14 @@ def call_iap(env, route, params=None):
         raise UserError(str(ERROR_MESSAGES.get("error_connecting_iap")))
 
 
-def get_public_keys(env):
-    result = call_iap(env, "get_public_keys")
-    res = {}
-    for public_key_version, public_key_str in result.items():
-        res[int(public_key_version)] = public_key_str
-    return res
+def get_message_to_hash(date, create_date, amount_total, l10n_pt_document_number, previous_hash):
+    date = date.isoformat()
+    system_entry_date = create_date.isoformat(timespec='seconds')
+    gross_total = float_repr(amount_total, 2)
+    return f"{date};{system_entry_date};{l10n_pt_document_number};{gross_total};{previous_hash}"
 
 
-def sign_records_online(env, docs_to_sign):
+def sign_records(env, docs_to_sign):
     result = call_iap(env, "sign_documents", {"documents": docs_to_sign})
     res = {}
     for record_id, record_info in result.items():
@@ -62,22 +53,12 @@ def sign_records_online(env, docs_to_sign):
     return res
 
 
-def sign_records_locally(env, message):
-    """
-    Technical requirements from the Portuguese tax authority can be found at page 13 of the following document:
-    https://info.portaldasfinancas.gov.pt/pt/docs/Portug_tax_system/Documents/Order_No_8632_2014_of_the_3rd_July.pdf
-    """
-    current_key_version = env['ir.config_parameter'].sudo().get_param('l10n_pt.key_version', 1)
-    private_key_string = env['ir.config_parameter'].sudo().get_param('l10n_pt.private_key')
-    if not private_key_string:
-        raise UserError(str(_lt("The private key for the local hash generation in Portugal is not set.")))
-    private_key = serialization.load_pem_private_key(str.encode(private_key_string), password=None)
-    signature = private_key.sign(
-        message.encode(),
-        padding.PKCS1v15(),
-        hashes.SHA1(),
-    )
-    return f"${current_key_version}${base64.b64encode(signature).decode()}"
+def get_public_keys(env):
+    result = call_iap(env, "get_public_keys")
+    res = {}
+    for public_key_version, public_key_str in result.items():
+        res[int(public_key_version)] = public_key_str
+    return res
 
 
 def verify_integrity(message, inalterable_hash, public_key_string):
@@ -97,8 +78,8 @@ def verify_integrity(message, inalterable_hash, public_key_string):
             hashes.SHA1(),
         )
         return True
-    except (InvalidSignature, binascii.Error, ValueError):
+    except (InvalidSignature, binascii.Error, ValueError, IndexError):
         # InvalidSignature: the hash is not valid
         # binascii.Error: the hash is not base64 encoded
-        # ValueError: the hash does not have the correct format (with $)
+        # ValueError/IndexError: the hash does not have the correct format (with $)
         return False

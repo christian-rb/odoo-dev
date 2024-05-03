@@ -25,5 +25,5 @@ class ResCompany(models.Model):
 
     def _verify_hashed_move(self, move, previous_hash, versioning_list, current_versioning_index):
         previous_hash = previous_hash.split("$")[2] if previous_hash else ""
-        message = move._l10n_pt_get_message_to_hash(previous_hash)
+        message = pt_hash_utils.get_message_to_hash(move.date, move.create_date, move.amount_total, move._get_l10n_pt_document_number(), previous_hash)
         return pt_hash_utils.verify_integrity(message, move.inalterable_hash, versioning_list[current_versioning_index])

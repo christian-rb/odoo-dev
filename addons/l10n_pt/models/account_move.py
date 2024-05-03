@@ -19,6 +19,21 @@ class AccountMove(models.Model):
     l10n_pt_show_future_date_warning = fields.Boolean(compute='_compute_l10n_pt_show_future_date_warning')
 
     ####################################
+    # OVERRIDES
+    ####################################
+
+    def action_reverse(self):
+        for move in self.filtered(lambda m: m.company_id.account_fiscal_country_id.code == "PT"):
+            if move.payment_state == 'reversed':
+                raise UserError(_("You cannot reverse an invoice that has already been fully reversed."))
+        return super().action_reverse()
+
+    def action_post(self):
+        for move in self.filtered(lambda m: m.company_id.account_fiscal_country_id.code == 'PT').sorted('invoice_date'):
+            move._l10n_pt_check_invoice_date()
+        return super().action_post()
+
+    ####################################
     # MISC REQUIREMENTS
     ####################################
 
@@ -44,11 +59,11 @@ class AccountMove(models.Model):
                 and move.name != '/'
                 and not re.match(r'^[^/^ ]+/[0-9]+$', move.name)
             ):
-                raise ValidationError(
-                    _("The name of the document (%s) is invalid. It must start with the identifier "
-                      "of the series followed by a slash and the number of the document within the "
-                      "series (e.g. INV2024/1).", move.name)
-                )
+                raise ValidationError(_(
+                    "The name of the document (%s) is invalid. It must start with the identifier "
+                    "of the series followed by a slash and the number of the document within the "
+                    "series (e.g. INV2024/1).", move.name
+                ))
 
     @api.depends('state', 'invoice_date', 'company_id.account_fiscal_country_id.code')
     def _compute_l10n_pt_show_future_date_warning(self):
@@ -121,14 +136,6 @@ class AccountMove(models.Model):
                 button_text=_("Configure the journal"),
             )
 
-        previous_hash = previous_hash or ''
-
-        endpoint = self.env['ir.config_parameter'].sudo().get_param('l10n_pt.iap_endpoint', pt_hash_utils.SIGN_DEFAULT_ENDPOINT)
-        if endpoint == 'local':
-            return self._l10n_pt_sign_records_locally(previous_hash)  # sign locally (keys defined as system parameters)
-        return self._l10n_pt_sign_records_online(previous_hash)  # sign the records using Odoo's IAP (or a custom endpoint)
-
-    def _l10n_pt_sign_records_online(self, previous_hash):
         previous_hash = previous_hash.split("$")[2] if previous_hash else ""
         docs_to_sign = [{
             'id': move.id,
@@ -139,13 +146,12 @@ class AccountMove(models.Model):
             'gross_total': float_repr(move.amount_total, 2),
             'previous_signature': previous_hash,
         } for move in self]
-        return pt_hash_utils.sign_records_online(self.env, docs_to_sign)
+        return pt_hash_utils.sign_records(self.env, docs_to_sign)
 
     @api.model
     def _l10n_pt_compute_missing_hashes(self):
         """
         Compute the hash for all records that do not have one yet
-        (because they were not printed/previewed yet)
         """
         pt_companies = self.env['res.company'].sudo().search([('account_fiscal_country_id.code', '=', 'PT')])
         for company in pt_companies:
@@ -156,40 +162,6 @@ class AccountMove(models.Model):
                 ('company_id', '=', company.id),
             ], order='sequence_prefix,sequence_number')
             all_moves.button_hash()
-
-    ####################################
-    # HASH DEMO AND VERIFICATION
-    ####################################
-
-    def _l10n_pt_get_message_to_hash(self, previous_hash):
-        self.ensure_one()
-        return pt_hash_utils.get_message_to_hash(self.date, self.create_date, self.amount_total, self._get_l10n_pt_document_number(), previous_hash)
-
-    def _l10n_pt_get_last_record(self):
-        self.ensure_one()
-        return self.sudo().search([
-            ('journal_id', '=', self.journal_id.id),
-            ('state', '=', 'posted'),
-            ('sequence_prefix', '=', self.sequence_prefix),
-            ('sequence_number', '=', self.sequence_number - 1),
-            ('inalterable_hash', '!=', False),
-        ], limit=1)
-
-    def _l10n_pt_sign_records_locally(self, previous_hash):
-        """
-        Technical requirements from the Portuguese tax authority can be found at page 13 of the following document:
-        https://info.portaldasfinancas.gov.pt/pt/docs/Portug_tax_system/Documents/Order_No_8632_2014_of_the_3rd_July.pdf
-        """
-        res = {}
-        for move in self:
-            if not previous_hash:
-                previous = move._l10n_pt_get_last_record()
-                previous_hash = previous.inalterable_hash if previous else ""
-            previous_hash = previous_hash.split("$")[2] if previous_hash else ""
-            message = move._l10n_pt_get_message_to_hash(previous_hash)
-            res[move.id] = pt_hash_utils.sign_records_locally(self.env, message)
-            previous_hash = res[move.id]
-        return res
 
     ####################################
     # HASH SHORT - ATCUD - QR CODE
@@ -300,18 +272,3 @@ class AccountMove(models.Model):
             qr_code_str += f"Q:{move.l10n_pt_inalterable_hash_short}*"
             qr_code_str += "R:0000"  # TODO: Fill with Certificate number provided by the Tax Authority
             move.l10n_pt_qr_code_str = urllib.parse.quote_plus(qr_code_str)
-
-    ####################################
-    # OVERRIDES
-    ####################################
-
-    def action_reverse(self):
-        for move in self.filtered(lambda m: m.company_id.account_fiscal_country_id.code == "PT"):
-            if move.payment_state == 'reversed':
-                raise UserError(_("You cannot reverse an invoice that has already been fully reversed."))
-        return super().action_reverse()
-
-    def action_post(self):
-        for move in self.filtered(lambda m: m.company_id.account_fiscal_country_id.code == 'PT').sorted('invoice_date'):
-            move._l10n_pt_check_invoice_date()
-        return super().action_post()

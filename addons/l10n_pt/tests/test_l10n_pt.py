@@ -9,14 +9,14 @@ from odoo.tools import format_date
 import datetime
 
 
-@tagged('post_install_l10n', 'post_install', '-at_install')
+@tagged('external_l10n', '-at_install', 'post_install', '-standard', 'external')
 class TestL10nPt(AccountTestInvoicingCommon):
     @classmethod
     def setUpClass(cls, chart_template_ref='pt'):
         super().setUpClass(chart_template_ref=chart_template_ref)
         cls.company_pt = cls.company_data['company']
         cls.company_pt.write({
-            'street': '250 Executive Park Blvd, Suite 3400',
+            'street': '25 Avenida da Liberdade',
             'city': 'Lisboa',
             'zip': '9415-343',
             'company_registry': '123456',
@@ -25,7 +25,14 @@ class TestL10nPt(AccountTestInvoicingCommon):
             'vat': 'PT123456789',
         })
         cls.company_data['default_journal_sale'].restrict_mode_hash_table = True
-        cls.company_data['default_journal_purchase'].restrict_mode_hash_table = True
+        cls.company_data['default_journal_sale'].l10n_pt_at_series_invoice_id = cls.env['l10n_pt.at.series'].create({
+            'code': f'DEMO_INVOICE_SERIES{cls.company_pt.id}',
+            'company_id': cls.company_pt.id,
+        })
+        cls.company_data['default_journal_sale'].l10n_pt_at_series_refund_id = cls.env['l10n_pt.at.series'].create({
+            'code': f'DEMO_REFUND_SERIES{cls.company_pt.id}',
+            'company_id': cls.company_pt.id,
+        })
 
     @classmethod
     def create_invoice(cls, move_type, invoice_date="2022-01-01", create_date=None, amount=1000.0, post=False):
@@ -92,11 +99,11 @@ class TestL10nPt(AccountTestInvoicingCommon):
                 self.assertEqual(move.inalterable_hash.split("$")[2], expected_hash)
 
     def test_l10n_pt_hash_inalterability(self):
-        expected_error_msg = "You cannot edit the following fields due to restrict mode being activated on the journal.*"
+        expected_error_msg = "This document is protected by a hash. Therefore, you cannot edit the following fields:*"
 
         out_invoice = self.create_invoice('out_invoice', '2022-01-01', post=True)
         out_invoice.flush_recordset()
-        with self.assertRaisesRegex(UserError, "You cannot overwrite the values ensuring the inalterability of the accounting."):
+        with self.assertRaisesRegex(UserError, expected_error_msg):
             out_invoice.inalterable_hash = 'fake_hash'
         with self.assertRaisesRegex(UserError, expected_error_msg):
             out_invoice.invoice_date = fields.Date.from_string('2000-01-01')
@@ -139,64 +146,22 @@ class TestL10nPt(AccountTestInvoicingCommon):
         out_invoice3 = self.create_invoice('out_invoice', '2022-01-03', post=True)
         out_invoice4 = self.create_invoice('out_invoice', '2022-01-04', post=True)
 
-        integrity_check = self.company_pt._check_accounting_hash_integrity()['results'][0]  # [0] = 'out_invoice'
+        integrity_check = self.company_pt._check_hash_integrity()['results'][0]  # [0] = 'out_invoice'
         self.assertEqual(integrity_check['status'], 'verified')
-        self.assertRegex(integrity_check['msg'], 'Entries are correctly hashed')
-        self.assertEqual(integrity_check['from_date'], fields.Date.to_string(out_invoice1.date))
-        self.assertEqual(integrity_check['to_date'], fields.Date.to_string(out_invoice4.date))
+        self.assertRegex(integrity_check['msg_cover'], 'Entries are correctly hashed')
+        self.assertEqual(integrity_check['first_move_date'], format_date(self.env, out_invoice1.date))
+        self.assertEqual(integrity_check['last_move_date'], format_date(self.env, out_invoice4.date))
 
         # Let's change one of the fields used by the hash. It should be detected by the integrity report.
         # We need to bypass the write method of account.move to do so.
         Model.write(out_invoice3, {'invoice_date': fields.Date.from_string('2022-01-07')})
-        integrity_check = self.company_pt._check_accounting_hash_integrity()['results'][0]
+        integrity_check = self.company_pt._check_hash_integrity()['results'][0]
         self.assertEqual(integrity_check['status'], 'corrupted')
-        self.assertEqual(integrity_check['msg'], f'Corrupted data on journal entry with id {out_invoice3.id}.')
+        self.assertEqual(integrity_check['msg_cover'], f'Corrupted data on journal entry with id {out_invoice3.id} ({out_invoice3.name}).')
 
         # Let's try with the inalterable_hash field itself
         Model.write(out_invoice3, {'invoice_date': fields.Date.from_string("2022-01-03")})  # Revert the previous change
         Model.write(out_invoice4, {'inalterable_hash': 'fake_hash'})
-        integrity_check = self.company_pt._check_accounting_hash_integrity()['results'][0]
+        integrity_check = self.company_pt._check_hash_integrity()['results'][0]
         self.assertEqual(integrity_check['status'], 'corrupted')
-        self.assertEqual(integrity_check['msg'], f'Corrupted data on journal entry with id {out_invoice4.id}.')
-
-    def test_l10n_pt_inalterable_hash_computation_optimization(self):
-        """
-        Test that the hash is computed only when needed (when printing, previewing or
-        when generating the hash integrity report), and not when posting an invoice.
-        One must make sure that all invoices before the one being printed have a hash too.
-        """
-        out_invoices = self.env['account.move']
-        for _ in range(3):
-            out_invoices |= self.create_invoice('out_invoice', '2022-01-01')
-            out_invoices[-1].action_post()
-            self.assertEqual(out_invoices[-1].inalterable_hash, False)
-
-        for method in ['preview_invoice', 'action_send_and_print']:
-            out_invoices |= self.create_invoice('out_invoice', '2022-01-01')
-            out_invoices[-1].action_post()
-            self.assertEqual(out_invoices[-1].inalterable_hash, False)
-            getattr(out_invoices[-1], method)()  # Should trigger the compute of the hash
-            self.assertNotEqual(out_invoices[-1].inalterable_hash, False)
-
-        in_invoices = self.env['account.move']
-        for _ in range(3):
-            in_invoices |= self.create_invoice('in_invoice', '2022-01-01')
-            in_invoices[-1].action_post()
-            self.assertEqual(in_invoices[-1].inalterable_hash, False)
-
-        # Following statement should trigger the compute of the hash
-        integrity_check = self.company_pt._check_accounting_hash_integrity()['results']
-        for in_invoice in in_invoices:
-            self.assertNotEqual(in_invoice.inalterable_hash, False)
-
-        integrity_check_out_invoice = integrity_check[0]  # [0] = 'out_invoice'
-        self.assertEqual(integrity_check_out_invoice['status'], 'verified')
-        self.assertRegex(integrity_check_out_invoice['msg'], 'Entries are correctly hashed')
-        self.assertEqual(integrity_check_out_invoice['from_date'], fields.Date.to_string(out_invoices[0].date))
-        self.assertEqual(integrity_check_out_invoice['to_date'], fields.Date.to_string(out_invoices[-1].date))
-
-        integrity_check_in_invoice = integrity_check[1]  # [1] = 'in_invoice'
-        self.assertEqual(integrity_check_in_invoice['status'], 'verified')
-        self.assertRegex(integrity_check_in_invoice['msg'], 'Entries are correctly hashed')
-        self.assertEqual(integrity_check_in_invoice['from_date'], fields.Date.to_string(in_invoices[0].date))
-        self.assertEqual(integrity_check_in_invoice['to_date'], fields.Date.to_string(in_invoices[-1].date))
+        self.assertEqual(integrity_check['msg_cover'], f'Corrupted data on journal entry with id {out_invoice4.id} ({out_invoice4.name}).')
