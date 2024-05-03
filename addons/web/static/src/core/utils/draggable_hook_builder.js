@@ -57,6 +57,7 @@ import { hasTouch, isBrowserFirefox, isIOS } from "../browser/feature_detection"
  * @property {DOMRect | null} [current.scrollParentXRect]
  * @property {HTMLElement | null} [current.scrollParentY]
  * @property {DOMRect | null} [current.scrollParentYRect]
+ * @property {"left"|"right"|"top"|"bottom"|null} [scrollingEdge]
  * @property {number} [timeout]
  * @property {Position} [initialPosition]
  * @property {Position} [offset={ x: 0, y: 0 }]
@@ -605,7 +606,7 @@ export function makeDraggableHook(hookParams) {
                 }
 
                 const diffToScroll = ([delta, sign]) =>
-                    (1 - clamp(delta, 0, threshold) / threshold) * correctedSpeed * sign;
+                    (1 - Math.max(delta, 0) / threshold) * correctedSpeed * sign;
                 if ((!direction || direction === "vertical") && diff.y) {
                     ctx.current.scrollParentY.scrollBy({ top: diffToScroll(diff.y) });
                 }
