@@ -617,19 +617,16 @@
     <template id="external_layout_wave">
         <!-- HEADER -->
         <div t-attf-class="header o_company_#{company.id}_layout" t-att-style="report_header_style">
-            <div class="row">
-                <div class="col-3 mb4">
-                    <img t-if="company.logo" t-att-src="image_data_uri(company.logo)" style="max-height: 45px;" alt="Logo"/>
+            <svg class="o_report_layout_shape o_wave_header" width="1000" height="292" viewBox="0 0 1000 292" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1000 282.214C937.384 292.121 803.83 301.786 562.185 272.061C311.343 241.204 104.626 252.793 0 263.037V0H1000V282.214Z" t-att-fill="company.primary_color" fill-opacity=".1"/>
+            </svg>
+
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <div>
+                    <img t-if="company.logo" class="o_company_logo" t-att-src="image_data_uri(company.logo)" alt="Logo"/>
+                    <div t-if="company.report_header" t-field="company.report_header" class="o_company_tagline fw-bold">Company tagline</div>
                 </div>
-                <div class="col-9 text-end" style="margin-top:22px;" t-if="company.report_header" t-field="company.report_header" name="moto">Company tagline</div>
-            </div>
-            <div t-if="company.logo or company.report_header" class="row zero_min_height">
-                <div class="col-12">
-                    <div style="border-bottom: 1px solid black;"/>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-6" name="company_address">
+                <div name="company_address" class="text-end">
                     <ul class="list-unstyled" name="company_address_list">
                         <li t-if="company.is_company_details_empty"><span t-field="company.partner_id" t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": true}'>
                             <div class="bg-light border-1 rounded h-100 d-flex flex-column align-items-center justify-content-center p-4 w-100 opacity-75 text-muted text-center">
@@ -656,7 +653,7 @@
         </div>
 
         <!-- BODY -->
-        <div t-attf-class="article o_report_layout_wave o_company_#{company.id}_layout {{  'o_report_layout_background' if company.layout_background in ['Geometric', 'Custom']  else  '' }}"
+        <div t-attf-class="article o_report_layout_wave o_table_striped o_company_#{company.id}_layout {{  'o_report_layout_background' if company.layout_background in ['Geometric', 'Custom']  else  '' }}"
              t-attf-style="background-image: url({{ 'data:image/png;base64,%s' % company.layout_background_image.decode('utf-8') if company.layout_background_image and company.layout_background == 'Custom' else '/base/static/img/bg_background_template.jpg' if company.layout_background == 'Geometric' else ''}});"
              t-att-data-oe-model="o and o._name"
              t-att-data-oe-id="o and o.id"
@@ -669,7 +666,10 @@
         </div>
 
         <!-- Footer -->
-        <div t-attf-class="footer o_standard_footer o_company_#{company.id}_layout">
+        <div t-attf-class="footer o_company_#{company.id}_layout">
+            <svg class="o_report_layout_shape o_wave_footer" width="1000" height="180" viewBox="0 0 1000 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M427.731 19.757C686.904 51.3469 898.971 38.039 1000 27.6922V180H0V8.20934C66.363 -0.991089 198.347 -8.20218 427.731 19.757Z" t-att-fill="company.secondary_color" fill-opacity=".1"/>
+            </svg>
             <div class="text-center" style="border-top: 1px solid black;">
                 <ul class="list-inline mb4">
                     <div t-field="company.report_footer"/>
@@ -922,6 +922,10 @@
             </t>
             <t t-elif="layout == 'web.external_layout_wave'">
                 &amp;.o_report_layout_wave {
+                    #informations {
+                        background-color: mix(white, <t t-esc='secondary'/>, 92%);;
+                        border-color: <t t-esc='secondary'/>;
+                    }
                 }
             </t>
             <t t-elif="layout == 'web.external_layout_bubble'">
