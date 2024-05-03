@@ -27,4 +27,40 @@
             </field>
         </record>
 
+    <record id="view_calendar" model="ir.ui.view">
+        <field name="name">res.users.preferences.form.calendar</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form_simple_modif"/>
+        <field name="arch" type="xml">
+            <!-- Set the Integrations group in calendar module as visible. -->
+            <xpath expr="//page[@name='calendar']//group[@name='integrations']" position='attributes'>
+                <attribute name="invisible">0</attribute>
+            </xpath>
+            <xpath expr="//page[@name='calendar']" position='inside'>
+                <!-- Microsoft synchronization unpause/stop/refresh buttons. -->
+                <button name="action_microsoft_unpause_sync" type="object" class="btn btn-warning text-nowrap"
+                    invisible="microsoft_sync_status in ('missing_credentials', 'sync_stopped', 'sync_active')">
+                        <b>
+                            <i title="Pause" class='fa fa-pause'/>
+                            <span class="mx-1">Outlook</span>
+                        </b>
+                </button>
+                <button name="action_microsoft_refresh_sync" type="object" class="btn btn-secondary text-nowrap"
+                    invisible="microsoft_sync_status in ('missing_credentials', 'sync_paused', 'sync_active')">
+                        <b>
+                            <i title="Refresh" class='fa fa-refresh'/>
+                            <span class="mx-1">Outlook</span>
+                        </b>
+                </button>
+                <button name="action_microsoft_stop_sync" type="object" class="btn btn-outline-primary text-nowrap m-1"
+                    invisible="microsoft_sync_status in ('missing_credentials', 'sync_paused', 'sync_stopped')">
+                    <b>
+                        <i title="Check" class='fa fa-check fa-fw'/>
+                        <i title="Stop" class='fa fa-times fa-fw'/>
+                        <span class="mx-1">Outlook</span>
+                    </b>
+                </button>
+            </xpath>
+        </field>
+    </record>
 </odoo>

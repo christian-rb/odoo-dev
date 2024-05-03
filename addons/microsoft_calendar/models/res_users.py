@@ -22,6 +22,11 @@ class User(models.Model):
     microsoft_calendar_sync_token = fields.Char(related='res_users_settings_id.microsoft_calendar_sync_token', groups='base.group_system')
     microsoft_synchronization_stopped = fields.Boolean(related='res_users_settings_id.microsoft_synchronization_stopped', readonly=False, groups='base.group_system')
     microsoft_last_sync_date = fields.Datetime(related='res_users_settings_id.microsoft_last_sync_date', readonly=False, groups='base.group_system')
+    microsoft_sync_status = fields.Selection(related='res_users_settings_id.microsoft_sync_status', readonly=True, store=False)
+
+    @property
+    def SELF_READABLE_FIELDS(self):
+        return super().SELF_READABLE_FIELDS + ['microsoft_sync_status']
 
     def _microsoft_calendar_authenticated(self):
         return bool(self.sudo().microsoft_calendar_rtoken)
@@ -89,6 +94,8 @@ class User(models.Model):
         status = "sync_active"
         if str2bool(self.env['ir.config_parameter'].sudo().get_param("microsoft_calendar_sync_paused"), default=False):
             status = "sync_paused"
+        elif self.sudo().microsoft_calendar_token and not self.sudo().microsoft_synchronization_stopped:
+            status = "sync_active"
         elif self.sudo().microsoft_synchronization_stopped:
             status = "sync_stopped"
         return status
@@ -162,3 +169,38 @@ class User(models.Model):
         client_secret = get_param('microsoft_calendar_client_secret')
         res['microsoft_calendar'] = bool(client_id and client_secret)
         return res
+
+    def check_synchronization_status(self):
+        res = super().check_synchronization_status()
+        credentials_status = self.check_calendar_credentials()
+        sync_status = 'missing_credentials'
+        if credentials_status.get('microsoft_calendar'):
+            sync_status = self._get_microsoft_sync_status()
+            if sync_status == 'sync_active' and not self.microsoft_calendar_token:
+                sync_status = 'sync_stopped'
+        res['microsoft_calendar'] = sync_status
+        return res
+
+    def action_microsoft_unpause_sync(self):
+        self.ensure_one()
+        self.unpause_microsoft_synchronization()
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'reload',
+        }
+
+    def action_microsoft_refresh_sync(self):
+        self.ensure_one()
+        self.restart_microsoft_synchronization()
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'reload',
+        }
+
+    def action_microsoft_stop_sync(self):
+        self.ensure_one()
+        self.stop_microsoft_synchronization()
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'reload',
+        }
