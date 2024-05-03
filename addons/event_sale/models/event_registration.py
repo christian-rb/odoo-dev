@@ -86,6 +86,8 @@ class EventRegistration(models.Model):
                     render_values={'self': registration, 'origin': registration.sale_order_id},
                     subtype_xmlid='mail.mt_note',
                 )
+            if not registration.sale_status:
+                registration._compute_registration_status()
         return registrations
 
     def write(self, vals):
