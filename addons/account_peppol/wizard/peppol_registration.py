@@ -17,6 +17,7 @@ class PeppolRegistration(models.TransientModel):
     )
     account_peppol_contact_email = fields.Char(related='company_id.account_peppol_contact_email', readonly=False)
     account_peppol_edi_mode = fields.Selection(
+        string='EDI mode',
         selection=[('demo', 'Demo'), ('test', 'Test'), ('prod', 'Live')],
         compute='_compute_account_peppol_edi_mode',
         inverse='_inverse_account_peppol_edi_mode',
@@ -61,8 +62,7 @@ class PeppolRegistration(models.TransientModel):
     @api.depends("company_id.account_edi_proxy_client_ids")
     def _compute_account_peppol_edi_user(self):
         for wizard in self:
-            wizard.account_peppol_edi_user = wizard.company_id.\
-                account_edi_proxy_client_ids.filtered(lambda u: u.proxy_type == 'peppol')
+            wizard.account_peppol_edi_user = wizard.company_id.account_edi_proxy_client_ids.filtered(lambda u: u.proxy_type == 'peppol')
 
     @api.depends('peppol_eas', 'peppol_endpoint')
     def _compute_peppol_warnings(self):
@@ -149,6 +149,8 @@ class PeppolRegistration(models.TransientModel):
 
         company = self.company_id
         edi_user = self.account_peppol_edi_user.sudo()._register_proxy_user(company, 'peppol', self.account_peppol_edi_mode)
+        if not self.account_peppol_edi_user:
+            self.account_peppol_edi_user = edi_user
 
         # if there is an error when activating the participant below,
         # the client side is rolled back and the edi user is deleted on the client side
@@ -175,8 +177,8 @@ class PeppolRegistration(models.TransientModel):
             params=params,
         )
 
-        self.button_send_peppol_verification_code()
-        self.account_peppol_proxy_state = 'in_verification'
+        if edi_user.edi_mode != 'demo':
+            return self.button_send_peppol_verification_code()
         return self._action_open_peppol_form()
 
     @handle_demo
@@ -187,34 +189,7 @@ class PeppolRegistration(models.TransientModel):
         network, i.e. receive documents from other Peppol participants.
         """
         self.ensure_one()
-
-        if self.account_peppol_proxy_state != 'sender':
-            raise UserError(
-                _('Cannot register a user with a %s application', self.account_peppol_proxy_state))
-
-        company = self.company_id
-        edi_identification = self.account_peppol_edi_user._get_proxy_identification(company, 'peppol')
-
-        if (
-            company.partner_id._check_peppol_participant_exists(edi_identification)
-            and not self.account_peppol_migration_key
-        ):
-            raise UserError(
-                _("A participant with these details has already been registered on the network. "
-                  "If you have previously registered to an alternative Peppol service, please deregister from that service, "
-                  "or request a migration key before trying again."))
-
-        self.account_peppol_edi_user._call_peppol_proxy(
-            endpoint='/api/peppol/2/register_participant',
-            params={
-                'migration_key': self.account_peppol_migration_key,
-                'supported_identifiers': list(self.company_id._peppol_get_supported_document_types().keys()),
-            },
-        )
-        # once we sent the migration key over, we don't need it
-        # but we need the field for future in case the user decided to migrate away from Odoo
-        self.account_peppol_migration_key = False
-        self.account_peppol_proxy_state = 'smp_registration'
+        self.account_peppol_edi_user._peppol_register_receiver()
         return self._action_open_peppol_form()
 
     @handle_demo
@@ -239,7 +214,7 @@ class PeppolRegistration(models.TransientModel):
             endpoint='/api/peppol/1/update_user',
             params=params,
         )
-        return self._action_open_peppol_form()
+        return True
 
     def button_send_peppol_verification_code(self):
         """

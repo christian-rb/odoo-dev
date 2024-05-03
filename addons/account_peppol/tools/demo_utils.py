@@ -67,7 +67,7 @@ def _mock_make_request(func, self, *args, **kwargs):
         'activate_participant': lambda _user, _args, _kwargs: {},
         'get_all_documents': _mock_get_all_documents,
         'get_document': _mock_get_document,
-        'participant_status': lambda _user, _args, _kwargs: {'peppol_state': 'active'},
+        'participant_status': lambda _user, _args, _kwargs: {'peppol_state': 'receiver'},
         'send_document': _mock_send_document,
     }[endpoint](self, args, kwargs)
 
@@ -78,9 +78,7 @@ def _mock_button_verify_partner_endpoint(func, self, *args, **kwargs):
 
 def _mock_user_creation(func, self, *args, **kwargs):
     func(self, *args, **kwargs)
-    self.write({
-        'account_peppol_proxy_state': 'sender',
-    })
+    self.account_peppol_proxy_state = 'sender' if not self.smp_registration else 'smp_registration'
     self.account_peppol_edi_user.write({
         'private_key': b64encode(file_open(DEMO_PRIVATE_KEY, 'rb').read()),
     })

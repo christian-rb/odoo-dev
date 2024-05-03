@@ -258,6 +258,38 @@ class AccountEdiProxyClientUser(models.Model):
                 edi_user.company_id.account_peppol_proxy_state = proxy_user['peppol_state']
 
     # -------------------------------------------------------------------------
+    # BUSINESS ACTIONS
+    # -------------------------------------------------------------------------
+
+    def _peppol_register_receiver(self):
+        company = self.company_id
+        edi_identification = self._get_proxy_identification(company, 'peppol')
+
+        if company.account_peppol_proxy_state != 'sender':
+            raise UserError(
+                _('Cannot register a user with a %s application', company.account_peppol_proxy_state))
+
+        if (
+            company.partner_id._check_peppol_participant_exists(edi_identification)
+            and not company.account_peppol_migration_key
+        ):
+            raise UserError(
+                _("A participant with these details has already been registered on the network. "
+                "If you have previously registered to an alternative Peppol service, please deregister from that service, "
+                "or request a migration key before trying again."))
+
+        self._call_peppol_proxy(
+            endpoint='/api/peppol/2/register_participant',
+            params={
+                'migration_key': company.account_peppol_migration_key,
+            },
+        )
+        # once we sent the migration key over, we don't need it
+        # but we need the field for future in case the user decided to migrate away from Odoo
+        company.account_peppol_migration_key = False
+        company.account_peppol_proxy_state = 'smp_registration'
+
+    # -------------------------------------------------------------------------
     # SERVICE MANAGEMENT
     # -------------------------------------------------------------------------
 

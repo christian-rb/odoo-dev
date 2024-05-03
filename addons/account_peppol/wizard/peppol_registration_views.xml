@@ -77,7 +77,7 @@
                 </group>
 
                 <!-- Optional step: receiver registration fields -->
-                <group name="step_register_receiver" invisible="account_peppol_proxy_state not in ('not_registered', 'sender')">
+                <group name="step_register_receiver" invisible="account_peppol_proxy_state != 'not_registered'">
                     <field colspan="2" name="smp_registration"/>
                     <p colspan="2" class="mb-2" invisible="not smp_registration">
                         I want to migrate my existing Peppol connection to Odoo (optional):

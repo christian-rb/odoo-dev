@@ -68,11 +68,23 @@ class ResConfigSettings(models.TransientModel):
             endpoint='/api/peppol/1/update_user',
             params=params,
         )
+        return True
+
+    @handle_demo
+    def button_peppol_smp_registration(self):
+        """
+        The second (optional) step in Peppol registration.
+        The user can choose to become a Receiver and officially register on the Peppol
+        network, i.e. receive documents from other Peppol participants.
+        """
+        self.ensure_one()
+        self.account_peppol_edi_user._peppol_register_receiver()
+        return True
 
     @handle_demo
     def button_migrate_peppol_registration(self):
         """
-        If the user is active, they need to request a migration key, generated on the IAP server.
+        If the user is a receiver, they need to request a migration key, generated on the IAP server.
         The migration key is then displayed in Peppol settings.
         Currently, reopening after migrating away is not supported.
         """
@@ -83,6 +95,7 @@ class ResConfigSettings(models.TransientModel):
 
         response = self.account_peppol_edi_user._call_peppol_proxy(endpoint='/api/peppol/1/migrate_peppol_registration')
         self.account_peppol_migration_key = response['migration_key']
+        return True
 
     @handle_demo
     def button_deregister_peppol_participant(self):
@@ -103,6 +116,7 @@ class ResConfigSettings(models.TransientModel):
         self.account_peppol_proxy_state = 'not_registered'
         if self.account_peppol_edi_user:
             self.account_peppol_edi_user.unlink()
+        return True
 
     def button_account_peppol_configure_services(self):
         wizard = self.env['account_peppol.service.wizard'].create({

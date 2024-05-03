@@ -85,7 +85,8 @@ class AccountMoveSend(models.TransientModel):
             invalid_partners = wizard.move_ids.partner_id.commercial_partner_id.filtered(lambda p: not p.is_peppol_edi_format)
             wizard.enable_peppol = (
                 (
-                    wizard.enable_ubl_cii_xml
+                    wizard.company_id.account_peppol_proxy_state != 'rejected'
+                    and wizard.enable_ubl_cii_xml
                     or any(m.ubl_cii_xml_id and m.peppol_move_state not in ('processing', 'done') for m in wizard.move_ids)
                 )
                 and not invalid_partners

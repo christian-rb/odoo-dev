@@ -26,6 +26,7 @@ class PeppolSettingsButtons extends Component {
         // because the wizard has to be reopened whenever a button is clicked
         this.state = useState({
             isSmsButtonDisabled: this.props.record.context.disable_sms_verification || false,
+            isSettingsView: this.props.record.resModel === 'res.config.settings',
         });
         // enable Send Again button after some time
         setTimeout(() => this.state.isSmsButtonDisabled = false, waitTime);

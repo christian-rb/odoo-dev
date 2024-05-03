@@ -16,8 +16,17 @@
                     <button type="button"
                             class="btn btn-primary me-1"
                             t-on-click="createReceiver"
-                            t-if="proxyState === 'sender' and smpRegistration">
+                            t-if="proxyState === 'sender' and (smpRegistration or this.state.isSettingsView)">
                             Register as a receiver
+                    </button>
+                </div>
+                <div class="mt-3">
+                    <button type="button"
+                            class="btn btn-secondary me-1"
+                            t-on-click="updateDetails"
+                            t-if="['sender', 'smp_registration', 'receiver'].includes(proxyState)
+                                  and this.state.isSettingsView">
+                            Update contact details
                     </button>
                 </div>
                 <div class="mt-3">
@@ -26,14 +35,6 @@
                             t-on-click="migrate"
                             t-if="proxyState === 'receiver' and migrationPrepared === false and ediMode != 'demo'">
                             Migrate registration to another service
-                    </button>
-                </div>
-                <div class="mt-3">
-                    <button type="button"
-                            class="btn btn-primary me-1"
-                            t-on-click="updateDetails"
-                            t-if="['sender', 'smp_registration', 'receiver'].includes(proxyState)">
-                            Update contact details
                     </button>
                 </div>
                 <div class="mt-3">
@@ -57,7 +58,9 @@
                     <button type="button"
                             class="btn btn-secondary me-1"
                             t-on-click="deregister"
-                            t-if="![false, 'not_registered'].includes(proxyState) and migrationPrepared === false">
+                            t-if="['sender', 'smp_registration', 'receiver'].includes(proxyState)
+                                  and migrationPrepared === false
+                                  and this.state.isSettingsView">
                             <t t-out="deregisterUserButtonLabel"/>
                     </button>
                 </div>
