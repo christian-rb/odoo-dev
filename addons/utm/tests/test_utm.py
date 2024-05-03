@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from odoo.addons.utm.models.utm_mixin import UtmMixin
 from odoo.addons.utm.tests.common import TestUTMCommon
 from odoo.tests import tagged
 
@@ -95,3 +96,15 @@ class TestUtm(TestUTMCommon):
         self.assertEqual(
             utm_9.name, 'UTM dup [9]',
             msg='Even if the record has been created using a title, the name must be unique')
+
+    def test_split_name_and_count(self):
+        """ Test for tool '_split_name_and_count' """
+        for name, (expected_name, expected_count) in [
+            ("medium", ("medium", 1)),
+            ("medium [0]", ("medium", 0)),
+            ("medium [1]", ("medium", 1)),
+            ("medium [x]", ("medium [x]", 1)),  # not integer -> do not care
+            ("medium [0", ("medium [0", 1)),  # unrecognized -> do not crash
+        ]:
+            with self.subTest(name=name):
+                self.assertEqual(UtmMixin._split_name_and_count(name), (expected_name, expected_count))
