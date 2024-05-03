@@ -539,11 +539,8 @@ class Meeting(models.Model):
         return super()._compute_field_value(field)
 
     def _fetch_query(self, query, fields):
-        if self.env.is_system():
-            return super()._fetch_query(query, fields)
-
         public_fnames = self._get_public_fields()
-        private_fields = [field for field in fields if field.name not in public_fnames]
+        private_fields = [field for field in fields if field.name in self._get_private_fields()]
         if not private_fields:
             return super()._fetch_query(query, fields)
 
@@ -551,12 +548,7 @@ class Meeting(models.Model):
         events = super()._fetch_query(query, fields_to_fetch)
 
         # determine private events to which the user does not participate
-        current_partner_id = self.env.user.partner_id
-        others_private_events = events.filtered(
-            lambda e: e.privacy == 'private' \
-                  and e.user_id != self.env.user \
-                  and current_partner_id not in e.partner_ids
-        )
+        others_private_events = events.filtered(lambda ev: ev._check_private_event_conditions())
         if not others_private_events:
             return events
 
@@ -660,20 +652,60 @@ class Meeting(models.Model):
 
         return True
 
+    def _check_private_event_conditions(self):
+        """
+        Checks if the event is private, returning True if the conditions match and False otherwise.
+        The event is private if it is explicetely defined and the user is neither the organizer or a partner of it.
+        """
+        self.ensure_one()
+        event_is_private = self.privacy == 'private'
+        user_is_not_partner = self.user_id.id != self.env.uid and self.env.user.partner_id not in self.partner_ids
+        return event_is_private and user_is_not_partner
+
     def name_get(self):
         """ Hide private events' name for events which don't belong to the current user
         """
-        hidden = self.filtered(
-            lambda evt:
-                evt.privacy == 'private' and
-                evt.user_id.id != self.env.uid and
-                self.env.user.partner_id not in evt.partner_ids
-        )
-
+        hidden = self.filtered(lambda evt: evt._check_private_event_conditions())
         shown = self - hidden
         shown_names = super(Meeting, shown).name_get()
         obfuscated_names = [(eid, _('Busy')) for eid in hidden.ids]
         return shown_names + obfuscated_names
+
+    def read(self, fields=None, load='_classic_read'):
+        """
+        Return the events information to be shown on calendar and form views.
+        Private events will have their sensitive fields hidden from uninvited users.
+        """
+        records = super().read(fields=fields, load=load)
+        if fields and self.env.user and len(records) > 0:
+            records = self._hide_events_private_information(records)
+        return records
+
+    def _hide_events_private_information(self, records):
+        # Get the private fields and filter the private events according to the filtering conditions.
+        private_fields = self._get_private_fields()
+        private_events = self.filtered(lambda ev: ev._check_private_event_conditions())
+
+        # Hide the private information of the event by changing their values to 'Busy' and False.
+        records = self._hide_private_field_information(records, private_fields, private_events.ids)
+
+        # Update the cache with the new hidden values.
+        for field_name in private_fields:
+            if field_name in self._fields:
+                field = self._fields[field_name]
+                replacement = field.convert_to_cache(
+                    _('Busy') if field_name in ['name', 'display_name'] else False,
+                    private_events)
+                self.env.cache.update(private_events, field, repeat(replacement))
+        return records
+
+    def _hide_private_field_information(self, records, private_fields, events_ids):
+        """ Hide the private fields information by changing their values to 'Busy' and False. """
+        for event in records:
+            if event['id'] in events_ids:
+                for field in private_fields:
+                    event[field] = _('Busy') if field in ['name', 'display_name'] else False
+        return records
 
     @api.model
     def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
@@ -1427,3 +1459,8 @@ class Meeting(models.Model):
             'id', 'active', 'allday',
             'duration', 'user_id', 'interval', 'partner_id',
             'count', 'rrule', 'recurrence_id', 'show_as', 'privacy'}
+
+    @api.model
+    def _get_private_fields(self):
+        """ Return the fields that might contain private information in events. """
+        return {'name', 'location', 'attendee_ids', 'description', 'videocall_location', 'message_ids', 'partner_ids'}
