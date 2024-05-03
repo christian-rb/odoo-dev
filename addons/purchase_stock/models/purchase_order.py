@@ -5,7 +5,6 @@ from markupsafe import Markup
 from odoo import api, Command, fields, models, SUPERUSER_ID, _
 from odoo.tools.float_utils import float_compare
 from odoo.exceptions import UserError
-from collections import Counter
 
 
 class PurchaseOrder(models.Model):
@@ -117,22 +116,6 @@ class PurchaseOrder(models.Model):
         result = super(PurchaseOrder, self).button_approve(force=force)
         self._create_picking()
         return result
-
-    def _prepare_counts(self):
-        counts = super()._prepare_counts()
-        counts.append(Counter(po.picking_type_id.id for po in self))
-        return counts
-
-    def _prepare_domain(self, group):
-        domain = super()._prepare_domain(group)
-        picking_type_id = group[3].id if group[3] else False
-        domain.append(('picking_type_id', '=', picking_type_id))
-        return domain
-
-    def _get_group_by(self):
-        group_by = super()._get_group_by()
-        group_by.append('picking_type_id')
-        return group_by
 
     def button_cancel(self):
         for order in self:

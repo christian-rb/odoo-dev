@@ -636,60 +636,96 @@ class PurchaseOrder(models.Model):
         return self.action_view_invoice(moves)
 
     def action_merge(self):
-        if len(self) < 2:
+        rfq_to_merge = self.filtered(lambda r: r.state == 'draft')
+        if len(rfq_to_merge) < 2:
             raise UserError(_("Please select at least two purchase orders to merge."))
 
-        origin = []
-        partner_ref = []
-        # Group purchase orders based on specified criteria
-        grouped_data = self._read_group([('id', 'in', self.ids), ('state', 'in', ['draft', 'sent'])], self._get_group_by())
-        filtered_states = self.filtered(lambda order: order.state not in ['draft', 'sent'])
+        # Group RFQs by vendor
+        rfqs_grouped = {}
+        for rfq in rfq_to_merge:
+            module_install = bool(self.env['ir.module.module'].search(
+                [('name', '=', 'purchase_requisition'), ('state', '=', 'installed')], limit=1))
+            key = (rfq.partner_id.id, rfq.requisition_id.id) if module_install else (rfq.partner_id.id)
+            if key not in rfqs_grouped:
+                rfqs_grouped[key] = rfq
+            else:
+                rfqs_grouped[key] += rfq
 
-        if filtered_states:
-            raise UserError(_("Selected purchase orders must be in 'RFQ' or 'RFQ Sent' state."))
+        # Merge RFQs for each vendor group
+        for rfqs in rfqs_grouped.values():
 
-        for group in grouped_data:
-            domain = self._prepare_domain(group)
-            purchase_orders = self.env['purchase.order'].search(domain)
-            counts = self._prepare_counts()
-            # Count the occurrences of each vendor, currency, deliver to and dropship address name among the selected purchase orders
-            for counter in counts:
-                if any(value == 1 for value in counter.values()):
-                    raise UserError(_("Vendor, currency, destination and dropship address must be same of selected purchase order to merge."))
+            # Check if all RFQs have the same vendor, currency, deliver to, and dropship address
+            vendors = rfqs.mapped('partner_id')
+            currencies = rfqs.mapped('currency_id')
+            # deliver_to = rfqs.mapped('picking_type_id')
+            # dropship_addresses = rfqs.mapped('dropship_address_id')
 
-            # Get the oldest record from the filtered purchase orders
-            oldest_record = purchase_orders.filtered(lambda o: o.date_order == min(purchase_orders.mapped('date_order')))[0]
-            for purchase_order in purchase_orders:
-                if purchase_order not in oldest_record:
-                    if purchase_order.origin:
-                        origin.append(purchase_order.origin)
-                    if purchase_order.partner_ref:
-                        partner_ref.append(purchase_order.partner_ref)
+            if len(vendors) != 1:
+                raise UserError(_("All RFQs for vendor %s must have the same vendor.") % vendors[0].name)
+            if len(currencies) != 1:
+                raise UserError(_("All RFQs for vendor %s must have the same currency.") % vendors[0].name)
+            # if len(deliver_to) != 1:
+            #     raise UserError(_("All RFQs for vendor %s must have the same delivery address.") % vendors[0].name)
+            # if len(dropship_addresses) != 1:
+            #     raise UserError(_("All RFQs for vendor %s must have the same dropship address.") % vendors[0].name)
 
-                    # Merge order lines of the current purchase order with the oldest record
-                    for order_line in purchase_order.order_line:
-                        corresponding_line = oldest_record.order_line.filtered(
-                            lambda x: x.product_id == order_line.product_id
-                            and x.product_uom == order_line.product_uom
-                            and x.analytic_distribution == order_line.analytic_distribution
-                            and x.product_packaging_id == order_line.product_packaging_id
-                            and (x.date_planned - order_line.date_planned).total_seconds() <= 86400  # 24 hours in seconds
-                        )
+            oldest_rfq = min(rfqs, key=lambda r: r.date_order)
+            if oldest_rfq:
+                # Merge RFQs into the oldest purchase order
+                rfqs -= oldest_rfq
+                for rfq in rfqs:
+                    for rfq_line in rfq.order_line:
+                        existing_line = oldest_rfq.order_line.filtered(lambda l: l.product_id == rfq_line.product_id and
+                                                                                 l.product_uom == rfq_line.product_uom and
+                                                                                 l.product_packaging_id == rfq_line.product_packaging_id and
+                                                                                 l.analytic_distribution == rfq_line.analytic_distribution and
+                                                                                 (
+                                                                                         l.date_planned - rfq_line.date_planned).total_seconds() <= 86400
+                                                                       # 24 hours in seconds
+                                                                       )
+                        if len(existing_line) > 1:
+                            existing_line[0].product_qty += sum(existing_line[1:].mapped('product_qty'))
+                            existing_line[1:].unlink()
+                            existing_line = existing_line[0]
 
-                        if corresponding_line:
-                            corresponding_line.product_qty += order_line.product_qty
+                        if existing_line:
+                            existing_line.product_qty += rfq_line.product_qty
                         else:
-                            oldest_record.order_line += order_line
+                            oldest_rfq.order_line += rfq_line
 
-                        if self.env['ir.module.module'].search([('name', '=', 'purchase_requisition'), ('state', '=', 'installed')]) and purchase_order.alternative_po_ids:
-                            oldest_record.alternative_po_ids += (purchase_order.alternative_po_ids)
-                    purchase_order.state = 'cancel'
+                    if self.env['ir.module.module'].search([('name', '=', 'purchase_requisition'), (
+                            'state', '=', 'installed')]) and rfq.alternative_po_ids:
+                        oldest_rfq.alternative_po_ids += (rfq.alternative_po_ids)
+                    rfq.state = 'cancel'
 
-            oldest_record.origin = ', '.join(filter(None, [oldest_record.origin, *origin]))
-            oldest_record.partner_ref = ', '.join(filter(None, [oldest_record.partner_ref, *partner_ref]))
-            if self.env['ir.module.module'].search([('name', '=', 'purchase_requisition'), ('state', '=', 'installed')]) and purchase_order.alternative_po_ids:
-                cancelled_records = purchase_orders.alternative_po_ids.filtered(lambda po: po.state == 'cancel')
-                cancelled_records.unlink()
+                    # Merge source documents and vendor references
+                    oldest_rfq_origin = oldest_rfq.origin or ''
+                    mergable_rfqs_origin = list(rfqs.mapped('origin') if rfqs.mapped('origin')[0] != False else '')
+                    all_origins = ', '.join([oldest_rfq_origin] + mergable_rfqs_origin)
+
+                    oldest_vendor_references = oldest_rfq.partner_ref or ''
+                    mergable_rfqs_vendor_references = list(
+                        rfqs.mapped('partner_ref') if rfqs.mapped('partner_ref')[0] != False else '')
+                    all_vendor_references = ', '.join([oldest_vendor_references] + mergable_rfqs_vendor_references)
+
+                    oldest_rfq.write({
+                        'origin': all_origins,
+                        'partner_ref': all_vendor_references,
+                    })
+                rfqs.state = 'cancel'
+                if self.env['ir.module.module'].search([('name', '=', 'purchase_requisition'), (
+                        'state', '=', 'installed')]) and rfq.alternative_po_ids:
+                    rfq.alternative_po_ids.filtered(lambda po: po.state == 'cancel').unlink()
+
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'type': 'success',
+                'message': _('purchase order has been merged'),
+                'next': {'type': 'ir.actions.act_window_close'},
+            }
+        }
 
     def _prepare_counts(self):
         counts = [

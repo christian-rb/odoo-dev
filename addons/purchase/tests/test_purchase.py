@@ -4,7 +4,6 @@ from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 from odoo.tests import tagged, Form
 from odoo import Command, fields
 from odoo.exceptions import UserError
-import time
 
 
 from datetime import timedelta
@@ -647,8 +646,6 @@ class TestPurchase(AccountTestInvoicingCommon):
             po_line.product_qty = 1
             po_line.price_unit = 100
         po_1 = po_1.save()
-
-        time.sleep(1)
 
         po_2 = Form(PurchaseOrder)
         po_2.partner_id = self.partner_a
