@@ -28,9 +28,16 @@ class UtmMedium(models.Model):
     @api.ondelete(at_uninstall=False)
     def _unlink_except_utm_medium_email(self):
         utm_medium_email = self.env.ref('utm.utm_medium_email', raise_if_not_found=False)
+        utm_medium_website = self.env.ref('utm.utm_medium_website', raise_if_not_found=False)
         if utm_medium_email and utm_medium_email in self:
             raise UserError(_(
                 "The UTM medium '%s' cannot be deleted as it is used in some main "
                 "functional flows, such as the recruitment and the mass mailing.",
                 utm_medium_email.name
+            ))
+        if utm_medium_website and utm_medium_website in self:
+            raise UserError(_(
+                "The UTM medium '%s' cannot be deleted as it is used in some main "
+                "functional flows, such as the recruitment and the website form.",
+                utm_medium_website.name
             ))
