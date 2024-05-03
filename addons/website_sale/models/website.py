@@ -536,6 +536,8 @@ class Website(models.Model):
         for website in self.search([]):
             if not website.send_abandoned_cart_email:
                 continue
+            if request:
+                request.website = website.with_context(request.context)
             all_abandoned_carts = self.env['sale.order'].search([
                 ('is_abandoned_cart', '=', True),
                 ('cart_recovery_email_sent', '=', False),
