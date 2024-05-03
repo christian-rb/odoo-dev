@@ -2972,4 +2972,26 @@ Sitemap: <t t-esc="url_root"/>sitemap.xml
         </li>
     </xpath>
 </template>
+
+<!-- Breadcrumb -->
+<template id="website.breadcrumb" name="Page Breadcrumb">
+    <div class="breadcrumb bg-light p-2 rounded" aria-label="breadcrumb">
+            <!-- <t t-foreach="parent_page" t-as="page">
+            <span class="breadcrumb-item">
+            <a t-attf-href="/{{page['website_url']}}" class="text-decoration-none"><t t-out="page['parent_page_id'][1]"/></a>
+            </span>
+            <span class="separator mx-1">/</span>
+            <span class="breadcrumb-item">
+                <span><t t-out="page['name']"/></span>
+            </span>
+        </t> -->
+        <span class="breadcrumb-item">
+            <span>Hello</span>
+        </span>
+        <span class="separator mx-1">/</span>
+        <span class="breadcrumb-item">
+            <span>World</span>
+        </span>
+    </div>
+</template>
 </odoo>

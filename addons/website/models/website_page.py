@@ -29,9 +29,11 @@ class Page(models.Model):
     # This is needed to be able to control if page is a menu in page properties.
     # TODO this should be reviewed entirely so that we use a transient model.
     is_in_menu = fields.Boolean(compute='_compute_website_menu', inverse='_inverse_website_menu')
+    is_parent_page = fields.Boolean(string="Breadcrumb")
     is_homepage = fields.Boolean(compute='_compute_is_homepage', inverse='_set_is_homepage', string='Homepage')
     is_visible = fields.Boolean(compute='_compute_visible', string='Is Visible')
     is_new_page_template = fields.Boolean(string="New Page Template", help='Add this page to the "+New" page templates. It will be added to the "Custom" category.')
+    parent_page_id = fields.Many2one('website.page', string="Parent Page", domain="['&',('website_id','=',website_id),('id','!=',id)]")
 
     # Page options
     header_overlay = fields.Boolean()

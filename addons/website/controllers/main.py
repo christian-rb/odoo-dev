@@ -880,6 +880,15 @@ class Website(Home):
 
         return request.redirect('/')
 
+    @http.route(['/breadcrumb'], type="http", auth="public", website="True", sitemap=False)
+    def get_breadcrumb(self):
+        parent_pages = request.env['website.page']
+
+        parent_page = parent_pages.sudo().search_read([('name', '=', 'testing')], ['name', 'parent_page_id', 'website_url'])
+        return request.render('website.breadcrumb', {
+            'parent_page': parent_page
+        })
+
 
 class WebsiteBinary(Binary):
 
