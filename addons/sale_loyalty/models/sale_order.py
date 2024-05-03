@@ -358,19 +358,33 @@ class SaleOrder(models.Model):
             point_cost = converted_discount / reward.discount
         # Gift cards and eWallets are considered gift cards and should not have any taxes
         if reward.program_id.is_payment_program:
-            return [{
+            reward_product = reward.discount_line_product_id
+            reward_line_values = {
                 'name': reward.description,
-                'product_id': reward.discount_line_product_id.id,
+                'product_id': reward_product.id,
                 'price_unit': -min(max_discount, discountable),
                 'product_uom_qty': 1.0,
-                'product_uom': reward.discount_line_product_id.uom_id.id,
+                'product_uom': reward_product.uom_id.id,
                 'reward_id': reward.id,
                 'coupon_id': coupon.id,
                 'points_cost': point_cost,
                 'reward_identifier_code': reward_code,
                 'sequence': sequence,
-                'tax_id': [(Command.CLEAR, 0, 0)],
-            }]
+                'tax_id': [Command.clear()],
+            }
+            if reward.program_id.program_type == 'gift_card':
+                # For gift cards, the SOL should consider the discount product taxes
+                taxes_to_apply = reward_product.taxes_id
+                if taxes_to_apply:
+                    tax_res = taxes_to_apply.with_context(force_price_include=True).compute_all(
+                        reward_line_values['price_unit'],
+                        currency=self.currency_id,
+                    )
+                    reward_line_values.update({
+                        'price_unit': tax_res['total_excluded'],
+                        'tax_id': [Command.set(taxes_to_apply.ids)],
+                    })
+            return [reward_line_values]
         discount_factor = min(1, (max_discount / discountable)) if discountable else 1
         reward_dict = {}
         for tax, price in discountable_per_tax.items():
