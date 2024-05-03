@@ -14803,7 +14803,12 @@ msgstr ""
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_invoice_report__price_subtotal
-msgid "Untaxed Total"
+msgid "Untaxed Amount"
+msgstr ""
+
+#. module: account
+#: model:ir.model.fields,field_description:account.field_account_invoice_report__price_subtotal_currency
+msgid "Untaxed Amount in Currency"
 msgstr ""
 
 #. module: account
