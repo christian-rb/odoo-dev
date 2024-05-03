@@ -118,3 +118,11 @@ class CalendarController(http.Controller):
     def check_calendar_credentials(self):
         # method should be overwritten by sync providers
         return request.env['res.users'].check_calendar_credentials()
+
+    @http.route('/calendar/check_synchronization_status', type='json', auth='user')
+    def check_synchronization_status(self):
+        """
+        Method to be override in synchronization modules to check the synchronization status.
+        The possible return values are 'sync_active', 'sync_paused' and 'sync_stopped'.
+        """
+        return request.env.user.check_synchronization_status()

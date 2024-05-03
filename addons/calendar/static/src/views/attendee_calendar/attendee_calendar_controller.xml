@@ -6,5 +6,29 @@
                 <button class="btn btn-primary o-calendar-button-new me-1" t-on-click="onClickAddButton">New</button>
             </t>
         </xpath>
+        <!-- Add header div to be filled with synchronization buttons in synchronization modules. -->
+        <xpath expr="//Layout//div[hasclass('o_calendar_container')]//h5[hasclass('d-inline-flex')]" position="after">
+            <div id="header-sync-settings" class="ms-lg-auto">
+                <t t-if="(model.syncStatus.google_calendar?.includes('sync_stopped') and model.syncStatus.microsoft_calendar?.includes('sync_stopped', 'missing_credentials'))
+                    or (model.syncStatus.microsoft_calendar?.includes('sync_stopped') and model.syncStatus.google_calendar?.includes('sync_stopped', 'missing_credentials'))">
+                    <h5 id="synchronize_with" class="d-inline-flex" >Synchronize with</h5>
+                </t>
+                <t t-elif="model.syncStatus.google_calendar == 'sync_active'">
+                    <button type="button" class="btn btn-secondary text-nowrap" t-on-click="onRedirectToMyPreferencesPage">
+                        <div><i class='fa fa-refresh px-1'/>Synchronized with Google</div>
+                    </button>
+                </t>
+                <t t-elif="model.syncStatus.microsoft_calendar == 'sync_active'">
+                    <button type="button" id="outlook_synchronized" class="btn btn-secondary text-nowrap" t-on-click="onRedirectToMyPreferencesPage">
+                        <div><i class='fa fa-refresh px-1'/>Synchronized with Outlook</div>
+                    </button>
+                </t>
+                <t t-elif="model.syncStatus.google_calendar == 'sync_paused' or model.syncStatus.microsoft_calendar =='sync_paused'">
+                    <button type="button" class="btn btn-warning text-nowrap" t-on-click="onSyncUnpause">
+                        <div><i class='o_text_orange fa fa-pause px-1'/>Synchronization is paused</div>
+                    </button>
+                </t>
+            </div>
+        </xpath>
     </t>
 </templates>

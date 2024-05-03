@@ -6,6 +6,8 @@ import { user } from "@web/core/user";
 import { useService } from "@web/core/utils/hooks";
 import { onWillStart } from "@odoo/owl";
 import { CalendarQuickCreate } from "@calendar/views/calendar_form/calendar_quick_create";
+import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+
 export class AttendeeCalendarController extends CalendarController {
     static template = "calendar.AttendeeCalendarController";
     static components = {
@@ -33,6 +35,17 @@ export class AttendeeCalendarController extends CalendarController {
                 additionalContext: this.props.context,
             }
         );
+    }
+
+    onSyncUnpause() {
+        if (this.isSystemUser) {
+            this.env.services.action.doAction("calendar.calendar_settings_action");
+        } else {
+            this.dialog.add(AlertDialog, {
+                title: _t("Configuration"),
+                body: _t("Your administrator paused the synchronization with the external calendar provider."),
+            });
+        }
     }
 
     goToFullEvent(resId, additionalContext) {
@@ -129,5 +142,15 @@ export class AttendeeCalendarController extends CalendarController {
                 dialog_size: "medium",
             },
         });
+    }
+
+    async onRedirectToMyPreferencesPage() {
+        /**
+         * Redirect user to My Preferences Page.
+         * Currently there is no way to focus at the calendar page by means of the 'doAction' method.
+         */
+        const actionDescription = await this.orm.call("res.users", "action_get");
+        actionDescription.res_id = user.userId;
+        this.action.doAction(actionDescription);
     }
 }

@@ -1,16 +1,23 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data>
-        <!-- Update Preferences form !-->
-        <record id="res_users_form_view_calendar_default_privacy" model="ir.ui.view">
-            <field name="name">res.users.preferences.form.inherit</field>
-            <field name="model">res.users</field>
-            <field name="inherit_id" ref="base.view_users_form_simple_modif"/>
-            <field name="arch" type="xml">
-                <xpath expr="//field[@name='tz']" position="after">
-                    <field name="calendar_default_privacy" readonly="0" string="Calendar Default Privacy" invisible="share"/>
-                </xpath>
-            </field>
-        </record>
-    </data>
+    <!-- Update Preferences form. -->
+    <record id="res_users_form_view_calendar" model="ir.ui.view">
+        <field name="name">res.users.preferences.form.calendar</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form_simple_modif"/>
+        <field name="arch" type="xml">
+            <notebook position="inside">
+                <page string="Calendar" name="calendar">
+                    <!-- Calendar Default Privacy setting. -->
+                    <group name="default_privacy">
+                        <field name="calendar_default_privacy" string="Calendar Default Privacy" readonly="0" invisible="share"/>
+                    </group>
+                    <!-- Calendar integrations with providers, to be override by synchronization modules. -->
+                    <group name="integrations" invisible="1">
+                        <group string="Integrations"/>
+                    </group>
+                </page>
+            </notebook>
+        </field>
+    </record>
 </odoo>
