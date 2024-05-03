@@ -18,5 +18,16 @@ class EventRegistration(models.Model):
 
     def _get_registration_summary(self):
         res = super()._get_registration_summary()
-        res['registration_answers'] = self.registration_answer_ids.filtered('value_answer_id').mapped('display_name')
+        questions_answers = []
+        for answer in self.registration_answer_ids:
+            index = next((i for i, ans in enumerate(questions_answers) if ans['question'] == answer.question_id.title), None)
+            answer_value = answer.value_answer_id.name if answer.question_type == 'simple_choice' else answer.value_text_box
+            if index is not None:
+                questions_answers[index]['answers'].append(answer_value)
+            else:
+                questions_answers.append({
+                    'question': answer.question_id.title,
+                    'answers': [answer_value],
+                })
+        res['registration_questions_answers'] = questions_answers
         return res

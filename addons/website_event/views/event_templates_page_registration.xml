@@ -314,11 +314,27 @@
                 </div>
             </div>
             <div t-if="attendees" class="row mb-3">
-                <div class="col-12 mb-2">
-                    <a class="btn btn-primary" title="Download All Tickets" target="_blank"
+                <div class="col-12 mb-2 d-flex flex-column flex-md-row">
+                    <a class="btn btn-primary" title="Download All Tickets" target="_blank" style="min-width: 14rem;"
                         t-attf-href="/event/{{ event.id }}/my_tickets?registration_ids={{ attendees.ids }}&amp;tickets_hash={{ event._get_tickets_access_hash(attendees.ids) }}">
                         Download Tickets <i class="ms-1 fa fa-download"/>
                     </a>
+                    <div class="o_send_by_email_widget input-group ms-md-2 mt-2 mt-md-0">
+                        <input id="o_send_by_email_input" type="text"
+                            placeholder="friend1@email.com, friend2@email.com" class="form-control"/>
+                        <button class="o_wevent_js_send_email btn btn-primary"
+                            type="button"
+                            t-att-data-event-id="event.id"
+                            t-att-data-attendees-ids="attendees.ids"
+                            t-att-data-tickets-hash="event._get_tickets_access_hash(attendees.ids)">
+                            Send Email<i class="fa fa-envelope mx-1"/>
+                        </button>
+                    </div>
+                    <div class="o_send_by_email_info alert alert-info ms-md-2 mt-2 mt-md-0 mb-0 px-3 py-1 d-inline-flex align-items-center justify-content-center d-none" role="alert">
+                        <span>
+                            <strong>See you soon!</strong> Your tickets have been sent.
+                        </span>
+                    </div>
                 </div>
             </div>
             <div class="row mb-3 o_wereg_confirmed_attendees">

@@ -76,6 +76,20 @@ class EventController(Controller):
         ]
         return request.make_response(pdf, headers=pdfhttpheaders)
 
+    @route(['/event/<int:event_id>/my_tickets_by_email'], type='json', auth='public', website=True)
+    def event_my_tickets_by_email(self, event_id, registration_ids, tickets_hash, emails):
+        event = request.env['event.event'].browse(event_id).exists()
+        hash_truth = event and event._get_tickets_access_hash(registration_ids)
+        if not consteq(tickets_hash, hash_truth):
+            raise NotFound()
+
+        # Since all registrations are related, only use the first one to send the email
+        registration_id = registration_ids[0]
+        override_values = {
+            'email_to': emails
+        }
+        request.env.ref('event.event_subscription_guest').sudo().send_mail(registration_id, force_send=True, email_values=override_values)
+
     @http.route(['/event/init_barcode_interface'], type='json', auth="user")
     def init_barcode_interface(self, event_id):
         event = request.env['event.event'].browse(event_id).exists() if event_id else False

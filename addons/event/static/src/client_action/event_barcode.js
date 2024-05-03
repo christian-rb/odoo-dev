@@ -2,12 +2,14 @@
 
 import { _t } from "@web/core/l10n/translation";
 import { BarcodeScanner } from "@barcodes/components/barcode_scanner";
+import { scanBarcode } from "@web/webclient/barcode/barcode_scanner";
 import { Component, onWillStart } from "@odoo/owl";
 import { rpc } from "@web/core/network/rpc";
 import { registry } from "@web/core/registry";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { EventRegistrationSummaryDialog } from "./event_registration_summary_dialog";
 import { standardActionServiceProps } from "@web/webclient/actions/action_service";
+import { url } from '@web/core/utils/urls';
 
 export class EventScanView extends Component {
     static template = "event.EventScanView";
@@ -40,6 +42,19 @@ export class EventScanView extends Component {
         this.data = await rpc("/event/init_barcode_interface", {
             event_id: this.eventId,
         });
+        const fileExtension = new Audio().canPlayType("audio/ogg") ? "ogg" : "mp3";
+        this.sounds = {
+            error: new Audio(url(`/stock_barcode/static/src/audio/error.${fileExtension}`)),
+            notify: new Audio(url(`/mail/static/src/audio/ting.${fileExtension}`)),
+        };
+        this.sounds.error.load();
+        this.sounds.notify.load();
+    }
+
+    playSound(ev) {
+        const type = ev.detail || "notify";
+        this.sounds[type].currentTime = 0;
+        this.sounds[type].play();
     }
 
     /**
@@ -54,13 +69,35 @@ export class EventScanView extends Component {
         });
 
         if (result.error && result.error === "invalid_ticket") {
+            this.playSound({ detail: "error" });
             this.notification.add(_t("Invalid ticket"), {
                 title: _t("Warning"),
                 type: "danger",
             });
         } else {
             this.registrationId = result.id;
-            this.dialog.add(EventRegistrationSummaryDialog, { registration: result });
+            this.dialog.add(EventRegistrationSummaryDialog, { playSound: (ev) => this.playSound(ev), doNextScan: () => this.doNextScan(), registration: result });
+        }
+    }
+
+    async doNextScan() {
+        let error = null;
+        let barcode = null;
+        try {
+            barcode = await scanBarcode(this.env, this.facingMode);
+        } catch (err) {
+            error = err.message;
+        }
+
+        if (barcode) {
+            this.onBarcodeScanned(barcode);
+            if ("vibrate" in window.navigator) {
+                window.navigator.vibrate(100);
+            }
+        } else {
+            this.notification.add(error || _t("Please, Scan again!"), {
+                type: "warning",
+            });
         }
     }
 

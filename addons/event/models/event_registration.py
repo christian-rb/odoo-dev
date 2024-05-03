@@ -50,6 +50,13 @@ class EventRegistration(models.Model):
     phone = fields.Char(string='Phone', compute='_compute_phone', readonly=False, store=True, tracking=4)
     company_name = fields.Char(
         string='Company Name', compute='_compute_company_name', readonly=False, store=True, tracking=5)
+    # related registrations
+    related_registration_ids = fields.Many2many(
+        string='Related Registrations',
+        comodel_name='event.registration',
+        relation='event_registration_related_rel',
+        column1='registration_id',
+        column2='related_registration_id')
     # organization
     date_closed = fields.Datetime(
         string='Attended Date', compute='_compute_date_closed',
@@ -411,7 +418,7 @@ class EventRegistration(models.Model):
             'id': self.id,
             'name': self.name,
             'partner_id': self.partner_id.id,
-            'ticket_name': self.event_ticket_id.name or _('None'),
+            'ticket_name': self.event_ticket_id.name,
             'event_id': self.event_id.id,
             'event_display_name': self.event_id.display_name,
             'company_name': self.event_id.company_id and self.event_id.company_id.name or False,
