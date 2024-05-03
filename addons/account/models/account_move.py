@@ -3726,9 +3726,10 @@ class AccountMove(models.Model):
                 to_reverse += move
             else:
                 to_cancel += move
-        to_reverse._reverse_moves(cancel=True)
+        reversed_moves = to_reverse._reverse_moves(cancel=True)
         to_cancel.button_draft()
         to_cancel.filtered(lambda m: m.state == 'draft').unlink()
+        return reversed_moves
 
     def _post(self, soft=True):
         """Post/Validate the documents.
