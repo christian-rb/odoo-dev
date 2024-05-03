@@ -4,7 +4,7 @@ import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { useRecordObserver } from "@web/model/relational_model/utils";
 
-import { formatDate } from "@web/core/l10n/dates";
+import { formatDateTime } from "@web/core/l10n/dates";
 import { Component, useState, onWillStart } from "@odoo/owl";
 import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
 
@@ -94,13 +94,14 @@ export class LeaveStatsComponent extends Component {
                 ["date_from", "<=", dateTo],
                 ["date_to", ">=", dateFrom],
             ],
-            ["employee_id", "date_from", "date_to", "number_of_days"]
+            ["employee_id", "date_from", "date_to", "number_of_days", "number_of_hours", "leave_type_request_unit"]
         );
 
         this.state.departmentLeaves = departmentLeaves.map((leave) => {
+            const format = leave.leave_type_request_unit === "hour" ? "MM/dd/yyyy HH:mm" : "MM/dd/yyyy"
             return Object.assign({}, leave, {
-                dateFrom: formatDate(DateTime.fromSQL(leave.date_from, { zone: "utc" }).toLocal()),
-                dateTo: formatDate(DateTime.fromSQL(leave.date_to, { zone: "utc" }).toLocal()),
+                dateFrom: formatDateTime(DateTime.fromSQL(leave.date_from, { zone: "utc" }).toLocal(), {format: format}),
+                dateTo: formatDateTime(DateTime.fromSQL(leave.date_to, { zone: "utc" }).toLocal(), {format: format}),
                 sameEmployee: leave.employee_id[0] === employee[0],
             });
         });
@@ -122,7 +123,7 @@ export class LeaveStatsComponent extends Component {
                 ["date_from", "<=", dateTo],
                 ["date_to", ">=", dateFrom],
             ],
-            ["holiday_status_id", "number_of_days:sum"],
+            ["holiday_status_id", "number_of_days:sum", "number_of_hours:sum", "leave_type_request_unit:array_agg"],
             ["holiday_status_id"]
         );
     }
