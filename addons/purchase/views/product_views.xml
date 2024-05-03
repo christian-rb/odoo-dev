@@ -14,6 +14,7 @@
                 </xpath>
                 <xpath expr="//tree" position="inside">
                     <field name="company_id" column_invisible="True"/>
+                    <field name="is_vendor_blocked" column_invisible="True"/>
                 </xpath>
                 <xpath expr="//field[@name='company_id']" position="attributes">
                     <attribute name="readonly">0</attribute>
@@ -21,6 +22,8 @@
                 </xpath>
                 <xpath expr="//field[@name='partner_id']" position="attributes">
                     <attribute name="readonly">0</attribute>
+                    <attribute name="decoration-danger">is_vendor_blocked</attribute>
+                    <attribute name="decoration-muted">(not is_vendor_blocked) and ((date_start and now &lt; date_start) or (date_end and now &gt; date_end))</attribute>
                 </xpath>
                 <xpath expr="//field[@name='product_id']" position="attributes">
                     <attribute name="readonly">0</attribute>
