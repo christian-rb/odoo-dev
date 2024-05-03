@@ -1,6 +1,9 @@
 // This file regroups the table styling of the reports, apply the styling class
 // to the article bloc of the report.
 
+$table-cell-h-spacing: map-get($spacers, 3);
+$table-cell-v-spacing: map-get($spacers, 2);
+
 .o_table_standard {
     table {
         &.o_main_table {
@@ -24,5 +27,79 @@
         & table, & .o_total {
             border-top: $border-width solid $border-color;
         }
+    }
+}
+
+.o_table_boxed {
+    td, th {
+        padding: $table-cell-v-spacing $table-cell-h-spacing;
+    }
+
+    table {
+        position: relative;
+
+        &::before {
+            // Avoid inner borders overlapping the table borders
+            content: '';
+            @include o-position-absolute(0, 0, 0, 0);
+            border: $border-width solid $gray-700;
+        }
+
+        &.o_main_table {
+            margin-bottom: 0;
+        }
+
+        thead {
+            text-transform: uppercase;
+
+            th:not(:last-child) {
+                border-right: $border-width solid $gray-700;
+            }
+            th {
+                border-bottom: $border-width solid $border-color;
+            }
+        }
+
+        tbody {
+            tr:not(:last-child) td {
+                border-bottom: $border-width solid $gray-400;
+            }
+
+            td:not(:last-child) {
+                border-right: $border-width solid $gray-400;
+            }
+
+            &.o_line_section td,
+            &.o_line_note td,
+            &.is-subtotal td {
+                border-top: $border-width solid $gray-700;
+                border-bottom: $border-width solid $gray-700;
+            }
+            &.o_line_section td {
+                background-color: $gray-200;
+            }
+
+            td.o_price_total, .o_taxes td {
+                background-color: $gray-100;
+            }
+        }
+    }
+
+    #total table, div.totals_taxes_company_currency table {
+        td {
+            border-right: none;
+        }
+
+        .o_total td {
+            background-color: rgba($o-default-report-primary-color, 0.9);
+
+            strong {
+                color: color-contrast($o-default-report-primary-color);
+            }
+        }
+    }
+
+    #total table::before {
+        border-top: none;
     }
 }

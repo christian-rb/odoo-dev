@@ -342,7 +342,7 @@
             -->
             <t t-foreach="tax_totals['groups_by_subtotal'][subtotal_to_show]" t-as="amount_by_group">
                 <t t-set="display_tax_base" t-value="tax_totals['display_tax_base']"/>
-                <tr>
+                <tr class="o_taxes">
                     <t t-if="not display_tax_base">
                         <td><span class="text-nowrap" t-out="amount_by_group['tax_group_name']">Tax 15%</span></td>
                         <td class="text-end o_price_total font-monospace">
@@ -390,7 +390,7 @@
                         </tr>
                         <t t-set="subtotal_to_show" t-value="subtotal['name']"/>
                         <t t-foreach="tax_totals['groups_by_subtotal'][subtotal_to_show]" t-as="amount_by_group">
-                            <tr>
+                            <tr class="o_taxes">
                                 <t t-if="tax_totals['display_tax_base']">
                                     <td>
                                         <span class="text-nowrap">
