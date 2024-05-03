@@ -586,7 +586,7 @@ class TestStockValuationLCFIFOVB(TestStockValuationLCCommon):
         self.assertEqual(self.product1.value_svl, 150)
 
 def test_create_landed_cost_from_bill_multi_currencies_qung(self):
-
+    '''Test the landed cost created from vendor bill is using the exchange rate of the invoice date instead of the accounting date.'''
     # create a vendor bill in EUR where base currency in USD
     company = self.env.user.company_id
     company.currency_id = self.usd_currency
@@ -617,7 +617,6 @@ def test_create_landed_cost_from_bill_multi_currencies_qung(self):
         'currency_id': self.eur_currency.id,
         'company_id': company.id,
     })
-
 
     po_form = Form(self.env['purchase.order'])
     po_form.partner_id = self.vendor1
