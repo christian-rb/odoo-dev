@@ -884,7 +884,9 @@ class Channel(models.Model):
                 info["message_needaction_counter_bus_id"] = bus_last_id
                 member = member_of_current_user_by_channel.get(channel, self.env['discuss.channel.member']).with_prefetch([m.id for m in member_of_current_user_by_channel.values()])
                 if member:
-                    info['channelMembers'] = [('ADD', list(member._discuss_channel_member_format(extra_fields={"last_interest_dt": True}).values()))]
+                    info['channelMembers'] = [('ADD', list(member._discuss_channel_member_format(
+                        extra_fields={"last_interest_dt": True, "new_message_separator": True}
+                    ).values()))]
                     info['state'] = member.fold_state or 'closed'
                     info['message_unread_counter'] = member.message_unread_counter
                     info["message_unread_counter_bus_id"] = bus_last_id
@@ -1013,14 +1015,12 @@ class Channel(models.Model):
         else:
             self.env['bus.bus']._sendone(self.env.user.partner_id, 'mail.record/insert', {"Thread": self._channel_info()[0]})
 
-    def _channel_seen(self, last_message_id=None, allow_older=False):
+    def _channel_seen(self, last_message_id=None):
         """
         Mark channel as seen by updating seen message id of the current persona.
         :param last_message_id: the id of the message to be marked as seen, last message of the
         thread by default. This param SHOULD be required, the default behaviour is DEPRECATED and
         kept only for compatibility reasons.
-        :param allow_order: whether to allow setting and older message
-        as the last seen message.
         """
         self.ensure_one()
         domain = ["&", ("model", "=", "discuss.channel"), ("res_id", "in", self.ids)]
@@ -1032,15 +1032,13 @@ class Channel(models.Model):
         )
         if last_message_id is not False and not last_message:
             return
-        self._set_last_seen_message(last_message, allow_older=allow_older)
+        self._set_last_seen_message(last_message)
         return last_message.id
 
-    def _set_last_seen_message(self, last_message, allow_older=False, notify=True):
+    def _set_last_seen_message(self, last_message, notify=True):
         """
         Set last seen message of `self` channels for the current persona.
         :param last_message: the message to set as last seen message
-        :param allow_order: whether to allow setting and older message
-        as the last seen message.
         :param notify: whether to send a `discuss.channel.member/seen`
         notification.
         """
@@ -1051,9 +1049,10 @@ class Channel(models.Model):
         channel_member_domain = expression.AND([
             [('channel_id', 'in', self.ids)],
             [('partner_id', '=', current_partner.id) if current_partner else ('guest_id', '=', current_guest.id)],
-            [] if allow_older else expression.OR([
+            expression.OR([
+                [('new_message_separator', '<=', last_message.id)],
                 [('seen_message_id', '=', False)],
-                [('seen_message_id', '<', last_message.id)]
+                [('seen_message_id', '<', last_message.id)],
             ])
         ])
         member = self.env['discuss.channel.member'].search(channel_member_domain)
@@ -1064,6 +1063,7 @@ class Channel(models.Model):
             'seen_message_id': last_message.id,
             'last_seen_dt': fields.Datetime.now(),
         })
+        member._set_new_message_separator(last_message.id + 1)
         if notify:
             member_basic_info = {
                 'id': member.id,

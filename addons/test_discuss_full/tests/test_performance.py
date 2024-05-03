@@ -351,6 +351,7 @@ class TestDiscussFullPerformance(HttpCase):
                                     },
                                     "fetched_message_id": False,
                                     "seen_message_id": False,
+                                    "new_message_separator": 0,
                                 }
                             ],
                             key=lambda member_data: member_data["id"],
@@ -417,6 +418,7 @@ class TestDiscussFullPerformance(HttpCase):
                                     },
                                     "fetched_message_id": {"id": last_message.id},
                                     "seen_message_id": {"id": last_message.id},
+                                    "new_message_separator": last_message.id,
                                 }
                             ],
                             key=lambda member_data: member_data["id"],
@@ -483,6 +485,7 @@ class TestDiscussFullPerformance(HttpCase):
                                     },
                                     "fetched_message_id": {"id": last_message.id},
                                     "seen_message_id": {"id": last_message.id},
+                                    "new_message_separator": last_message.id,
                                 }
                             ],
                             key=lambda member_data: member_data["id"],
@@ -549,6 +552,7 @@ class TestDiscussFullPerformance(HttpCase):
                                     },
                                     "fetched_message_id": {"id": last_message.id},
                                     "seen_message_id": {"id": last_message.id},
+                                    "new_message_separator": last_message.id,
                                 }
                             ],
                             key=lambda member_data: member_data["id"],
@@ -676,6 +680,7 @@ class TestDiscussFullPerformance(HttpCase):
                                     },
                                     "fetched_message_id": {"id": last_message.id},
                                     "seen_message_id": {"id": last_message.id},
+                                    "new_message_separator": last_message.id,
                                 }
                             ],
                             key=lambda member_data: member_data["id"],
@@ -741,6 +746,7 @@ class TestDiscussFullPerformance(HttpCase):
                                     },
                                     "fetched_message_id": False,
                                     "seen_message_id": False,
+                                    "new_message_separator": 0,
                                 },
                                 {
                                     "create_date": fields.Datetime.to_string(member_12.create_date),
@@ -764,6 +770,7 @@ class TestDiscussFullPerformance(HttpCase):
                                     },
                                     "fetched_message_id": False,
                                     "seen_message_id": False,
+                                    "new_message_separator": 0,
                                 },
                             ],
                             key=lambda member_data: member_data["id"],
@@ -829,6 +836,7 @@ class TestDiscussFullPerformance(HttpCase):
                                     },
                                     "fetched_message_id": False,
                                     "seen_message_id": False,
+                                    "new_message_separator": 0,
                                 },
                                 {
                                     "create_date": fields.Datetime.to_string(member_14.create_date),
@@ -852,6 +860,7 @@ class TestDiscussFullPerformance(HttpCase):
                                     },
                                     "fetched_message_id": False,
                                     "seen_message_id": False,
+                                    "new_message_separator": 0,
                                 },
                             ],
                             key=lambda member_data: member_data["id"],
@@ -917,6 +926,7 @@ class TestDiscussFullPerformance(HttpCase):
                                     },
                                     "fetched_message_id": False,
                                     "seen_message_id": False,
+                                    "new_message_separator": 0,
                                 },
                                 {
                                     "create_date": fields.Datetime.to_string(member_15.create_date),
@@ -940,6 +950,7 @@ class TestDiscussFullPerformance(HttpCase):
                                     },
                                     "fetched_message_id": False,
                                     "seen_message_id": False,
+                                    "new_message_separator": 0,
                                 },
                             ],
                             key=lambda member_data: member_data["id"],
@@ -1005,6 +1016,7 @@ class TestDiscussFullPerformance(HttpCase):
                                     },
                                     "fetched_message_id": False,
                                     "seen_message_id": False,
+                                    "new_message_separator": 0,
                                 },
                                 {
                                     "create_date": fields.Datetime.to_string(member_2.create_date),
@@ -1028,6 +1040,7 @@ class TestDiscussFullPerformance(HttpCase):
                                     },
                                     "fetched_message_id": False,
                                     "seen_message_id": False,
+                                    "new_message_separator": 0,
                                 },
                             ],
                             key=lambda member_data: member_data["id"],
@@ -1093,6 +1106,7 @@ class TestDiscussFullPerformance(HttpCase):
                                     },
                                     "fetched_message_id": False,
                                     "seen_message_id": False,
+                                    "new_message_separator": 0,
                                 },
                                 {
                                     "create_date": fields.Datetime.to_string(member_3.create_date),
@@ -1118,6 +1132,7 @@ class TestDiscussFullPerformance(HttpCase):
                                     },
                                     "fetched_message_id": False,
                                     "seen_message_id": False,
+                                    "new_message_separator": 0,
                                 },
                             ],
                             key=lambda member_data: member_data["id"],
@@ -1183,6 +1198,7 @@ class TestDiscussFullPerformance(HttpCase):
                                     },
                                     "fetched_message_id": False,
                                     "seen_message_id": False,
+                                    "new_message_separator": 0,
                                 },
                                 {
                                     "create_date": fields.Datetime.to_string(member_1.create_date),
@@ -1206,6 +1222,7 @@ class TestDiscussFullPerformance(HttpCase):
                                     },
                                     "fetched_message_id": {"id": last_message.id},
                                     "seen_message_id": {"id": last_message.id},
+                                    "new_message_separator": last_message.id,
                                 },
                             ],
                             key=lambda member_data: member_data["id"],
@@ -1277,6 +1294,7 @@ class TestDiscussFullPerformance(HttpCase):
                                 },
                                 "fetched_message_id": False,
                                 "seen_message_id": False,
+                                "new_message_separator": 0
                             },
                             {
                                 "create_date": fields.Datetime.to_string(member_g.create_date),
@@ -1294,6 +1312,7 @@ class TestDiscussFullPerformance(HttpCase):
                                 },
                                 "fetched_message_id": {"id": last_message.id},
                                 "seen_message_id": {"id": last_message.id},
+                                "new_message_separator": last_message.id,
                             },
                         ],
                     ]

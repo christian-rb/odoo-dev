@@ -96,6 +96,7 @@ class TestGetDiscussChannel(TestImLivechatCommon, MailCommon):
                 },
                 'fetched_message_id': False,
                 'seen_message_id': False,
+                'new_message_separator': False,
             },
             {
                 'thread': {'id': channel_info['id'], 'model': "discuss.channel"},
@@ -116,6 +117,7 @@ class TestGetDiscussChannel(TestImLivechatCommon, MailCommon):
                 },
                 'fetched_message_id': False,
                 'seen_message_id': False,
+                'new_message_separator': False,
             },
         ]]])
 
@@ -157,6 +159,7 @@ class TestGetDiscussChannel(TestImLivechatCommon, MailCommon):
                 },
                 'fetched_message_id': False,
                 'seen_message_id': False,
+                'new_message_separator': False,
             },
         ]]])
 

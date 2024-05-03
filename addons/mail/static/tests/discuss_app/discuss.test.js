@@ -6,7 +6,6 @@ import {
     createFile,
     defineMailModels,
     editInput,
-    focus,
     insertText,
     onRpcBefore,
     openDiscuss,
@@ -1527,7 +1526,10 @@ test("new messages separator [REQUIRE FOCUS]", async () => {
         ["channel_id", "=", channelId],
         ["partner_id", "=", serverState.partnerId],
     ]);
-    pyEnv["discuss.channel.member"].write([memberId], { seen_message_id: lastMessageId });
+    pyEnv["discuss.channel.member"].write([memberId], {
+        seen_message_id: lastMessageId,
+        new_message_separator: lastMessageId + 1,
+    });
     const env = await start();
     rpc = rpcWithEnv(env);
     await openDiscuss(channelId);
@@ -1549,7 +1551,7 @@ test("new messages separator [REQUIRE FOCUS]", async () => {
     await contains(".o-mail-Thread-newMessage hr + span", { text: "New messages" });
     await scroll(".o-mail-Discuss-content .o-mail-Thread", "bottom");
     await contains(".o-mail-Thread-newMessage hr + span", { text: "New messages" });
-    await focus(".o-mail-Composer-input");
+    $(".o-mail-Composer-input").focus();
     await contains(".o-mail-Thread-newMessage hr + span", { count: 0, text: "New messages" });
 });
 

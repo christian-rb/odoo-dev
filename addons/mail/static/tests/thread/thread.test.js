@@ -495,7 +495,10 @@ test("no new messages separator on posting message (some message history)", asyn
         ["channel_id", "=", channelId],
         ["partner_id", "=", serverState.partnerId],
     ]);
-    pyEnv["discuss.channel.member"].write([memberId], { seen_message_id: messageId });
+    pyEnv["discuss.channel.member"].write([memberId], {
+        seen_message_id: messageId,
+        new_message_separator: messageId + 1,
+    });
     await start();
     await openDiscuss(channelId);
     await contains(".o-mail-Message");
@@ -531,7 +534,10 @@ test("new messages separator on receiving new message [REQUIRE FOCUS]", async ()
         ["channel_id", "=", channelId],
         ["partner_id", "=", serverState.partnerId],
     ]);
-    pyEnv["discuss.channel.member"].write([memberId], { seen_message_id: messageId });
+    pyEnv["discuss.channel.member"].write([memberId], {
+        seen_message_id: messageId,
+        new_message_separator: messageId + 1,
+    });
     const env = await start();
     rpc = rpcWithEnv(env);
     await openDiscuss(channelId);
@@ -791,7 +797,7 @@ test("first unseen message should be directly preceded by the new message separa
     );
     await contains(".o-mail-Message", { count: 3 });
     await contains(".o-mail-Thread-newMessage hr + span", { text: "New messages" });
-    await contains(".o-mail-Message:not([aria-label='Note']) + .o-mail-Thread-newMessage");
+    await contains(".o-mail-Message[aria-label='Note'] + .o-mail-Thread-newMessage");
 });
 
 test("composer should be focused automatically after clicking on the send button [REQUIRE FOCUS]", async () => {

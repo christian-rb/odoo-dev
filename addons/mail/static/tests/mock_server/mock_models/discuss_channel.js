@@ -791,9 +791,6 @@ export class DiscussChannel extends models.ServerModel {
             last_interest_dt: serializeDateTime(today()),
         });
         const messageData = MailThread.message_post.call(this, [id], kwargs);
-        if (kwargs.author_id === this.env.user?.partner_id) {
-            this._set_last_seen_message([channel.id], messageData.id, false);
-        }
         // simulate compute of message_unread_counter
         const memberOfCurrentUser = this._find_or_create_member_for_self(channel.id);
         const otherMembers = DiscussChannelMember._filter([
@@ -996,17 +993,22 @@ export class DiscussChannel extends models.ServerModel {
         const ResPartner = this.env["res.partner"];
 
         const memberOfCurrentUser = this._find_or_create_member_for_self(ids[0]);
-        const message_unread_counter = this.env["mail.message"]._filter([
+        const message_unread_counter = this.env["mail.message"].search_count([
             ["res_id", "=", ids[0]],
             ["model", "=", "discuss.channel"],
             ["id", ">", message_id],
-        ]).length;
+        ]);
         if (memberOfCurrentUser) {
             DiscussChannelMember.write([memberOfCurrentUser.id], {
                 fetched_message_id: message_id,
+                new_message_separator: message_id,
                 seen_message_id: message_id,
                 message_unread_counter,
             });
+            DiscussChannelMember._set_new_message_separator(
+                [memberOfCurrentUser.id],
+                message_id + 1
+            );
         }
         if (notify) {
             const [channel] = this.search_read([["id", "in", ids]]);
