@@ -20,6 +20,7 @@ def _ensure_names_follows_pattern(names):
 
 def _get_restricted_form_fields(BaseModel, docs, str_whitelist):
     # TODO edm docstring, ensure mimetypde can't be done here because of the onchange where the mimetype has to be manually computed.
+    # TODO edm: this won't work with header/footer, need to be adapted to have the datas passed instead of product_document
     restricted_fields = {}
     for doc in docs:
         # Without bin_size=False, size is returned instead of content when saving the file.
@@ -29,9 +30,9 @@ def _get_restricted_form_fields(BaseModel, docs, str_whitelist):
         raw_pdf_fields = reader.getFields() or set()
         _ensure_names_follows_pattern(raw_pdf_fields)
         pdf_models_and_fields = _get_model_and_fields(BaseModel, raw_pdf_fields)
-        whitelisted_fields = json.loads(str_whitelist)
+        whitelist = json.loads(str_whitelist)
         for model, fields_list in pdf_models_and_fields.items():
-            missing_fields = [field not in whitelisted_fields.get(model) for field in fields_list]
+            missing_fields = [field not in whitelist.get(model, []) for field in fields_list]
             if model not in restricted_fields:
                 restricted_fields[model] = fields_list
             else:

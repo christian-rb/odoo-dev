@@ -1,6 +1,8 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 
+import json
+
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 
@@ -44,6 +46,8 @@ class ProductDocument(models.Model):
                 'sale_pdf_quote_builder.whitelisted_form_fields'
             )
             restricted_fields = utils._get_restricted_form_fields(BaseModel, doc, str_whitelist)
+            print("before wizard, restricted fields are: ", restricted_fields)
+            # TODO edm: wrong, messing some
             doc.has_restricted_form_fields = bool(restricted_fields)
 
     # === ONCHANGE METHODS ===#
@@ -114,7 +118,6 @@ class ProductDocument(models.Model):
         str_whitelist = self.env['ir.config_parameter'].sudo().get_param(
             'sale_pdf_quote_builder.whitelisted_form_fields'
         )
-        restricted_fields = utils._get_restricted_form_fields(BaseModel, self, str_whitelist)
         return {
             'name': _("Whitelisting PDF Form Fields"),
             'type': 'ir.actions.act_window',
@@ -123,7 +126,8 @@ class ProductDocument(models.Model):
             'target': 'new',
             'context': {
                 'active_model': 'product.document',
-                'active_ids': self.id,
+                'active_id': self.id,
+                'default_restricted_fields': json.dumps(utils._get_restricted_form_fields(BaseModel, self, str_whitelist))
             },
         }
 
