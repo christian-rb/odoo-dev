@@ -21,7 +21,7 @@ from odoo.tools import mute_logger
 BASE_64_STRING = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII='
 
 
-@tagged('mass_mailing')
+@tagged("mass_mailing")
 class TestMassMailValues(MassMailCommon):
 
     @classmethod
@@ -420,6 +420,15 @@ class TestMassMailValues(MassMailCommon):
         with self.assertRaises(IntegrityError):
             activity.write({'res_id': 0})
             self.env.flush_all()
+
+
+@tagged("mass_mailing", "utm")
+class TestMassMailUTM(MassMailCommon):
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls._create_mailing_list()
 
     @freeze_time('2022-01-02')
     @patch.object(Cursor, 'now', lambda *args, **kwargs: datetime(2022, 1, 2))
