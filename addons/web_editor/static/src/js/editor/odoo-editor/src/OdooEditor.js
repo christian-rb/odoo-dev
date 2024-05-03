@@ -2024,7 +2024,7 @@ export class OdooEditor extends EventTarget {
             this.editable;
         const startUneditable = getFurthestUneditableParent(range.startContainer, commonAncestorContainer);
         if (startUneditable) {
-            let leaf = previousLeaf(startUneditable);
+            let leaf = previousLeaf(startUneditable, this.editable);
             if (leaf) {
                 range.setStart(leaf, nodeSize(leaf));
             } else {
@@ -2033,7 +2033,7 @@ export class OdooEditor extends EventTarget {
         }
         const endUneditable = getFurthestUneditableParent(range.endContainer, commonAncestorContainer);
         if (endUneditable) {
-            let leaf = nextLeaf(endUneditable);
+            let leaf = nextLeaf(endUneditable, this.editable);
             if (leaf) {
                 range.setEnd(leaf, 0);
             } else {
@@ -2123,6 +2123,11 @@ export class OdooEditor extends EventTarget {
         }
         // Ensure empty blocks be given a <br> child.
         if (start) {
+            if (start === this.editable && !start.hasChildNodes()) {
+                const p = document.createElement('p');
+                start.appendChild(p);
+                start = p;
+            }
             fillEmpty(closestBlock(start));
         }
         fillEmpty(closestBlock(range.endContainer));
@@ -3750,7 +3755,7 @@ export class OdooEditor extends EventTarget {
             // backspace
             const selection = this.document.getSelection();
             if (!ev.ctrlKey && !ev.metaKey) {
-                if (selection.isCollapsed && !this._fromCompositionText) {
+                if ((selection.isCollapsed && !this._fromCompositionText) || selection.anchorNode === this.editable) {
                     // We need to hijack it because firefox doesn't trigger a
                     // deleteBackward input event with a collapsed selection in
                     // front of a contentEditable="false" (eg: font awesome).
@@ -3996,7 +4001,8 @@ export class OdooEditor extends EventTarget {
             selection.anchorNode === this.editable &&
             selection.focusNode === this.editable &&
             selection.anchorOffset === 0 &&
-            selection.focusOffset === [...this.editable.childNodes].length
+            selection.focusOffset === [...this.editable.childNodes].length &&
+            this.editable.firstChild.nodeName !== 'DIV'
         ) {
             getDeepRange(this.editable, {select: true});
             // The selection is changed in `getDeepRange` and will therefore
