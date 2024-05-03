@@ -11,6 +11,7 @@ from odoo.addons.http_routing.models.ir_http import slug, unslug
 from odoo.exceptions import UserError, ValidationError, AccessError
 from odoo.osv import expression
 from odoo.tools import sql
+from odoo.tools.json import scriptsafe as json_safe
 
 _logger = logging.getLogger(__name__)
 
@@ -160,6 +161,90 @@ class Post(models.Model):
     can_use_full_editor = fields.Boolean(  # Editor Features: image and links
         'Can Use Full Editor',
         compute='_compute_post_karma_rights', compute_sudo=False)
+
+    def _accepted_answer(self):
+        for answer in self.child_ids:
+            if answer.is_correct:
+                return {
+                    "text": answer.plain_content,
+                    "upvoteCount": answer.vote_count,
+                    "url": answer.website_url,
+                    "datePublished": answer.create_date.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "author_name": answer.create_uid.name,
+                    "author_url": f"/forum/user/{ answer.create_uid.id }",
+                }
+        return False
+
+    def _suggested_answers(self):
+        ret = []
+        for answer in self.child_ids:
+            if not answer.is_correct:
+                ret.append({
+                    "text": answer.plain_content,
+                    "upvoteCount": answer.vote_count,
+                    "url": answer.website_url,
+                    "datePublished": answer.create_date.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "author_name": answer.create_uid.name,
+                    "author_url": f"/forum/user/{ answer.create_uid.id }",
+                })
+        return ret
+
+    def microdata(self):
+        if self.parent_id:
+            return False
+        accepted_answer = self._accepted_answer()
+        suggested_answers = self._suggested_answers()
+        if not suggested_answers and not accepted_answer:
+            return False
+        structured_data = {
+                "@context": "https://schema.org",
+                "@type": "QAPage",
+                "mainEntity": {
+                    "@type": "Question",
+                    "name": self.name,
+                    "text": self.plain_content or self.name,
+                    "answerCount": self.child_count,
+                    "upvoteCount": self.vote_count,
+                    "datePublished": self.create_date.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "author": {
+                        "@type": "Person",
+                        "name": self.create_uid.name,
+                        "url": f"/forum/user/{ self.create_uid.id }",
+                    },
+                }
+            }
+        if accepted_answer:
+            structured_data["mainEntity"]["acceptedAnswer"] = {
+                "@type": "Answer",
+                "text": accepted_answer["text"],
+                "upvoteCount": accepted_answer["upvoteCount"],
+                "datePublished": accepted_answer["datePublished"],
+                "url": accepted_answer["url"],
+                "author": {
+                    "@type": "Person",
+                    "name": accepted_answer["author_name"],
+                    "url": accepted_answer["author_url"],
+                }
+            }
+        if suggested_answers:
+            structured_data["mainEntity"]["suggestedAnswer"] = [
+                {
+                    "@type": "Answer",
+                    "text": suggested_answer["text"],
+                    "upvoteCount": suggested_answer["upvoteCount"],
+                    "datePublished": suggested_answer["datePublished"],
+                    "url": suggested_answer["url"],
+                    "author": {
+                        "@type": "Person",
+                        "name": suggested_answer["author_name"],
+                        "url": suggested_answer["author_url"],
+                    }
+                }
+                for suggested_answer in suggested_answers
+            ]
+        return json_safe.dumps(
+            structured_data, indent=2
+        )
 
     @api.constrains('parent_id')
     def _check_parent_id(self):
