@@ -6,9 +6,22 @@
         <field name="inherit_id" ref="account.view_move_form"/>
         <field name="arch" type="xml">
 
+            <header position="inside">
+                <field name="l10n_gr_edi_enable_send_invoices" invisible="1"/>
+                <field name="l10n_gr_edi_enable_send_expense_classification" invisible="1"/>
+                <button name="l10n_gr_edi_try_send_invoices"
+                        type="object"
+                        string="Send Invoice to MyDATA"
+                        invisible="not l10n_gr_edi_enable_send_invoices"/>
+                <button name="l10n_gr_edi_try_send_expense_classification"
+                        type="object"
+                        string="Send Expense Classifications to MyDATA"
+                        invisible="not l10n_gr_edi_enable_send_expense_classification"/>
+            </header>
+
             <header position="after">
                 <div class="alert alert-warning" role="alert" invisible="country_code != 'GR' or not l10n_gr_edi_warnings">
-                    <field name="l10n_gr_edi_warnings"/>
+                    <field name="l10n_gr_edi_warnings" widget="text"/>
                 </div>
             </header>
 
@@ -52,7 +65,7 @@
 
             <!-- MyDATA Documents Tab -->
             <xpath expr="//page[@id='other_tab_entry']" position="after">
-                <page id="l10n_gr_mydata_documents"
+                <page id="l10n_gr_edi_documents"
                       string="MyDATA"
                       invisible="not l10n_gr_edi_document_ids">
                     <field name="l10n_gr_edi_document_ids">
@@ -70,15 +83,6 @@
                         </tree>
                     </field>
                 </page>
-            </xpath>
-
-            <xpath expr="//header" position="inside">
-                <button name="mydata_send_expense_classifications"
-                        type="object"
-                        string="Send Expense Classifications to MyDATA"
-                        invisible="country_code != 'GR'
-                                    or move_type not in ('in_invoice', 'in_refund')
-                                    or state != 'posted'"/>
             </xpath>
 
         </field>

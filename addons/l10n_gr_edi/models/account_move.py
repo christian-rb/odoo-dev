@@ -4,7 +4,7 @@ from odoo import models, fields, _, api
 from odoo.addons.l10n_gr_edi.models.classification_data import (
     CLASSIFICATION_CATEGORY_EXPENSE, INVOICE_TYPES_SELECTION, INVOICE_TYPES_HAVE_INCOME, INVOICE_TYPES_HAVE_EXPENSE,
     TYPES_WITH_CORRELATE_INVOICE, COMBINATIONS_WITH_POSSIBLE_EMPTY_TYPE, VALID_TAX_AMOUNTS,
-    TYPES_WITH_FORBIDDEN_COUNTERPART, TYPES_WITH_VAT_EXEMPT, TYPES_WITH_VAT_CATEGORY_8,
+    TYPES_WITH_FORBIDDEN_COUNTERPART, TYPES_WITH_VAT_EXEMPT, TYPES_WITH_VAT_CATEGORY_8, TYPES_WITH_FORBIDDEN_PAYMENT, TYPES_WITH_FORBIDDEN_QUANTITY,
 )
 
 
@@ -29,12 +29,14 @@ class AccountMove(models.Model):
     )
     l10n_gr_edi_need_correlated = fields.Boolean(compute='_compute_l10n_gr_edi_need_correlated')
     l10n_gr_edi_document_ids = fields.One2many(
-        comodel_name='mydata.document',
+        comodel_name='l10n_gr_edi.document',
         inverse_name='move_id',
         copy=False,
         readonly=True,
     )
-    l10n_gr_edi_active_document_id = fields.Many2one('mydata.document')
+    l10n_gr_edi_active_document_id = fields.Many2one(comodel_name='l10n_gr_edi.document')
+    l10n_gr_edi_enable_send_invoices = fields.Boolean(compute='_compute_l10n_gr_edi_enable_send')
+    l10n_gr_edi_enable_send_expense_classification = fields.Boolean(compute='_compute_l10n_gr_edi_enable_send')
 
     @api.onchange('l10n_gr_edi_inv_type')
     def _onchange_l10n_gr_edi_inv_type(self):
@@ -46,6 +48,13 @@ class AccountMove(models.Model):
                 preferred_classification = line._l10n_gr_edi_get_preferred_classification()
                 line.l10n_gr_edi_cls_category = preferred_classification.l10n_gr_edi_cls_category
                 line.l10n_gr_edi_cls_type = preferred_classification.l10n_gr_edi_cls_type
+
+    @api.depends('l10n_gr_edi_state')
+    def _compute_show_reset_to_draft_button(self):
+        """ Prevent user from resetting the move to draft if it's already sent to MyDATA """
+        for move in self:
+            if move.l10n_gr_edi_state == 'sent':
+                move.show_reset_to_draft_button = False
 
     @api.depends('move_type')
     def _compute_l10n_gr_edi_inv_type(self):
@@ -73,12 +82,36 @@ class AccountMove(models.Model):
         print('_compute_l10n_gr_edi_warnings')
         for move in self:
             if move.state == 'posted':
-                warnings = move.mydata_prepare_constraints(skip_document_error=True)
+                warnings = move.l10n_gr_edi_compute_errors()
                 move.l10n_gr_edi_warnings = '\n'.join(warnings)
             else:
                 move.l10n_gr_edi_warnings = False
 
-    def mydata_prepare_constraints(self, skip_document_error=False):
+    @api.depends('state', 'l10n_gr_edi_state')
+    def _compute_l10n_gr_edi_enable_send(self):
+        for move in self:
+            have_payment = True
+            if move.l10n_gr_edi_inv_type not in TYPES_WITH_FORBIDDEN_PAYMENT:
+                reconciled_lines = move.line_ids.filtered(
+                    lambda line: line.account_id.account_type in ('asset_receivable', 'liability_payable'))
+                have_payment = len(reconciled_lines.matched_credit_ids + reconciled_lines.matched_debit_ids) > 0
+
+            move.l10n_gr_edi_enable_send_invoices = all((
+                move.country_code == 'GR',
+                move.move_type in ('out_invoice', 'out_refund'),
+                move.state == 'posted',
+                move.l10n_gr_edi_state != 'sent',
+                have_payment,
+            ))
+            move.l10n_gr_edi_enable_send_expense_classification = all((
+                move.country_code == 'GR',
+                move.move_type in ('in_invoice', 'in_refund'),
+                move.state == 'posted',
+                move.l10n_gr_edi_state != 'sent',
+                have_payment,
+            ))
+
+    def l10n_gr_edi_compute_errors(self):
         """ Tries to catch all possible errors before sending to MyDATA API """
         self.ensure_one()
         errors = []
@@ -93,34 +126,27 @@ class AccountMove(models.Model):
             errors.append(_('Missing VAT on company %s', self.company_id.name))
 
         for line in self.invoice_line_ids:
+            line_name = line.name or line.id
             if not line.l10n_gr_edi_cls_category and line.l10n_gr_edi_available_cls_category:
-                errors.append(_('Missing MyDATA classification category on line %s', line.name))
+                errors.append(_('Missing MyDATA classification category on line %s', line_name))
             if not line.l10n_gr_edi_cls_type \
                     and line.l10n_gr_edi_available_cls_type \
                     and (line.move_id.l10n_gr_edi_inv_type, line.l10n_gr_edi_cls_category) \
                     not in COMBINATIONS_WITH_POSSIBLE_EMPTY_TYPE:
-                errors.append(_('Missing MyDATA classification type on line %s', line.name))
+                errors.append(_('Missing MyDATA classification type on line %s', line_name))
             if len(line.tax_ids) > 1:
-                errors.append(_('MyDATA does not support multiple taxes on line %s', line.name))
-            if not line.tax_ids:
-                errors.append(_('Missing tax on line %s', line.name))
+                errors.append(_('MyDATA does not support multiple taxes on line %s', line_name))
+            if not line.tax_ids and self.l10n_gr_edi_inv_type not in TYPES_WITH_VAT_CATEGORY_8:
+                errors.append(_('Missing tax on line %s', line_name))
             if len(line.tax_ids) == 1 and line.tax_ids.amount == 0 and not line.l10n_gr_edi_tax_exemption_category:
-                errors.append(_('MyDATA Tax Exemption Category is missing for line %s', line.name))
+                errors.append(_('Missing MyDATA Tax Exemption Category for line %s', line_name))
             if len(line.tax_ids) == 1 and line.tax_ids.amount not in VALID_TAX_AMOUNTS:
                 errors.append(_('Invalid tax amount for line %s. The valid values are %s',
                                 line.name, ', '.join(str(tax) for tax in VALID_TAX_AMOUNTS)))
-
-        if errors and not skip_document_error:
-            self.env['mydata.document'].create([{
-                'move_id': self.id,
-                'state': 'error',
-                'message': '\n'.join(errors),
-                'datetime': fields.Datetime.now(),
-            }])
         return errors
 
     @staticmethod
-    def _get_mydata_issuer_counterpart_vals(move):
+    def _l10n_gr_edi_get_issuer_counterpart_vals(move):
         party_vals = {
             'issuer_vat': move.company_id.vat,
             'issuer_country': move.company_id.country_code,
@@ -151,7 +177,7 @@ class AccountMove(models.Model):
         return party_vals
 
     @staticmethod
-    def _get_mydata_payment_method_vals(move):
+    def _l10n_gr_edi_get_payment_method_vals(move):
         payment_vals = {'payment_details': []}
         reconciled_lines = move.line_ids.filtered(
             lambda line: line.account_id.account_type in ('asset_receivable', 'liability_payable'))
@@ -170,8 +196,8 @@ class AccountMove(models.Model):
         return payment_vals
 
     @staticmethod
-    def _get_mydata_vat_category_vals(line):
-        vat_vals = {'vat_category': 7, 'vat_exemption_category': ''}
+    def _l10n_gr_edi_get_val_category_vals(line):
+        vat_vals = {'vat_category': 8, 'vat_exemption_category': ''}
 
         if line.tax_ids and line.move_id.l10n_gr_edi_inv_type not in TYPES_WITH_VAT_EXEMPT:
             vat_vals['vat_category'] = {24: 1, 13: 2, 6: 3, 17: 4, 9: 5, 4: 6, 0: 7}[int(line.tax_ids.amount)]
@@ -186,7 +212,7 @@ class AccountMove(models.Model):
         return vat_vals
 
     @staticmethod
-    def _get_mydata_classification_vals(line):
+    def _l10n_gr_edi_get_classification_vals(line):
         cls_vals = {'ecls': [], 'icls': []}
 
         if line.l10n_gr_edi_cls_category:
@@ -211,7 +237,7 @@ class AccountMove(models.Model):
         return cls_vals
 
     @staticmethod
-    def _get_mydata_sum_classification_vals(details):
+    def _l10n_gr_edi_get_sum_classification_vals(details):
         icls_vals, ecls_vals = {}, {}
         summary_icls, summary_ecls = [], []
 
@@ -236,16 +262,16 @@ class AccountMove(models.Model):
         return {'summary_icls': summary_icls, 'summary_ecls': summary_ecls}
 
     @staticmethod
-    def _cleanup_xml_value(xml_value):
+    def _l10n_gr_edi_cleanup_xml_vals(xml_value):
         """ Remove empty string and list value from xml_vals """
         if isinstance(xml_value, list):
-            return [AccountMove._cleanup_xml_value(item) for item in xml_value if item not in ('', [])]
+            return [AccountMove._l10n_gr_edi_cleanup_xml_vals(item) for item in xml_value if item not in ('', [])]
         elif isinstance(xml_value, dict):
-            return {k: AccountMove._cleanup_xml_value(v) for k, v in xml_value.items() if v not in ('', [])}
+            return {k: AccountMove._l10n_gr_edi_cleanup_xml_vals(v) for k, v in xml_value.items() if v not in ('', [])}
         else:
             return xml_value
 
-    def _prepare_mydata_invoice_xml_vals(self):
+    def _l10n_gr_edi_prepare_invoice_xml_vals(self):
         xml_vals = {'invoices': []}
 
         for move in self:
@@ -253,11 +279,12 @@ class AccountMove(models.Model):
             for line in move.line_ids.filtered(lambda l: l.display_type == 'product'):
                 details.append({
                     'line_number': len(details) + 1,
+                    'quantity': line.quantity if move.l10n_gr_edi_inv_type not in TYPES_WITH_FORBIDDEN_QUANTITY else '',
                     'detail_type': line.l10n_gr_edi_detail_type or '',
                     'net_value': abs(line.balance),
                     'vat_amount': round(line.price_total - line.price_subtotal, 2),
-                    **self._get_mydata_vat_category_vals(line),
-                    **self._get_mydata_classification_vals(line),
+                    **self._l10n_gr_edi_get_val_category_vals(line),
+                    **self._l10n_gr_edi_get_classification_vals(line),
                 })
 
             xml_vals['invoices'].append({
@@ -276,15 +303,15 @@ class AccountMove(models.Model):
                 'summary_total_other_taxes_amount': 0,
                 'summary_total_deductions_amount': 0,
                 'summary_total_gross_value': move.amount_total,
-                **self._get_mydata_issuer_counterpart_vals(move),
-                **self._get_mydata_payment_method_vals(move),
-                **self._get_mydata_sum_classification_vals(details),
+                **self._l10n_gr_edi_get_issuer_counterpart_vals(move),
+                **self._l10n_gr_edi_get_payment_method_vals(move),
+                **self._l10n_gr_edi_get_sum_classification_vals(details),
             })
 
-        xml_vals = self._cleanup_xml_value(xml_vals)
+        xml_vals = self._l10n_gr_edi_cleanup_xml_vals(xml_vals)
         return xml_vals
 
-    def _prepare_mydata_classification_xml_vals(self):
+    def _l10n_gr_edi_prepare_expense_classification_xml_vals(self):
         xml_vals = {'invoices': []}
 
         for move in self:
@@ -292,26 +319,55 @@ class AccountMove(models.Model):
             for line in move.line_ids.filtered(lambda l: l.display_type == 'product'):
                 details.append({
                     'line_number': len(details) + 1,
-                    **self._get_mydata_classification_vals(line),
+                    **self._l10n_gr_edi_get_classification_vals(line),
                 })
 
             xml_vals['invoices'].append({
                 'mark': move.l10n_gr_edi_mark,
-                'transaction_mode': '',  # todo - add way to 'reject' received invoices
+                'transaction_mode': '',  # Later, add a way to 'reject' received invoices
                 'details': details,
             })
 
-        xml_vals = self._cleanup_xml_value(xml_vals)
+        xml_vals = self._l10n_gr_edi_cleanup_xml_vals(xml_vals)
         return xml_vals
 
-    def mydata_send_invoices(self):
+    def l10n_gr_edi_send_invoices(self):
         """ Create Document(s) of XML values from selected invoice(s) and send them to MyDATA """
-        xml_vals = self._prepare_mydata_invoice_xml_vals()
-        document_ids = self.env['mydata.document'].create([{'move_id': move.id} for move in self])
+        xml_vals = self._l10n_gr_edi_prepare_invoice_xml_vals()
+        document_ids = self.env['l10n_gr_edi.document'].create([{'move_id': move.id} for move in self])
         document_ids._send_mydata_invoices_xml(xml_vals)
 
-    def mydata_send_expense_classifications(self):
+    def l10n_gr_edi_send_expense_classification(self):
         """ Create XML documents for Expense Classifications and send them to MyDATA """
-        xml_vals = self._prepare_mydata_classification_xml_vals()
-        document_ids = self.env['mydata.document'].create([{'move_id': move.id} for move in self])
+        xml_vals = self._l10n_gr_edi_prepare_expense_classification_xml_vals()
+        document_ids = self.env['l10n_gr_edi.document'].create([{'move_id': move.id} for move in self])
         document_ids._send_mydata_expense_classifications_xml(xml_vals)
+
+    def _l10n_gr_edi_try_send(self, send_expense_classification=False):
+        """ Gather all invoices in `self` and compute errors in each of them.
+         Collect all 'good' invoices and send them as batches to MyDATA.
+         Any errors detected will not be raised but instead saved as a new document.
+         @param send_expense_classification: False (default, send invoice) | True (send expense classification) """
+        moves_to_send = self.env['account.move']
+        for move in self:
+            if errors := move.l10n_gr_edi_compute_errors():
+                self.env['l10n_gr_edi.document'].create([{
+                    'move_id': move.id,
+                    'state': 'error',
+                    'message': '\n'.join(errors),
+                    'datetime': fields.Datetime.now(),
+                }])
+            else:
+                moves_to_send |= move
+
+        if moves_to_send:
+            if send_expense_classification:
+                moves_to_send.l10n_gr_edi_send_expense_classification()
+            else:
+                moves_to_send.l10n_gr_edi_send_invoices()
+
+    def l10n_gr_edi_try_send_invoices(self):
+        self._l10n_gr_edi_try_send()
+
+    def l10n_gr_edi_try_send_expense_classification(self):
+        self._l10n_gr_edi_try_send(send_expense_classification=True)

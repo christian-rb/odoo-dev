@@ -7,8 +7,8 @@ from odoo import models, fields, api, _
 from odoo.tools import cleanup_xml_node
 
 
-class MyDataDocument(models.Model):
-    _name = 'mydata.document'
+class GreeceEDIDocument(models.Model):
+    _name = 'l10n_gr_edi.document'
     _description = "Greece document object for tracking all sent XML to MyDATA"
     _order = 'datetime DESC, id DESC'
 
@@ -37,8 +37,8 @@ class MyDataDocument(models.Model):
         return f"{self.move_id.name.replace('/', '_')}_xml_{self.id}.xml"
 
     def _generate_xml_content(self, xml_vals, send_classification=False):
-        xml_template = 'l10n_gr_edi.mydata_send_invoices' if not send_classification else \
-            'l10n_gr_edi.mydata_send_expense_classification'
+        xml_template = 'l10n_gr_edi.l10n_gr_edi_send_invoices' if not send_classification else \
+            'l10n_gr_edi.l10n_gr_edi_send_expense_classification'
         xml_content = self.env['ir.qweb']._render(xml_template, xml_vals)
         xml_content = etree.tostring(cleanup_xml_node(xml_content), encoding='ISO-8859-7', standalone='yes')
         xml_content = xml_content.decode('iso8859_7')
@@ -140,5 +140,5 @@ class MyDataDocument(models.Model):
         self.ensure_one()
         return {
             'type': 'ir.actions.act_url',
-            'url': f'/web/content/mydata.document/{self.id}/attachment_id/{self._get_attachment_file_name()}?download=true',
+            'url': f'/web/content/l10n_gr_edi.document/{self.id}/attachment_id/{self._get_attachment_file_name()}?download=true',
         }

@@ -1,3 +1,4 @@
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
 {
     'author': 'Odoo',
     'name': 'Greece - MyDATA',
@@ -25,7 +26,6 @@
         'views/mydata_document_views.xml',
         'views/product_template_views.xml',
         'views/res_company_views.xml',
-        'wizard/account_move_send_views.xml',
     ],
     'installable': True,
     'auto_install': True,

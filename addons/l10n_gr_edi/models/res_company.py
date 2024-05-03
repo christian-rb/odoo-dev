@@ -37,7 +37,7 @@ class ResCompany(models.Model):
     def _l10n_gr_edi_get_headers_credentials(self):
         """ Returns required credentials for header of all requests to MyDATA. """
         if not self.l10n_gr_edi_aade_id or not self.l10n_gr_edi_aade_key:
-            # Will not happen as we've checked from mydata_prepare_constraints check, but just in case
+            # Will not happen as we've checked from l10n_gr_edi_compute_errors check, but just in case
             raise UserError(_('MyDATA credentials not found on company %s', self.name))
 
         return {
@@ -45,23 +45,27 @@ class ResCompany(models.Model):
             'ocp-apim-subscription-key': self.l10n_gr_edi_aade_key,
         }
 
-    def cron_mydata_fetch_invoices(self):
+    def cron_l10n_gr_edi_fetch_invoices(self):
         """ Receive issued MyDATA Invoices and create draft Vendor Bills based on the received XML. """
         gr_companies = self.env['res.company'].search([
             ('country_code', '=', 'GR'),
-            '|', ('l10n_gr_edi_test_env', '=', True),  # uses test environment
-            '&', ('l10n_gr_edi_aade_id', '!=', False),  # uses real credential
-                 ('l10n_gr_edi_aade_key', '!=', False)
+            ('l10n_gr_edi_aade_id', '!=', False),
+            ('l10n_gr_edi_aade_key', '!=', False),
         ])
+        session = requests.session()
 
         for gr_company in gr_companies:
             date_90_days_ago = (fields.Datetime.now() - timedelta(days=90)).strftime("%d/%m/%Y")
             date_today = fields.Datetime.now().strftime("%d/%m/%Y")
 
-            response = requests.get(
+            response = session.get(
                 url=gr_company._l10n_gr_edi_get_mydata_url('requestdocs'),
                 headers=gr_company._l10n_gr_edi_get_headers_credentials(),
-                params={'mark': 0, 'dateFrom': date_90_days_ago, 'dateTo': date_today})
+                params={'mark': 0, 'dateFrom': date_90_days_ago, 'dateTo': date_today},
+                timeout=5,
+            )
+            if not response:
+                continue
 
             root = etree.fromstring(response.content)
             pretty_xml = etree.tostring(root, encoding='unicode', pretty_print=True)
@@ -71,7 +75,7 @@ class ResCompany(models.Model):
                 def find_value(element_name):
                     return invoice_element.findtext(f".//ns:{element_name}", namespaces=NAMESPACES)
 
-                # Make sure to not create a duplicate bill
+                # Make sure not to create duplicate bill
                 if self.env['account.move'].search(
                         [('l10n_gr_edi_mark', '=', find_value('mark')), ('company_id', '=', gr_company.id)], limit=1):
                     continue
@@ -81,8 +85,12 @@ class ResCompany(models.Model):
                 for detail_element in invoice_element.xpath('.//*[local-name()="invoiceDetails"]'):
                     tax_amount = {'1': 24.0, '2': 13.0, '3': 6.0, '4': 17.0, '5': 9.0, '6': 4.0, '7': 0.0, '8': 0.0}[
                         detail_element.findtext('.//ns:vatCategory', namespaces=NAMESPACES)]
+                    quantity = max(1.0, float(detail_element.findtext('.//ns:quantity', namespaces=NAMESPACES) or 1))
+                    price_unit = float(detail_element.findtext('.//ns:netValue', namespaces=NAMESPACES)) / quantity
+                    print(price_unit)
                     invoice_line_ids.append(Command.create({
-                        'price_unit': float(detail_element.findtext('.//ns:netValue', namespaces=NAMESPACES)),
+                        'price_unit': price_unit,
+                        'quantity': quantity,
                         'tax_ids': self.env['account.tax'].sudo().search([('amount', '=', tax_amount), ('company_id', '=', gr_company.id)], limit=1),
                     }))
 
@@ -93,7 +101,7 @@ class ResCompany(models.Model):
                     'state': 'draft',
                     'move_type': 'in_invoice',
                     'company_id': gr_company.id,
-                    'partner_id': self.env['res.partner'].search([('company_id', '=', gr_company.id), ('vat', '=', issuer_vat)], limit=1).id,
+                    'partner_id': self.env['res.partner'].search([('vat', '=', issuer_vat)], limit=1).id,
                     'date': fields.Date.to_date(find_value('issueDate')),
                     'invoice_date': fields.Date.to_date(find_value('issueDate')),
                     'l10n_gr_edi_mark': find_value('mark'),

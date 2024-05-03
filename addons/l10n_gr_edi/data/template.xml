@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <template id="mydata_send_invoices">
+    <template id="l10n_gr_edi_send_invoices">
         <InvoicesDoc xmlns="http://www.aade.gr/myDATA/invoice/v1.0"
                      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                      xmlns:icls="https://www.aade.gr/myDATA/incomeClassificaton/v1.0"
@@ -44,6 +44,7 @@
                 </paymentMethods>
                 <invoiceDetails t-foreach="invoice.get('details')" t-as="detail">
                     <lineNumber t-out="detail.get('line_number')"/>
+                    <quantity t-out="detail.get('quantity')"/>
                     <invoiceDetailType t-out="detail.get('detail_type')"/>
                     <netValue t-out="detail.get('net_value')"/>
                     <vatCategory t-out="detail.get('vat_category')"/>
@@ -84,7 +85,7 @@
         </InvoicesDoc>
     </template>
 
-    <template id="mydata_send_expense_classification">
+    <template id="l10n_gr_edi_send_expense_classification">
         <ecls:ExpensesClassificationsDoc xmlns:ecls="https://www.aade.gr/myDATA/expensesClassificaton/v1.0">
             <ecls:expensesInvoiceClassification t-foreach="invoices" t-as="invoice">
                 <ecls:invoiceMark t-out="invoice.get('mark')"/>
