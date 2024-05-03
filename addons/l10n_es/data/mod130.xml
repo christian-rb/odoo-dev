@@ -35,6 +35,7 @@
                                 <field name="engine">domain</field>
                                 <field name="formula" eval="[('account_id.internal_group', '=', 'income'), '|', ('partner_id.industry_id', '=', False), ('partner_id.industry_id.name', '!=', 'Agriculture')]"/>
                                 <field name="subformula">-sum</field>
+                                <field name="date_scope">from_fiscalyear</field>
                             </record>
                         </field>
                     </record>
@@ -61,12 +62,26 @@
                     <record id="mod_130_casilla_04" model="account.report.line">
                         <field name="name">[04]</field>
                         <field name="code">aeat_mod_130_04</field>
-                        <field name="aggregation_formula">aeat_mod_130_03.balance * 0.20</field>
+                        <field name="expression_ids">
+                            <record id="mod_130_casilla_04_balance" model="account.report.expression">
+                                <field name="label">balance</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">aeat_mod_130_03.balance * 0.20</field>
+                                <field name="subformula">if_above(EUR(0))</field>
+                            </record>
+                        </field>
                     </record>
                     <record id="mod_130_casilla_05" model="account.report.line">
                         <field name="name">[05]</field>
                         <field name="code">aeat_mod_130_05</field>
-                        <field name="aggregation_formula">aeat_mod_130_03.balance * 0.20</field>
+                        <field name="expression_ids">
+                            <record id="mod_130_casilla_05_balance" model="account.report.expression">
+                                <field name="label">balance</field>
+                                <field name="engine">external</field>
+                                <field name="formula">sum</field>
+                                <field name="subformula">editable;rounding=2</field>
+                            </record>
+                        </field>
                     </record>
                     <record id="mod_130_casilla_06" model="account.report.line">
                         <field name="name">[06]</field>
@@ -77,7 +92,7 @@
                             <record id="mod_130_casilla_06_balance" model="account.report.expression">
                                 <field name="label">balance</field>
                                 <field name="engine">domain</field>
-                                <field name="formula" eval="[('tax_tag_ids', '=', 'mod115[03]'), '|', ('partner_id.industry_id', '=', False), ('partner_id.industry_id.name', '!=', 'Agriculture')]"/>
+                                <field name="formula" eval="[('tax_tag_ids', '=', '+mod115[03]'), '|', ('partner_id.industry_id', '=', False), ('partner_id.industry_id.name', '!=', 'Agriculture')]"/>
                                 <field name="subformula">sum</field>
                             </record>
                         </field>
@@ -122,7 +137,7 @@
                             <record id="mod_130_casilla_10_balance" model="account.report.expression">
                                 <field name="label">balance</field>
                                 <field name="engine">domain</field>
-                                <field name="formula" eval="[('tax_tag_ids', '=', 'mod115[03]'), ('partner_id.industry_id.name', '=', 'Agriculture')]"/>
+                                <field name="formula" eval="[('tax_tag_ids', '=', '+mod115[03]'), ('partner_id.industry_id.name', '=', 'Agriculture')]"/>
                                 <field name="subformula">sum</field>
                             </record>
                         </field>
@@ -142,7 +157,14 @@
                     <record id="mod_130_casilla_12" model="account.report.line">
                         <field name="name">[12]</field>
                         <field name="code">aeat_mod_130_12</field>
-                        <field name="aggregation_formula">aeat_mod_130_07.balance + aeat_mod_130_11.balance</field>
+                        <field name="expression_ids">
+                            <record id="mod_130_casilla_12_balance" model="account.report.expression">
+                                <field name="label">balance</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">aeat_mod_130_07.balance + aeat_mod_130_11.balance</field>
+                                <field name="subformula">if_above(EUR(0))</field>
+                            </record>
+                        </field>
                     </record>
                     <record id="mod_130_casilla_13" model="account.report.line">
                         <field name="name">[13]</field>
@@ -162,20 +184,59 @@
                     <record id="mod_130_casilla_14" model="account.report.line">
                         <field name="name">[14]</field>
                         <field name="code">aeat_mod_130_14</field>
-                        <field name="aggregation_formula">aeat_mod_130_12.balance - aeat_mod_130_13.balance</field>
+                        <field name="expression_ids">
+                            <record id="mod_130_casilla_14_balance" model="account.report.expression">
+                                <field name="label">balance</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">aeat_mod_130_12.balance - aeat_mod_130_13.balance</field>
+                            </record>
+                        </field>
                     </record>
                     <record id="mod_130_casilla_15" model="account.report.line">
                         <field name="name">[15]</field>
-                        <field name="groupby">account_id</field>
-                        <field name="foldable" eval="True"/>
+                        <field name="code">aeat_mod_130_15</field>
                         <field name="expression_ids">
                             <record id="mod_130_casilla_15_balance" model="account.report.expression">
                                 <field name="label">balance</field>
-                                <field name="engine">custom</field>
-                                <field name="formula">_report_custom_engine_mod_130</field>
-                                <field name="subformula">mod_130_15</field>
+                                <field name="engine">external</field>
+                                <field name="formula">sum</field>
+                                <field name="subformula">editable;rounding=2</field>
                             </record>
                         </field>
+                    </record>
+                    <record id="mod_130_casilla_16" model="account.report.line">
+                        <field name="name">[16]</field>
+                        <field name="code">aeat_mod_130_16</field>
+                        <field name="expression_ids">
+                            <record id="mod_130_casilla_16_balance" model="account.report.expression">
+                                <field name="label">balance</field>
+                                <field name="engine">external</field>
+                                <field name="formula">sum</field>
+                                <field name="subformula">editable;rounding=2</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="mod_130_casilla_17" model="account.report.line">
+                        <field name="name">[17]</field>
+                        <field name="code">aeat_mod_130_17</field>
+                        <field name="aggregation_formula">aeat_mod_130_14.balance - aeat_mod_130_15.balance - aeat_mod_130_16.balance</field>
+                    </record>
+                    <record id="mod_130_casilla_18" model="account.report.line">
+                        <field name="name">[18]</field>
+                        <field name="code">aeat_mod_130_18</field>
+                        <field name="expression_ids">
+                            <record id="mod_130_casilla_18_balance" model="account.report.expression">
+                                <field name="label">balance</field>
+                                <field name="engine">external</field>
+                                <field name="formula">sum</field>
+                                <field name="subformula">editable;rounding=2;if_above(EUR(0))</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="mod_130_casilla_19" model="account.report.line">
+                        <field name="name">[19]</field>
+                        <field name="code">aeat_mod_130_19</field>
+                        <field name="aggregation_formula">aeat_mod_130_17.balance - aeat_mod_130_18.balance</field>
                     </record>
                 </field>
             </record>
