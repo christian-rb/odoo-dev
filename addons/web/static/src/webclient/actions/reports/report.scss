@@ -109,3 +109,16 @@ blockquote {
 li.oe-nested {
     display: block;
 }
+
+// Global styling for reports elements, shared between all layouts
+.o_company_logo {
+    max-height: 4rem;
+}
+
+.o_company_tagline p {
+    margin-bottom: 0;
+}
+
+div[name=comment] p {
+    margin-bottom: 0;
+}
