@@ -54,6 +54,12 @@ class UtmSourceMixin(models.AbstractModel):
     def create(self, vals_list):
         """Create the UTM sources if necessary, generate the name based on the content in batch."""
         # Create all required <utm.source>
+        caca = [
+            {'name': values.get('name') or self.env['utm.source']._generate_name(self, values.get(self._rec_name))}
+            for values in vals_list
+            if not values.get('source_id')
+        ]
+        print("caca", caca)
         utm_sources = self.env['utm.source'].create([
             {'name': values.get('name') or self.env['utm.source']._generate_name(self, values.get(self._rec_name))}
             for values in vals_list
@@ -72,9 +78,14 @@ class UtmSourceMixin(models.AbstractModel):
         return super().create(vals_list)
 
     def write(self, values):
+        if (values.get(self._rec_name) or values.get('name')) and len(self) > 1:
+            raise ValueError(
+                _('You cannot update multiple records with the same name. The name should be unique!')
+            )
+
         if values.get(self._rec_name) and not values.get('name'):
             values['name'] = self.env['utm.source']._generate_name(self, values[self._rec_name])
-        if values.get('name'):
+        if values.get('name') and values['name'] != self.name:  # do not regenerate if name is the same
             values['name'] = self.env['utm.mixin']._get_unique_names("utm.source", [values['name']])[0]
 
         super().write(values)

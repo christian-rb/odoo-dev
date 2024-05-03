@@ -467,12 +467,16 @@ class TestMassMailUTM(MassMailCommon):
         self.assertEqual(mailing_6.name, 'Second subject (Mass Mailing created on 2022-01-02)')
 
         mailing_0.subject = 'First subject'
-        self.assertEqual(mailing_0.name, 'First subject (Mass Mailing created on 2022-01-02) [4]',
-            msg='The name must have been re-generated')
+        self.assertEqual(mailing_0.name, 'First subject (Mass Mailing created on 2022-01-02)',
+            msg='The name must not have been re-generated, as it is the same')
+
+        mailing_0.subject = 'Second subject'
+        self.assertEqual(mailing_0.name, 'Second subject (Mass Mailing created on 2022-01-02) [2]',
+            msg='The name must be unique, it was already taken')
 
         mailing_0.name = 'Second subject (Mass Mailing created on 2022-01-02)'
         self.assertEqual(mailing_0.name, 'Second subject (Mass Mailing created on 2022-01-02) [2]',
-            msg='The name must be unique')
+            msg='The name must be unique, it was already taken')
 
 
 @tagged('mass_mailing')
