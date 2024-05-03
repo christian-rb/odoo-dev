@@ -13,6 +13,7 @@ const dom = require('web.dom');
 var mixins = require('web.mixins');
 var publicWidget = require('web.public.widget');
 const wUtils = require('website.utils');
+const gridUtils = require("@web_editor/js/common/grid_layout_utils");
 
 var qweb = core.qweb;
 
@@ -1732,6 +1733,29 @@ registry.ZoomedBackgroundShape = publicWidget.Widget.extend({
             // only appears if the overflow to the right exceeds 0.333px.
             this._updateShapePosition(offset + 'px');
         }
+    },
+});
+
+/**
+ * Only on Chrome: Sometimes, cached images dimensions are not correctly
+ * computed when their CSS `display` property is updated (and their size will be
+ * set to 0). They should be reloaded in edit mode to avoid this disappearing
+ * image behaviour.
+ */
+registry.ReloadImages = publicWidget.Widget.extend({
+    selector: "#wrapwrap",
+    disabledInEditableMode: false,
+
+    /**
+     * @override
+     */
+    start() {
+        if (navigator.userAgent.toLowerCase().includes("chrome") && this.options.editableMode) {
+            this.options.wysiwyg.odooEditor.observerUnactive("chrome_reload_images");
+            gridUtils._reloadLazyImages(this.$target[0]);
+            this.options.wysiwyg.odooEditor.observerActive("chrome_reload_images");
+        }
+        return this._super(...arguments);
     },
 });
 
