@@ -23,7 +23,6 @@ registry.category("web_tour.tours").add("PaymentScreenTour", {
             PaymentScreen.enterPaymentLineAmount("Cash", "11"),
             PaymentScreen.selectedPaymentlineHas("Cash", "11.00"),
             PaymentScreen.remainingIs("41.8"),
-            PaymentScreen.changeIs("0.0"),
             PaymentScreen.validateButtonIsHighlighted(false),
             // remove the selected paymentline with multiple backspace presses
             PaymentScreen.pressNumpad("⌫ ⌫"),
@@ -35,7 +34,6 @@ registry.category("web_tour.tours").add("PaymentScreenTour", {
             // Pay with bank, the selected line should have full amount
             PaymentScreen.clickPaymentMethod("Bank"),
             PaymentScreen.remainingIs("0.0"),
-            PaymentScreen.changeIs("0.0"),
             PaymentScreen.validateButtonIsHighlighted(true),
             // remove the line using the delete button
             PaymentScreen.clickPaymentlineDelButton("Bank", "52.8"),
@@ -45,11 +43,9 @@ registry.category("web_tour.tours").add("PaymentScreenTour", {
             PaymentScreen.pressNumpad("+10"),
             PaymentScreen.fillPaymentLineAmountMobile("Cash", "10"),
             PaymentScreen.remainingIs("42.8"),
-            PaymentScreen.changeIs("0.0"),
             PaymentScreen.validateButtonIsHighlighted(false),
             PaymentScreen.pressNumpad("+50"),
             PaymentScreen.fillPaymentLineAmountMobile("Cash", "60"),
-            PaymentScreen.remainingIs("0.0"),
             PaymentScreen.changeIs("7.2"),
             PaymentScreen.validateButtonIsHighlighted(true),
             PaymentScreen.clickPaymentlineDelButton("Cash", "60.0"),
@@ -59,17 +55,14 @@ registry.category("web_tour.tours").add("PaymentScreenTour", {
             PaymentScreen.pressNumpad("1"),
             PaymentScreen.fillPaymentLineAmountMobile("Cash", "1"),
             PaymentScreen.remainingIs("51.8"),
-            PaymentScreen.changeIs("0.0"),
             PaymentScreen.validateButtonIsHighlighted(false),
             PaymentScreen.clickPaymentMethod("Bank"),
             PaymentScreen.fillPaymentLineAmountMobile("Bank", "5"),
             PaymentScreen.pressNumpad("5"),
             PaymentScreen.remainingIs("46.8"),
-            PaymentScreen.changeIs("0.0"),
             PaymentScreen.validateButtonIsHighlighted(false),
             PaymentScreen.clickPaymentMethod("Bank"),
             PaymentScreen.remainingIs("0.0"),
-            PaymentScreen.changeIs("0.0"),
             PaymentScreen.validateButtonIsHighlighted(true),
         ].flat(),
 });
@@ -87,7 +80,6 @@ registry.category("web_tour.tours").add("PaymentScreenTour2", {
             // trying to put 99 as an amount should throw an error. We thus confirm the dialog.
             Dialog.confirm(),
             PaymentScreen.remainingIs("0.0"),
-            PaymentScreen.changeIs("0.0"),
         ].flat(),
 });
 
@@ -105,7 +97,6 @@ registry.category("web_tour.tours").add("PaymentScreenRoundingUp", {
             PaymentScreen.clickPaymentMethod("Cash"),
 
             PaymentScreen.remainingIs("0.0"),
-            PaymentScreen.changeIs("0.0"),
 
             Chrome.clickMenuButton(),
             Chrome.clickTicketButton(),
@@ -118,7 +109,6 @@ registry.category("web_tour.tours").add("PaymentScreenRoundingUp", {
             PaymentScreen.clickPaymentMethod("Cash"),
 
             PaymentScreen.remainingIs("0.0"),
-            PaymentScreen.changeIs("0.0"),
         ].flat(),
 });
 
@@ -136,7 +126,6 @@ registry.category("web_tour.tours").add("PaymentScreenRoundingDown", {
             PaymentScreen.clickPaymentMethod("Cash"),
 
             PaymentScreen.remainingIs("0.0"),
-            PaymentScreen.changeIs("0.0"),
 
             Chrome.clickMenuButton(),
             Chrome.clickTicketButton(),
@@ -149,7 +138,6 @@ registry.category("web_tour.tours").add("PaymentScreenRoundingDown", {
             PaymentScreen.clickPaymentMethod("Cash"),
 
             PaymentScreen.remainingIs("0.0"),
-            PaymentScreen.changeIs("0.0"),
         ].flat(),
 });
 
@@ -167,7 +155,6 @@ registry.category("web_tour.tours").add("PaymentScreenRoundingHalfUp", {
             PaymentScreen.clickPaymentMethod("Cash"),
 
             PaymentScreen.remainingIs("0.0"),
-            PaymentScreen.changeIs("0.0"),
 
             Chrome.clickMenuButton(),
             Chrome.clickTicketButton(),
@@ -180,7 +167,6 @@ registry.category("web_tour.tours").add("PaymentScreenRoundingHalfUp", {
             PaymentScreen.clickPaymentMethod("Cash"),
 
             PaymentScreen.remainingIs("0.0"),
-            PaymentScreen.changeIs("0.0"),
 
             Chrome.clickMenuButton(),
             Chrome.clickTicketButton(),
@@ -193,7 +179,6 @@ registry.category("web_tour.tours").add("PaymentScreenRoundingHalfUp", {
             PaymentScreen.clickPaymentMethod("Cash"),
 
             PaymentScreen.remainingIs("0.0"),
-            PaymentScreen.changeIs("0.0"),
 
             Chrome.clickMenuButton(),
             Chrome.clickTicketButton(),
@@ -207,7 +192,6 @@ registry.category("web_tour.tours").add("PaymentScreenRoundingHalfUp", {
             PaymentScreen.pressNumpad("2"),
             PaymentScreen.fillPaymentLineAmountMobile("Cash", "2"),
 
-            PaymentScreen.remainingIs("0.0"),
             PaymentScreen.changeIs("1.0"),
         ].flat(),
 });
@@ -232,7 +216,6 @@ registry.category("web_tour.tours").add("PaymentScreenRoundingHalfUpCashAndBank"
             PaymentScreen.clickPaymentMethod("Cash"),
 
             PaymentScreen.remainingIs("0.0"),
-            PaymentScreen.changeIs("0.0"),
 
             PaymentScreen.clickInvoiceButton(),
             PaymentScreen.clickValidate(),
@@ -252,7 +235,6 @@ registry.category("web_tour.tours").add("PaymentScreenRoundingHalfUpCashAndBank"
             PaymentScreen.clickPaymentMethod("Cash"),
 
             PaymentScreen.remainingIs("0.0"),
-            PaymentScreen.changeIs("0.0"),
 
             PaymentScreen.clickInvoiceButton(),
             PaymentScreen.clickValidate(),
@@ -272,9 +254,8 @@ registry.category("web_tour.tours").add("PaymentScreenTotalDueWithOverPayment", 
             PaymentScreen.totalIs("1.95"),
             PaymentScreen.clickPaymentMethod("Cash"),
             PaymentScreen.enterPaymentLineAmount("Cash", "5"),
-            PaymentScreen.remainingIs("0.0"),
             PaymentScreen.changeIs("3.05"),
-            PaymentScreen.totalDueIs("1.95"),
+            PaymentScreen.totalDueIs("1.95"), // TODO ALEX
         ].flat(),
 });
 

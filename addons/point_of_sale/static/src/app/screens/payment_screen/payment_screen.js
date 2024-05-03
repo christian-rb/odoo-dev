@@ -83,6 +83,11 @@ export class PaymentScreen extends Component {
     get selectedPaymentLine() {
         return this.currentOrder.selected_paymentline;
     }
+    get totalDueText() {
+        return this.env.utils.formatCurrency(
+            this.currentOrder.get_total_with_tax() + this.currentOrder.get_rounding_applied()
+        );
+    }
     addNewPaymentLine(paymentMethod) {
         // original function: click_paymentmethods
         const result = this.currentOrder.add_paymentline(paymentMethod);

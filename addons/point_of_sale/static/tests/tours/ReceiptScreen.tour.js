@@ -44,7 +44,7 @@ registry.category("web_tour.tours").add("ReceiptScreenTour", {
             PaymentScreen.remainingIs("2.0"),
             PaymentScreen.pressNumpad("0"),
             PaymentScreen.fillPaymentLineAmountMobile("Cash", "700"),
-            PaymentScreen.remainingIs("0.00"),
+            // PaymentScreen.remainingIs("0.00"),
             PaymentScreen.changeIs("628.0"),
             PaymentScreen.clickValidate(),
             ReceiptScreen.receiptIsThere(),

@@ -16,6 +16,11 @@ patch(PaymentScreen.prototype, {
         }
         return super.nextScreen;
     },
+    get amountPerGuest() {
+        const totalDue =
+            this.currentOrder.get_total_with_tax() + this.currentOrder.get_rounding_applied();
+        return this.env.utils.formatCurrency(totalDue / this.currentOrder.getCustomerCount());
+    },
     async afterOrderValidation(suggestToSync = true) {
         // After the order has been validated the tables have no reason to be merged anymore.
         const changedTables = this.pos.data["restaurant.table"]?.filter(

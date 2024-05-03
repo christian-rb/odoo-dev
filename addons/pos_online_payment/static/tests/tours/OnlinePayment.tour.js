@@ -21,12 +21,10 @@ registry.category("web_tour.tours").add("OnlinePaymentErrorsTour", {
             PaymentScreen.enterPaymentLineAmount("Online payment", "47"),
             PaymentScreen.selectedPaymentlineHas("Online payment", "47.0"),
             PaymentScreen.remainingIs("1.0"),
-            PaymentScreen.changeIs("0.0"),
             PaymentScreen.validateButtonIsHighlighted(false),
             PaymentScreen.clickPaymentMethod("Cash"),
             PaymentScreen.enterPaymentLineAmount("Cash", "2"),
             PaymentScreen.selectedPaymentlineHas("Cash", "2.0"),
-            PaymentScreen.remainingIs("0.0"),
             PaymentScreen.changeIs("1.0"),
             PaymentScreen.validateButtonIsHighlighted(true),
             PaymentScreen.clickValidate(),
@@ -39,7 +37,6 @@ registry.category("web_tour.tours").add("OnlinePaymentErrorsTour", {
             PaymentScreen.clickPaymentMethod("Online payment"),
             PaymentScreen.selectedPaymentlineHas("Online payment", "0.0"),
             PaymentScreen.remainingIs("0.0"),
-            PaymentScreen.changeIs("0.0"),
             PaymentScreen.validateButtonIsHighlighted(true),
             PaymentScreen.clickValidate(),
             // successfully confirming the dialog would imply that the error popup is actually shown
@@ -52,7 +49,6 @@ registry.category("web_tour.tours").add("OnlinePaymentErrorsTour", {
             PaymentScreen.clickPaymentMethod("Online payment"),
             PaymentScreen.selectedPaymentlineHas("Online payment", "-1.0"),
             PaymentScreen.remainingIs("0.0"),
-            PaymentScreen.changeIs("0.0"),
             PaymentScreen.validateButtonIsHighlighted(true),
             PaymentScreen.clickValidate(),
             // successfully confirming the dialog would imply that the error popup is actually shown

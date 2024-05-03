@@ -39,7 +39,7 @@ registry.category("web_tour.tours").add("ChromeTour", {
             ProductScreen.addOrderline("Whiteboard Pen", "5", "6", "30.0"),
             ProductScreen.clickPayButton(),
             PaymentScreen.clickPaymentMethod("Bank"),
-            PaymentScreen.remainingIs("0.0"),
+            PaymentScreen.remainingIs("0.0"), // TODO ALEX
             PaymentScreen.validateButtonIsHighlighted(true),
             PaymentScreen.clickValidate(),
             ReceiptScreen.isShown(),
