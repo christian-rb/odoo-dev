@@ -21,6 +21,11 @@ class User(models.Model):
     google_calendar_sync_token = fields.Char(related='res_users_settings_id.google_calendar_sync_token', groups="base.group_system")
     google_calendar_cal_id = fields.Char(related='res_users_settings_id.google_calendar_cal_id', groups="base.group_system")
     google_synchronization_stopped = fields.Boolean(related='res_users_settings_id.google_synchronization_stopped', readonly=False, groups="base.group_system")
+    google_sync_status = fields.Selection(related='res_users_settings_id.google_sync_status', readonly=True, store=False)
+
+    @property
+    def SELF_READABLE_FIELDS(self):
+        return super().SELF_READABLE_FIELDS + ['google_sync_status']
 
     def _get_google_calendar_token(self):
         self.ensure_one()
@@ -33,6 +38,8 @@ class User(models.Model):
         status = "sync_active"
         if str2bool(self.env['ir.config_parameter'].sudo().get_param("google_calendar_sync_paused"), default=False):
             status = "sync_paused"
+        elif self.sudo().google_calendar_rtoken and not self.sudo().google_synchronization_stopped:
+            status = "sync_active"
         elif self.sudo().google_synchronization_stopped:
             status = "sync_stopped"
         return status
@@ -158,3 +165,38 @@ class User(models.Model):
         client_secret = get_param('google_calendar_client_secret')
         res['google_calendar'] = bool(client_id and client_secret)
         return res
+
+    def check_synchronization_status(self):
+        res = super().check_synchronization_status()
+        credentials_status = self.check_calendar_credentials()
+        sync_status = 'missing_credentials'
+        if credentials_status.get('google_calendar'):
+            sync_status = self._get_google_sync_status()
+            if sync_status == 'sync_active' and not self.sudo().google_calendar_rtoken:
+                sync_status = 'sync_stopped'
+        res['google_calendar'] = sync_status
+        return res
+
+    def action_google_unpause_sync(self):
+        self.ensure_one()
+        self.unpause_google_synchronization()
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'reload',
+        }
+
+    def action_google_refresh_sync(self):
+        self.ensure_one()
+        self.restart_google_synchronization()
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'reload',
+        }
+
+    def action_google_stop_sync(self):
+        self.ensure_one()
+        self.stop_google_synchronization()
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'reload',
+        }

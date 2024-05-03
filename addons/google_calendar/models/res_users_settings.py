@@ -19,6 +19,12 @@ class ResUsersSettings(models.Model):
     google_calendar_cal_id = fields.Char('Calendar ID', copy=False, groups='base.group_system',
         help='Last Calendar ID who has been synchronized. If it is changed, we remove all links between GoogleID and Odoo Google Internal ID')
     google_synchronization_stopped = fields.Boolean('Google Synchronization stopped', copy=False, groups='base.group_system')
+    google_sync_status = fields.Selection([
+        ('sync_active', 'Active'),
+        ('sync_paused', 'Paused'),
+        ('sync_stopped', 'Stopped'),
+        ('missing_credentials', 'Missing Credentials'),
+        ], string='Google Sync Status', readonly=True, store=False, compute='_compute_google_sync_status')
 
     @api.model
     def _get_fields_blacklist(self):
@@ -29,9 +35,15 @@ class ResUsersSettings(models.Model):
             'google_calendar_token_validity',
             'google_calendar_sync_token',
             'google_calendar_cal_id',
-            'google_synchronization_stopped'
+            'google_synchronization_stopped',
+            'google_sync_status'
         ]
         return super()._get_fields_blacklist() + google_fields_blacklist
+
+    def _compute_google_sync_status(self):
+        """ Compute the Google Calendar synchronization's status. """
+        for setting in self:
+            setting.google_sync_status = setting.user_id.check_synchronization_status().get('google_calendar')
 
     def _set_google_auth_tokens(self, access_token, refresh_token, ttl):
         self.sudo().write({

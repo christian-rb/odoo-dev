@@ -8,3 +8,11 @@
         display: none;
     }
 }
+
+.btn:hover .fa-check {
+    display: none;
+}
+
+.btn:not(:hover) .fa-times {
+    display: none;
+}

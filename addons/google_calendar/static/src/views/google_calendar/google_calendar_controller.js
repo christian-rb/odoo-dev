@@ -63,18 +63,8 @@ patch(AttendeeCalendarController.prototype, {
                     },
                 );
                 await this.model.load();
+                this.render(true);
             },
         });
     },
-
-    onGoogleSyncUnpause() {
-        if (this.isSystemUser) {
-            this.env.services.action.doAction("calendar.calendar_settings_action");
-        } else {
-            this.dialog.add(AlertDialog, {
-                title: _t("Configuration"),
-                body: _t("Your administrator paused the synchronization with Google Calendar."),
-            });
-        }
-    }
 });
