@@ -3,6 +3,7 @@
 import { useSequential } from "@mail/utils/common/hooks";
 import { useState, onWillUnmount, markup } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
+import { escapeRegExp } from "@web/core/utils/strings";
 
 export const HIGHLIGHT_CLASS = "o-mail-Message-searchHighlight";
 
@@ -16,9 +17,18 @@ export function searchHighlight(searchTerm, target) {
     }
     const htmlDoc = new DOMParser().parseFromString(target, "text/html");
     for (const term of searchTerm.split(" ")) {
-        const regexp = new RegExp(`(${term})`, "gi");
+        // escaping single quote using xpath concat()
+        const split = term.toLowerCase().split("'");
+        let concat = split.map(s => `'${s}'`).join(', "\'", ');
+        let upperConcat = concat.toUpperCase();
+        if (split.length > 1) {
+            concat = `concat(${concat})`;
+            upperConcat = `concat(${upperConcat})`;
+        }
+        const expression = `//*[text()[contains(translate(., ${upperConcat}, ${concat}), ${concat})]]`;
+        const regexp = new RegExp(`(${escapeRegExp(term)})`, "gi");
         const matchs = htmlDoc.evaluate(
-            `//*[text()[contains(translate(., '${term.toUpperCase()}', '${term.toLowerCase()}'), '${term.toLowerCase()}')]]`,
+            expression,
             htmlDoc,
             null,
             XPathResult.ORDERED_NODE_SNAPSHOT_TYPE

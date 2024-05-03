@@ -1008,7 +1008,7 @@ export class ThreadService {
     async search(searchTerm, thread, before = false) {
         const { messages, count } = await this.rpc(this.getFetchRoute(thread), {
             ...this.getFetchParams(thread),
-            search_term: escape(searchTerm),
+            search_term: escape(searchTerm, true),
             before,
         });
         return {

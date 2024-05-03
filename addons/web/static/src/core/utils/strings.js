@@ -8,9 +8,10 @@ export const escapeMethod = Symbol("html");
  * Escapes a string for HTML.
  *
  * @param {string | number} [str] the string to escape
+ * @param {boolean} [skipQuotes=false] - whether to skip escaping single, double and back quotes. Default is false.
  * @returns {string} an escaped string
  */
-export function escape(str) {
+export function escape(str, skipQuotes = false) {
     if (typeof str === "object" && str[escapeMethod]) {
         return str[escapeMethod]();
     } else {
@@ -20,15 +21,20 @@ export function escape(str) {
         if (typeof str === "number") {
             return String(str);
         }
-        [
-            ["&", "&amp;"],
-            ["<", "&lt;"],
-            [">", "&gt;"],
-            ["'", "&#x27;"],
-            ['"', "&quot;"],
-            ["`", "&#x60;"],
-        ].forEach((pairs) => {
-            str = String(str).replaceAll(pairs[0], pairs[1]);
+        const toReplace = [
+                ["&", "&amp;"],
+                ["<", "&lt;"],
+                [">", "&gt;"],
+        ];
+        if (!skipQuotes) {
+            toReplace.push(...[
+                ["'", "&#x27;"],
+                ['"', "&quot;"],
+                ["`", "&#x60;"],
+            ]);
+        }
+        toReplace.forEach((pair) => {
+            str = String(str).replaceAll(pair[0], pair[1]);
         });
         return str;
     }
