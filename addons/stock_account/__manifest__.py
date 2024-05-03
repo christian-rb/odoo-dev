@@ -19,7 +19,7 @@ Dashboard / Reports for Warehouse Management includes:
 ------------------------------------------------------
 * Stock Inventory Value at given date (support dates in the past)
     """,
-    'depends': ['stock', 'account'],
+    'depends': ['stock', 'account', 'web_tour'],
     'category': 'Hidden',
     'sequence': 16,
     'data': [
@@ -44,6 +44,9 @@ Dashboard / Reports for Warehouse Management includes:
     'assets': {
         'web.assets_backend': [
             'stock_account/static/src/stock_account_forecasted/*',
+        ],
+        'web.assets_tests': [
+            'stock_account/static/tests/tours/tour_test_revaluation.js',
         ],
     },
     'license': 'LGPL-3',

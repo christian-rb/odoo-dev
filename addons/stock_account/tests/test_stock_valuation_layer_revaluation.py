@@ -2,7 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo.exceptions import UserError
-from odoo.tests import Form
+from odoo.tests import Form, HttpCase
 from odoo.addons.stock_account.tests.test_stockvaluation import _create_accounting_data
 from odoo.addons.stock_account.tests.test_stockvaluationlayer import TestStockValuationCommon
 
@@ -237,3 +237,20 @@ class TestStockValuationLayerRevaluation(TestStockValuationCommon):
 
         credit_lines = [l for l in new_layer.account_move_id.line_ids if l.credit > 0]
         self.assertEqual(len(credit_lines), 1)
+
+
+class TestRevaluationTour(TestStockValuationLayerRevaluation, HttpCase):
+    def test_revaluation_multi_company(self):
+        ch_company = self.env.companies.filtered(lambda cmp: "Chicago" in cmp.name)
+        prod1_ch = self.product1.with_company(ch_company)
+        prod1_ch.categ_id.with_company(ch_company).property_cost_method = 'fifo'
+
+        # Recieve 10 unit at 2$ (chicago company)
+        self.env.company = ch_company
+        reciepts_ch = self.env['stock.picking.type'].search([('company_id', '=',ch_company.id),('code','=','incoming')])
+        self._make_in_move(prod1_ch, 10, unit_cost=2, loc_dest=reciepts_ch.default_location_dest_id, pick_type=reciepts_ch)
+        self.assertEqual(prod1_ch.standard_price, 2)
+
+        # Revalue stock
+        self.start_tour("/web?debug=assets", 'test_revaluation_multi_company', login='admin', timeout=600000, watch=True )
+        self.assertEqual(prod1_ch.standard_price, 4)
