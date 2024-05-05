@@ -203,6 +203,7 @@ class configmanager(object):
         # Logging Group
         group = optparse.OptionGroup(parser, "Logging Configuration")
         group.add_option("--logfile", dest="logfile", help="file where the server log will be stored")
+        group.add_option("--logfilesdb", dest="logfilesdb", help="files where the server log will be stored per database")
         group.add_option("--syslog", action="store_true", dest="syslog", my_default=False, help="Send the log to the syslog server")
         group.add_option('--log-handler', action="append", default=[], my_default=DEFAULT_LOG_HANDLER, metavar="PREFIX:LEVEL", help='setup a handler at LEVEL for a given PREFIX. An empty PREFIX indicates the root logger. This option can be repeated. Example: "odoo.orm:DEBUG" or "werkzeug:CRITICAL" (default: ":INFO")')
         group.add_option('--log-web', action="append_const", dest="log_handler", const="odoo.http:DEBUG", help='shortcut for --log-handler=odoo.http:DEBUG')
@@ -397,8 +398,11 @@ class configmanager(object):
         # Ensures no illegitimate argument is silently discarded (avoids insidious "hyphen to dash" problem)
         die(args, "unrecognized parameters: '%s'" % " ".join(args))
 
-        die(bool(opt.syslog) and bool(opt.logfile),
-            "the syslog and logfile options are exclusive")
+        die(bool(opt.syslog) + bool(opt.logfile) + bool(opt.logfilesdb) > 1,
+            "the syslog, logfile and logfilesdb options are exclusive")
+
+        die(opt.logfilesdb and '%db' not in os.path.basename(opt.logfilesdb),
+            "the logfilesdb option must contain the '%db' pattern in the file name")
 
         die(opt.translate_in and (not opt.language or not opt.db_name),
             "the i18n-import option cannot be used without the language (-l) and the database (-d) options")
@@ -452,7 +456,7 @@ class configmanager(object):
         # if defined do not take the configfile value even if the defined value is None
         keys = ['gevent_port', 'http_interface', 'http_port', 'longpolling_port', 'http_enable', 'x_sendfile',
                 'db_name', 'db_user', 'db_password', 'db_host', 'db_replica_host', 'db_sslmode',
-                'db_port', 'db_replica_port', 'db_template', 'logfile', 'pidfile', 'smtp_port',
+                'db_port', 'db_replica_port', 'db_template', 'logfile', 'logfilesdb', 'pidfile', 'smtp_port',
                 'email_from', 'smtp_server', 'smtp_user', 'smtp_password', 'from_filter',
                 'smtp_ssl_certificate_filename', 'smtp_ssl_private_key_filename',
                 'db_maxconn', 'db_maxconn_gevent', 'import_partial', 'addons_path', 'upgrade_path',
@@ -549,7 +553,7 @@ class configmanager(object):
             self.save()
 
         # normalize path options
-        for key in ['data_dir', 'logfile', 'pidfile', 'test_file', 'screencasts', 'screenshots', 'pg_path', 'translate_out', 'translate_in', 'geoip_city_db', 'geoip_country_db']:
+        for key in ['data_dir', 'logfile', 'logfilesdb', 'pidfile', 'test_file', 'screencasts', 'screenshots', 'pg_path', 'translate_out', 'translate_in', 'geoip_city_db', 'geoip_country_db']:
             self.options[key] = self._normalize(self.options[key])
 
         conf.addons_paths = self.options['addons_path'].split(',')

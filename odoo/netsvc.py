@@ -28,6 +28,38 @@ def log(logger, level, prefix, msg, depth=None):
         indent=indent_after
 
 
+def init_file_logger(log_file_path: str) -> logging.Handler:
+    # We check we have the right location for the log files
+    dirname = os.path.dirname(log_file_path)
+    if dirname and not os.path.isdir(dirname):
+        os.makedirs(dirname)
+    if os.name == 'posix':
+        handler = WatchedFileHandler(log_file_path)
+    else:
+        handler = logging.FileHandler(log_file_path)
+    return handler
+
+
+class SplittedDatabaseFilesHandler(logging.Handler):
+    def __init__(self, log_file_path: str):
+        super().__init__()
+        self.log_file_path = log_file_path
+        self._db_handlers = {}
+
+    def _get_database_handler(self, db_name: str) -> logging.Handler:
+        if db_name not in self._db_handlers:
+            log_file_name = self.log_file_path.replace('%db', db_name)
+            db_handler = init_file_logger(log_file_name)
+            db_handler.setFormatter(self.formatter)
+            self._db_handlers[db_name] = db_handler
+        return self._db_handlers[db_name]
+
+    def emit(self, record):
+        self._get_database_handler(
+            getattr(threading.current_thread(), 'dbname', '?') or "XXXXX"
+            ).emit(record)
+
+
 class WatchedFileHandler(logging.handlers.WatchedFileHandler):
     def __init__(self, filename):
         self.errors = None  # py38
@@ -208,18 +240,13 @@ def init_logger():
 
     elif tools.config['logfile']:
         # LogFile Handler
-        logf = tools.config['logfile']
         try:
-            # We check we have the right location for the log files
-            dirname = os.path.dirname(logf)
-            if dirname and not os.path.isdir(dirname):
-                os.makedirs(dirname)
-            if os.name == 'posix':
-                handler = WatchedFileHandler(logf)
-            else:
-                handler = logging.FileHandler(logf)
-        except Exception:
+            handler = init_file_logger(tools.config['logfile'])
+        except OSError:
             sys.stderr.write("ERROR: couldn't create the logfile directory. Logging to the standard output.\n")
+
+    elif tools.config['logfilesdb']:
+        handler = SplittedDatabaseFilesHandler(tools.config['logfilesdb'])
 
     # Check that handler.stream has a fileno() method: when running OpenERP
     # behind Apache with mod_wsgi, handler.stream will have type mod_wsgi.Log,

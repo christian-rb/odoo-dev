@@ -62,6 +62,7 @@ class TestConfigManager(TransactionCase):
 
             # logging
             'logfile': '',
+            'logfilesdb': '',
             'syslog': False,
             'log_handler': [':INFO'],
             'log_db': False,
@@ -180,6 +181,7 @@ class TestConfigManager(TransactionCase):
 
             # logging
             'logfile': '/foo/bar/odoo.log',
+            'logfilesdb': '/foo/bar/odoo_%db.log',
             'syslog': True,
             'log_handler': [':DEBUG'],
             'log_db': True,
@@ -305,6 +307,7 @@ class TestConfigManager(TransactionCase):
             'log_handler': [':INFO'],
             'log_level': 'info',
             'logfile': '',
+            'logfilesdb': '',
             'max_cron_threads': 2,
             'osv_memory_count_limit': False,
             'overwrite_existing_translations': False,
