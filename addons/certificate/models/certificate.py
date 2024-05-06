@@ -170,7 +170,7 @@ class Certificate(models.Model):
         return certificates
     
     # TODO make a function that return a the DER formatting of certificate, it is called often
-    def get_public_key_numbers(self):
+    def _get_public_key_numbers(self):
         self.ensure_one()
         public_key = serialization.load_pem_private_key(base64.b64decode(self.pem_private_key), None).public_key()
         e = public_key.public_numbers().e
@@ -179,7 +179,7 @@ class Certificate(models.Model):
         n = base64.b64encode(n.to_bytes((n.bit_length() + 7) // 8, 'big')).decode('utf-8')
         return e, n
 
-    def sign(self, message):
+    def _sign(self, message):
         """ Return the base64 encoded signature of message. """
         self.ensure_one()
 
@@ -197,7 +197,7 @@ class Certificate(models.Model):
         return base64.b64encode(signature)
     
     @api.model
-    def sign_with_key(self, message, pem_key, pwd=None, hashing_algorithm='sha256'):
+    def _sign_with_key(self, message, pem_key, pwd=None, hashing_algorithm='sha256'):
         """ Return the base64 encoded signature of message. """
         if not isinstance(message, bytes):
             message = message.encode('utf-8')
@@ -212,7 +212,7 @@ class Certificate(models.Model):
         )
         return base64.b64encode(signature)
 
-    def verify(self, message, signature):
+    def _verify(self, message, signature):
         """ Verify the base64 encoded signature of message. """
         self.ensure_one()
 
@@ -239,7 +239,7 @@ class Certificate(models.Model):
         return verification
 
     # Check if b64encode the return value is useful to reduce lines or not
-    def digest(self, messages):
+    def _digest(self, messages):
         if not isinstance(messages, list):
             messages = [messages]
         digest = hashes.Hash(STR_TO_HASH[self.hashing_algorithm])
@@ -267,7 +267,7 @@ class Certificate(models.Model):
             })
 
         simple_private_key = SimpleNamespace(**{
-            'sign': private_key.sign,
+            '_sign': private_key._sign,
             'private_bytes': private_key.private_bytes,
         })
 
