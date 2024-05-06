@@ -31,11 +31,6 @@ import {
 
 import { Component, markup, useRef, useState } from "@odoo/owl";
 
-import {
-    legacyRegistry,
-    owlRegistry,
-    UnitUserValue,
-} from '@web_editor/js/editor/snippets.options'; 
 const InputUserValueWidget = options.userValueWidgetsRegistry['we-input'];
 const SelectUserValueWidget = options.userValueWidgetsRegistry['we-select'];
 const Many2oneUserValueWidget = options.userValueWidgetsRegistry['we-many2one'];
@@ -649,11 +644,9 @@ const GPSPicker = InputUserValueWidget.extend({
         }
     },
 });
-/*
 options.userValueWidgetsRegistry['we-urlpicker'] = UrlPickerUserValueWidget;
 options.userValueWidgetsRegistry['we-fontfamilypicker'] = FontFamilyPickerUserValueWidget;
 options.userValueWidgetsRegistry['we-gpspicker'] = GPSPicker;
-*/
 
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -4196,7 +4189,7 @@ options.registry.SnippetMove.include({
     },
 });
 
-const oldExport = {
-    // UrlPickerUserValueWidget: UrlPickerUserValueWidget,
-    // FontFamilyPickerUserValueWidget: FontFamilyPickerUserValueWidget,
+export default {
+    UrlPickerUserValueWidget: UrlPickerUserValueWidget,
+    FontFamilyPickerUserValueWidget: FontFamilyPickerUserValueWidget,
 };

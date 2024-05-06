@@ -1355,7 +1355,7 @@ const ButtonGroupUserValueWidget = BaseSelectionUserValueWidget.extend({
 });
 
 const UnitUserValueWidget = UserValueWidget.extend({});
-class UnitUserValue extends UserValue {
+export class UnitUserValue extends UserValue {
     /**
      * @override
      */
