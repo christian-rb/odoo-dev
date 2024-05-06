@@ -18,6 +18,12 @@
             border-radius: 30px;
         }
     }
+    &.floor-grid {
+        background-image:
+            linear-gradient(0, #808080 14%, transparent 14%),
+            linear-gradient(90deg, transparent 90%, #808080 70%);
+        background-size: 10px 10px;
+    }
 }
 .floor-picture {
     height: 48px;
