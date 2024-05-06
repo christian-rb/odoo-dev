@@ -1485,7 +1485,7 @@ export class UnitUserValue extends UserValue {
 }
 
 const InputUserValueWidget = UnitUserValueWidget.extend({});
-class WeInput extends UserValueComponent {
+export class WeInput extends UserValueComponent {
     static template = 'web_editor.WeInput';
     static props = {
         unit: { type: String, optional: true },

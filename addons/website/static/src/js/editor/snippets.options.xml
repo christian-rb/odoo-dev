@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates id="template" xml:space="preserve">
+<t t-name="website.TestSnippetOption" t-inherit="web_editor.TestSnippetOption" t-inherit-mode="extension">
+    <xpath expr="//WeRange" position="before">
+        <WeUrlPicker selectDataAttribute="''" attributeName="'url'"/>
+        <WeButton selectClass="'test_another_class'">Test Another Class</WeButton>
+    </xpath>
+</t>
+
+<t t-name="website.WeUrlPicker">
+    <we-input class="o_we_user_value_widget o_we_large">
+        <!--
+        <we-title>URL</we-title>
+        -->
+        <div>
+            <input t-ref="input" type="text" class="text-start"
+                autocomplete="chrome-off"
+                t-att-placeholder="this.props.placeholder"
+                t-on-input="this._onInputInput"
+                t-on-blur="this._onInputBlur"
+                t-on-change="this._onUserValueChange"
+                t-on-keydown="this._onInputKeydown"
+                t-att-value="this.value._state.preview ? this.inputRef.el.value : this.value._value"
+            />
+        </div>
+        <we-button class="o_we_redirect_to o_we_link ms-1"
+            title="Preview this URL in a new tab"
+            t-on-click="this._onRedirectTo"
+        >
+            <i class="fa fa-fw fa-external-link"/>
+        </we-button>
+    </we-input>
+</t>
+</templates>
