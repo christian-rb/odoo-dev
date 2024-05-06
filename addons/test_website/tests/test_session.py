@@ -18,6 +18,11 @@ class TestWebsiteSession(HttpCaseWithUserDemo):
         self.env.ref('base.lang_fr').active = False
         session.context['lang'] = 'fr_FR'
         odoo.http.root.session_store.save(session)
+
+        # ensure that _get_current_website_id will be able to match a website
+        current_website_id = self.env["website"]._get_current_website_id(odoo.tests.HOST)
+        self.env["website"].browse(current_website_id).domain = odoo.tests.HOST
+
         res = self.url_open('/test_website_sitemap')  # any auth='public' route would do
         res.raise_for_status()
 
