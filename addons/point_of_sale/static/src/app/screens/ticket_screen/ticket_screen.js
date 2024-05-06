@@ -15,7 +15,12 @@ import { ReprintReceiptButton } from "@point_of_sale/app/screens/ticket_screen/r
 import { SearchBar } from "@point_of_sale/app/screens/ticket_screen/search_bar/search_bar";
 import { usePos } from "@point_of_sale/app/store/pos_hook";
 import { Component, onMounted, useState } from "@odoo/owl";
-import { Numpad, getButtons } from "@point_of_sale/app/generic_components/numpad/numpad";
+import {
+    BACKSPACE,
+    Numpad,
+    getButtons,
+    getDefaultLastRow,
+} from "@point_of_sale/app/generic_components/numpad/numpad";
 import { ask } from "@point_of_sale/app/store/make_awaitable_dialog";
 import { PosOrderLineRefund } from "@point_of_sale/app/models/pos_order_line_refund";
 import { fuzzyLookup } from "@web/core/utils/search";
@@ -88,11 +93,11 @@ export class TicketScreen extends Component {
         }
     }
     getNumpadButtons() {
-        return getButtons(this.env, [
+        return getButtons(getDefaultLastRow(this.env), [
             { value: "quantity", text: _t("Qty"), class: "active border-primary" },
             { value: "discount", text: _t("% Disc"), disabled: true },
             { value: "price", text: _t("Price"), disabled: true },
-            { value: "-", text: "+/-", disabled: true },
+            BACKSPACE,
         ]);
     }
     async onSearch(search) {

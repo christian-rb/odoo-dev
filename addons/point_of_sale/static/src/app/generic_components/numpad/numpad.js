@@ -19,7 +19,15 @@ export const buttonsType = {
         String,
     ],
 };
-export function getButtons(env, rightColumn) {
+
+export function getDefaultLastRow(env) {
+    const decimalButton = { value: env.services.localization.decimalPoint };
+    return [{ value: "-", text: "+/-" }, { value: "0" }, decimalButton];
+}
+
+export const BACKSPACE = { value: "Backspace", text: "⌫" };
+
+export function getButtons(lastRow, rightColumn) {
     return [
         { value: "1" },
         { value: "2" },
@@ -33,18 +41,17 @@ export function getButtons(env, rightColumn) {
         { value: "8" },
         { value: "9" },
         ...(rightColumn ? [rightColumn[2]] : []),
-        { value: env.services.localization.decimalPoint },
-        { value: "0" },
-        { value: "Backspace", text: "⌫" },
+        ...lastRow,
         ...(rightColumn ? [rightColumn[3]] : []),
     ];
 }
+
 export function enhancedButtons(env) {
-    return getButtons(env, [
+    return getButtons(getDefaultLastRow(env), [
         { value: "+10" },
         { value: "+20" },
         { value: "+50" },
-        { value: "-", text: "+/-" },
+        BACKSPACE,
     ]);
 }
 
@@ -59,7 +66,7 @@ export class Numpad extends Component {
         class: "",
     };
     get buttons() {
-        return this.props.buttons || getButtons(this.env);
+        return this.props.buttons || getButtons(getDefaultLastRow(this.env));
     }
     setup() {
         if (!this.props.onClick) {
