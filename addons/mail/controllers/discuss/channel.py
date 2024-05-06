@@ -47,15 +47,19 @@ class ChannelController(http.Controller):
 
     @http.route("/discuss/channel/messages", methods=["POST"], type="json", auth="public")
     def discuss_channel_messages(self, channel_id, before=None, after=None, limit=30, around=None):
-        channel_member_sudo = request.env["discuss.channel.member"]._get_as_sudo_from_request_or_raise(
-            request=request, channel_id=int(channel_id)
-        )
+        not_public_channel = request.env["discuss.channel"].browse(channel_id).group_public_id
         domain = [
             ("res_id", "=", channel_id),
             ("model", "=", "discuss.channel"),
             ("message_type", "!=", "user_notification"),
         ]
-        messages = channel_member_sudo.env["mail.message"]._message_fetch(domain, before, after, around, limit)
+        if not_public_channel:
+            channel_member_sudo = request.env["discuss.channel.member"]._get_as_sudo_from_request_or_raise(
+            request=request, channel_id=int(channel_id)
+        )
+            messages = channel_member_sudo.env["mail.message"]._message_fetch(domain, before, after, around, limit)
+        else:
+            messages = request.env["mail.message"]._message_fetch(domain, before, after, around, limit)
         if not request.env.user._is_public() and not around:
             messages.set_message_done()
         return messages.message_format()

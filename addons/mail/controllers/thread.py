@@ -76,7 +76,12 @@ class ThreadController(http.Controller):
         )
         if context:
             request.update_context(**context)
-        thread = request.env[thread_model]._get_from_request_or_raise(request, int(thread_id))
+        not_public_channel = request.env["discuss.channel"].browse(thread_id).group_public_id
+
+        if not_public_channel:
+            thread = request.env[thread_model]._get_from_request_or_raise(request, int(thread_id))
+        else:
+            thread = request.env[thread_model].browse(thread_id)
         if "body" in post_data:
             post_data["body"] = Markup(post_data["body"])  # contains HTML such as @mentions
         new_partners = []
