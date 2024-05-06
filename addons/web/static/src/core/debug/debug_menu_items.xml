@@ -14,7 +14,7 @@
                     <td class="oe_form_required">
                         <select id="formview_default_fields" class="o_input" t-model="state.fieldToSet">
                             <option value=""/>
-                            <option t-foreach="defaultFields" t-as="field" t-att-value="field.name" t-key="field.name">
+                            <option t-if="state.fieldsReady" t-foreach="state.defaultFields" t-as="field" t-att-value="field.name" t-key="field.name">
                                 <t t-esc="field.string"/> = <t t-esc="field.displayed"/>
                             </option>
                         </select>

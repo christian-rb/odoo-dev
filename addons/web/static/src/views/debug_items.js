@@ -210,12 +210,19 @@ class SetDefaultDialog extends Component {
         this.fieldNamesInView.forEach((fieldName) => {
             this.modifierDatas[fieldName] = this.fieldsInfo[fieldName].modifiers;
         });
-        this.defaultFields = this.getDefaultFields();
+        this.state = useState({defaultFields: [], fieldsReady: false});
+        this.getDefaultFields();
         this.conditions = this.getConditions();
     }
 
-    getDefaultFields() {
-        return this.fieldNamesInView
+    async getDefaultFields() {
+        let contextJson = '';
+        const action = this.props.component.env.config;
+        if (action.actionType == 'ir.actions.act_window') {
+            const tmp = await this.orm.read('ir.actions.act_window', [action.actionId], ['context']);
+            contextJson = tmp[0]?.context || '';
+        }
+        this.state.defaultFields = this.fieldNamesInView
             .filter((fieldName) => !this.fieldNamesBlackList.includes(fieldName))
             .map((fieldName) => {
                 const modifierData = this.modifierDatas[fieldName];
@@ -232,12 +239,13 @@ class SetDefaultDialog extends Component {
                 const displayed = valueDisplayed[1];
                 // ignore fields which are empty, invisible, readonly, o2m or m2m
                 if (
-                    !value ||
+                    (fieldInfo.type !== 'boolean' && !value) ||
                     invisibleOrReadOnly ||
                     fieldInfo.type === "one2many" ||
                     fieldInfo.type === "many2many" ||
                     fieldInfo.type === "binary" ||
-                    this.fieldsInfo[fieldName].options.isPassword
+                    this.fieldsInfo[fieldName].options.isPassword ||
+                    contextJson.includes('default_' + fieldInfo.name)
                 ) {
                     return false;
                 }
@@ -250,6 +258,7 @@ class SetDefaultDialog extends Component {
             })
             .filter((val) => val)
             .sort((field) => field.string);
+        this.state.fieldsReady = true;
     }
 
     getConditions() {
