@@ -344,6 +344,11 @@
             &.d-flex > .o_input {
                 height: max-content;
             }
+
+            ::placeholder {
+                --formView_placeholder-color: #{$gray-400};
+                --formView_placeholder-color-dark: #{$gray-500};
+            }
         }
         .o_priority > .o_priority_star {
             font-size: inherit;

@@ -296,7 +296,7 @@ $badge-padding-y: 0.25em !default;
 $badge-padding-x: 0.82em !default;
 
 // Placeholder color 
-$input-placeholder-color: $gray-600 !default;
+$input-placeholder-color: var(--formView_placeholder-color, mix($gray-500, $gray-600)) !default;
 
 // Card
 
