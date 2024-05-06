@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.certificate</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app data-string="Certificates" string="Certificates" name="certificate" groups="base.group_system">
+                    <setting string="Certificates" help="Configure your certificates" company_dependent="1" title="The parameters to configure the certificate.">
+                        <div class="content-group">
+                            <div class="row mt16">
+                                <div class="col-6">
+                                    <button name="%(certificate.certificate_list_action)d" icon="oi-arrow-right" type="action"
+                                            string="Configure Certificates" class="btn-link"/>
+                                </div>
+                            </div>
+                        </div>
+                    </setting>
+                </app>
+            </xpath>
+        </field>
+    </record>
+</odoo>
